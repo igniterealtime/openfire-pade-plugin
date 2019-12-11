@@ -1,18 +1,17 @@
-[![Build Status](https://travis-ci.org/igniterealtime/Openfire-Meetings.svg?branch=master)](https://travis-ci.org/igniterealtime/Openfire-Meetings)
-
-Openfire Meetings project
+Pàdé Plugin for Openfire
 =========================
 
-This project produces two Openfire plugins, offocus and ofmeet, that, combined, provide a WebRTC-based video conference solution for Openfire.
+This project produces four Openfire plugins, offocus, ofmeet, ofgasi and pade, combined, provide a unified communication solution for Openfire.
 
-The OFMeet project bundles various third-party products, notably:
-- the [Jitsi Videobridge](https://github.com/jitsi/jitsi-videobridge) project;
-- the [Jitsi Conference Focus (jicofo)](https://github.com/jitsi/jicofo) project; 
-- the [Jitsi Meet](https://github.com/jitsi/jitsi-meet) webclient.
+The pade project bundles various third-party products, notably:
+- [Jitsi Videobridge](https://github.com/jitsi/jitsi-videobridge) project;
+- [Jitsi Conference Focus (jicofo)](https://github.com/jitsi/jicofo) project; 
+- [Jitsi Meet](https://github.com/jitsi/jitsi-meet) webclient.
+- [ConverseJS] (https://github.com/conversejs/converse.js) webclient.
 
 Installation
 ------------
-Install the offocus and ofmeet plugins into your Openfire instance.
+Install the offocus, ofmeet, ofgasi and pade plugins into your Openfire instance.
 
 Build instructions
 ------------------
@@ -21,7 +20,9 @@ This project is a Apache Maven project, and is build using the standard Maven in
 
     mvn clean package
 
-After a successful execution, the two plugins should be available in these locations:
+After a successful execution, the four plugins should be available in these locations:
 
     offocus/target/offocus.jar
     ofmeet/target/ofmeet.jar
+    ofgasis/target/ofgasi.jar
+    pade/target/pade.jar    

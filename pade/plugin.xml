@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin>
+    <class>uk.ifsoft.openfire.plugins.pade.PadePlugin</class>
+    <name>${project.name}</name>
+    <description>${project.description}</description>
+    <author>Ignite Realtime</author>
+    <version>${project.version}</version>
+    <date>12/31/2019</date>
+    <minServerVersion>4.1.5</minServerVersion>
+    <minJavaVersion>1.8</minJavaVersion>   
+</plugin>

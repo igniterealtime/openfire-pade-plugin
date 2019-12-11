@@ -1,0 +1,430 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.igniterealtime.openfire.ofmeet</groupId>
+        <artifactId>parent</artifactId>
+        <version>0.9.7-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>pade</artifactId>
+    
+    <name>Pade Server</name>
+    <description>Implements Pade server-side features</description>
+
+    <developers>
+        <developer>
+            <id>deleolajide</id>
+            <name>Dele Olajide</name>
+            <email>dele@4ng.net</email>
+            <timezone>0</timezone>
+        </developer>
+    </developers>
+
+    <build>
+        <sourceDirectory>src/java</sourceDirectory>
+        <plugins>
+            <plugin>
+                <groupId>com.googlecode.maven-download-plugin</groupId>
+                <artifactId>download-maven-plugin</artifactId>
+                <version>1.3.0</version>
+                <executions>
+                    <execution>
+                    <id>retrieve-jitsimeet-webclient</id>
+                    <phase>prepare-package</phase>
+                    <goals>
+                        <goal>wget</goal>
+                    </goals>
+                    <configuration>
+                        <url>https://github.com/igniterealtime/Pade/archive/v${pade.version}.zip</url>
+                        <unpack>true</unpack>
+                        <outputDirectory>${project.build.directory}/pade-extension</outputDirectory>
+                    </configuration>
+                    </execution>
+                    <execution>
+                        <id>retrieve-win-64</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>https://github.com/electron/electron/releases/download/v7.1.4/electron-v7.1.4-win32-x64.zip</url>
+                            <unpack>true</unpack>
+                            <outputDirectory>${project.build.directory}/win-64</outputDirectory>
+                        </configuration>
+                    </execution>   
+                    <execution>
+                        <id>retrieve-linux-64</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>https://github.com/electron/electron/releases/download/v7.1.4/electron-v7.1.4-linux-x64.zip</url>
+                            <unpack>true</unpack>
+                            <outputDirectory>${project.build.directory}/linux-64</outputDirectory>
+                        </configuration>
+                    </execution>  
+                    <execution>
+                        <id>retrieve-darwin-64</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>https://github.com/electron/electron/releases/download/v7.1.4/electron-v7.1.4-darwin-x64.zip</url>
+                            <unpack>true</unpack>
+                            <outputDirectory>${project.build.directory}/darwin-64</outputDirectory>
+                        </configuration>
+                    </execution>                                         
+                </executions>
+            </plugin> 
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.7</version>
+                <executions>
+                <execution>
+                    <id>copy-pade-extension</id>
+                    <phase>prepare-package</phase>
+                    <goals>
+                    <goal>copy-resources</goal>
+                    </goals>
+                    <configuration>
+                    <overwrite>true</overwrite>                 
+                    <outputDirectory>classes/public</outputDirectory>
+                    <resources>
+                        <resource><directory>${project.build.directory}/pade-extension/Pade-${pade.version}/extension</directory></resource>                        
+                        <resource><directory>src/public</directory></resource>                                                
+                    </resources>
+                    </configuration>
+                </execution> 
+                <execution>
+                    <id>copy-win-64</id>
+                    <phase>prepare-package</phase>
+                    <goals>
+                    <goal>copy-resources</goal>
+                    </goals>
+
+                    <configuration>
+                    <overwrite>true</overwrite>                 
+                    <outputDirectory>${project.build.directory}/win-64</outputDirectory>
+                    <resources>
+                        <resource><directory>application</directory><filtering>true</filtering></resource>                        
+                    </resources>
+                    </configuration>
+                </execution>
+                <execution>
+                    <id>copy-linux-64</id>
+                    <phase>prepare-package</phase>
+                    <goals>
+                    <goal>copy-resources</goal>
+                    </goals>
+
+                    <configuration>
+                    <overwrite>true</overwrite>                 
+                    <outputDirectory>${project.build.directory}/linux-64</outputDirectory>
+                    <resources>
+                        <resource><directory>application</directory><filtering>true</filtering></resource>                         
+                    </resources>
+                    </configuration>
+                </execution>    
+                <execution>
+                    <id>copy-darwin-64</id>
+                    <phase>prepare-package</phase>
+                    <goals>
+                    <goal>copy-resources</goal>
+                    </goals>
+
+                    <configuration>
+                    <overwrite>true</overwrite>                 
+                    <outputDirectory>${project.build.directory}/darwin-64</outputDirectory>
+                    <resources>
+                        <resource><directory>application</directory><filtering>true</filtering></resource>                         
+                    </resources>
+                    </configuration>
+                </execution>                                  
+               </executions>
+            </plugin>            
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.6</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.igniterealtime.openfire.plugins</groupId>
+                        <artifactId>openfire-plugin-assembly-descriptor</artifactId>
+                        <version>${openfire.version}</version>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution> 
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>                    
+                        <configuration> 
+                            <appendAssemblyId>true</appendAssemblyId>
+                            <descriptors>
+                                <descriptor>win-64.xml</descriptor>
+                                <descriptor>linux-64.xml</descriptor>
+                                <descriptor>darwin-64.xml</descriptor>                        
+                            </descriptors>                        
+                        </configuration>
+                    </execution>                    
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <finalName>${project.artifactId}</finalName>
+                            <attach>false</attach>
+                            <!-- This is where we use our shared assembly descriptor -->
+                            <descriptorRefs>
+                                <descriptorRef>openfire-plugin-assembly</descriptorRef>
+                            </descriptorRefs>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Fix for Mina 2.x -->
+            <!-- https://issues.apache.org/jira/browse/DIRMINA-919 -->
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>3.0.0</version>
+                <extensions>true</extensions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.igniterealtime.openfire</groupId>
+            <artifactId>xmppserver</artifactId>
+            <scope>provided</scope>
+        </dependency>    
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-client</artifactId>
+            <version>1.19.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-core</artifactId>
+            <version>1.19.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-server</artifactId>
+            <version>1.19.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-servlet</artifactId>
+            <version>1.19.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-json</artifactId>
+            <version>1.19.4</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>jsr311-api</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-httpclient</groupId>
+            <artifactId>commons-httpclient</artifactId>
+            <version>3.1</version>
+        </dependency>  
+        <dependency>
+            <groupId>net.sf.json-lib</groupId>
+            <artifactId>json-lib</artifactId>
+            <version>0.8</version>
+        </dependency>   
+        
+        <!-- https://mvnrepository.com/artifact/org.apache.lucene/lucene-core -->
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-core</artifactId>
+            <version>2.9.4</version>
+        </dependency>                         
+    
+        <!-- https://mvnrepository.com/artifact/asm/asm -->
+        <dependency>
+            <groupId>asm</groupId>
+            <artifactId>asm</artifactId>
+            <version>3.3.1</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.codehaus.jackson/jackson-mapper-asl -->
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-mapper-asl</artifactId>
+            <version>1.9.13</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.codehaus.jackson/jackson-core-asl -->
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-core-asl</artifactId>
+            <version>1.9.13</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.codehaus.jackson/jackson-jaxrs -->
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-jaxrs</artifactId>
+            <version>1.9.13</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.codehaus.jackson/jackson-xc -->
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-xc</artifactId>
+            <version>1.9.13</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.codehaus.jettison/jettison -->
+        <dependency>
+            <groupId>org.codehaus.jettison</groupId>
+            <artifactId>jettison</artifactId>
+            <version>1.3.8</version>
+        </dependency>
+
+        <!-- web push dependencies -->
+        
+        <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.1</version>
+        </dependency>
+        
+        <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpasyncclient -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpasyncclient</artifactId>
+            <version>4.1.3</version>
+        </dependency>
+        
+        <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>23.0</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.bitbucket.b_c/jose4j -->
+        <dependency>
+            <groupId>org.bitbucket.b_c</groupId>
+            <artifactId>jose4j</artifactId>
+            <version>0.6.0</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/fluent-hc -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>fluent-hc</artifactId>
+            <version>4.5.3</version>
+        </dependency>
+        
+        <!-- https://mvnrepository.com/artifact/com.beust/jcommander -->
+        <dependency>
+            <groupId>com.beust</groupId>
+            <artifactId>jcommander</artifactId>
+            <version>1.72</version>
+        </dependency>
+
+        
+        <!-- https://mvnrepository.com/artifact/org.picocontainer/picocontainer -->
+        <dependency>
+            <groupId>org.picocontainer</groupId>
+            <artifactId>picocontainer</artifactId>
+            <version>1.2</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.6</version>
+        </dependency>
+        
+        <!-- https://mvnrepository.com/artifact/org.eclipse.jetty.fcgi/fcgi-server -->
+        <dependency>
+            <groupId>org.eclipse.jetty.fcgi</groupId>
+            <artifactId>fcgi-server</artifactId>
+            <version>9.4.12.v20180830</version>
+        </dependency>
+        
+        <!-- https://mvnrepository.com/artifact/com.j256.two-factor-auth/two-factor-auth -->
+        <dependency>
+            <groupId>com.j256.two-factor-auth</groupId>
+            <artifactId>two-factor-auth</artifactId>
+            <version>1.0</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>net.lingala.zip4j</groupId>
+            <artifactId>zip4j</artifactId>
+            <version>1.3.2</version>
+        </dependency>        
+        
+        <dependency>
+           <groupId>org.json</groupId>
+           <artifactId>json</artifactId>
+           <version>20160810</version>
+        </dependency>       
+
+        <dependency>
+            <groupId>org.quartz-scheduler</groupId>
+            <artifactId>quartz</artifactId>
+            <version>2.2.2</version>
+        </dependency>       
+        
+        <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->        
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.8.3</version>
+        </dependency> 
+        
+        <!-- https://mvnrepository.com/artifact/com.kotcrab.remark/remark -->
+        <dependency>
+            <groupId>com.kotcrab.remark</groupId>
+            <artifactId>remark</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+                
+        <!-- https://mvnrepository.com/artifact/com.github.waffle/waffle-jna -->
+        <dependency>
+            <groupId>com.github.waffle</groupId>
+            <artifactId>waffle-jna</artifactId>
+            <version>1.9.1</version>
+        </dependency>
+        
+        <!-- https://mvnrepository.com/artifact/com.github.davidmoten/subethasmtp -->
+        <dependency>
+            <groupId>com.github.davidmoten</groupId>
+            <artifactId>subethasmtp</artifactId>
+            <version>4.0-RC6</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.lowagie</groupId>
+            <artifactId>itext</artifactId>
+            <!-- NB. Later versions are available at com.itextpdf:itextpdf but require code changes -->
+            <version>2.0.8</version>
+        </dependency>  
+                
+    </dependencies>
+</project>

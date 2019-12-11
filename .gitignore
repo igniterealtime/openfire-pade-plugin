@@ -1,0 +1,23 @@
+target/
+work/
+*.class
+
+# Ignore Intellij Idea project files
+*.iml
+*.ipr
+.idea
+atlassian-ide-plugin.xml
+out/
+
+# Ignore Eclipse project files
+.settings
+.project
+.classpath
+
+# Ignore MacOSX files
+.DS_Store
+
+# Ignore Netbeans project files
+nbproject/
+nbbuild/
+/bin/

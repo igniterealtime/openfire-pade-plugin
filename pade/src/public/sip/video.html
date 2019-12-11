@@ -1,0 +1,51 @@
+<html>
+  <head>
+    <style>
+        html, body{
+            margin:0px;
+            height:100%;
+            color: #424242;
+            font-family:'Helvetica Neue', Helvetica, sans-serif;
+            font-weight: 400;
+            overflow-x: hidden;
+        }
+    </style>
+    <script src="sip.js"></script>
+    <script src="video.js"></script>
+    <script>
+            var session = null;
+
+            function login()
+            {
+                realtime.login(document.getElementById("server").value, document.getElementById("username").value, document.getElementById("password").value)
+            };
+
+            function makeCall()
+            {
+                session = realtime.dial(document.getElementById("destination").value)
+            };
+
+            function clearCall()
+            {
+                if (session != null)
+                {
+                    realtime.hangup(session);
+                    session = null;
+                }
+            };
+
+    </script>
+  </head>
+  <body>
+        Server: <input id="server" value="192.168.1.252" />
+        Username: <input id="username" value="patient" />
+        Password: <input id="password" value="5b506cb3e4b01a21a6a31278" type="password" />
+        <p/>
+        <button onclick="login()">Login</button>
+        <p/>
+        <input id="destination" /><button onclick="makeCall()">Call</button><button onclick="clearCall()">Clear</button>
+        <video id="localVideo" style="width: 320px; height: 240px;" muted="muted"></video>
+        <video id="remoteVideo" style="width: 320px; height: 240px;"></video>
+
+  </body>
+</html>

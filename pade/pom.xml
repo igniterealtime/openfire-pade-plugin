@@ -30,20 +30,23 @@
             <plugin>
                 <groupId>com.googlecode.maven-download-plugin</groupId>
                 <artifactId>download-maven-plugin</artifactId>
-                <version>1.3.0</version>
-                <executions>
+                <version>1.3.0</version>               
+                <executions>   
+<!--                 
                     <execution>
-                    <id>retrieve-jitsimeet-webclient</id>
+                    <id>retrieve-pade-webclient</id>
                     <phase>prepare-package</phase>
                     <goals>
                         <goal>wget</goal>
                     </goals>
                     <configuration>
-                        <url>https://github.com/igniterealtime/Pade/archive/v${pade.version}.zip</url>
+                        <url>https://clients2.google.com/service/update2/crx?response=redirect&amp;acceptformat=crx2,crx3&amp;prodversion=72.0&amp;x=id%3Dfohfnhgabmicpkjcpjpjongpijcffaba%26installsource%3Dondemand%26uc</url>
                         <unpack>true</unpack>
+                        <outputFileName>pade-extension.zip</outputFileName>
                         <outputDirectory>${project.build.directory}/pade-extension</outputDirectory>
                     </configuration>
-                    </execution>
+                    </execution>    
+-->                    
                     <execution>
                         <id>retrieve-win-64</id>
                         <phase>prepare-package</phase>
@@ -96,7 +99,8 @@
                     <overwrite>true</overwrite>                 
                     <outputDirectory>classes/public</outputDirectory>
                     <resources>
-                        <resource><directory>${project.build.directory}/pade-extension/Pade-${pade.version}/extension</directory></resource>                        
+                        <!--resource><directory>${project.build.directory}/pade-extension</directory></resource-->  
+                        <resource><directory>C:/Projects/Ignite/Pade/extension</directory></resource>                           
                         <resource><directory>src/public</directory></resource>                                                
                     </resources>
                     </configuration>

@@ -28,13 +28,11 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!-- {openfire.version} used by managed dependencies, but also in the pom files of various modules. -->
         <openfire.version>4.2.0</openfire.version>
         <videobridge.version>1.1-20191004.132308-120</videobridge.version>        
         <jicofo.version>1.1-20191122.000029-86</jicofo.version>
         <jigasi.version>1.1-20190806.132856-49</jigasi.version>    
-        <jicoco.version>1.1-20190509.130302-15</jicoco.version>    
-        <pade.version>1.5.2</pade.version>    
+        <jicoco.version>1.1-20190509.130302-15</jicoco.version>     
         <pade.url>https://desktop-545pc5b:7443/apps/index.html</pade.url>        
     </properties>
 

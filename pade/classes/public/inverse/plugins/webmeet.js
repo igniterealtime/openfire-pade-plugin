@@ -359,10 +359,10 @@
                 }
             });
 
-            _converse.api.listen.on('chatBoxOpened', function (view)
+            _converse.api.listen.on('chatBoxInitialized', function (view)
             {
                 const jid = view.model.get("jid");
-                console.debug("chatBoxOpened", jid);
+                console.debug("chatBoxInitialized", jid);
             });
 
             _converse.api.listen.on('renderToolbar', function(view)
@@ -744,7 +744,7 @@
 
                 renderChatMessage: async function renderChatMessage()
                 {
-                    console.debug('webmeet - renderChatMessage', this.model.get("fullname"), this.model.getDisplayName(), this.model.vcard.attributes.fullname, this.model);
+                    console.debug('webmeet - renderChatMessage', this.model.get("fullname"), this.model.getDisplayName(), this.model);
                     // intercepting email IM
 
                     if (this.model.vcard)

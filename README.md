@@ -7,7 +7,7 @@ The pade project bundles various third-party products, notably:
 - [Jitsi Videobridge](https://github.com/jitsi/jitsi-videobridge) project;
 - [Jitsi Conference Focus (jicofo)](https://github.com/jitsi/jicofo) project; 
 - [Jitsi Meet](https://github.com/jitsi/jitsi-meet) web client.
-- [Pàdé](https://github.com/igniterealtime/pade) desktop client.
+- [Pàdé](https://github.com/igniterealtime/pade) web desktop client.
 
 Installation
 ------------

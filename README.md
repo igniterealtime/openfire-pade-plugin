@@ -1,4 +1,4 @@
-Pàdé Plugin for Openfire
+PÃ dÃ© Plugin for Openfire
 =========================
 
 This project produces four Openfire plugins, offocus, ofmeet, ofgasi and pade, combined, provide a unified communication solution for Openfire.
@@ -7,7 +7,7 @@ The pade project bundles various third-party products, notably:
 - [Jitsi Videobridge](https://github.com/jitsi/jitsi-videobridge) project;
 - [Jitsi Conference Focus (jicofo)](https://github.com/jitsi/jicofo) project; 
 - [Jitsi Meet](https://github.com/jitsi/jitsi-meet) webclient.
-- [ConverseJS] (https://github.com/conversejs/converse.js) webclient.
+- [ConverseJS](https://github.com/conversejs/converse.js) webclient.
 
 Installation
 ------------

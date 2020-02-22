@@ -20,7 +20,6 @@ import net.java.sip.communicator.util.ServiceUtils;
 import org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig;
 import org.jitsi.jicofo.FocusBundleActivator;
 import org.jitsi.jicofo.FocusManager;
-import org.jitsi.jicofo.JvbDoctor;
 import org.jitsi.jicofo.auth.AuthenticationAuthority;
 import org.jitsi.jicofo.osgi.JicofoBundleConfig;
 import org.jitsi.jicofo.reservation.ReservationSystem;
@@ -83,7 +82,6 @@ public class JitsiJicofoWrapper
 
         // Disable health check. Our JVB is not an external component, so there's no need to check for its connectivity.
         // Also, the health check appears to cumulatively use and not release resources!
-        System.setProperty( JvbDoctor.HEALTH_CHECK_INTERVAL_PNAME, "-1" );
         System.setProperty( "org.jitsi.jicofo.PING_INTERVAL", "-1" );
 
         // Disable JVB rediscovery. We are running with one hard-coded videobridge, there's no need for dynamic detection of others.

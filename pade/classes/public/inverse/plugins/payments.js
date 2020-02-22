@@ -96,9 +96,7 @@
 
                     if (view.model.get('type') === "chatbox" && bgWindow.pade.transferWiseProfile && bgWindow.pade.transferWiseProfile.length > 0 && email)
                     {
-                        addToolbarItem(view, id, "webmeet-transferwise-" + id, '<a class="plugin-transferwise fa" title="TransferWise. Click to open"><img height="16" src="plugins/css/images/transferwise.svg"/></a>');
-
-                        var transferWiseButton = document.getElementById("webmeet-transferwise-" + id);
+                        var transferWiseButton = addToolbarItem(view, id, "webmeet-transferwise-" + id, '<a class="plugin-transferwise fa" title="TransferWise. Click to open"><img height="16" src="plugins/css/images/transferwise.svg"/></a>');
 
                         if (transferWiseButton)
                         {
@@ -106,7 +104,13 @@
                             {
                                 evt.stopPropagation();
 
-                                transferWiseDialog = new TransferWiseDialog({'model': new converse.env.Backbone.Model({view: view}) });
+                                if (!transferWiseDialog)
+                                {
+                                    transferWiseDialog = new TransferWiseDialog({'model': new converse.env.Backbone.Model({view: view}) });
+                                }
+                                else {
+                                    transferWiseDialog.model.set("view", view);
+                                }
                                 transferWiseDialog.show();
 
                             }, false);
@@ -115,9 +119,7 @@
 
                     if (getSetting("enablePayPalMe", false) && url && url.indexOf("https://www.paypal.me/") > -1)
                     {
-                        addToolbarItem(view, id, "webmeet-paypalme-" + id, '<a class="plugin-paypalme fa" title="PayPal Me. Click to open"><img height="16" src="plugins/css/images/pp-acceptance-small.png"/></a>');
-
-                        var payPalMe = document.getElementById("webmeet-paypalme-" + id);
+                        var payPalMe = addToolbarItem(view, id, "webmeet-paypalme-" + id, '<a class="plugin-paypalme fa" title="PayPal Me. Click to open"><img height="16" src="plugins/css/images/pp-acceptance-small.png"/></a>');
 
                         if (payPalMe)
                         {
@@ -154,7 +156,13 @@
 
                         if (command === "tw" && this.model.get('type') === "chatbox" && bgWindow.pade.transferWiseProfile && bgWindow.pade.transferWiseProfile.length > 0 && email)
                         {
-                            transferWiseDialog = new TransferWiseDialog({'model': new converse.env.Backbone.Model({view: this}) });
+                            if (!transferWiseDialog)
+                            {
+                                transferWiseDialog = new TransferWiseDialog({'model': new converse.env.Backbone.Model({view: this}) });
+                            }
+                            else {
+                                transferWiseDialog.model.set("view", this);
+                            }
                             transferWiseDialog.show();
                             return true;
                         }

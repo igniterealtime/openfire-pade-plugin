@@ -815,6 +815,12 @@ window.addEventListener("load", function()
     }
 
     chrome.contextMenus.create({id: "pade_applications", title: "Applications", contexts: ["browser_action"]});
+
+    chrome.contextMenus.create({parentId: "pade_applications", id: "pade_public_chat", type: "normal", title: "Public Chat", contexts: ["browser_action"],  onclick: function()
+    {
+        openWebAppsWindow("https://" + getSetting("server") + "/monitoring/", null, 1024, 800);
+    }});
+
     chrome.contextMenus.create({id: "pade_content", type: "normal", title: "Shared Documents", contexts: ["browser_action"]});
 
     if (getSetting("enableInverse", false))
@@ -1723,23 +1729,26 @@ function openVertoWindow(state)
 
 function doExtensionPage(url)
 {
-    chrome.tabs.query({}, function(tabs)
+    if (chrome.tabs)
     {
-        var setupUrl = chrome.runtime.getURL(url);
-
-        if (tabs)
+        chrome.tabs.query({}, function(tabs)
         {
-            var option_tab = tabs.filter(function(t) { return t.url === setupUrl; });
+            var setupUrl = chrome.runtime.getURL(url);
 
-            if (option_tab.length)
+            if (tabs)
             {
-            chrome.tabs.update(option_tab[0].id, {highlighted: true, active: true});
+                var option_tab = tabs.filter(function(t) { return t.url === setupUrl; });
 
-            }else{
-            chrome.tabs.create({url: setupUrl, active: true});
+                if (option_tab.length)
+                {
+                chrome.tabs.update(option_tab[0].id, {highlighted: true, active: true});
+
+                }else{
+                chrome.tabs.create({url: setupUrl, active: true});
+                }
             }
-        }
-    });
+        });
+    } else window.open(chrome.runtime.getURL(url), url);
 }
 
 function addHandlers()
@@ -2915,7 +2924,7 @@ function addCommunityMenu()
     {
         chrome.contextMenus.create({parentId: "pade_applications", id: "pade_community", type: "normal", title: "CMS/Community Client", contexts: ["browser_action"],  onclick: function()
         {
-            openWebAppsWindow(getSetting("communityUrl"), getSetting("server") + "/tiki", null, 1024, 800);
+            openWebAppsWindow(getSetting("communityUrl"), null, 1024, 800);
         }});
     }
 }
@@ -3318,14 +3327,14 @@ function updateVCardAvatar(jid, avatar)
 }
 
 
-function createAvatar(nickname, width, height, font)
+function createAvatar(nickname, width, height, font, force)
 {
     if (!nickname) nickname = "Anonymous";
     nickname = nickname.toLowerCase();
 
     if (avatars[nickname])
     {
-        return avatars[nickname];
+        if (!force) return avatars[nickname];
     }
 
     if (getSetting("converseRandomAvatars", false))
@@ -3767,11 +3776,11 @@ function getConnection(connUrl)
 function doPadeConnect()
 {
     var resource = chrome.i18n.getMessage('manifest_shortExtensionName').toLowerCase() + "-" + chrome.runtime.getManifest().version + "-" + BrowserDetect.browser + BrowserDetect.version + BrowserDetect.OS + "-" + Math.random().toString(36).substr(2,9);
-    var connUrl = "https://" + pade.server + "/http-bind/";
+    var connUrl = getSetting("boshUri", "https://" + pade.server + "/http-bind/");
 
     if (getSetting("useWebsocket", false))
     {
-        connUrl = "wss://" + pade.server + "/ws/";
+        connUrl = getSetting("websocketUri", "wss://" + pade.server + "/ws/");
     }
 
     var connJid = pade.username + "@" + pade.domain  + "/" + resource;

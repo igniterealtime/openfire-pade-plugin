@@ -47,7 +47,31 @@ public class JerseyWrapper extends ServletContainer
         //prc.getProperties().put(CONTAINER_RESPONSE_FILTERS, GZIP_FILTER);
         loadAuthenticationFilter();
 
+        prc.getClasses().add(RestAPIService.class);
+
+        prc.getClasses().add(MUCRoomService.class);
+        prc.getClasses().add(MUCRoomOwnersService.class);
+        prc.getClasses().add(MUCRoomAdminsService.class);
+        prc.getClasses().add(MUCRoomMembersService.class);
+        prc.getClasses().add(MUCRoomOutcastsService.class);
+
+        prc.getClasses().add(UserService.class);
+        prc.getClasses().add(UserRosterService.class);
+        prc.getClasses().add(UserGroupService.class);
+        prc.getClasses().add(UserLockoutService.class);
+
+        prc.getClasses().add(GroupService.class);
+        prc.getClasses().add(SessionService.class);
+        prc.getClasses().add(MsgArchiveService.class);
+        prc.getClasses().add(StatisticsService.class);
+        prc.getClasses().add(MessageService.class);
+        prc.getClasses().add(SipService.class);
+        prc.getClasses().add(BookmarkService.class);
+        prc.getClasses().add(ChatService.class);
         prc.getClasses().add(MeetService.class);
+        prc.getClasses().add(AskService.class);
+
+        prc.getClasses().add(RESTExceptionMapper.class);
     }
 
     public static String loadAuthenticationFilter()

@@ -81,6 +81,22 @@ this.manifest = {
         },
         {
             "tab": i18n.get("Connection"),
+            "group": i18n.get("URIs"),
+            "name": "boshUri",
+            "type": "text",
+            "label": i18n.get("Bosh"),
+            "text": "https://example.com:7443/http-bind/"
+        },
+        {
+            "tab": i18n.get("Connection"),
+            "group": i18n.get("URIs"),
+            "name": "websocketUri",
+            "type": "text",
+            "label": i18n.get("WebSocket"),
+            "text": "wss://example.com:7443/ws/"
+        },
+        {
+            "tab": i18n.get("Connection"),
             "group": i18n.get("Authentication"),
             "name": "restartDesc",
             "type": "description",
@@ -820,7 +836,7 @@ this.manifest = {
             "name": "ofmeetUrl",
             "type": "text",
             "label": i18n.get("Base Url"),
-            "text": "https://server:7443/ofmeet"
+            "text": "https://server:7443/ofmeet/"
         },
         {
             "tab": i18n.get("Meetings"),
@@ -1080,9 +1096,16 @@ this.manifest = {
             "name": "archivedMessagesPageSize",
             "type": "slider",
             "label": i18n.get("Archived Messages Page Size"),
-            "max": 121,
+            "max": 201,
             "min": 1,
-            "step": 10
+            "step": 20
+        },
+        {
+            "tab": i18n.get("Converse"),
+            "group": i18n.get("User Interface"),
+            "name": "converseSimpleView",
+            "type": "checkbox",
+            "label": i18n.get("Use simple conversations view")
         },
         {
             "tab": i18n.get("Converse"),
@@ -1111,13 +1134,6 @@ this.manifest = {
             "name": "useUpDownCursorKeys",
             "type": "checkbox",
             "label": i18n.get("Use UP & DOWN cursor keys to edit messages")
-        },
-        {
-            "tab": i18n.get("Converse"),
-            "group": i18n.get("User Interface"),
-            "name": "enableMessageRetraction",
-            "type": "checkbox",
-            "label": i18n.get("Enable message retraction action")
         },
         {
             "tab": i18n.get("Converse"),
@@ -1157,13 +1173,6 @@ this.manifest = {
         {
             "tab": i18n.get("Converse"),
             "group": i18n.get("User Interface"),
-            "name": "converseShowOnlyOnlineUsers",
-            "type": "checkbox",
-            "label": i18n.get("Show only users with available presence")
-        },
-        {
-            "tab": i18n.get("Converse"),
-            "group": i18n.get("User Interface"),
             "name": "showSendButton",
             "type": "checkbox",
             "label": i18n.get("Show send button which can be clicked to send a message")
@@ -1179,6 +1188,7 @@ this.manifest = {
                 {"text": "Fly Concord", "value": "concord"},
                 {"text": "Paper White", "value": "paperwhite"},
                 {"text": "Hand Write", "value": "handwrite"},
+                {"text": "Red Pill", "value": "redpill"},
                 {"text": "Dark Room", "value": "darkroom"},
                 {"text": "Black Board", "value": "blackboard"}
             ]
@@ -1878,6 +1888,13 @@ this.manifest = {
             "type": "checkbox",
             "label": i18n.get("Enable Audio/Video Capture")
         },
+        {                                       // irma
+            "tab": i18n.get("Applications"),
+            "group": i18n.get("IRMA"),
+            "name": "enableIrma",
+            "type": "checkbox",
+            "label": i18n.get("Enable IRMA (I reveal my attributes)")
+        },
         {                                               // search
             "tab": i18n.get("Search"),
             "group": i18n.get("Rooms Directory"),
@@ -2011,6 +2028,13 @@ this.manifest = {
         {
             "tab": i18n.get("Feeds"),
             "group": i18n.get("RSS/Atom"),
+            "name": "showRssToolbar",
+            "type": "checkbox",
+            "label": i18n.get("Show Chatbox Toolbar")
+        },
+        {
+            "tab": i18n.get("Feeds"),
+            "group": i18n.get("RSS/Atom"),
             "name": "rssFeedTitle",
             "type": "text",
             "label": i18n.get("Title"),
@@ -2134,6 +2158,10 @@ this.manifest = {
             "ofmeetInvitation",
             "letsCollaborate",
             "webinarInvite"
+        ],
+        [
+            "boshUri",
+            "websocketUri"
         ]
     ]
 };

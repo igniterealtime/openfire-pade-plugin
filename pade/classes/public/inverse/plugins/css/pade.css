@@ -54,6 +54,10 @@
     padding: 5px;
 }
 
+#conversejs .chat-msg__content--action .chat-msg__actions { 
+    display: none!important;
+}
+
 #conversejs .chat-msg__reaction {
     padding-right: 10px;
 }
@@ -62,6 +66,7 @@
     position: relative;
     overflow: hidden !important;       
 }
+
 #conversejs .chat-msg__actions {
     vertical-align: middle !important;
     background-color: rgba(255,255,255,1);
@@ -70,9 +75,10 @@
     flex-direction: row;
     height: 1.5rem;
     position: absolute;
-    right: 0;
+    right: 30px;
     bottom: 0;
 }
+
 
 #conversejs.converse-fullscreen .flyout {
   border-radius: 0;
@@ -241,10 +247,6 @@
 
 #conversejs #controlbox .controlbox-pane .controlbox-padded {
   padding-top: 4px;
-}
-      
-#conversejs .items-list .list-item.open {
-    background-color: #444 !important; 
 }
 
 #conversejs .chat-msg__time { 

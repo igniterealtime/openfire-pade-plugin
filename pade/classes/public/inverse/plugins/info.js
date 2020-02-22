@@ -8,9 +8,9 @@
     var bgWindow = chrome.extension ? chrome.extension.getBackgroundPage() : null;
     var _converse = null;
     var infoDialog = null;
-    var panelHTML = {};
 
     var Strophe, $iq, $msg, $pres, $build, b64_sha1, _ ,Backbone, dayjs;
+    var PreviewDialog = null, previewDialog = null;
 
     converse.plugins.add("info", {
         'dependencies': [],
@@ -41,37 +41,40 @@
                          '</div> </div> </div>';
                 },
                 afterRender() {
+                    const url = this.model.get("url");
 
                     if (this.model.get("type") == "image")
                     {
-                        this.el.querySelector('.modal-body').innerHTML = '<img class="pade-preview-image" src="' + this.model.get("url") + '"/>';
+                        this.el.querySelector('.modal-body').innerHTML = '<img class="pade-preview-image" src="' + url + '"/>';
                     }
                     else
 
                     if (this.model.get("type") == "video")
                     {
-                        this.el.querySelector('.modal-body').innerHTML = '<video controls class="pade-preview-image" src="' + this.model.get("url") + '"/>';
+                        if (url.endsWith(".tgs")) {
+                            this.el.querySelector('.modal-body').innerHTML = '<tgs-player style="height: 512px; width: 512px;" autoplay controls loop mode="normal" src="' + url + '"></tgs-player>';
+
+                        } else if (url.endsWith(".json")) {
+                            this.el.querySelector('.modal-body').innerHTML = '<lottie-player autoplay controls loop mode="normal" src="' + url + '"></lottie-player>';
+                        } else {
+                            this.el.querySelector('.modal-body').innerHTML = '<video controls class="pade-preview-image" src="' + url + '"/>';
+                        }
                     }
                     else
 
                     if (this.model.get("type") == "audio")
                     {
-                        this.el.querySelector('.modal-body').innerHTML = '<audio controls class="pade-preview-image" src="' + this.model.get("url") + '"/>';
+                        this.el.querySelector('.modal-body').innerHTML = '<audio controls class="pade-preview-image" src="' + url + '"/>';
                     }
 
-                    this.el.querySelector('.modal-title').innerHTML = "Media Content Preview<br/>" + this.model.get("url") + "<br/>" + this.model.get("from") + " - " + this.model.get("timestamp");
-                },
-                events: {
-                    "click .btn-danger": "clearIframe",
-                },
-
-                clearIframe() {
-                    this.el.querySelector('.modal-body').innerHTML = "about:blank";
+                    this.el.querySelector('.modal-title').innerHTML = "Media Content Preview<br/>" + url + "<br/>" + this.model.get("from") + " - " + this.model.get("timestamp");
                 }
             });
 
             _converse.api.listen.on('renderToolbar', function(view)
             {
+                console.debug('info - renderToolbar', view.model);
+
                 if (view.model.get("type") === "chatroom" && !view.el.querySelector(".fa-info"))
                 {
                     var jid = view.model.get("jid");
@@ -164,14 +167,9 @@
 
                                                 view.showHelpMessages(["Feed " + feed.title + " added\n" + feed.path]);
                                                 view.viewUnreadMessages();
+                                                view.close();
 
-                                                setTimeout(function()
-                                                {
-                                                    view.close();
-                                                    _converse.api.rooms.open(view.model.get("jid"));
-
-                                                }, 3000);
-
+                                                setTimeout(function() {_converse.api.rooms.open(view.model.get("jid"))});
                                             });
                                         });
                                     });
@@ -224,13 +222,26 @@
 
     var toggleInfoBar = function(view, id, jid)
     {
-        const chat_area = view.el.querySelector('.chat-area');
+        const chatroom_body = view.el.querySelector('.chatroom-body');
+        let info_area = view.el.querySelector('.occupants-pade-info');
+
+        if (!info_area)
+        {
+            info_area = document.createElement("div");
+            info_area.classList.add('occupants-pade-info');
+            info_area.classList.add('col-md-3');
+            info_area.classList.add('col-4');
+            chatroom_body.appendChild(info_area);
+        }
+
         const occupants_area = view.el.querySelector('.occupants.col-md-3.col-4');
 
-        if (!panelHTML[id])
+        if (occupants_area.style.display != "none")
         {
-            panelHTML[id] = occupants_area.innerHTML;
-            occupants_area.innerHTML = '<div class="plugin-infobox">' + getHTML(id, jid) + '</div>';
+            occupants_area.style.display = "none";
+
+            info_area.innerHTML = '<div class="plugin-infobox">' + getHTML(id, jid) + '</div>';
+            info_area.style.display = "";
 
             createContentSummary(view, jid, id);
             createMediaContentSummary(jid, id);
@@ -244,8 +255,8 @@
             createBroadcastEndpoints(jid, id);
 
         } else {
-            occupants_area.innerHTML = panelHTML[id];
-            panelHTML[id] = null;
+            occupants_area.style.display = "";
+            info_area.style.display = "none";
         }
         view.scrollDown();
     }
@@ -735,14 +746,9 @@
                             view.showHelpMessages(["Feed " + evt.target.title + " removed"]);
                             view.viewUnreadMessages();
                             view.clearMessages();
+                            view.close();
 
-                            setTimeout(function()
-                            {
-                                view.close();
-                                _converse.api.rooms.open(view.model.get("jid"));
-
-                            }, 3000);
-
+                            setTimeout(function() {_converse.api.rooms.open(view.model.get("jid"))});
                         });
                     }
                 });
@@ -822,6 +828,12 @@
                             if (isVideoURL(file))
                             {
                                 media.video.urls.push({timestamp: stamp, id: msgId, url: urls[j], file: file, from: from, type: "video"});
+                            }
+                            else
+
+                            if (isOpenOfficeDoc(file))
+                            {
+                                media.ppt.urls.push({timestamp: stamp, id: msgId, url: urls[j], file: file, from: from, type: "odf"});
                             }
                             else
 
@@ -1021,7 +1033,20 @@
     var isVideoURL = function (url)
     {
       const filename = url.toLowerCase();
-      return filename.endsWith('.mp4') || filename.endsWith('.webm');
+      return filename.endsWith('.mp4') || filename.endsWith('.webm') || filename.endsWith('.tgs') || filename.endsWith('.json');
+    };
+
+    var isOpenOfficeDoc = function (url)
+    {
+        var openOfficeDoc = false;
+        var pos = url.lastIndexOf(".");
+
+        if (pos > -1)
+        {
+            var exten = url.substring(pos + 1);
+            openOfficeDoc = "odt ods odp".indexOf(exten) > -1;
+        }
+        return openOfficeDoc;
     };
 
     var isOnlyOfficeDoc = function (url)
@@ -1032,7 +1057,7 @@
         if (pos > -1)
         {
             var exten = url.substring(pos + 1);
-            onlyOfficeDoc = "doc docx ppt pptx xls xlsx csv pdf".indexOf(exten) > -1;
+            onlyOfficeDoc = "doc docx ppt pptx xls xlsx csv".indexOf(exten) > -1;
         }
         return onlyOfficeDoc;
     };
@@ -1081,7 +1106,16 @@
 
             if (type == "image" || type == "audio" || type == "video")
             {
-                previewDialog = new PreviewDialog({'model': new converse.env.Backbone.Model({url: url, type: type, timestamp: timestamp, from: from}) });
+                if (!previewDialog)
+                {
+                    previewDialog = new PreviewDialog({'model': new converse.env.Backbone.Model({url: url, type: type, timestamp: timestamp, from: from}) });
+                }
+                else {
+                    previewDialog.model.set("url", url);
+                    previewDialog.model.set("type", type);
+                    previewDialog.model.set("timestamp", timestamp);
+                    previewDialog.model.set("from", from);
+                }
                 previewDialog.show();
             }
             else
@@ -1089,6 +1123,21 @@
             if (type == "link")
             {
                 window.open(url, "pade-media-link");
+            }
+            else
+
+            if (type == "odf")
+            {
+                const username = getSetting("username");
+                const password = getSetting("password");
+                const name = getSetting("displayname");
+                const domain = getSetting("domain");
+                const avatar = "data:" + _converse.xmppstatus.vcard.get("image_type") + ";base64," + _converse.xmppstatus.vcard.get("image");
+                const file = url.substring(url.lastIndexOf("/") + 1);
+                const bosh = "wss://" + getSetting("server") + "/ws/";
+
+                const query = `audio=true&trace=true&pwd=${password}&username=${username}&name=${name}&avatar=${avatar}&docurl=${url}&docname=${file}&domain=${domain}&bosh=${bosh}`;
+                bgWindow.openWebAppsWindow(chrome.extension.getURL("akowe/index.html?" + query), null, 1400, 900);
             }
             else {  // insert into textarea
                 replyInverseChat(url);

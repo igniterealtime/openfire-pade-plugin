@@ -26,9 +26,13 @@ import org.apache.tomcat.SimpleInstanceManager;
 import org.jivesoftware.openfire.plugin.rest.sasl.*;
 import org.jivesoftware.openfire.plugin.rest.service.JerseyWrapper;
 import org.jivesoftware.openfire.plugin.rest.OpenfireLoginService;
+import org.jivesoftware.util.*;
 
 import java.io.File;
 import java.util.*;
+import java.nio.charset.Charset;
+import java.nio.file.*;
+import java.nio.file.attribute.FileTime;
 import java.security.Security;
 import javax.servlet.DispatcherType;
 
@@ -116,6 +120,9 @@ public class PadePlugin implements Plugin
         {
             Log.error( "An exception occurred", ex );
         }
+
+        Log.info("Create recordings folder");
+        checkRecordingsFolder();
     }
 
     /**
@@ -163,5 +170,41 @@ public class PadePlugin implements Plugin
         csh.setLoginService(l);
 
         return csh;
+    }
+
+    private void checkRecordingsFolder()
+    {
+        String ofmeetHome = JiveGlobals.getHomeDirectory() + File.separator + "resources" + File.separator + "spank" + File.separator + "ofmeet-cdn";
+
+        try
+        {
+            File ofmeetFolderPath = new File(ofmeetHome);
+
+            if(!ofmeetFolderPath.exists())
+            {
+                ofmeetFolderPath.mkdirs();
+
+            }
+
+            List<String> lines = Arrays.asList("Move on, nothing here....");
+            Path file = Paths.get(ofmeetHome + File.separator + "index.html");
+            Files.write(file, lines, Charset.forName("UTF-8"));
+
+            File recordingsHome = new File(ofmeetHome + File.separator + "recordings");
+
+            if(!recordingsHome.exists())
+            {
+                recordingsHome.mkdirs();
+
+            }
+
+            lines = Arrays.asList("Move on, nothing here....");
+            file = Paths.get(recordingsHome + File.separator + "index.html");
+            Files.write(file, lines, Charset.forName("UTF-8"));
+        }
+        catch (Exception e)
+        {
+            Log.error("checkDownloadFolder", e);
+        }
     }
 }

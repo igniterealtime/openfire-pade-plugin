@@ -684,7 +684,7 @@ window.addEvent("domready", function () {
             location.reload()
         });
 
-        if (settings.manifest.useSmartIdCard)
+        if (settings.manifest.useSmartIdCard && chrome.tabs)
         {
             settings.manifest.useSmartIdCard.addEvent("action", function ()
             {
@@ -1190,11 +1190,11 @@ window.addEvent("domready", function () {
                    lynks.password = JSON.parse(window.localStorage["store.settings.password"]);
                 }
 
-                lynks.connUrl = "https://" + lynks.server + "/http-bind/";
+                lynks.connUrl = getSetting("boshUri", "https://" + lynks.server + "/http-bind/");
 
                 if (window.localStorage["store.settings.useWebsocket"] && JSON.parse(window.localStorage["store.settings.useWebsocket"]))
                 {
-                    lynks.connUrl = "wss://" + lynks.server + "/ws/";
+                    lynks.connUrl = getSetting("websocketUri", "wss://" + lynks.server + "/ws/");
                 }
 
                 var connection = background.getConnection(lynks.connUrl);
@@ -1309,11 +1309,11 @@ window.addEvent("domready", function () {
                     {
                         var doConnect = function(creds)
                         {
-                            var connUrl = "https://" + lynks.server + "/http-bind/";
+                            var connUrl = getSetting("boshUri", "https://" + lynks.server + "/http-bind/");
 
                             if (window.localStorage["store.settings.useWebsocket"] && JSON.parse(window.localStorage["store.settings.useWebsocket"]))
                             {
-                                connUrl = "wss://" + lynks.server + "/ws/";
+                                connUrl = getSetting("websocketUri", "wss://" + lynks.server + "/ws/");
                             }
                             var connection = background.getConnection(connUrl);
 
@@ -1473,7 +1473,7 @@ function doDefaults(background)
     //setDefaultSetting("converseTimeAgo", true);
 
     // web apps
-    setDefaultSetting("webApps", "web.skype.com, web.whatsapp.com, web.telegram.org, www.messenger.com");
+    setDefaultSetting("webApps", "web.skype.com, web.whatsapp.com, web.telegram.org, www.messenger.com, messages.google.com");
 
     // only office
     setDefaultSetting("onlyOfficeVersion", "5.2.2-2");
@@ -1528,7 +1528,7 @@ function setDefaultServer()
             });
         }
 
-        chrome.tabs.query({}, function(tabs)
+        if (chrome.tabs) chrome.tabs.query({}, function(tabs)
         {
             if (tabs)
             {

@@ -65,7 +65,13 @@
                     {
                         evt.stopPropagation();
 
-                        vmsgDialog = new VmsgDialog({ 'model': new converse.env.Backbone.Model({view: view}) });
+                        if (!vmsgDialog)
+                        {
+                            vmsgDialog = new VmsgDialog({ 'model': new converse.env.Backbone.Model({view: view}) });
+                        }
+                        else {
+                            vmsgDialog.model.set("view", view);
+                        }
                         vmsgDialog.show();
 
                     }, false);
@@ -86,7 +92,13 @@
 
                     if (command === "vmsg")
                     {
-                        vmsgDialog = new VmsgDialog({ 'model': new converse.env.Backbone.Model({view: this}) });
+                        if (!vmsgDialog)
+                        {
+                            vmsgDialog = new VmsgDialog({ 'model': new converse.env.Backbone.Model({view: this}) });
+                        }
+                        else {
+                            vmsgDialog.model.set("view", this);
+                        }
                         vmsgDialog.show();
                         return true;
                     }

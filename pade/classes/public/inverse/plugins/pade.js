@@ -18,6 +18,7 @@
      var _converse = null;
      var bgWindow = chrome.extension ? chrome.extension.getBackgroundPage() : null;
      var notified = false;
+     var anonRoster = {};
 
      window.chatThreads = {};
 
@@ -64,27 +65,9 @@
                 resetAllMsgCount();
             }
 
-            /* From the `_converse` object you can get any configuration
-             * options that the user might have passed in via
-             * `converse.initialize`.
-             *
-             * You can also specify new configuration settings for this
-             * plugin, or override the default values of existing
-             * configuration settings. This is done like so:
-            */
-
             _converse.api.settings.update({
-
+              'show_client_info': false
             });
-
-            /* The user can then pass in values for the configuration
-             * settings when `converse.initialize` gets called.
-             * For example:
-             *
-             *      converse.initialize({
-             *           "initialize_message": "My plugin has been initialized"
-             *      });
-             */
 
             _converse.on('messageAdded', function (data) {
                 // The message is at `data.message`
@@ -146,29 +129,41 @@
                     var numUnreadBox = chatbox.get("num_unread");
                     var numUnreadRoom = chatbox.get("num_unread_general");
 
-                    if (document.hasFocus())
+                    if (document.hasFocus() || notified)
                     {
                         chrome.browserAction.setBadgeBackgroundColor({ color: '#0000e1' });
                         chrome.browserAction.setBadgeText({ text: "" });
                     }
                     else {
 
-                        if (!notified)
+                        if (bgWindow)
                         {
                             chrome.windows.update(bgWindow.pade.chatWindow.id, {drawAttention: true});
+                            let count = 0;
 
-                            if (bgWindow)
+                            _converse.chatboxes.each(function (chat_box)
                             {
-                                if (!bgWindow.pade.messageCount) bgWindow.pade.messageCount = 0;
-                                bgWindow.pade.messageCount++;
+                                if (chat_box.get("type") == "chatbox")
+                                {
+                                    count = count + chat_box.get("num_unread");
+                                }
+                                else
 
+                                if (chat_box.get("type") == "chatroom")
+                                {
+                                    count = count + chat_box.get("num_unread_general");
+                                }
+                            });
+
+                            if (count > 0)
+                            {
                                 chrome.browserAction.setBadgeBackgroundColor({ color: '#0000e1' });
-                                chrome.browserAction.setBadgeText({ text: bgWindow.pade.messageCount.toString() });
+                                chrome.browserAction.setBadgeText({ text: count.toString() });
                             }
                         }
                     }
 
-                    if (type == "chatroom")  // chatboxes handled in background.js
+                    if (type == "chatroom")
                     {
                         var theNick =  message.getAttribute("from").split("/")[1];
                         var myName =  chatbox.get('name');
@@ -253,10 +248,28 @@
                 }
             });
 
-            _converse.api.listen.on('chatRoomOpened', function (view)
+            _converse.api.listen.on('chatRoomViewInitialized', function (view)
             {
                 const jid = view.model.get("jid");
-                console.debug("chatRoomOpened", view);
+                console.debug("chatRoomViewInitialized", view);
+
+                view.model.occupants.on('add', occupant =>
+                {
+                    if (occupant.get("jid"))
+                    {
+                        console.debug("chatbox.occupants added", occupant);
+                        anonRoster[occupant.get("jid")] = occupant.get("nick");
+                    }
+
+                    setTimeout(function() {extendOccupant(occupant, view)}, 1000);
+                });
+
+                view.model.occupants.on('remove', occupant =>
+                {
+                    console.debug("chatbox.occupants removed", occupant);
+                    delete anonRoster[occupant.get("jid")];
+                });
+
 
                 if (getSetting("enableThreading", false))
                 {
@@ -288,15 +301,38 @@
                 }
             });
 
-            _converse.api.listen.on('chatBoxInitialized', function (view)
+            _converse.api.listen.on('chatBoxInsertedIntoDOM', function (view)
             {
+                console.debug("chatBoxInsertedIntoDOM", view.model, anonRoster);
+
                 const jid = view.model.get("jid");
-                console.debug("pade plugin chatBoxInitialized", jid);
+                const activeDiv = document.getElementById("active-conversations");
+                console.debug("pade plugin chatBoxInsertedIntoDOM", jid, activeDiv);
 
                 if (bgWindow)
                 {
                     bgWindow.pade.autoJoinPrivateChats[view.model.get("jid")] = {jid: jid, type: view.model.get("type")};
                 }
+
+                if (!_converse.connection.pass)
+                {
+                    if (anonRoster[view.model.get("jid")])
+                    {
+                        const nick = anonRoster[view.model.get("jid")];
+                        view.model.set('fullname', nick);
+                        view.model.set('nickname', nick);
+                        view.model.vcard.set('nickname', nick);
+                        view.model.vcard.set('fullname', nick);
+
+                        const dataUri = getSetting("avatar", createAvatar(nick, null, null, null, true, jid));
+                        const avatar = dataUri.split(";base64,");
+
+                        view.model.vcard.set('image', avatar[1]);
+                        view.model.vcard.set('image_type', 'image/png');
+                    }
+                }
+
+                if (activeDiv) addActiveConversation(view.model, activeDiv);
             });
 
             _converse.api.listen.on('chatBoxClosed', function (chatbox)
@@ -332,8 +368,45 @@
 
             _converse.api.listen.on('connected', function()
             {
-                var initPade = function initPade()
+                if (chrome.pade)    // browser mode
                 {
+                    if (typeof module === 'object') // electron fix for jQuery
+                    {
+                        window.module = module; module = undefined;
+                    }
+
+                    top.pade.connection = _converse.connection;
+                    top.addHandlers();
+                    top.publishUserLocation();
+                    top.setupUserPayment();
+
+                    const username = Strophe.getNodeFromJid(_converse.connection.jid);
+                    const password = _converse.connection.pass;
+
+                    if (username && password)
+                    {
+                        if (top.setCredentials)    // save new credentials
+                        {
+                            top.setCredentials({id: username, password: password});
+                        }
+
+                        if (top.webpush && top.webpush.registerServiceWorker) // register webpush service worker
+                        {
+                            top.webpush.registerServiceWorker(bgWindow.pade.server, username, password);
+                        }
+                    }
+                    else {
+
+                    }
+
+                    window.addEventListener('focus', function(evt)
+                    {
+                        chrome.browserAction.setBadgeBackgroundColor({ color: '#0000e1' });
+                        chrome.browserAction.setBadgeText({ text: "" });
+                    });
+                }
+
+                _converse.api.waitUntil('bookmarksInitialized').then((initPade) => {
                     var myNick = _converse.nickname || Strophe.getNodeFromJid(_converse.bare_jid);
 
                     if (!_converse.singleton)
@@ -344,9 +417,10 @@
 
                         var bookmarkRoom = function bookmarkRoom(json)
                         {
-                            var room = _converse.chatboxes.get(json.jid);
+                            const room = _converse.chatboxes.get(json.jid);
+                            const bookmark = _converse.bookmarks.findWhere({'jid': json.jid});
 
-                            if (!room)
+                            if (!bookmark)
                             {
                                 _converse.bookmarks.create({
                                     'jid': json.jid,
@@ -354,10 +428,9 @@
                                     'autojoin': json.autojoin,
                                     'nick': myNick
                                 });
-
-                                room = _converse.chatboxes.get(json.jid);
-                                if (room) room.save('bookmarked', true);
                             }
+
+                            if (room) room.save('bookmarked', true);
                             return room;
                         }
 
@@ -405,40 +478,70 @@
                         }
                     }
 
-                    console.log("pade plugin is ready");
-                }
+                    _converse.api.waitUntil('roomsPanelRendered').then(() => {
+                        const section = document.body.querySelector('.controlbox-section.profile.d-flex');
+                        console.debug("extendControlBox", section);
 
-                Promise.all([_converse.api.waitUntil('bookmarksInitialized')]).then(initPade);
+                        if (section)
+                        {
+                            const viewButton = __newElement('a', null, '<a class="controlbox-heading__btn show-active-conversations fa fa-navicon align-self-center" title="Change view"></a>');
+                            section.appendChild(viewButton);
 
-                if (chrome.pade)    // browser mode
-                {
-                    top.pade.connection = _converse.connection;
-                    top.addHandlers();
-                    top.publishUserLocation();
-                    top.setupUserPayment();
+                            viewButton.addEventListener('click', function(evt)
+                            {
+                                evt.stopPropagation();
+                                handleActiveConversations();
 
-                    const username = Strophe.getNodeFromJid(_converse.connection.jid);
-                    const password = _converse.connection.pass;
+                            }, false);
 
-                    if (username && password)
+
+                            if (getSetting("converseSimpleView", false))
+                            {
+                                handleActiveConversations();
+                            }
+
+                            const prefButton = __newElement('a', null, '<a class="controlbox-heading__btn show-preferences fas fa-cog align-self-center" title="Preferences/Settings"></a>');
+                            section.appendChild(prefButton);
+
+                            prefButton.addEventListener('click', function(evt)
+                            {
+                                evt.stopPropagation();
+                                const url = chrome.extension.getURL("options/index.html");
+                                bgWindow.openWebAppsWindow(url, null, 1300, 950);
+
+                            }, false);
+                        }
+                    });
+                });
+
+                _converse.api.waitUntil('controlBoxInitialized').then(() => {
+
+                    if (!_converse.connection.pass)     // anonymous connection, use Pade settings for _converse.xmppstatus
                     {
-                        if (top.setCredentials)    // save new credentials
+                        setTimeout(function()
                         {
-                            top.setCredentials({id: username, password: password});
-                        }
+                            const nick = getSetting("displayname");
+                            _converse.xmppstatus.set('fullname', nick);
+                            _converse.xmppstatus.set('nickname', nick);
+                            _converse.xmppstatus.vcard.set('nickname', nick);
+                            _converse.xmppstatus.vcard.set('fullname', nick);
 
-                        if (top.webpush && top.webpush.registerServiceWorker) // register webpush service worker
-                        {
-                            top.webpush.registerServiceWorker(bgWindow.pade.server, username, password);
-                        }
+                            const dataUri = getSetting("avatar", createAvatar(nick, null, null, null, true));
+                            const avatar = dataUri.split(";base64,");
+
+                            _converse.xmppstatus.vcard.set('image', avatar[1]);
+                            _converse.xmppstatus.vcard.set('image_type', 'image/png');
+                        }, 3000);
                     }
 
-                    window.addEventListener('focus', function(evt)
-                    {
-                        chrome.browserAction.setBadgeBackgroundColor({ color: '#0000e1' });
-                        chrome.browserAction.setBadgeText({ text: "" });
-                    });
-                }
+                    // add self for testing
+                    setTimeout(function() {
+                        openChat(Strophe.getBareJidFromJid(_converse.connection.jid), getSetting("displayname"), ["Bots"])
+                    }, 3000);
+
+                });
+
+                console.log("pade plugin is ready");
             });
         },
 
@@ -455,7 +558,7 @@
                     if (getSetting("enableThreading", false))
                     {
                         const msgThread = this.model.get('thread');
-                        const source = this.model.get("type") == "groupchat" ? this.model.get("from") : this.model.get("jid");
+                        const source = this.model.get("from");
                         const box_jid = Strophe.getBareJidFromJid(source);
                         const box = _converse.chatboxes.get(box_jid);
 
@@ -478,7 +581,7 @@
                         }
                     }
 
-                    if (body.indexOf(":lol:") > -1)
+                    if (body && body.indexOf(":lol:") > -1)
                     {
                         const newBody = body.replace(":lol:", ":smiley:");
                         this.model.set('message', newBody);
@@ -486,7 +589,7 @@
 
                     const msgAttachId = this.model.get("msg_attach_to");
 
-                    if (msgAttachId && body.indexOf(msgAttachId) == -1) // very important check (duplicates)
+                    if (msgAttachId && body && body.indexOf(msgAttachId) == -1) // very important check (duplicates)
                     {
                         if (body.indexOf(":thumbsup:") > -1 || body.indexOf(":thumbsdown:") > -1)
                         {
@@ -495,7 +598,7 @@
                         }
                     }
 
-                    if (getSetting("notifyOnInterests", false))
+                    if (body && getSetting("notifyOnInterests", false))
                     {
                         var highlightedBody = body;
                         var interestList = getSetting("interestList", "").split("\n");
@@ -518,7 +621,6 @@
                     }
 
                     await this.__super__.renderChatMessage.apply(this, arguments);
-
 
                     // action button for quoting, pinning
 
@@ -555,18 +657,10 @@
                             messageDiv.parentElement.appendChild(messageActionButtons);
                         }
 
-                        if (getSetting("enableMessageRetraction", false) && !messageActionButtons.querySelector('.chat-msg__action-delete') && this.model.get("type") !== 'headline' && !this.model.isMeCommand() && this.model.get('sender') === 'me')
-                        {
-                            var ele = document.createElement("button");
-                            ele.classList.add("chat-msg__action", "chat-msg__action-delete", "far", "fa-trash-alt");
-                            ele.title = "Reract this message";
-                            messageActionButtons.appendChild(ele);
-                        }
-
                         if (!messageActionButtons.querySelector('.chat-msg__action-reply'))
                         {
                             var ele = document.createElement("button");
-                            ele.classList.add("chat-msg__action", "chat-msg__action-reply", "fas", "fa-reply");
+                            ele.classList.add("chat-msg__action", "chat-msg__action-reply", "fas", "fa-reply-all");
                             ele.title = "Reply this message";
                             messageActionButtons.appendChild(ele);
                         }
@@ -764,6 +858,103 @@
             }
         }
     });
+
+    var occupantAvatarClicked = function(ev)
+    {
+        const jid = ev.target.getAttribute('data-room-jid');
+        const nick = ev.target.getAttribute('data-room-nick');
+
+        if (jid && _converse.bare_jid != jid)
+        {
+             _converse.api.chats.open(jid, {nickname: nick, fullname: nick}).then(chat => {
+                 if (!chat.vcard.attributes.fullname) chat.vcard.set('fullname', nick);
+                 if (!chat.vcard.attributes.nickname) chat.vcard.set('nickname', nick);
+             });
+        }
+    }
+
+    var extendOccupant = function(occupant, view)
+    {
+        const element = document.getElementById(occupant.get('id'));
+        console.debug("extendOccupant", element);
+
+        if (element)
+        {
+            // avatar
+
+            const status = element.querySelector(".occupant-status");
+            let imgEle = element.querySelector(".occupant-avatar");
+            const image = createAvatar(occupant.get('nick'), null, null, null, null, occupant.get('jid'));
+            const imgHtml = '<img class="room-avatar avatar" src="' + image + '" height="22" width="22">';
+
+            if (imgEle)
+            {
+                imgEle.innerHTML = imgHtml;
+            }
+            else {
+                imgEle = __newElement('span', null, imgHtml, 'occupant-avatar');
+                status.insertAdjacentElement('beforeBegin', imgEle);
+            }
+
+            if (occupant.get('jid'))
+            {
+                const badges = element.querySelector(".occupant-badges");
+
+                // location
+
+                if (bgWindow.pade.geoloc[occupant.get('jid')])
+                {
+                    let locationEle = element.querySelector(".occupants-pade-location");
+                    let locationHtml = "<span data-room-nick='" + occupant.get('nick') + "' data-room-jid='" + occupant.get('jid') + "' title='click to see location' class='badge badge-dark'>GeoLoc</span>";
+
+                    if (locationEle)
+                    {
+                        locationEle.innerHTML = locationHtml;
+                    }
+                    else {
+                        locationEle = __newElement('span', null, locationHtml, 'occupants-pade-location');
+                        badges.appendChild(locationEle);
+                    }
+
+                    locationEle.addEventListener('click', function(evt)
+                    {
+                        evt.stopPropagation();
+
+                        const jid = evt.target.getAttribute('data-room-jid');
+                        const nick = evt.target.getAttribute('data-room-nick');
+                        _converse.pluggable.plugins["webmeet"].showGeolocation(jid, nick, view);
+
+                    }, false);
+                }
+
+                // chat badge
+
+                let padeEle = element.querySelector(".occupants-pade-chat");
+                let html = "<span data-room-nick='" + occupant.get('nick') + "' data-room-jid='" + occupant.get('jid') + "' title='click to chat' class='badge badge-success'>chat</span>";
+
+                if (_converse.bare_jid == occupant.get('jid'))
+                {
+                    html = "<span data-room-nick='" + occupant.get('nick') + "' data-room-jid='" + occupant.get('jid') + "' class='badge badge-groupchat'>self</span>";
+                }
+
+                if (padeEle)
+                {
+                    padeEle.innerHTML = html;
+                }
+                else {
+                    padeEle = __newElement('span', null, html, 'occupants-pade-chat');
+                    badges.appendChild(padeEle);
+                }
+
+                padeEle.addEventListener('click', function(evt)
+                {
+                    evt.stopPropagation();
+                    occupantAvatarClicked(evt);
+
+                }, false);
+            }
+        }
+    }
 
     var displayReactions = function(msgId, positives, negatives)
     {

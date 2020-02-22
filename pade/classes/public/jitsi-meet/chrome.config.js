@@ -1,13 +1,13 @@
 var __domain = getSetting("domain");
 var __server = getSetting("server");
-var connUrl = "https://" + __server + "/http-bind/";
+var connUrl = getSetting("boshUri", "https://" + __server + "/http-bind/");
 
 if (getSetting("useWebsocket", true))
 {
-    connUrl = "wss://" + __server + "/ws/";
+    connUrl = getSetting("websocketUri", "wss://" + __server + "/ws/");
 }
 
-var __baseUrl = getSetting("ofmeetUrl", "https://" + __server + "/ofmeet/");
+var __baseUrl = getSetting("ofmeetUrl", "https://meet.jit.si");
 
 if (__baseUrl.indexOf("https://" + __server) == -1)
 {

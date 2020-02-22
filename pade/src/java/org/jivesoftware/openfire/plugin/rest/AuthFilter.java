@@ -29,11 +29,6 @@ public class AuthFilter implements ContainerRequestFilter {
 
     @Override public ContainerRequest filter(ContainerRequest containerRequest) throws WebApplicationException
     {
-        if (!JiveGlobals.getBooleanProperty("pade.authentication.enabled", false))
-        {
-            return containerRequest;
-        }
-
         // Let the preflight request through the authentication
         if ("OPTIONS".equals(containerRequest.getMethod())) {
             return containerRequest;
@@ -53,12 +48,13 @@ public class AuthFilter implements ContainerRequestFilter {
             throw new WebApplicationException(Status.UNAUTHORIZED);
         }
 
+/*
         boolean userAdmin = AdminManager.getInstance().isUserAdmin(usernameAndPassword[0], true);
 
         if (!userAdmin) {
             throw new WebApplicationException(Status.UNAUTHORIZED);
         }
-
+*/
         try {
             AuthFactory.authenticate(usernameAndPassword[0], usernameAndPassword[1]);
         } catch (UnauthorizedException e) {

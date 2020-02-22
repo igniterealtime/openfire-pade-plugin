@@ -1,5 +1,5 @@
 var bgWindow = chrome.extension ? chrome.extension.getBackgroundPage() : null;
-var __origins = {}, __irmaVerifications = {};
+var __origins = {};
 
 window.addEventListener("unload", function()
 {
@@ -375,7 +375,6 @@ function doConverse(server, username, password, anonUser)
     {
         var domain = getSetting("domain", null);
         var displayname = getSetting("displayname", username);
-
         var autoJoinRooms = undefined;
         var autoJoinPrivateChats = undefined;
 
@@ -412,7 +411,7 @@ function doConverse(server, username, password, anonUser)
 
         if (getSetting("useWebsocket", false))
         {
-            connUrl = "wss://" + server + "/ws/";
+            connUrl = getSetting("websocketUri", "wss://" + server + "/ws/");
         }
 
         var whitelistedPlugins = ["search", "directory", "invite", "webmeet", "pade", "vmsg", "payments", "gateway"];
@@ -439,6 +438,16 @@ function doConverse(server, username, password, anonUser)
             whitelistedPlugins.push("canned");
         }
 
+        if (getSetting("enableIrma", false))
+        {
+            whitelistedPlugins.push("irma");
+        }
+
+        if (!getSetting("enableSip", false))
+        {
+           whitelistedPlugins.push("audioconf");
+        }
+
         var config =
         {
           allow_bookmarks: true,
@@ -459,9 +468,9 @@ function doConverse(server, username, password, anonUser)
           auto_reconnect: getSetting("autoReconnectConverse", true),
           auto_subscribe: getSetting("autoSubscribe", false),
           auto_xa: 0, //autoXa,
-          bosh_service_url: "https://" + server + "/http-bind/",
+          bosh_service_url: getSetting("boshUri", "https://" + server + "/http-bind/"),
           clear_messages_on_reconnection: getSetting("clearCacheOnConnect", false),
-          debug: getSetting("converseDebug", false),
+          loglevel: getSetting("converseDebug", false) ? "debug" : "info",
           default_domain: domain,
           default_state: getSetting("converseOpenState", "online"),
           domain_placeholder: domain,
@@ -480,7 +489,7 @@ function doConverse(server, username, password, anonUser)
           muc_show_join_leave: getSetting("showGroupChatStatusMessages", true),
           muc_show_join_leave_status: getSetting("showGroupChatStatusMessages", true),
           muc_mention_autocomplete_filter: getSetting("converseAutoCompleteFilter", "starts_with"),
-          nickname: getSetting("autoCreateNickname", false) ? username : displayname,
+          nickname: displayname,
           notification_icon: '../image.png',
           notify_all_room_messages: getSetting("notifyAllRoomMessages", false),
           password: anonUser ? null : password,
@@ -491,16 +500,16 @@ function doConverse(server, username, password, anonUser)
           show_controlbox_by_default: false,
           show_desktop_notifications: false,
           show_message_load_animation: false,
-          show_only_online_users: getSetting("converseShowOnlyOnlineUsers", false),
           show_send_button: getSetting("showSendButton", false),
           sounds_path: chrome.runtime.getURL('inverse/sounds/'),
           theme: 'concord',
           singleton: (autoJoinRooms && autoJoinRooms.length == 1),
           view_mode: viewMode,
-          visible_toolbar_buttons: {'emoji': true, 'call': getSetting("enableSip", false), 'clear': true },
+          visible_toolbar_buttons: {'emoji': true, 'call': true, 'clear': true },
           webinar_invitation: getSetting("webinarInvite", 'Please join webinar at'),
           webmeet_invitation: getSetting("ofmeetInvitation", 'Please join meeting at'),
           websocket_url: connUrl,
+          enable_smacks: !getSetting("useWebsocket"), // TODO Fix Openfire websockets stream mgmt issues
           whitelisted_plugins: whitelistedPlugins
         };
 
@@ -509,19 +518,38 @@ function doConverse(server, username, password, anonUser)
     }
 }
 
-function openChat(from, name)
+function openChat(from, name, groups, open)
 {
     if (_inverse)
     {
+        if (!groups) groups = [];
+
         if (!name)
         {
             name = from.split("@")[0];
             if (name.indexOf("sms-") == 0) name = name.substring(4);
         }
 
-        var contact = _converse.roster.findWhere({'jid': from});
-        if (!contact) _inverse.roster.addAndSubscribe(from, name);
-        _inverse.api.chats.open(from);
+        var contact = _inverse.roster.findWhere({'jid': from});
+
+        if (!contact)
+        {
+          _inverse.roster.create({
+            'nickname': name,
+            'groups': groups,
+            'jid': from,
+            'subscription': 'both'
+          }, {
+            sort: false
+          });
+        }
+
+        if (open) _inverse.api.chats.open(from);
+
+        if (_inverse.connection.injectMessage)
+        {
+            _inverse.connection.injectMessage('<presence to="' + _inverse.connection.jid + '" from="' + from + '"/>');
+        }
     }
 }
 
@@ -601,42 +629,45 @@ function handleActiveConversations()
     const chatDiv = document.getElementById("converse-roster");
     let activeDiv = document.getElementById("active-conversations");
 
-    let display = roomDiv.style.display;
-
-    if (display != "none")
+    if (roomDiv && _inverse)
     {
-        roomDiv.style.display = "none";
-        if (chatDiv) chatDiv.style.display = "none";
+        let display = roomDiv.style.display;
 
-        if (!activeDiv)
+        if (display != "none")
         {
-            activeDiv = document.createElement("div");
-            activeDiv.id = "active-conversations";
-            activeDiv.classList.add("controlbox-section");
-            roomDiv.parentElement.appendChild(activeDiv);
+            roomDiv.style.display = "none";
+            if (chatDiv) chatDiv.style.display = "none";
+
+            if (!activeDiv)
+            {
+                activeDiv = document.createElement("div");
+                activeDiv.id = "active-conversations";
+                activeDiv.classList.add("controlbox-section");
+                roomDiv.parentElement.appendChild(activeDiv);
+            }
+
+            var compare = function ( x, y )
+            {
+                const one = x.get("name");
+                const two = y.get("name");
+                const a = one ? one.toLowerCase() : "";
+                const b = two ? two.toLowerCase() : "";
+
+                if ( a < b ) return -1;
+                if ( a > b ) return 1;
+                return 0;
+            }
+
+            _inverse.chatboxes.models.sort(compare).forEach(function (chatbox)
+            {
+                addActiveConversation(chatbox, activeDiv);
+            });
+
+        } else {
+            roomDiv.style.display = "";
+            if (chatDiv) chatDiv.style.display = "";
+            if (activeDiv) roomDiv.parentElement.removeChild(activeDiv);
         }
-
-        var compare = function ( x, y )
-        {
-            const one = x.get("name");
-            const two = y.get("name");
-            const a = one ? one.toLowerCase() : "";
-            const b = two ? two.toLowerCase() : "";
-
-            if ( a < b ) return -1;
-            if ( a > b ) return 1;
-            return 0;
-        }
-
-        _converse.chatboxes.models.sort(compare).forEach(function (chatbox)
-        {
-            addActiveConversation(chatbox, activeDiv);
-        });
-
-    } else {
-        roomDiv.style.display = "";
-        if (chatDiv) chatDiv.style.display = "";
-        if (activeDiv) roomDiv.parentElement.removeChild(activeDiv);
     }
 }
 
@@ -657,9 +688,16 @@ function removeActiveConversation(chatbox, activeDiv)
 
 function addActiveConversation(chatbox, activeDiv, newMessage)
 {
-    if (chatbox.vcard)
+    if (_inverse && chatbox.vcard)
     {
         console.debug("addActiveConversation", chatbox);
+
+        const panel = document.getElementById("pade-active-" + chatbox.get('box_id'));
+
+        if (panel)
+        {
+            activeDiv.removeChild(panel.parentElement);
+        }
 
         if (!newMessage) newMessage = "";
 
@@ -674,18 +712,19 @@ function addActiveConversation(chatbox, activeDiv, newMessage)
 
         let display_name = chatbox.getDisplayName();
         if (!display_name || display_name.trim() == "") display_name = jid;
+        if (display_name.indexOf("@") > -1) display_name = display_name.split("@")[0];
 
         let dataUri = "data:" + chatbox.vcard.attributes.image_type + ";base64," + chatbox.vcard.attributes.image;
 
-        if (_converse.DEFAULT_IMAGE == chatbox.vcard.attributes.image)
+        if (_inverse.DEFAULT_IMAGE == chatbox.vcard.attributes.image)
         {
-            dataUri = createAvatar(display_name);
+            dataUri = createAvatar(display_name, null, null, null, null);
         }
         else {
             setAvatar(display_name, dataUri);
         }
 
-        msg_content.innerHTML = '<span id="pade-badge-' + id + '" class="pade-badge" data-badge="' + numUnread + '"><img class="avatar" src="' + dataUri + '" style="width: 24px; width: 24px; height: 100%; margin-right: 10px;"/></span><span title="' + newMessage + '" data-label="' + display_name + '" data-jid="' + jid + '" data-type="' + chatType + '" id="pade-active-' + id +'" class="pade-active-conv">' + display_name + '</span><a href="#" id="pade-active-conv-close-' + id +'" data-jid="' + jid + '" class="pade-active-conv-close fas fa-window-close"></a>';
+        msg_content.innerHTML = '<span id="pade-badge-' + id + '" class="pade-badge" data-badge="' + numUnread + '"><img class="avatar" src="' + dataUri + '" style="width: 22px; width: 22px; height: 100%; margin-right: 10px;"/></span><span title="' + newMessage + '" data-label="' + display_name + '" data-jid="' + jid + '" data-type="' + chatType + '" id="pade-active-' + id +'" class="pade-active-conv">' + display_name + '</span><a href="#" id="pade-active-conv-close-' + id +'" data-jid="' + jid + '" class="pade-active-conv-close fa fa-times"></a>';
         activeDiv.appendChild(msg_content);
 
         const openButton = document.getElementById("pade-active-" + id);
@@ -703,12 +742,12 @@ function addActiveConversation(chatbox, activeDiv, newMessage)
 
                 if (jid)
                 {
-                    if (type == "chat") _converse.api.chats.open(jid);
+                    if (type == "chat") _inverse.api.chats.open(jid);
                     else
-                    if (type == "groupchat") _converse.api.rooms.open(jid);
+                    if (type == "groupchat") _inverse.api.rooms.open(jid);
                 }
 
-                _converse.chatboxes.each(function (chatbox)
+                _inverse.chatboxes.each(function (chatbox)
                 {
                     const itemId = chatbox.get('box_id');
                     const itemLabel = document.getElementById("pade-active-" + itemId);
@@ -732,7 +771,7 @@ function addActiveConversation(chatbox, activeDiv, newMessage)
                 evt.stopPropagation();
 
                 const jid = evt.target.getAttribute("data-jid");
-                const view = _converse.chatboxviews.get(jid);
+                const view = _inverse.chatboxviews.get(jid);
 
                 if (view) view.close();
 
@@ -746,14 +785,23 @@ function setAvatar(nickname, avatar)
     if (bgWindow) bgWindow.setAvatar(nickname, avatar);
 }
 
-function createAvatar(nickname, width, height, font)
+function createAvatar(nickname, width, height, font, force, jid)
 {
-    if (bgWindow) return bgWindow.createAvatar(nickname, width, height, font);
+    if (_inverse && _inverse.vcards)
+    {
+        let vcard = _inverse.vcards.findWhere({'jid': nickname});
+        if (!vcard && jid) vcard = _inverse.vcards.findWhere({'jid': jid});
+        if (!vcard) vcard = _inverse.vcards.findWhere({'nickname': nickname});
+
+        if (vcard && vcard.get('image') && _inverse.DEFAULT_IMAGE != vcard.get('image')) return "data:" + vcard.get('image_type') + ";base64," + vcard.get('image');
+    }
+
+    if (bgWindow) return bgWindow.createAvatar(nickname, width, height, font, force);
 }
 
 function __newElement(el, id, html, className)
 {
-    var ele = document.createElement(el);
+    const ele = document.createElement(el);
     if (id) ele.id = id;
     if (html) ele.innerHTML = html;
     if (className) ele.classList.add(className);
@@ -761,20 +809,21 @@ function __newElement(el, id, html, className)
     return ele;
 }
 
-function addToolbarItem(view, id, label, html)
+function addToolbarItem (view, id, label, html)
 {
-    if (getSetting("showToolbarIcons", true) || label == "webmeet-scrolldown-" + id || label == "webmeet-trash-" + id || label == "webmeet-refresh-" + id || label == "webmeet-notepad-" + id)
-    {
-        var placeHolder = view.el.querySelector('#place-holder');
+    if (document.getElementById(label)) return null;
 
-        if (!placeHolder)
-        {
-            var smiley = view.el.querySelector('.toggle-smiley.dropup');
-            smiley.insertAdjacentElement('afterEnd', __newElement('li', 'place-holder'));
-            placeHolder = view.el.querySelector('#place-holder');
-        }
-        placeHolder.insertAdjacentElement('afterEnd', __newElement('li', label, html));
+    let placeHolder = view.el.querySelector('#place-holder');
+
+    if (!placeHolder)
+    {
+        const toolbar = view.el.querySelector('.chat-toolbar');
+        toolbar.appendChild(__newElement('li', 'place-holder'));
+        placeHolder = view.el.querySelector('#place-holder');
     }
+    const newEle = __newElement('li', label, html);
+    placeHolder.insertAdjacentElement('afterEnd', newEle);
+    return newEle;
 }
 
 function occupantAvatarClicked(ev, view)
@@ -782,9 +831,12 @@ function occupantAvatarClicked(ev, view)
     const jid = ev.target.getAttribute('data-room-jid');
     const nick = ev.target.getAttribute('data-room-nick');
 
-    if (jid && converse.env.Strophe.getNodeFromJid(jid) && _converse.bare_jid != jid)
+    if (_inverse && jid && converse.env.Strophe.getNodeFromJid(jid) && _inverse.bare_jid != jid)
     {
-        _converse.api.chats.open(jid);
+         _inverse.api.chats.open(jid, {nickname: nick, fullname: nick}).then(chat => {
+             if (!chat.vcard.attributes.fullname) chat.vcard.set('fullname', nick);
+             if (!chat.vcard.attributes.nickname) chat.vcard.set('nickname', nick);
+         });
     }
 }
 

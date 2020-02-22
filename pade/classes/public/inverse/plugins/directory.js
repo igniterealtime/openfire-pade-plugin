@@ -36,7 +36,7 @@
                   return '<div class="modal" id="myModal"> <div class="modal-dialog modal-lg"> <div class="modal-content">' +
                          '<div class="modal-header"><h1 class="modal-title"><b>User Directory</b></h1><button type="button" class="close" data-dismiss="modal">&times;</button></div>' +
                          '<div class="modal-body">' +
-                         '<input id="pade-directory-query" class="form-control" type="text" placeholder="Type a query string and press [Enter] to search user directory" ><p/><div id="pade-directory-results"></div>' +
+                         '<input id="pade-directory-query" class="form-control" type="text" placeholder="Type a query string and press [Enter] to search user directory" ><p/><div style="overflow-x:hidden; overflow-y:scroll; height: 400px;" id="pade-directory-results"></div>' +
                          '</div>' +
                          '<div class="modal-footer">' + inviteButton + '<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button> </div>' +
                          '</div> </div> </div>';
@@ -47,7 +47,6 @@
                   {
                       if (that.model.get("query"))
                       {
-                          that.el.querySelector('#pade-directory-query').style.display = "none";
                           that.doDirectory();
                       }
                       else {
@@ -113,6 +112,8 @@
 
             _converse.api.listen.on('renderToolbar', function(view)
             {
+                console.debug('directory - renderToolbar', view.model);
+
                 if (!view.el.querySelector(".fa-male"))
                 {
                     var id = view.model.get("box_id");
@@ -124,7 +125,10 @@
                     {
                         evt.stopPropagation();
 
-                        directoryDialog = new DirectoryDialog({ 'model': new converse.env.Backbone.Model({}) });
+                        if (!directoryDialog)
+                        {
+                            directoryDialog = new DirectoryDialog({ 'model': new converse.env.Backbone.Model({}) });
+                        }
                         directoryDialog.show();
                     }, false);
                 }
@@ -144,7 +148,13 @@
 
                     if (command === "find")
                     {
-                        directoryDialog = new DirectoryDialog({ 'model': new converse.env.Backbone.Model({query: match[2]}) });
+                        if (!directoryDialog)
+                        {
+                            directoryDialog = new DirectoryDialog({ 'model': new converse.env.Backbone.Model({query: match[2]}) });
+                        }
+                        else {
+                            directoryDialog.model.set("query", match[2]);
+                        }
                         directoryDialog.show();
                         return true;
                     }

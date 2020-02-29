@@ -100,7 +100,7 @@
                     <outputDirectory>classes/public</outputDirectory>
                     <resources>
                         <!--resource><directory>${project.build.directory}/pade-extension</directory></resource-->  
-                        <resource><directory>C:/Projects/Ignite/Pade/extension</directory></resource>                           
+                        <resource><directory>C:/Projects/Ignite/Pade/docs</directory></resource>                           
                         <resource><directory>src/public</directory></resource>                                                
                     </resources>
                     </configuration>

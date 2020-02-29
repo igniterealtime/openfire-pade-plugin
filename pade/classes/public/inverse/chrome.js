@@ -11,10 +11,23 @@ if (!window.chrome || !window.chrome.extension)
         appLanguage = JSON.parse(window.localStorage["store.settings.language"]);
     }
 
-    fetch("https://" + location.host + "/apps/_locales/" + appLanguage + "/messages.json", {method: "GET", headers: {"accept": "application/json"}}).then(function(response){ return response.json()}).then(function(messages)
+    fetch("https://" + location.host + "/pade/_locales/" + appLanguage + "/messages.json", {method: "GET", headers: {"accept": "application/json"}}).then(function(response){ return response.json()}).then(function(messages)
     {
         console.debug("i18nMessages", messages);
         i18nMessages = messages;
+
+        if (i18nMessages.manifest_shortExtensionName) appName = i18nMessages.manifest_shortExtensionName.message;
+
+        fetch("https://" + location.host + "/pade/manifest.json", {method: "GET", headers: {"accept": "application/json"}}).then(function(response){ return response.json()}).then(function(manifest)
+        {
+            console.debug("manifest.json", manifest);
+            appVer = manifest.version;
+            document.title = appName + " - " + appVer;
+
+        }).catch(function (err) {
+            console.error("manifest.json", err);
+        });
+
     }).catch(function (err) {
         console.error("i18nMessages", err);
     });
@@ -102,7 +115,7 @@ if (!window.chrome || !window.chrome.extension)
 
         extension : {
             getURL : function(file) {
-                return document.location.protocol + '//' + document.location.host + '/apps/' + file;
+                return document.location.protocol + '//' + document.location.host + '/pade/' + file;
             },
 
             getBackgroundPage: function() {
@@ -194,7 +207,7 @@ if (!window.chrome || !window.chrome.extension)
                 }
             },
             getURL : function(file) {
-                return document.location.protocol + '//' + document.location.host + '/apps/' + file;
+                return document.location.protocol + '//' + document.location.host + '/pade/' + file;
             },
             reload: function() {
 
@@ -206,7 +219,7 @@ if (!window.chrome || !window.chrome.extension)
                         top.close();
                     }
                     else {
-                        top.location.href = "/apps/index.html";
+                        top.location.href = "/pade/index.html";
                     }
                 }
                 else {
@@ -343,6 +356,12 @@ function setDefaultSetting(name, defaultValue)
 {
     console.debug("setDefaultSetting", name, defaultValue, window.localStorage["store.settings." + name]);
 
+    if (branding[name] != undefined)
+    {
+        window.localStorage["store.settings." + name] = JSON.stringify(branding[name].value);
+    }
+    else
+
     if (!window.localStorage["store.settings." + name] && window.localStorage["store.settings." + name] != false)
     {
         if (defaultValue) window.localStorage["store.settings." + name] = JSON.stringify(defaultValue);
@@ -363,7 +382,7 @@ function openUrl(data)
 
     if (optionsPage)
     {
-        window.open("/apps/options.html", "options");
+        window.open("/pade/options.html", "options");
     }
     else {
         window.open(data.url, data.url);

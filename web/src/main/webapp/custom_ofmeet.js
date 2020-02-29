@@ -6,17 +6,31 @@ var ofmeet = (function(of)
     let customStore = {};
     let filenames = {};
     let dbnames = [];
+    let clockTrack = {start: 0, stop: 0};
     let tags = {location: "", date: (new Date()).toISOString().split('T')[0], expert: "", operator: "", operation: ""};
 
     window.addEventListener("DOMContentLoaded", function()
     {
         console.debug("ofmeet.js load");
+
+        indexedDB.databases().then(function(databases)
+        {
+            console.debug("ofmeet.js found databases", databases);
+
+            databases.forEach(function(db)
+            {
+                if (db.name.indexOf("ofmeet-db-") > -1) recoverRecording(db.name);
+            })
+        })
+
         setTimeout(setup, 1000);
     });
 
-    window.addEventListener("beforeunload", function()
+    window.addEventListener("beforeunload", function(event)
     {
         console.debug("ofmeet.js beforeunload");
+        event.preventDefault();
+        event.returnValue = '';
 
         dbnames.forEach(function(dbname)
         {
@@ -26,6 +40,8 @@ var ofmeet = (function(of)
               console.log("ofmeet.js me database deleted successfully", dbname);
             };
         });
+
+        return event.returnValue;
     });
 
     function setup()
@@ -68,20 +84,16 @@ var ofmeet = (function(of)
 
             if (track.getType() == "audio") recordingAudioTrack[track.getParticipantId()] = track.stream;
             if (track.getType() == "video") recordingVideoTrack[track.getParticipantId()] = track.stream;
-
-            //if (track.getType() == "audio") recordingAudioTrack[track.getParticipantId()] = recordingAudioTrack[APP.conference.getMyUserId()];
-            //if (track.getType() == "video") recordingVideoTrack[track.getParticipantId()] = recordingVideoTrack[APP.conference.getMyUserId()]
         });
 
         navigator.mediaDevices.getUserMedia({audio: true, video: true}).then(function(stream)
         {
-            recordingVideoTrack[APP.conference.getMyUserId()] = stream.clone();
-            recordingAudioTrack[APP.conference.getMyUserId()] = stream.clone();
+            recordingVideoTrack[APP.conference.getMyUserId()] = stream;
+            recordingAudioTrack[APP.conference.getMyUserId()] = stream;
 
             createRecordButton();
             createPhotoButton();
             createTagsButton();
-            createClock()
         });
 
 
@@ -125,9 +137,15 @@ var ofmeet = (function(of)
         });
     }
 
-    function createClock()
+    function hideClock()
+    {
+        document.getElementById("clocktext").style.display = "none";
+    }
+
+    function showClock()
     {
         var textElem = document.getElementById("clocktext");
+        textElem.style.display = "";
 
         function updateClock() {
             var d = new Date();
@@ -206,7 +224,8 @@ var ofmeet = (function(of)
                 tags.date.replace(/\//g, '')  + "-" +
                 (tags.expert != "" ? tags.expert + "-" : "") +
                 (tags.operator != "" ? tags.operator + "-" : "") +
-                (tags.operation != "" ? tags.operation + "-" : "") +
+                (tags.operation != "" ? tags.operation : "") +
+                Math.random().toString(36).substr(2,9) +
                 suffix;
     }
 
@@ -223,58 +242,73 @@ var ofmeet = (function(of)
         });
     }
 
-    function addTagsToImage(blob, callback)
+    function addTagsToImage(bitmap, callback)
     {
         const font = "20px Arial";
         const canvas = document.createElement('canvas');
-        canvas.width = screen.width;
-        canvas.height = screen.height;
+        canvas.width = bitmap.width;
+        canvas.height = bitmap.height;
 
         canvas.style.display = 'none';
         document.body.appendChild(canvas);
-        const img = new Image(screen.width, screen.height);
 
-        img.onload = function()
+        const context = canvas.getContext('2d');
+        context.drawImage(bitmap, 0, 0)
+        context.font = font;
+        context.fillStyle = "#fff";
+        context.fillText("Location: " + tags.location, 50, 50);
+        context.fillText("Date: " +  tags.date, 50, 75);
+        context.fillText("Expert: " +  tags.expert, 50, 100);
+        context.fillText("Operator: " +  tags.operator, 50, 125);
+        context.fillText("Operation: " +  tags.operation, 50, 150);
+
+        canvas.toBlob(function(blob)
         {
-            const context = canvas.getContext('2d');
-
-            context.drawImage(img, 0, 0);
-            context.font = font;
-            context.fillStyle = "#fff";
-            context.fillText("Location: " + tags.location, 50, 50);
-            context.fillText("Date: " +  tags.date, 50, 75);
-            context.fillText("Expert: " +  tags.expert, 50, 100);
-            context.fillText("Operator: " +  tags.operator, 50, 125);
-            context.fillText("Operation: " +  tags.operation, 50, 150);
-
-            canvas.toBlob(function(newBlob)
-            {
-                callback(newBlob);
-                document.body.removeChild(canvas);
-            });
-        }
-        img.src = URL.createObjectURL(blob);
+            callback(blob);
+            setTimeout(function() {document.body.removeChild(canvas)});
+        });
     }
+
+    function createPhotoViewerHTML()
+    {
+        console.debug("ofmeet.js createPhotoViewerHTML");
+
+        const me = APP.conference.getMyUserId();
+        const html = ['<style> img { float: left; } img:first-child:nth-last-child(1) { width: 100%;} img:first-child:nth-last-child(2), img:first-child:nth-last-child(2) ~ img { width: 50%;} img:first-child:nth-last-child(3), img:first-child:nth-last-child(3) ~ img, img:first-child:nth-last-child(4), img:first-child:nth-last-child(4) ~ img { width: 50%;} img:first-child:nth-last-child(5), img:first-child:nth-last-child(5) ~ img, img:first-child:nth-last-child(6), img:first-child:nth-last-child(6) ~ img, img:first-child:nth-last-child(7), img:first-child:nth-last-child(7) ~ img, img:first-child:nth-last-child(8), img:first-child:nth-last-child(8) ~ img, img:first-child:nth-last-child(9), img:first-child:nth-last-child(9) ~ img { width: 33.33%; } </style>'];
+        const ids = Object.getOwnPropertyNames(recordingVideoTrack);
+
+        ids.forEach(function(id)
+        {
+            const filename = getFilename("ofmeet-" + id, ".png");
+            html.push('\n<img id="' + id + '" src="' + filename + '"/>');
+        });
+
+        const blob = new Blob(html, {type: "text/plain;charset=utf-8"});
+        const htmlFile = getFilename("ofmeet-photo-" + me, ".html");
+        createAnchor(htmlFile, blob);
+    }
+
 
     function takePhoto()
     {
         const ids = Object.getOwnPropertyNames(recordingVideoTrack);
         console.debug("ofmeet.js takePhoto", ids);
 
+        createPhotoViewerHTML();
+
         ids.forEach(function(id)
         {
             const track = recordingVideoTrack[id].clone().getVideoTracks()[0];
             const imageCapture = new ImageCapture(track);
-            const photoSettings = {fillLightMode: "auto", imageHeight: screen.height, imageWidth: screen.width, redEyeReduction: false};
 
-            imageCapture.takePhoto(photoSettings).then(function(blob)
+            imageCapture.grabFrame().then(function(bitmap)
             {
                 const filename = getFilename("ofmeet-" + id, ".png");
 
-                addTagsToImage(blob, function(newBlob)
+                addTagsToImage(bitmap, function(blob)
                 {
-                    console.debug("ofmeet.js takePhoto with tags", newBlob);
-                    createAnchor(filename, newBlob);
+                    console.debug("ofmeet.js takePhoto with tags", blob);
+                    createAnchor(filename, blob);
                 });
             })
         });
@@ -283,13 +317,16 @@ var ofmeet = (function(of)
     function stopRecorder()
     {
         console.debug("ofmeet.js stopRecorder");
-
+        hideClock();
+        clockTrack.stop = (new Date()).getTime();
         const ids = Object.getOwnPropertyNames(recordingVideoTrack);
 
         ids.forEach(function(id)
         {
             if (videoRecorder[id]) videoRecorder[id].stop();
         });
+
+        createVideoViewerHTML();
     }
 
     function createAnchor(filename, blob)
@@ -303,54 +340,113 @@ var ofmeet = (function(of)
         window.URL.revokeObjectURL(anchor.href);
     }
 
-    function createWebVTTFile(me)
+    function createVttDataUrl()
     {
-        console.debug("ofmeet.js createWebVTTFile", me);
+        console.debug("ofmeet.js createVttDataUrl");
+
+        function pad(val) {
+          return (10 > val ? "0" : "") + val;
+        }
 
         const vtt = [
             "WEBVTT\n",
-            "\n00:00:00.000 --> 24:00:00.000 position:10% line:10% align:left size:100%",
+            "\n00:00:00.000 --> 24:00:00.000 position:10% line:1% align:left size:100%",
             "\n<b>Location</b>: " + tags.location,
             "\n<b>Date</b>: " +  tags.date,
             "\n<b>Expert</b>: " +  tags.expert,
             "\n<b>Operator</b>: " +  tags.operator,
             "\n<b>Operation</b>: " +  tags.operation
         ];
-        const blob = new Blob(vtt, {type: "text/plain;charset=utf-8"});
-        const filename = getFilename("ofmeet-tags-" + me, ".vtt");
-        createAnchor(filename, blob);
-        return filename;
+
+        let totalSeconds = 0;
+
+        for (let i=clockTrack.start; i<clockTrack.stop; i+=1000 )
+        {
+            var d = new Date(i);
+            var s = "";
+            s += pad(d.getHours()) + ":";
+            s += pad(d.getMinutes()) + ":";
+            s += pad(d.getSeconds());
+
+            ++totalSeconds;
+            const secondsLabel = pad(totalSeconds % 60);
+            const minutesLabel = pad(parseInt(totalSeconds / 60));
+            const hoursLabel = pad(parseInt(totalSeconds/3600, 10));
+
+            vtt.push("\n\n" + hoursLabel + ":" + minutesLabel + ":" + secondsLabel + ".000 --> " + hoursLabel + ":" + minutesLabel + ":" + secondsLabel + ".999 position:10% line:-10% align:left size:100%");
+            vtt.push("\n" + s);
+        }
+
+        console.debug("ofmeet.js createVttDataUrl", vtt);
+        const url = "data:image/png;base64," + btoa(vtt)
+        return url
     }
 
 
-    function createViewerHTMLpage()
+    function createVideoViewerHTML()
     {
-        console.debug("ofmeet.js createViewerHTMLpage");
-        const me = APP.conference.getMyUserId();
-        const vttFilename = createWebVTTFile(me);
+        console.debug("ofmeet.js createVideoViewerHTML");
 
-        const html = ['<style>video::cue {font-size: 20px; color: #FFF; opacity: 1;}</style>'];
+        const vttUrl = createVttDataUrl();
+        const html = ['<style> video { float: left; } video::cue {font-size: 20px; color: #FFF; opacity: 1;} video:first-child:nth-last-child(1) { width: 100%; height: 100%; } video:first-child:nth-last-child(2), video:first-child:nth-last-child(2) ~ video { width: 50%; height: 100%; } video:first-child:nth-last-child(3), video:first-child:nth-last-child(3) ~ video, video:first-child:nth-last-child(4), video:first-child:nth-last-child(4) ~ video { width: 50%; height: 50%; } video:first-child:nth-last-child(5), video:first-child:nth-last-child(5) ~ video, video:first-child:nth-last-child(6), video:first-child:nth-last-child(6) ~ video, video:first-child:nth-last-child(7), video:first-child:nth-last-child(7) ~ video, video:first-child:nth-last-child(8), video:first-child:nth-last-child(8) ~ video, video:first-child:nth-last-child(9), video:first-child:nth-last-child(9) ~ video { width: 33.33%; height: 33.33%; } </style>'];
         const ids = Object.getOwnPropertyNames(recordingVideoTrack);
 
         ids.forEach(function(id)
         {
-            html.push('\n<video controls autoplay src="' + filenames[id] + '"><track default src="' + vttFilename + '"></video>');
+            html.push('\n<video id="' + id + '" controls preload="metadata" src="' + filenames[id] + '"><track default src="' + vttUrl + '"></video>');
         });
 
+        html.push('\n<script>');
+        html.push('\n window.addEventListener("load", function() {');
+        html.push('\n   var v1 = document.getElementById("' + ids[0] + '");');
+
+        html.push('\n    v1.addEventListener("play", function() {');
+        for (let i=1; i<ids.length; i++)
+        {
+            html.push('\n       document.getElementById("' + ids[i] + '").play();');
+        }
+        html.push('\n    });');
+
+        html.push('\n    v1.addEventListener("pause", function() {');
+        for (let i=1; i<ids.length; i++)
+        {
+            html.push('\n       document.getElementById("' + ids[i] + '").pause();');
+        }
+        html.push('\n    });');
+
+        html.push('\n    v1.addEventListener("seeking", function() {');
+        for (let i=1; i<ids.length; i++)
+        {
+            html.push('\n       document.getElementById("' + ids[i] + '").currentTime = v1.currentTime;');
+        }
+        html.push('\n    });');
+
+        html.push('\n    v1.addEventListener("seeked", function() {');
+        for (let i=1; i<ids.length; i++)
+        {
+            html.push('\n       document.getElementById("' + ids[i] + '").currentTime = v1.currentTime;');
+        }
+        html.push('\n    });');
+
+        html.push('\n });');
+        html.push('\n</script>');
+
+        const me = APP.conference.getMyUserId();
         const blob = new Blob(html, {type: "text/plain;charset=utf-8"});
-        const htmlFile = getFilename("ofmeet-html-" + me, ".html");
+        const htmlFile = getFilename("ofmeet-video-" + me, ".html");
         createAnchor(htmlFile, blob);
     }
 
     function startRecorder()
     {
         console.debug("ofmeet.js startRecorder");
-
+        showClock();
+        clockTrack.start = (new Date()).getTime();
         const ids = Object.getOwnPropertyNames(recordingVideoTrack);
 
         ids.forEach(function(id)
         {
-            filenames[id] = getFilename("ofmeet-" + id, ".webm");
+            filenames[id] = getFilename("ofmeet-video-" + id, ".webm");
             const stream = new MediaStream()
 
             stream.addEventListener('addtrack', (event) =>
@@ -358,22 +454,22 @@ var ofmeet = (function(of)
               console.log(`ofmeet.js new ${event.track.kind} track added`);
             });
 
-            stream.addTrack(recordingVideoTrack[id].getVideoTracks()[0]);
-            stream.addTrack(recordingAudioTrack[id].getAudioTracks()[0]);
+            stream.addTrack(recordingVideoTrack[id].clone().getVideoTracks()[0]);
+            stream.addTrack(recordingAudioTrack[id].clone().getAudioTracks()[0]);
 
             console.debug("ofmeet.js startRecorder stream", id, stream);
 
             const dbname = 'ofmeet-db-' + id;
             dbnames.push(dbname);
 
-            customStore[id] = new idbKeyval.Store(dbname, 'custom-store-' + id);
+            customStore[id] = new idbKeyval.Store(dbname, dbname);
             videoRecorder[id] = new MediaRecorder(stream, { mimeType: 'video/webm'});
 
             videoRecorder[id].ondataavailable = function(e)
             {
                 if (e.data.size > 0)
                 {
-                    const key = "video-chunk-" + Math.random().toString(36).substr(2, 9);
+                    const key = "video-chunk-" + (new Date()).getTime();
 
                     idbKeyval.set(key, e.data, customStore[id]).then(function()
                     {
@@ -393,8 +489,7 @@ var ofmeet = (function(of)
                 {
                     console.debug("ofmeet.js startRecorder - onstop", id, filenames[id], data);
 
-                    const file = new File(data, filenames[id], {type: 'video/webm'});
-                    const blob = new Blob([file], {type: 'video/webm'});
+                    const blob = new Blob(data, {type: 'video/webm'});
                     createAnchor(filenames[id], blob);
 
                     idbKeyval.clear(customStore[id]);
@@ -402,10 +497,27 @@ var ofmeet = (function(of)
                 });
             }
 
-            videoRecorder[id].start();
+            videoRecorder[id].start(1000);
         });
+    }
 
-        createViewerHTMLpage();
+    function recoverRecording(dbname)
+    {
+        console.log("recovering db " + dbname);
+
+        dbnames.push(dbname);
+        const store = new idbKeyval.Store(dbname, dbname);
+        const filename = getFilename("ofmeet-video-" + dbname, ".webm");
+
+        idbKeyval.keys(store).then(function(data)
+        {
+            console.debug("ofmeet.js recoverRecording", filename, data);
+
+            const blob = new Blob(data, {type: 'video/webm'});
+            createAnchor(filename, blob);
+
+            idbKeyval.clear(store);
+        });
     }
 
     function newElement(el, id, html, className, label)

@@ -75,7 +75,7 @@
             {
                 console.debug('info - renderToolbar', view.model);
 
-                if (view.model.get("type") === "chatroom" && !view.el.querySelector(".fa-info"))
+                if (view.model.get("type") === "chatroom" && !view.el.querySelector(".fa-info") && getSetting("showToolbarIcons", true))
                 {
                     var jid = view.model.get("jid");
                     var id = view.model.get("box_id");
@@ -146,7 +146,7 @@
                             if (!data) data = {};
                             if (!data[feedId]) data[feedId] = {};
 
-                            var feed = {path: match[2], url: chrome.pade ? "https://" + bgWindow.pade.server + "/apps/download?url=" + match[2] : match[2]};
+                            var feed = {path: match[2], url: chrome.pade ? "https://" + bgWindow.pade.server + "/pade/download?url=" + match[2] : match[2]};
 
                             fetch(feed.url).then(function(response)
                             {

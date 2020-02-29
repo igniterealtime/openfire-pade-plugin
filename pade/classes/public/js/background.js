@@ -226,8 +226,8 @@ window.addEventListener("load", function()
         setDefaultSetting("useWebsocket", false);
         setDefaultSetting("ofmeetUrl", "https://" + location.host + "/ofmeet/");
 
-        setSetting("server", location.host);
-        setSetting("domain", location.hostname);
+        setDefaultSetting("server", location.host);
+        setDefaultSetting("domain", location.hostname);
 
         top.getCredentials(function(credential)
         {
@@ -2884,7 +2884,13 @@ function setSetting(name, value)
 
 function setDefaultSetting(name, defaultValue)
 {
-    console.debug("setDefaultSetting", name, defaultValue, window.localStorage["store.settings." + name]);
+    console.debug("setDefaultSetting", name, branding[name], defaultValue, window.localStorage["store.settings." + name]);
+
+    if (branding[name] != undefined)
+    {
+        window.localStorage["store.settings." + name] = JSON.stringify(branding[name].value);
+    }
+    else
 
     if (!window.localStorage["store.settings." + name] && window.localStorage["store.settings." + name] != false)
     {

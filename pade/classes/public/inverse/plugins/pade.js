@@ -29,8 +29,6 @@
 
         initialize: function () {
             _converse = this._converse;
-            window._inverse = _converse;
-            window.inverse = converse;
 
             Strophe = converse.env.Strophe;
             $iq = converse.env.$iq;

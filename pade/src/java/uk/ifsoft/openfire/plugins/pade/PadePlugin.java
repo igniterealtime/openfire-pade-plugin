@@ -79,7 +79,7 @@ public class PadePlugin implements Plugin
         contextPrivate.setWelcomeFiles(new String[]{"index.jsp"});
         HttpBindManager.getInstance().addJettyHandler(contextPrivate);
 
-        contextPublic = new WebAppContext(null, pluginDirectory.getPath() + "/classes/public", "/apps");
+        contextPublic = new WebAppContext(null, pluginDirectory.getPath() + "/classes/public", "/pade");
         contextPublic.setClassLoader(this.getClass().getClassLoader());
         final List<ContainerInitializer> initializersCRM = new ArrayList<>();
         initializersCRM.add(new ContainerInitializer(new JettyJasperInitializer(), null));

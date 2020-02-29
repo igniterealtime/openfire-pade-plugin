@@ -36896,11 +36896,11 @@ module.exports = function(o) {
 var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
 __p += '<!-- src/templates/toolbar.html -->\n';
- //if (o.show_call_button)  { ;
+ if (o.show_call_button)  { ;
 __p += '\n<li class="toggle-call fa fa-phone" title="' +
 __e(o.label_start_call) +
 '"></li>\n';
- //} ;
+ } ;
 __p += '\n';
  //if (o.show_occupants_toggle)  { ;
 __p += '\n<li class="toggle-occupants float-right fa ';
@@ -55863,7 +55863,7 @@ converse_core.plugins.add('converse-chat', {
 
         if (message) {
           this.updateMessage(message, original_stanza);
-        } else if (!this.handleReceipt(stanza, from_jid) && !this.handleChatMarker(stanza, from_jid)) {
+        } else if (!this.handleReceipt(stanza, from_jid, original_stanza) && !this.handleChatMarker(stanza, from_jid)) {
           const attrs = await this.getMessageAttributesFromStanza(stanza, original_stanza);
 
           if (this.handleRetraction(attrs)) {
@@ -56346,12 +56346,12 @@ converse_core.plugins.add('converse-chat', {
         _converse.api.send(receipt_stanza);
       },
 
-      handleReceipt(stanza, from_jid) {
+      handleReceipt(stanza, from_jid, original_stanza) {
         const is_me = converse_chat_Strophe.getBareJidFromJid(from_jid) === _converse.bare_jid;
 
         const requests_receipt = converse_chat_sizzle("request[xmlns=\"".concat(converse_chat_Strophe.NS.RECEIPTS, "\"]"), stanza).pop() !== undefined;
 
-        if (requests_receipt && !is_me && !converse_chat_u.isCarbonMessage(stanza)) {
+        if (requests_receipt && !is_me && !converse_chat_u.isCarbonMessage(stanza) && !converse_chat_u.isMAMMessage(original_stanza)) {
           this.sendReceiptStanza(from_jid, stanza.getAttribute('id'));
         }
 

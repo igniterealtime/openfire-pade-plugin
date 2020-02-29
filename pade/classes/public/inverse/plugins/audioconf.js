@@ -40,7 +40,7 @@
             }
 
             _converse.api.settings.update({
-                visible_toolbar_buttons: {call: true},
+                visible_toolbar_buttons: {call: getSetting("showToolbarIcons", true)},
                 click2_dial: {
                     custom_button_color: "orange",
                     custom_frame_color: "black",
@@ -53,7 +53,7 @@
                     placement: "bottom-right",
                     rating: "false",
                     ringback: "true",
-                    server_url: chrome.pade ? "/apps/inverse/plugins/audioconf" : "/inverse/plugins/audioconf",
+                    server_url: chrome.pade ? "/pade/inverse/plugins/audioconf" : "/inverse/plugins/audioconf",
                     show_branding: "false",
                     show_frame: "true",
                     text: "Audio Conference",

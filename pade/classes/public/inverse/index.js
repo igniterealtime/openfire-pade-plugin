@@ -78,8 +78,8 @@ window.addEventListener("load", function()
         setDefaultSetting("useBasicAuth", false);
         setDefaultSetting("ofmeetUrl", "https://" + server + "/ofmeet/");
 
-        setSetting("server", location.host);
-        setSetting("domain", location.hostname);
+        setDefaultSetting("server", location.host);
+        setDefaultSetting("domain", location.hostname);
 
         top.getCredentials(function(credential)
         {
@@ -414,7 +414,7 @@ function doConverse(server, username, password, anonUser)
             connUrl = getSetting("websocketUri", "wss://" + server + "/ws/");
         }
 
-        var whitelistedPlugins = ["search", "directory", "invite", "webmeet", "pade", "vmsg", "payments", "gateway"];
+        var whitelistedPlugins = ["paderoot", "search", "directory", "invite", "webmeet", "pade", "vmsg", "payments", "gateway"];
         var viewMode = chrome.pade ? 'fullscreen' : (window.pade ? 'overlayed' : 'fullscreen');
 
         if (getSetting("enableHomePage", false))
@@ -505,7 +505,7 @@ function doConverse(server, username, password, anonUser)
           theme: 'concord',
           singleton: (autoJoinRooms && autoJoinRooms.length == 1),
           view_mode: viewMode,
-          visible_toolbar_buttons: {'emoji': true, 'call': true, 'clear': true },
+          visible_toolbar_buttons: {'emoji': true, 'call': getSetting("showToolbarIcons", true), 'clear': true },
           webinar_invitation: getSetting("webinarInvite", 'Please join webinar at'),
           webmeet_invitation: getSetting("ofmeetInvitation", 'Please join meeting at'),
           websocket_url: connUrl,
@@ -514,6 +514,17 @@ function doConverse(server, username, password, anonUser)
         };
 
         console.debug("converse.initialize", config);
+
+        converse.plugins.add("paderoot", {
+            dependencies: [],
+
+            initialize: function () {
+                _converse = this._converse;
+                window._inverse = _converse;
+                window.inverse = converse;
+            }
+
+        });
         converse.initialize( config );
     }
 }

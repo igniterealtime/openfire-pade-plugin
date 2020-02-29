@@ -36,16 +36,15 @@
         <pade.url>https://desktop-545pc5b:7443/apps/index.html</pade.url>        
     </properties>
 
-    <modules>
-<!--    
-        <module>web</module>
+    <modules>    
+    
+        <!--module>web</module>
         <module>config</module>
         <module>videobridge</module>            
-        <module>ofmeet</module>    
+        <module>ofmeet</module>        
         <module>offocus</module>        
-        <module>ofgasi</module>  
--->        
-        <module>pade</module>          
+        <module>ofgasi</module-->           
+        <module>pade</module>        
     </modules>
 
     <licenses>

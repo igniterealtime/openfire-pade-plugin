@@ -39,9 +39,9 @@ window.addEvent("domready", function () {
 
         if (chrome.pade)    // browser mode
         {
-            settings.manifest.server.element.parentElement.style.display = "none";
-            settings.manifest.domain.element.parentElement.style.display = "none";
-            settings.manifest.connect.element.parentElement.style.display = "none";
+            //settings.manifest.server.element.parentElement.style.display = "none";
+            //settings.manifest.domain.element.parentElement.style.display = "none";
+            //settings.manifest.connect.element.parentElement.style.display = "none";
 
             document.title = chrome.i18n.getMessage('manifest_shortExtensionName') + " - Settings";
         }
@@ -1843,7 +1843,7 @@ function startSmartIdLogin(callback)
 {
     if (getSetting("useSmartIdCardCert", false))
     {
-        callback("https://" + getSetting("server", location.host) + "/apps/smartidcardcert");
+        callback("https://" + getSetting("server", location.host) + "/pade/smartidcardcert");
         console.log("startSmartIdLogin via certicate");
     }
     else {
@@ -1871,7 +1871,7 @@ function startSmartIdLogin(callback)
                 {
                     var code = gup(changeInfo.url, 'code');
                     if (idTab) chrome.tabs.remove(idTab.id);
-                    callback("https://" + getSetting("server", location.host) + "/apps/smartidcard?code=" + code);
+                    callback("https://" + getSetting("server", location.host) + "/pade/smartidcard?code=" + code);
                     console.log("startSmartIdLogin via smartid.ee", code);
                 }
             })

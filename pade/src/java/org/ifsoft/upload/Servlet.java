@@ -98,7 +98,7 @@ public class Servlet extends HttpServlet
 
                 if (name.endsWith(".h5p"))
                 {
-                    bookmarkValue = JiveGlobals.getProperty("ofmeet.root.url.secure", "https://" + XMPPServer.getInstance().getServerInfo().getHostname() + ":" + JiveGlobals.getProperty("httpbind.port.secure", "7443")) + "/apps/h5p/?path=" + username + "/" + folder;
+                    bookmarkValue = JiveGlobals.getProperty("ofmeet.root.url.secure", "https://" + XMPPServer.getInstance().getServerInfo().getHostname() + ":" + JiveGlobals.getProperty("httpbind.port.secure", "7443")) + "/pade/h5p/?path=" + username + "/" + folder;
                 }
 
                 long id = -1;

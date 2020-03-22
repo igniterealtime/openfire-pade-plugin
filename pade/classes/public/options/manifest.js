@@ -713,6 +713,13 @@ this.manifest = {
         {
             "tab": i18n.get("Meetings"),
             "group": i18n.get("General Settings"),
+            "name": "startScreenSharing",
+            "type": "checkbox",
+            "label": i18n.get("Start with Screen Sharing")
+        },
+        {
+            "tab": i18n.get("Meetings"),
+            "group": i18n.get("General Settings"),
             "name": "recordAudio",
             "type": "checkbox",
             "label": i18n.get("Record Audio")
@@ -980,6 +987,13 @@ this.manifest = {
         {
             "tab": i18n.get("Converse"),
             "group": i18n.get("General"),
+            "name": "enableAudioConfWidget",
+            "type": "checkbox",
+            "label": i18n.get("Enable Audio Conferencing Widget")
+        },
+        {
+            "tab": i18n.get("Converse"),
+            "group": i18n.get("General"),
             "name": "enableNotesTool",
             "type": "checkbox",
             "label": i18n.get("Enable Notes Tool")
@@ -1061,6 +1075,17 @@ this.manifest = {
             "type": "text",
             "label": i18n.get("Home Page"),
             "text": chrome.runtime.getManifest().homepage_url
+        },
+        {
+            "tab": i18n.get("Converse"),
+            "group": i18n.get("General"),
+            "name": "homePageView",
+            "type": "popupButton",
+            "label": i18n.get("Home Page View Mode"),
+            "options": [
+                {"text": "Full Screen", "value": "fullscreen"},
+                {"text": "Overlayed", "value": "overlayed"}
+            ]
         },
         {
             "tab": i18n.get("Converse"),
@@ -2162,6 +2187,9 @@ this.manifest = {
         [
             "boshUri",
             "websocketUri"
+        ],
+        [
+            "homePage"
         ]
     ]
 };

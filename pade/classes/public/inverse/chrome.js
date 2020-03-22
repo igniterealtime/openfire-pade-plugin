@@ -1,5 +1,6 @@
 if (!window.chrome || !window.chrome.extension)
 {
+    var padeName = "pade";
     var appName = "Pade";
     var appVer = "1.6.0";
     var appLanguage = "en";
@@ -11,18 +12,18 @@ if (!window.chrome || !window.chrome.extension)
         appLanguage = JSON.parse(window.localStorage["store.settings.language"]);
     }
 
-    fetch("https://" + location.host + "/pade/_locales/" + appLanguage + "/messages.json", {method: "GET", headers: {"accept": "application/json"}}).then(function(response){ return response.json()}).then(function(messages)
+    fetch("https://" + location.host + "/" + padeName + "/_locales/" + appLanguage + "/messages.json", {method: "GET", headers: {"accept": "application/json"}}).then(function(response){ return response.json()}).then(function(messages)
     {
         console.debug("i18nMessages", messages);
         i18nMessages = messages;
 
         if (i18nMessages.manifest_shortExtensionName) appName = i18nMessages.manifest_shortExtensionName.message;
 
-        fetch("https://" + location.host + "/pade/manifest.json", {method: "GET", headers: {"accept": "application/json"}}).then(function(response){ return response.json()}).then(function(manifest)
+        fetch("https://" + location.host + "/" + padeName + "/manifest.json", {method: "GET", headers: {"accept": "application/json"}}).then(function(response){ return response.json()}).then(function(manifest)
         {
             console.debug("manifest.json", manifest);
             appVer = manifest.version;
-            document.title = appName + " - " + appVer;
+            document.title = appName + " | " + appVer;
 
         }).catch(function (err) {
             console.error("manifest.json", err);
@@ -36,6 +37,7 @@ if (!window.chrome || !window.chrome.extension)
 
     window.chrome = {
         pade: true,
+        padeName: padeName,
 
         contextMenus: {
             create: function(data) {
@@ -53,7 +55,7 @@ if (!window.chrome || !window.chrome.extension)
                     {
                         data[query] = JSON.parse(window.localStorage[query]);
                     }
-                    console.debug("storage.local.get", data);
+                    //console.debug("storage.local.get", data);
                     if (callback) callback(data);
                 },
                 set : function(data, callback) {
@@ -64,15 +66,15 @@ if (!window.chrome || !window.chrome.extension)
                     {
                         window.localStorage[keys[0]] = JSON.stringify(data[keys[0]]);
                     }
-                    console.debug("storage.local.set", data);
+                    //console.debug("storage.local.set", data);
                     if (callback) callback(data);
                 },
                 clear : function() {
-                    console.debug("storage.local.clear");
+                    //console.debug("storage.local.clear");
                     localStorage.clear();
                 },
                 remove : function(key) {
-                    console.debug("storage.local.remove", key);
+                    //console.debug("storage.local.remove", key);
                     localStorage.removeItem(key);
                 }
             }
@@ -115,15 +117,15 @@ if (!window.chrome || !window.chrome.extension)
 
         extension : {
             getURL : function(file) {
-                return document.location.protocol + '//' + document.location.host + '/pade/' + file;
+                return document.location.protocol + '//' + document.location.host + '/' + padeName + '/' + file;
             },
 
             getBackgroundPage: function() {
-                return top;
+                return parent;
             },
 
             getViews: function(filter) {
-                return [top.document.getElementById("inverse").contentWindow]
+                return [parent.document.getElementById("inverse").contentWindow]
             }
         },
 
@@ -207,19 +209,18 @@ if (!window.chrome || !window.chrome.extension)
                 }
             },
             getURL : function(file) {
-                return document.location.protocol + '//' + document.location.host + '/pade/' + file;
+                return document.location.protocol + '//' + document.location.host + '/' + padeName + '/' + file;
             },
             reload: function() {
-
                 if (localStorage["store.settings.server"])
                 {
-                    if (top.opener)
+                    if (parent.opener)
                     {
-                        top.opener.location.reload();
-                        top.close();
+                        parent.opener.location.reload();
+                        parent.close();
                     }
                     else {
-                        top.location.href = "/pade/index.html";
+                        parent.location.href = "/" + padeName + "/index.html";
                     }
                 }
                 else {
@@ -250,7 +251,7 @@ if (!window.chrome || !window.chrome.extension)
             setBadgeText: function(data) {
               if (!data || !data.text) return;
 
-              var favicon = top.document.getElementById('favicon');
+              var favicon = parent.document.getElementById('favicon');
               var faviconSize = 16;
 
               var canvas = document.createElement('canvas');
@@ -338,9 +339,12 @@ function getSetting(name, defaultValue)
 
     if (localStorage["store.settings." + name])
     {
-        value = JSON.parse(localStorage["store.settings." + name]);
-
-        if (name == "password") value = getPassword(value, localStorage);
+        try {
+            value = JSON.parse(localStorage["store.settings." + name]);
+            if (name == "password") value = getPassword(value, localStorage);
+        } catch (e) {
+            console.error(e);
+        }
     }
 
     return value;
@@ -356,7 +360,7 @@ function setDefaultSetting(name, defaultValue)
 {
     console.debug("setDefaultSetting", name, defaultValue, window.localStorage["store.settings." + name]);
 
-    if (branding[name] != undefined)
+    if (branding && branding[name] != undefined)
     {
         window.localStorage["store.settings." + name] = JSON.stringify(branding[name].value);
     }
@@ -382,7 +386,7 @@ function openUrl(data)
 
     if (optionsPage)
     {
-        window.open("/pade/options.html", "options");
+        window.open("/" + padeName + "/options.html", "options");
     }
     else {
         window.open(data.url, data.url);

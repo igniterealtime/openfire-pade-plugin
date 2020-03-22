@@ -40,7 +40,7 @@
             Backbone = converse.env.Backbone;
             dayjs = converse.env.dayjs;
 
-            if (bgWindow && bgWindow.pade.chatWindow)
+            if (bgWindow && bgWindow.pade && bgWindow.pade.chatWindow)
             {
                 chrome.windows.onFocusChanged.addListener(function(win)
                 {
@@ -54,7 +54,7 @@
                     }
                 });
 
-                document.title = chrome.i18n.getMessage('manifest_shortExtensionName') + " Converse - " + _converse.VERSION_NAME;
+                document.title = chrome.i18n.getMessage('manifest_shortExtensionName') + " Converse | " + _converse.VERSION_NAME;
             }
 
             if (getSetting("enableThreading", false))
@@ -83,7 +83,7 @@
                 var body = message.querySelector('body');
                 var history = message.querySelector('forwarded');
 
-                console.debug("pade plugin message", history, body, chatbox, message);
+                //console.debug("pade plugin message", history, body, chatbox, message);
 
                 if (!history && body && chatbox)
                 {
@@ -134,7 +134,7 @@
                     }
                     else {
 
-                        if (bgWindow)
+                        if (bgWindow && bgWindow.pade)
                         {
                             chrome.windows.update(bgWindow.pade.chatWindow.id, {drawAttention: true});
                             let count = 0;
@@ -255,7 +255,7 @@
                 {
                     if (occupant.get("jid"))
                     {
-                        console.debug("chatbox.occupants added", occupant);
+                        //console.debug("chatbox.occupants added", occupant);
                         anonRoster[occupant.get("jid")] = occupant.get("nick");
                     }
 
@@ -264,7 +264,7 @@
 
                 view.model.occupants.on('remove', occupant =>
                 {
-                    console.debug("chatbox.occupants removed", occupant);
+                    //console.debug("chatbox.occupants removed", occupant);
                     delete anonRoster[occupant.get("jid")];
                 });
 
@@ -281,7 +281,7 @@
                     }
                 }
 
-                if (bgWindow)
+                if (bgWindow && bgWindow.pade)
                 {
                     bgWindow.pade.autoJoinRooms[view.model.get("jid")] = {jid: jid, type: view.model.get("type")};
                 }
@@ -307,7 +307,7 @@
                 const activeDiv = document.getElementById("active-conversations");
                 console.debug("pade plugin chatBoxInsertedIntoDOM", jid, activeDiv);
 
-                if (bgWindow)
+                if (bgWindow && bgWindow.pade)
                 {
                     bgWindow.pade.autoJoinPrivateChats[view.model.get("jid")] = {jid: jid, type: view.model.get("type")};
                 }
@@ -373,24 +373,24 @@
                         window.module = module; module = undefined;
                     }
 
-                    top.pade.connection = _converse.connection;
-                    top.addHandlers();
-                    top.publishUserLocation();
-                    top.setupUserPayment();
+                    parent.pade.connection = _converse.connection;
+                    parent.addHandlers();
+                    parent.publishUserLocation();
+                    parent.setupUserPayment();
 
                     const username = Strophe.getNodeFromJid(_converse.connection.jid);
                     const password = _converse.connection.pass;
 
                     if (username && password)
                     {
-                        if (top.setCredentials)    // save new credentials
+                        if (parent.setCredentials)    // save new credentials
                         {
-                            top.setCredentials({id: username, password: password});
+                            parent.setCredentials({id: username, password: password});
                         }
 
-                        if (top.webpush && top.webpush.registerServiceWorker) // register webpush service worker
+                        if (parent.webpush && parent.webpush.registerServiceWorker) // register webpush service worker
                         {
-                            top.webpush.registerServiceWorker(bgWindow.pade.server, username, password);
+                            parent.webpush.registerServiceWorker(bgWindow.pade.server, username, password);
                         }
                     }
                     else {
@@ -404,7 +404,8 @@
                     });
                 }
 
-                _converse.api.waitUntil('bookmarksInitialized').then((initPade) => {
+                if (_converse.api.waitUntil('bookmarksInitialized')) _converse.api.waitUntil('bookmarksInitialized').then((initPade) => {
+
                     var myNick = _converse.nickname || Strophe.getNodeFromJid(_converse.bare_jid);
 
                     if (!_converse.singleton)
@@ -415,8 +416,7 @@
 
                         var bookmarkRoom = function bookmarkRoom(json)
                         {
-                            const room = _converse.chatboxes.get(json.jid);
-                            const bookmark = _converse.bookmarks.findWhere({'jid': json.jid});
+                            let bookmark = _converse.bookmarks.findWhere({'jid': json.jid});
 
                             if (!bookmark)
                             {
@@ -427,9 +427,8 @@
                                     'nick': myNick
                                 });
                             }
-
-                            if (room) room.save('bookmarked', true);
-                            return room;
+                            bookmark = _converse.bookmarks.findWhere({'jid': json.jid});
+                            _converse.bookmarks.markRoomAsBookmarked(bookmark);
                         }
 
                         if (getSetting("enableBookmarks", true))
@@ -440,9 +439,10 @@
                                 {
                                     var jid = $(this).attr("jid");
                                     var name = $(this).attr("name");
+                                    var avatar_uri = $(this).attr("avatar_uri");
                                     if (!name) name = Strophe.getNodeFromJid(jid);
                                     var autojoin = $(this).attr('autojoin') === 'true' || $(this).attr('autojoin') === '1';
-                                    var json = {name: name, jid: jid, autojoin: autojoin};
+                                    var json = {name: name, jid: jid, autojoin: autojoin, avatar_uri: avatar_uri};
 
                                     console.debug('pade BookmarksReceived', json);
                                     if (_converse.bookmarks) bookmarkRoom(json);
@@ -453,7 +453,7 @@
                                 console.error("bookmarks error", error);
                             });
 
-                            if (bgWindow && bgWindow.pade.activeWorkgroup)
+                            if (bgWindow && bgWindow.pade && bgWindow.pade.activeWorkgroup)
                             {
                                 stanza = $iq({type: 'get', to: "workgroup." + _converse.connection.domain}).c('workgroups', {jid: _converse.connection.jid, xmlns: "http://jabber.org/protocol/workgroup"});
 
@@ -463,7 +463,7 @@
                                     {
                                         var name = Strophe.getNodeFromJid($(this).attr('jid'));
                                         var jid = 'workgroup-' + name + "@conference." + _converse.connection.domain;
-                                        var json = {name: name, jid: jid, autojoin: true};
+                                        var json = {name: name, jid: jid, autojoin: true, avatar_uri: createAvatar(name, null, null, null, true, jid)};
 
                                         console.debug('pade workgroup recieved', json);
                                         if (_converse.bookmarks) bookmarkRoom(json);
@@ -475,48 +475,52 @@
                             }
                         }
                     }
-
-                    _converse.api.waitUntil('roomsPanelRendered').then(() => {
-                        const section = document.body.querySelector('.controlbox-section.profile.d-flex');
-                        console.debug("extendControlBox", section);
-
-                        if (section)
-                        {
-                            const viewButton = __newElement('a', null, '<a class="controlbox-heading__btn show-active-conversations fa fa-navicon align-self-center" title="Change view"></a>');
-                            section.appendChild(viewButton);
-
-                            viewButton.addEventListener('click', function(evt)
-                            {
-                                evt.stopPropagation();
-                                handleActiveConversations();
-
-                            }, false);
-
-
-                            if (getSetting("converseSimpleView", false))
-                            {
-                                handleActiveConversations();
-                            }
-
-                            const prefButton = __newElement('a', null, '<a class="controlbox-heading__btn show-preferences fas fa-cog align-self-center" title="Preferences/Settings"></a>');
-                            section.appendChild(prefButton);
-
-                            prefButton.addEventListener('click', function(evt)
-                            {
-                                evt.stopPropagation();
-                                const url = chrome.extension.getURL("options/index.html");
-                                bgWindow.openWebAppsWindow(url, null, 1300, 950);
-
-                            }, false);
-                        }
-                    });
+                }).catch(function (err) {
+                    console.error('waiting for bookmarksInitialized error', err);
                 });
 
-                _converse.api.waitUntil('controlBoxInitialized').then(() => {
+                if (_converse.api.waitUntil('controlBoxInitialized')) _converse.api.waitUntil('controlBoxInitialized').then(() => {
 
-                    if (!_converse.connection.pass)     // anonymous connection, use Pade settings for _converse.xmppstatus
+                    var addControlFeatures = function()
                     {
-                        setTimeout(function()
+                        const section = document.body.querySelector('.controlbox-section.profile.d-flex');
+
+                        if (!section)
+                        {
+                            setTimeout(addControlFeatures, 1000);
+                            return;
+                        }
+
+                        console.debug("addControlFeatures", section);
+
+                        const viewButton = __newElement('a', null, '<a class="controlbox-heading__btn show-active-conversations fa fa-navicon align-self-center" title="Change view"></a>');
+                        section.appendChild(viewButton);
+
+                        viewButton.addEventListener('click', function(evt)
+                        {
+                            evt.stopPropagation();
+                            handleActiveConversations();
+
+                        }, false);
+
+
+                        if (getSetting("converseSimpleView", false))
+                        {
+                            handleActiveConversations();
+                        }
+
+                        const prefButton = __newElement('a', null, '<a class="controlbox-heading__btn show-preferences fas fa-cog align-self-center" title="Preferences/Settings"></a>');
+                        section.appendChild(prefButton);
+
+                        prefButton.addEventListener('click', function(evt)
+                        {
+                            evt.stopPropagation();
+                            const url = chrome.extension.getURL("options/index.html");
+                            bgWindow.openWebAppsWindow(url, null, 1300, 950);
+
+                        }, false);
+
+                        if (!_converse.connection.pass)     // anonymous connection, use Pade settings for _converse.xmppstatus
                         {
                             const nick = getSetting("displayname");
                             _converse.xmppstatus.set('fullname', nick);
@@ -529,14 +533,15 @@
 
                             _converse.xmppstatus.vcard.set('image', avatar[1]);
                             _converse.xmppstatus.vcard.set('image_type', 'image/png');
-                        }, 3000);
+                        }
+                        // add self for testing
+                        openChat(Strophe.getBareJidFromJid(_converse.connection.jid), getSetting("displayname"), ["Bots"])
                     }
 
-                    // add self for testing
-                    setTimeout(function() {
-                        openChat(Strophe.getBareJidFromJid(_converse.connection.jid), getSetting("displayname"), ["Bots"])
-                    }, 3000);
+                    addControlFeatures();
 
+                }).catch(function (err) {
+                    console.error('waiting for controlBoxInitialized error', err);
                 });
 
                 console.log("pade plugin is ready");
@@ -874,7 +879,7 @@
     var extendOccupant = function(occupant, view)
     {
         const element = document.getElementById(occupant.get('id'));
-        console.debug("extendOccupant", element);
+        //console.debug("extendOccupant", element);
 
         if (element)
         {
@@ -1088,8 +1093,11 @@
 
                     if (!alerted && getSetting("notifyRoomMentions", false))
                     {
-                        var mentioned = new RegExp(`\\b${myNick}\\b`).test(body);
-                        if (mentioned) notifyMe(body, fromNick, fromJid, chatbox);
+                        if (_converse.shouldNotifyOfMessage(message) && !document.hasFocus())
+                        {
+                            var mentioned = new RegExp(`\\b${myNick}\\b`).test(body);
+                            if (mentioned) notifyMe(body, fromNick, fromJid, chatbox);
+                        }
                     }
                 }
             }

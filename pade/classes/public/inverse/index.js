@@ -16,27 +16,25 @@ window.addEventListener("load", function()
 
     if (getSetting("clearCacheOnConnect", false))
     {
-        let savedSettings = {};
+        const savedSettings = [];
         console.debug("clearCacheOnConnect, old size", localStorage.length);
 
         for (var i = 0; i < localStorage.length; i++)
         {
             if (localStorage.key(i).startsWith("store.settings."))
             {
-                const key = localStorage.key(i);
-                savedSettings[key] = localStorage.getItem(localStorage.key(i));
-                console.debug("clearCacheOnConnect, saving", key, savedSettings[key]);
+                const entry = {key: localStorage.key(i), value: localStorage.getItem(localStorage.key(i))}
+                savedSettings.push(entry);
+                //console.debug("clearCacheOnConnect, saving", entry);
             }
         }
 
         localStorage.clear();
 
-        const keys = Object.getOwnPropertyNames(savedSettings);
-
-        for (var i=0; i<keys.length; i++)
+        for (var i=0; i<savedSettings.length; i++)
         {
-            localStorage[keys[i]] = savedSettings[keys[i]];
-            console.debug("clearCacheOnConnect, restoring", keys[i], savedSettings[keys[i]]);
+            localStorage[savedSettings[i].key] = savedSettings[i].value;
+            //console.debug("clearCacheOnConnect, restoring", savedSettings[i]);
         }
 
         console.debug("clearCacheOnConnect, new size", localStorage.length);
@@ -81,14 +79,11 @@ window.addEventListener("load", function()
         setDefaultSetting("server", location.host);
         setDefaultSetting("domain", location.hostname);
 
-        top.getCredentials(function(credential)
+        parent.getCredentials(username, password, function(credential)
         {
-            if (credential)
+            if ((credential.id && credential.password) || credential.anonymous)
             {
-                username = credential.id;
-                password = credential.password;
-
-                doConverse(server, username, password, anonUser);
+                doConverse(server, credential.id, credential.password, credential.anonymous || anonUser);
             }
             else {
                 doBasicAuth();
@@ -317,60 +312,6 @@ function doConverse(server, username, password, anonUser)
         }
     }
 
-    if (getSetting("useTotp", false) || getSetting("useWinSSO", false) || getSetting("useCredsMgrApi", false) || getSetting("useSmartIdCard", false))
-    {
-        converse.env.Strophe.addConnectionPlugin('ofchatsasl',
-        {
-            init: function (connection)
-            {
-                converse.env.Strophe.SASLOFChat = function () { };
-                converse.env.Strophe.SASLOFChat.prototype = new converse.env.Strophe.SASLMechanism("OFCHAT", true, 2000);
-
-                converse.env.Strophe.SASLOFChat.test = function (connection)
-                {
-                    return getSetting("password", null) !== null;
-                };
-
-                converse.env.Strophe.SASLOFChat.prototype.onChallenge = function (connection)
-                {
-                    var token = getSetting("username", null) + ":" + getSetting("password", null);
-                    console.debug("Strophe.SASLOFChat", token);
-                    return token;
-                };
-
-                connection.mechanisms[converse.env.Strophe.SASLOFChat.prototype.name] = converse.env.Strophe.SASLOFChat;
-                console.debug("strophe plugin: ofchatsasl enabled");
-            }
-        });
-    }
-
-    if (getSetting("useClientCert", false))
-    {
-        console.debug("useClientCert enabled");
-
-        converse.env.Strophe.addConnectionPlugin('externalsasl',
-        {
-            init: function (connection)
-            {
-                converse.env.Strophe.SASLExternal = function() {};
-                converse.env.Strophe.SASLExternal.prototype = new converse.env.Strophe.SASLMechanism("EXTERNAL", true, 2000);
-
-                converse.env.Strophe.SASLExternal.test = function (connection)
-                {
-                    return connection.authcid !== null;
-                };
-
-                converse.env.Strophe.SASLExternal.prototype.onChallenge = function(connection)
-                {
-                    return connection.authcid === connection.authzid ? '' : connection.authzid;
-                };
-
-                connection.mechanisms[converse.env.Strophe.SASLExternal.prototype.name] = converse.env.Strophe.SASLExternal;
-                console.debug("strophe plugin: externalsasl enabled");
-            }
-        });
-    }
-
     if (server)
     {
         var domain = getSetting("domain", null);
@@ -392,6 +333,7 @@ function doConverse(server, username, password, anonUser)
                 }
             }
         }
+
         var tempJids = getSetting("autoJoinPrivateChats", "").split("\n");
 
         if (tempJids.length > 0)
@@ -402,6 +344,15 @@ function doConverse(server, username, password, anonUser)
             {
                 if (tempJids[i]) autoJoinPrivateChats.push(tempJids[i].indexOf("@") == -1 ? tempJids[i].trim() + "@" + domain : tempJids[i].trim());
             }
+        }
+
+        if (location.hash != "")
+        {
+            const pos1 = location.hash.indexOf("converse/room?jid=");
+            if (pos1 != -1) autoJoinRooms = [{jid: location.hash.substring(pos1 + 18), nick: displayname}];
+
+            const pos2 = location.hash.indexOf("converse/chat?jid=");
+            if (pos2 != -1) autoJoinPrivateChats = [location.hash.substring(pos2 + 18)];
         }
 
         var autoAway = getSetting("idleTimeout", 300);
@@ -419,7 +370,7 @@ function doConverse(server, username, password, anonUser)
 
         if (getSetting("enableHomePage", false))
         {
-            viewMode = 'overlayed';
+            viewMode = getSetting("homePageView", "fullscreen");
             document.getElementById("pade-home-page").src = getSetting("homePage", chrome.runtime.getManifest().homepage_url)
         }
 
@@ -443,9 +394,14 @@ function doConverse(server, username, password, anonUser)
             whitelistedPlugins.push("irma");
         }
 
-        if (!getSetting("enableSip", false))
+        if (!getSetting("enableSip", false) && getSetting("enableAudioConfWidget", false))
         {
            whitelistedPlugins.push("audioconf");
+        }
+
+        if (chrome.pade && getSetting("wgEnabled", false))
+        {
+            whitelistedPlugins.push("fastpath");
         }
 
         var config =
@@ -469,7 +425,7 @@ function doConverse(server, username, password, anonUser)
           auto_subscribe: getSetting("autoSubscribe", false),
           auto_xa: 0, //autoXa,
           bosh_service_url: getSetting("boshUri", "https://" + server + "/http-bind/"),
-          clear_messages_on_reconnection: getSetting("clearCacheOnConnect", false),
+          clear_messages_on_reconnection: false,
           loglevel: getSetting("converseDebug", false) ? "debug" : "info",
           default_domain: domain,
           default_state: getSetting("converseOpenState", "online"),
@@ -505,7 +461,7 @@ function doConverse(server, username, password, anonUser)
           theme: 'concord',
           singleton: (autoJoinRooms && autoJoinRooms.length == 1),
           view_mode: viewMode,
-          visible_toolbar_buttons: {'emoji': true, 'call': getSetting("showToolbarIcons", true), 'clear': true },
+          visible_toolbar_buttons: {'emoji': true, 'call': getSetting("showToolbarIcons", true) && getSetting("enableAudioConfWidget", false), 'clear': true },
           webinar_invitation: getSetting("webinarInvite", 'Please join webinar at'),
           webmeet_invitation: getSetting("ofmeetInvitation", 'Please join meeting at'),
           websocket_url: connUrl,
@@ -522,6 +478,60 @@ function doConverse(server, username, password, anonUser)
                 _converse = this._converse;
                 window._inverse = _converse;
                 window.inverse = converse;
+
+                if (getSetting("useClientCert", false))
+                {
+                    console.debug("useClientCert enabled");
+
+                    converse.env.Strophe.addConnectionPlugin('externalsasl',
+                    {
+                        init: function (connection)
+                        {
+                            converse.env.Strophe.SASLExternal = function() {};
+                            converse.env.Strophe.SASLExternal.prototype = new converse.env.Strophe.SASLMechanism("EXTERNAL", true, 2000);
+
+                            converse.env.Strophe.SASLExternal.test = function (connection)
+                            {
+                                return connection.authcid !== null;
+                            };
+
+                            converse.env.Strophe.SASLExternal.prototype.onChallenge = function(connection)
+                            {
+                                return connection.authcid === connection.authzid ? '' : connection.authzid;
+                            };
+
+                            connection.mechanisms[converse.env.Strophe.SASLExternal.prototype.name] = converse.env.Strophe.SASLExternal;
+                            console.debug("strophe plugin: externalsasl enabled");
+                        }
+                    });
+                }
+
+                if (getSetting("useTotp", false) || getSetting("useWinSSO", false) || getSetting("useCredsMgrApi", false) || getSetting("useSmartIdCard", false))
+                {
+                    converse.env.Strophe.addConnectionPlugin('ofchatsasl',
+                    {
+                        init: function (connection)
+                        {
+                            converse.env.Strophe.SASLOFChat = function () { };
+                            converse.env.Strophe.SASLOFChat.prototype = new converse.env.Strophe.SASLMechanism("OFCHAT", true, 2000);
+
+                            converse.env.Strophe.SASLOFChat.test = function (connection)
+                            {
+                                return getSetting("password", null) !== null;
+                            };
+
+                            converse.env.Strophe.SASLOFChat.prototype.onChallenge = function (connection)
+                            {
+                                var token = getSetting("username", null) + ":" + getSetting("password", null);
+                                console.debug("Strophe.SASLOFChat", token);
+                                return token;
+                            };
+
+                            connection.mechanisms[converse.env.Strophe.SASLOFChat.prototype.name] = converse.env.Strophe.SASLOFChat;
+                            console.debug("strophe plugin: ofchatsasl enabled");
+                        }
+                    });
+                }
             }
 
         });
@@ -529,9 +539,9 @@ function doConverse(server, username, password, anonUser)
     }
 }
 
-function openChat(from, name, groups, open)
+function openChat(from, name, groups, closed)
 {
-    if (_inverse)
+    if (_inverse && _inverse.roster)
     {
         if (!groups) groups = [];
 
@@ -555,7 +565,7 @@ function openChat(from, name, groups, open)
           });
         }
 
-        if (open) _inverse.api.chats.open(from);
+        if (!closed) _inverse.api.chats.open(from);
 
         if (_inverse.connection.injectMessage)
         {

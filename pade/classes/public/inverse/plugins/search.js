@@ -79,7 +79,7 @@
                          '<div style="overflow-x:hidden; overflow-y:scroll; height: 400px;" id="pade-search-results"></div>' +
                          '</div>' +
                          '</div>' +
-                         '<div class="modal-footer"> <button type="button" class="btn btn-success btn-search">Search</button><button type="button" class="btn btn-danger" data-dismiss="modal">Close</button> </div>' +
+                         '<div class="modal-footer"> <button type="button" class="btn btn-success btn-search">Search</button><button type="button" class="btn btn-success btn-pdf">PDF</button><button type="button" class="btn btn-danger" data-dismiss="modal">Close</button> </div>' +
                          '</div> </div> </div>';
                 },
                 afterRender() {
@@ -110,6 +110,7 @@
                 events: {
                     'keyup #pade-search-keywords': 'clickSearch',
                     'click .btn-search': 'doSearch',
+                    'click .btn-pdf': 'doPDF',
                     'click .btn-danger': 'doDestroy'
                 },
 
@@ -123,10 +124,34 @@
                 doDestroy() {
 
                 },
+                doPDF() {
+                    const margins = {
+                      top: 70,
+                      bottom: 40,
+                      left: 30,
+                      width: 550
+                    };
+                    const pdf = new jsPDF('p','pt','a4');
+                    //pdf.setFontSize(18);
 
+                    pdf.autoTable({
+                        head: [['Date', 'Person', 'Message']],
+                        body: this.model.get("pdf_body"),
+                        columnStyles: {
+                            0: {cellWidth: 100},
+                            1: {cellWidth: 100},
+                            2: {cellWidth: 300}
+                        }
+                    })
+
+                    const view = this.model.get("view");
+                    const roomLabel = view.model.getDisplayName() || view.model.get("jid");
+                    pdf.save(roomLabel + '.pdf')
+                },
                 doSearch() {
                     const start = this.el.querySelector("#pade-search-start").value;
                     const end = this.el.querySelector("#pade-search-end").value;
+                    const pdf_body = [];
 
                     let keyword = this.el.querySelector("#pade-search-keywords").value.trim();
                     let participant = this.el.querySelector("#pade-search-participant");
@@ -192,6 +217,7 @@
                                         ids.push(id);
                                         const tagged = body.replace(tagRegExp, "<span style=background-color:#FF9;color:#555;><a href='#' data-id='" + id + "' id='search-" + id + "'>$1</a></span>");
                                         html = html + "<div class='row'><div style='max-width: 20%;' class='col'>" + pretty_time + "</div><div style='max-width: 15%;' class='col'>" + pretty_from + "</div><div class='col'>" + tagged + "</div></div>";
+                                        pdf_body.push([pretty_time, pretty_from, body]);
                                     }
                                 }
                             }
@@ -199,6 +225,7 @@
 
                         html =  html + "</div>";
                         searchResults.innerHTML = html;
+                        that.model.set("pdf_body", pdf_body);
 
                         for (var i=0; i<ids.length; i++)
                         {
@@ -271,6 +298,46 @@
                     }
                     else
 
+                    if (command === "summary")
+                    {
+                        const title = match[2] || this.model.getDisplayName();
+                        const messages = this.model.messages.models;
+                        let firstMsg = 0;
+
+                        for (let i=0; i<messages.length; i++)
+                        {
+                            const msg = document.getElementById("msg-" + messages[i].get("msgid"));
+
+                            if (msg && isInViewport(msg))
+                            {
+                                console.debug("first message in view", msg);
+                                firstMsg = i;
+                                break;
+                            }
+                        }
+
+                        let detail = "";
+
+                        for (var i=firstMsg; i<messages.length; i++)
+                        {
+                            const body = messages[i].get('message');
+                            const from = messages[i].get('from');
+                            const pretty_from =  messages[i].get('type') === "groupchat" ? from.split("/")[1] : from.split("@")[0];
+
+                            if (body && !body.startsWith('>')) {
+                                detail = detail + pretty_from + " says " + body + ". ";
+                            }
+                        }
+
+                        const summarizer = new JsSummarize();
+                        const summary = summarizer.summarize(title, detail);
+                        summary.unshift("---------- Summary ----------");
+                        this.showHelpMessages(summary);
+                        this.viewUnreadMessages();
+
+                        return true;
+                    }
+
                     return this.__super__.parseMessageForCommands.apply(this, arguments);
                 }
             },
@@ -325,10 +392,17 @@
 
                                 console.debug("pade.mention click", evt.target);
 
-                                const contact = _converse.roster.findWhere({'user_id': evt.target.getAttribute("data-mention")});
+                                const jid = evt.target.getAttribute("data-jid");
 
-                                if (contact) {
-                                    _converse.api.chats.open(contact.get("jid"), {fullname: contact.get("nickname") || contact.get("fullname")});
+                                if (jid) {
+                                    _converse.api.chats.open(jid, {fullname: evt.target.getAttribute("data-mention")});
+                                }
+                                else {
+                                    const contact = _converse.roster.findWhere({'user_id': evt.target.getAttribute("data-mention")});
+
+                                    if (contact) {
+                                        _converse.api.chats.open(contact.get("jid"), {fullname: contact.get("nickname") || contact.get("fullname")});
+                                    }
                                 }
 
                             }, false);
@@ -339,4 +413,13 @@
         }
     });
 
+    function isInViewport (elem) {
+        var distance = elem.getBoundingClientRect();
+        return (
+            distance.top >= 0 &&
+            distance.left >= 0 &&
+            distance.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+            distance.right <= (window.innerWidth || document.documentElement.clientWidth)
+        );
+    }
 }));

@@ -30,10 +30,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <openfire.version>4.2.0</openfire.version>
         <videobridge.version>1.1-20200124.173127-125</videobridge.version>        
-        <jicofo.version>1.1-20200206.195409-99</jicofo.version>
+        <jicofo.version>1.1-20200311.215910-101</jicofo.version>
         <jigasi.version>1.1-20190806.132856-49</jigasi.version>    
         <jicoco.version>1.1-20190509.130302-15</jicoco.version>     
-        <pade.url>https://desktop-545pc5b:7443/apps/index.html</pade.url>        
+        <pade.url>https://igniterealtime.github.io/pade</pade.url>        
     </properties>
 
     <modules>    

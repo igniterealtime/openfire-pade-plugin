@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2008 Jive Software. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,40 +22,22 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.AbstractCollection;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.DateTools;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.queryParser.ParseException;
-import org.apache.lucene.queryParser.QueryParser;
-import org.apache.lucene.search.BooleanClause;
-import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.Filter;
-import org.apache.lucene.search.Hit;
-import org.apache.lucene.search.Hits;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.RangeFilter;
-import org.apache.lucene.search.Sort;
-import org.apache.lucene.search.TermQuery;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.search.*;
+import org.apache.lucene.index.*;
+import org.apache.lucene.store.*;
 import org.jivesoftware.database.CachedPreparedStatement;
 import org.jivesoftware.database.DbConnectionManager;
+import org.jivesoftware.util.JiveGlobals;
 import org.picocontainer.Startable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xmpp.packet.JID;
-import org.jivesoftware.util.JiveGlobals;
 
 /**
  * Searches archived conversations. If conversation archiving is not enabled,
@@ -87,6 +69,7 @@ public class ArchiveSearcher implements Startable {
     }
 
     public void stop() {
+
     }
 
     /**
@@ -96,10 +79,7 @@ public class ArchiveSearcher implements Startable {
      * @param search the search.
      * @return a Collection of conversations that match the search query.
      */
-    public Collection<Conversation> search(ArchiveSearch search)
-    {
-        Log.debug("ArchiveSearcher search " + search.getQueryString());
-
+    public Collection<Conversation> search(ArchiveSearch search) {
         // If the search has a query string it will be driven by Lucene. Otherwise
         if (search.getQueryString() != null) {
             return luceneSearch(search);
@@ -115,12 +95,9 @@ public class ArchiveSearcher implements Startable {
      * @param search the search.
      * @return the collection of conversations that match the search.
      */
-    private Collection<Conversation> luceneSearch(ArchiveSearch search)
-    {
-        Log.debug("luceneSearch search " + search.getQueryString());
-
+    private Collection<Conversation> luceneSearch(ArchiveSearch search) {
+        Log.debug( "Executing new Lucene search for query string {}", search.getQueryString() );
         try {
-
             File searchDir = new File(JiveGlobals.getHomeDirectory() + File.separator + MonitoringConstants.NAME + File.separator + "search");
 
             if (!searchDir.exists())
@@ -129,12 +106,7 @@ public class ArchiveSearcher implements Startable {
                 return Collections.emptySet();
             }
             try {
-                if (IndexReader.indexExists(searchDir)) {
-                    directory = FSDirectory.getDirectory(searchDir, false);
-                }
-                else {
-                    directory = FSDirectory.getDirectory(searchDir, true);
-                }
+                directory = FSDirectory.open(searchDir.toPath());
             }
             catch (IOException ioe) {
                 Log.error(ioe.getMessage(), ioe);
@@ -142,12 +114,16 @@ public class ArchiveSearcher implements Startable {
             }
 
             if (searcher == null) {
-                searcher = new IndexSearcher(directory);
+                DirectoryReader reader = DirectoryReader.open(directory);
+                searcher = new IndexSearcher(reader);
             }
             // See if the searcher needs to be closed due to the index being updated.
-            else if (!searcher.getIndexReader().isCurrent()) {
-                searcher.close();
-                searcher = new IndexSearcher(directory);
+            final DirectoryReader replacement = DirectoryReader.openIfChanged((DirectoryReader) searcher.getIndexReader());
+            if ( replacement != null )
+            {
+                Log.debug("Returning new Index Searcher (as index was updated)");
+                searcher.getIndexReader().close();
+                searcher = new IndexSearcher(replacement);
             }
 
             final StandardAnalyzer analyzer = new StandardAnalyzer();
@@ -161,13 +137,13 @@ public class ArchiveSearcher implements Startable {
             Sort sort = null;
             if (search.getSortField() != ArchiveSearch.SortField.relevance) {
                 if (search.getSortField() == ArchiveSearch.SortField.date) {
-                    sort =  new Sort("date", search.getSortOrder() == ArchiveSearch.SortOrder.descending);
+                    sort = new Sort(new SortField("date", SortField.Type.STRING, search.getSortOrder() == ArchiveSearch.SortOrder.descending));
+                    Log.debug( "... applying sort: {}", sort );
                 }
             }
 
             // See if we need to filter on date. Default to a null filter so that it has
             // no effect if date filtering hasn't been selected.
-            Filter filter = null;
             if (search.getDateRangeMin() != null || search.getDateRangeMax() != null) {
                 String min = null;
                 if (search.getDateRangeMin() != null) {
@@ -177,8 +153,16 @@ public class ArchiveSearcher implements Startable {
                 if (search.getDateRangeMax() != null) {
                     max = DateTools.dateToString(search.getDateRangeMax(), DateTools.Resolution.DAY);
                 }
-                // ENT-271: don't include upper or lower bound if these elements are null
-                filter = new RangeFilter("date", min, max, min != null, max != null );
+
+                if (max != null || min != null) {
+                    // ENT-271: don't include upper or lower bound if these elements are null
+                    final TermRangeQuery dateRangeQuery = TermRangeQuery.newStringRange("date", min, max, min != null, max != null);
+                    Log.debug( "... limiting to range: {}", dateRangeQuery );
+                    query = new BooleanQuery.Builder()
+                        .add(query, BooleanClause.Occur.MUST)
+                        .add(dateRangeQuery, BooleanClause.Occur.MUST)
+                        .build();
+                }
             }
 
             // See if we need to match external conversations. This will only be true
@@ -187,63 +171,67 @@ public class ArchiveSearcher implements Startable {
             Collection<JID> participants = search.getParticipants();
             if (search.getParticipants().size() < 2 && search.isExternalWildcardMode()) {
                 TermQuery externalQuery = new TermQuery(new Term("external", "true"));
+                Log.debug( "... enabling 'external' wildcard matching: {}", true );
+
                 // Add this query to the existing query.
-                BooleanQuery booleanQuery = new BooleanQuery();
-                booleanQuery.add(query, BooleanClause.Occur.MUST);
-                booleanQuery.add(externalQuery, BooleanClause.Occur.MUST);
-                query = booleanQuery;
+                query = new BooleanQuery.Builder()
+                    .add(query, BooleanClause.Occur.MUST)
+                    .add(externalQuery, BooleanClause.Occur.MUST)
+                    .build();
             }
 
             // See if we need to restrict the search to certain users.
             if (!participants.isEmpty()) {
                 if (participants.size() == 1) {
-                    String jid = participants.iterator().next().toBareJID();
-                    Query participantQuery = new QueryParser("jid", analyzer).parse(jid);
+                    JID jid = participants.iterator().next().asBareJID();
+                    Query participantQuery = new QueryParser("jid", analyzer).parse(jid.toString());
+                    Log.debug( "... restricting to participant: {}", jid );
 
                     // Add this query to the existing query.
-                    BooleanQuery booleanQuery = new BooleanQuery();
-                    booleanQuery.add(query, BooleanClause.Occur.MUST);
-                    booleanQuery.add(participantQuery, BooleanClause.Occur.MUST);
-                    query = booleanQuery;
+                    query = new BooleanQuery.Builder()
+                        .add(query, BooleanClause.Occur.MUST)
+                        .add(participantQuery, BooleanClause.Occur.MUST)
+                        .build();
                 }
                 // Otherwise there are two participants.
                 else {
                     Iterator<JID> iter = participants.iterator();
                     String participant1 = iter.next().toBareJID();
                     String participant2 = iter.next().toBareJID();
-                    BooleanQuery participantQuery = new BooleanQuery();
-                    participantQuery.add(new QueryParser("jid", analyzer).parse(participant1),
-                            BooleanClause.Occur.MUST);
-                    participantQuery.add(new QueryParser("jid", analyzer).parse(participant2),
-                            BooleanClause.Occur.MUST);
+                    if ( iter.hasNext() ) {
+                        Log.warn( "More participants available in search than are used!" );
+                    }
+
+                    Log.debug( "... restricting to participants: {} and {}", participant1, participant2 );
+                    final BooleanQuery participantQuery = new BooleanQuery.Builder()
+                        .add(new QueryParser("jid", analyzer).parse(participant1), BooleanClause.Occur.MUST)
+                        .add(new QueryParser("jid", analyzer).parse(participant2), BooleanClause.Occur.MUST)
+                        .build();
+
                     // Add this query to the existing query.
-                    BooleanQuery booleanQuery = new BooleanQuery();
-                    booleanQuery.add(query, BooleanClause.Occur.MUST);
-                    booleanQuery.add(participantQuery, BooleanClause.Occur.MUST);
-                    query = booleanQuery;
+                    query = new BooleanQuery.Builder()
+                        .add(query, BooleanClause.Occur.MUST)
+                        .add(participantQuery, BooleanClause.Occur.MUST)
+                        .build();
                 }
             }
-
-            Hits hits = searcher.search(query, filter, sort);
 
             int startIndex = search.getStartIndex();
             int endIndex = startIndex + search.getNumResults() - 1;
 
-            // The end index can't be after the end of the results.
-            if (endIndex > hits.length() - 1) {
-
-               // endIndex = hits.length() - 1;
-                // TODO: We need to determine if this is necessary.
-            }
-
-            // If the start index is positioned after the end, return an empty list.
             if (((endIndex - startIndex) + 1) <= 0) {
+                Log.debug( "... end index of query ({}) is positioned is not larger then the start index ({}). Returning empty result.", endIndex, startIndex );
                 return Collections.emptyList();
             }
-            // Otherwise return the results.
-            else {
-                return new LuceneQueryResults(hits, startIndex, endIndex);
+
+            TopDocs hits;
+            if ( sort != null ) {
+                hits = searcher.search(query, endIndex + 1, sort);
+            } else {
+                hits = searcher.search(query, endIndex + 1 );
             }
+
+            return new LuceneQueryResults(searcher, hits, startIndex, endIndex);
         }
         catch (ParseException pe) {
             Log.error(pe.getMessage(), pe);
@@ -261,10 +249,7 @@ public class ArchiveSearcher implements Startable {
      * @param search the search.
      * @return the collection of conversations that match the search.
      */
-    private Collection<Conversation> databaseSearch(ArchiveSearch search)
-    {
-        Log.debug("databaseSearch search " + search.getParticipants());
-
+    private Collection<Conversation> databaseSearch(ArchiveSearch search) {
         CachedPreparedStatement cachedPstmt = new CachedPreparedStatement();
 
         // Build the SQL
@@ -526,7 +511,8 @@ public class ArchiveSearcher implements Startable {
      */
     private class LuceneQueryResults extends AbstractCollection<Conversation> {
 
-        private Hits hits;
+        private IndexSearcher searcher;
+        private TopDocs hits;
         private int index;
         private int endIndex;
 
@@ -537,7 +523,8 @@ public class ArchiveSearcher implements Startable {
          * @param startIndex the starting index that results should be returned from.
          * @param endIndex the ending index that results should be returned to.
          */
-        public LuceneQueryResults(Hits hits, int startIndex, int endIndex) {
+        public LuceneQueryResults(IndexSearcher searcher, TopDocs hits, int startIndex, int endIndex) {
+            this.searcher = searcher;
             this.hits = hits;
             this.index = startIndex;
             this.endIndex = endIndex;
@@ -545,11 +532,10 @@ public class ArchiveSearcher implements Startable {
 
         @Override
         public Iterator<Conversation> iterator() {
-            final Iterator<Hit> hitsIterator = hits.iterator();
-            // Advance the iterator until we hit the index.
-            for (int i=0; i<index; i++) {
-                hitsIterator.next();
-            }
+            // Only use the range as specified.
+            final ScoreDoc[] scoreDocs = Arrays.copyOfRange( hits.scoreDocs, index, Math.min( endIndex + 1, hits.scoreDocs.length) );
+            final Iterator<ScoreDoc> hitsIterator = Arrays.asList(scoreDocs).iterator();
+
             return new Iterator<Conversation>() {
 
                 private Conversation nextElement = null;
@@ -587,17 +573,10 @@ public class ArchiveSearcher implements Startable {
                     if (!hitsIterator.hasNext()) {
                         return null;
                     }
-                    // If we've reached the end index, stop iterating.
-                    else if (index >= endIndex) {
-                        return null;
-                    }
                     while (hitsIterator.hasNext()) {
                         try {
-                            Hit hit = hitsIterator.next();
-                            // Advance the index.
-                            index++;
-
-                            long conversationID = Long.parseLong(hit.get("conversationID"));
+                            ScoreDoc hit = hitsIterator.next();
+                            long conversationID = Long.parseLong(searcher.doc(hit.doc).get("conversationID"));
                             return new Conversation(conversationID);
                         }
                         catch (Exception e) {
@@ -611,7 +590,8 @@ public class ArchiveSearcher implements Startable {
 
         @Override
         public int size() {
-            return hits.length();
+            // TODO the original implementation returned the size of all hits, not the size as delimitered by index and endIndex. Shouldn't that be returned instead?
+            return (int) hits.totalHits.value;
         }
     }
 }

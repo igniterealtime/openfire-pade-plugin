@@ -43,7 +43,7 @@ window.addEvent("domready", function () {
             //settings.manifest.domain.element.parentElement.style.display = "none";
             //settings.manifest.connect.element.parentElement.style.display = "none";
 
-            document.title = chrome.i18n.getMessage('manifest_shortExtensionName') + " - Settings";
+            document.title = chrome.i18n.getMessage('manifest_shortExtensionName') + " | Settings";
         }
 
         if (settings.manifest.meetingPlanner)
@@ -1447,6 +1447,8 @@ function doDefaults(background)
     setDefaultSetting("converseAutoStart", true);
     setDefaultSetting("showGroupChatStatusMessages", true);
     setDefaultSetting("converseTheme", "concord");
+    setDefaultSetting("homePageView", "fullscreen");
+    setDefaultSetting("homePage", chrome.runtime.getURL("home/index.html"));
     setDefaultSetting("converseOpenState", "online");
     setDefaultSetting("converseCloseState", "online");
     setDefaultSetting("enableBookmarks", true);
@@ -1743,13 +1745,13 @@ function importPreferences(event, settings)
                     window.location.reload();
 
                 } catch (ex) {
-                    console.error("uploadAvatar - error", ex);
+                    console.error("importPreferences - error", ex);
                     settings.manifest.importExportStatus.element.innerHTML = '<b style="color:red">File could not be read! Error ' + ex;
                 }
             };
 
             reader.onerror = function(event) {
-                console.error("uploadAvatar - error", event);
+                console.error("importPreferences - error", event);
                 settings.manifest.importExportStatus.element.innerHTML = '<b style="color:red">File could not be read! Error ' + event.target.error.code;
             };
 

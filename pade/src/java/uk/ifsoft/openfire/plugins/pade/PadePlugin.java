@@ -70,6 +70,7 @@ public class PadePlugin implements Plugin
 
         contextPrivate = new WebAppContext(null, pluginDirectory.getPath() + "/classes/private", "/dashboard");
         contextPrivate.setClassLoader(this.getClass().getClassLoader());
+        contextPrivate.getMimeTypes().addMimeMapping("wasm", "application/wasm");
         SecurityHandler securityHandler = basicAuth("ofmeet");
         contextPrivate.setSecurityHandler(securityHandler);
         final List<ContainerInitializer> initializersDashboard = new ArrayList<>();
@@ -81,6 +82,7 @@ public class PadePlugin implements Plugin
 
         contextPublic = new WebAppContext(null, pluginDirectory.getPath() + "/classes/public", "/pade");
         contextPublic.setClassLoader(this.getClass().getClassLoader());
+        contextPublic.getMimeTypes().addMimeMapping("wasm", "application/wasm");
         final List<ContainerInitializer> initializersCRM = new ArrayList<>();
         initializersCRM.add(new ContainerInitializer(new JettyJasperInitializer(), null));
         contextPublic.setAttribute("org.eclipse.jetty.containerInitializers", initializersCRM);

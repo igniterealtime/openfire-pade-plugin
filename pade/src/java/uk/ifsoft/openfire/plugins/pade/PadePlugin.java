@@ -23,6 +23,10 @@ import org.eclipse.jetty.security.authentication.*;
 import org.apache.tomcat.InstanceManager;
 import org.apache.tomcat.SimpleInstanceManager;
 
+import org.jivesoftware.openfire.*;
+import org.jivesoftware.openfire.muc.*;
+import org.jivesoftware.openfire.session.*;
+import org.jivesoftware.openfire.group.*;
 import org.jivesoftware.openfire.plugin.rest.sasl.*;
 import org.jivesoftware.openfire.plugin.rest.service.JerseyWrapper;
 import org.jivesoftware.openfire.plugin.rest.OpenfireLoginService;
@@ -39,11 +43,11 @@ import javax.servlet.DispatcherType;
 import org.jitsi.util.OSUtils;
 import waffle.servlet.NegotiateSecurityFilter;
 import waffle.servlet.WaffleInfoServlet;
+import org.xmpp.packet.*;
+import org.dom4j.Element;
 
 
-
-
-public class PadePlugin implements Plugin
+public class PadePlugin implements Plugin, MUCEventListener
 {
     private static final Logger Log = LoggerFactory.getLogger( PadePlugin.class );
 
@@ -125,6 +129,11 @@ public class PadePlugin implements Plugin
 
         Log.info("Create recordings folder");
         checkRecordingsFolder();
+
+        if ( JiveGlobals.getBooleanProperty( "pade.mucevent.dispatcher.enabled", true))
+        {
+            MUCEventDispatcher.addListener(this);
+        }
     }
 
     /**
@@ -151,6 +160,11 @@ public class PadePlugin implements Plugin
         HttpBindManager.getInstance().removeJettyHandler(contextPrivate);
 
         if (contextWinSSO != null) HttpBindManager.getInstance().removeJettyHandler(contextWinSSO);
+
+        if ( JiveGlobals.getBooleanProperty( "pade.mucevent.dispatcher.enabled", true))
+        {
+            MUCEventDispatcher.removeListener(this);
+        }
     }
 
     private static final SecurityHandler basicAuth(String realm) {
@@ -207,6 +221,140 @@ public class PadePlugin implements Plugin
         catch (Exception e)
         {
             Log.error("checkDownloadFolder", e);
+        }
+    }
+
+    // -------------------------------------------------------
+    //
+    //  MUCEventListener
+    //
+    // -------------------------------------------------------
+
+    public void roomCreated(JID roomJID)
+    {
+
+    }
+
+    public void roomDestroyed(JID roomJID)
+    {
+
+    }
+
+    public void occupantJoined(JID roomJID, JID user, String nickname)
+    {
+
+    }
+
+    public void occupantLeft(JID roomJID, JID user)
+    {
+
+    }
+
+    public void nicknameChanged(JID roomJID, JID user, String oldNickname, String newNickname)
+    {
+
+    }
+
+    public void messageReceived(JID roomJID, JID user, String nickname, Message message)
+    {
+        if (JiveGlobals.getBooleanProperty("pade.room.activity.indicator", true))
+        {
+            final String body = message.getBody();
+            final String roomJid = roomJID.toString();
+            final String userJid = user.toBareJID();
+
+            if (body != null)
+            {
+                Log.debug("MUC messageReceived " + roomJID + " " + user + " " + nickname + "\n" + message.getBody());
+
+                try {
+                    for ( MultiUserChatService mucService : XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatServices() )
+                    {
+                        MUCRoom room = mucService.getChatRoom(roomJID.getNode());
+
+                        for (JID jid : room.getOwners())
+                        {
+                            notifyRoomSubscribers(jid, room, roomJID);
+                        }
+
+                        for (JID jid : room.getAdmins())
+                        {
+                            notifyRoomSubscribers(jid, room, roomJID);
+                        }
+
+                        for (JID jid : room.getMembers())
+                        {
+                            notifyRoomSubscribers(jid, room, roomJID);
+                        }
+
+                    }
+                } catch (Exception e) {
+                    Log.error("messageReceived", e);
+                }
+            }
+        }
+    }
+
+    public void roomSubjectChanged(JID roomJID, JID user, String newSubject)
+    {
+
+    }
+
+    public void privateMessageRecieved(JID a, JID b, Message message)
+    {
+
+    }
+
+    private void notifyRoomSubscribers(JID subscriberJID, MUCRoom room, JID roomJID)
+    {
+        Log.debug("notifyRoomSubscribers " + subscriberJID + " " + roomJID);
+
+        try {
+            if (GroupJID.isGroup(subscriberJID)) {
+                Group group = GroupManager.getInstance().getGroup(subscriberJID);
+
+                for (JID groupMemberJID : group.getAll()) {
+                    notifyRoomActivity(groupMemberJID, room, roomJID);
+                }
+            } else {
+                notifyRoomActivity(subscriberJID, room, roomJID);
+            }
+
+        } catch (GroupNotFoundException gnfe) {
+            Log.warn("Invalid group JID in the member list: " + subscriberJID);
+        }
+    }
+
+    private void notifyRoomActivity(JID subscriberJID, MUCRoom room, JID roomJID)
+    {
+        if (room.getAffiliation(subscriberJID) != MUCRole.Affiliation.none)
+        {
+            Log.debug("notifyRoomActivity checking " + subscriberJID + " " + roomJID);
+            boolean inRoom = true;
+
+            try {
+                List<MUCRole> roles = room.getOccupantsByBareJID(subscriberJID);
+
+                if (roles.size() > 1 && roles.get(0).getPresence().isAvailable() == false)
+                {
+                    inRoom = false;
+                }
+
+            } catch (Exception e) {
+                inRoom = false;
+            }
+
+            Log.debug("notifyRoomActivity confirmed " + subscriberJID + " " + roomJID + " " + inRoom);
+
+            if (!inRoom)
+            {
+                Message message = new Message();
+                message.setFrom(roomJID);
+                message.setTo(subscriberJID);
+                Element rai = message.addChildElement("rai", "xmpp:prosody.im/protocol/rai");
+                rai.addElement("activity").setText(roomJID.toString());
+                XMPPServer.getInstance().getRoutingTable().routePacket(subscriberJID, message, true);
+            }
         }
     }
 }

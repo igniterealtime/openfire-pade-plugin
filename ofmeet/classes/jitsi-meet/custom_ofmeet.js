@@ -1,5 +1,6 @@
 var ofmeet = (function(of)
 {
+    let modal = null;
     let recordingAudioTrack = {};
     let recordingVideoTrack = {};
     let videoRecorder = {};
@@ -43,7 +44,7 @@ var ofmeet = (function(of)
             const deleteRequest = indexedDB.deleteDatabase(dbname)
 
             deleteRequest.onsuccess = function(event) {
-              console.log("ofmeet.js me database deleted successfully", dbname);
+              console.debug("ofmeet.js me database deleted successfully", dbname);
             };
         });
 
@@ -75,10 +76,6 @@ var ofmeet = (function(of)
             {
                 delete recordingAudioTrack[id];
                 delete recordingVideoTrack[id];
-                delete filenames[id];
-                delete videoRecorder[id];
-                delete recorderStreams[id];
-                delete customStore[id];
             });
         });
 
@@ -150,6 +147,13 @@ var ofmeet = (function(of)
                 stopRecorder();
             }
         });
+
+        const leaveButton = document.querySelector('div[aria-label="Leave the call"]');
+
+        if (leaveButton) leaveButton.addEventListener("click", function(evt)
+        {
+            if (of.recording) stopRecorder();
+        });
     }
 
     function createTagsButton()
@@ -196,14 +200,9 @@ var ofmeet = (function(of)
     function doTags()
     {
         const template =
-        '<div class="modal fade" id="myModal" aria-hidden="true" style="display: none;">' +
-        '<div class="modal-dialog modal-lg">' +
-        '  <div class="modal-content">' +
-
         '    <!-- Modal Header -->' +
         '    <div class="modal-header">' +
         '      <h4 class="modal-title">Conference TAGS</h4>' +
-        '      <button type="button" class="close" data-dismiss="modal">x</button>' +
         '    </div>' +
 
         '    <!-- Modal body -->' +
@@ -220,51 +219,62 @@ var ofmeet = (function(of)
         '       <label for="tags-operation" class="col-form-label">Name of Operation:</label>' +
         '       <input id="tags-operation" type="text" class="form-control" name="tags-operation" value="' + tags.operation + '"/>' +
         '       </div>' +
-        '    </div>' +
+        '    </div>'
 
-        '    <!-- Modal footer -->' +
-        '    <div class="modal-footer">' +
-        '      <button type="button" class="btn btn-success" data-dismiss="modal">Save</button>' +
-        '      <button type="button" class="btn btn-danger" data-dismiss="modal" id="clearButton">Cancel</button>' +
-        '    </div>' +
+        if (!modal)
+        {
+            modal = new tingle.modal({
+                footer: true,
+                stickyFooter: false,
+                closeMethods: ['overlay', 'button', 'escape'],
+                closeLabel: "Close",
+                cssClass: ['custom-class-1', 'custom-class-2'],
+                onOpen: function() {
+                    console.debug('modal open');
+                },
+                onClose: function() {
+                    console.debug('modal closed');
+                },
+                beforeOpen: function() {
+                    document.getElementById('tags-date').value = (new Date()).toISOString().split('T')[0]
+                },
+                beforeClose: function() {
+                    tags.location = document.getElementById('tags-location').value;
+                    tags.date = document.getElementById('tags-date').value;
+                    tags.expert = document.getElementById('tags-expert').value;
+                    tags.operator = document.getElementById('tags-operator').value;
+                    tags.operation = document.getElementById('tags-operation').value;
 
-        '  </div>' +
-        '</div>' +
-        '</div>'
+                    if (tags.location != "")
+                    {
+                        document.getElementById("subtitles").innerHTML = `<b>Location</b>: ${tags.location} <br/><b>Date</b>: ${tags.date} <br/><b>Expert</b>: ${tags.expert} <br/><b>Operator</b>: ${tags.operator} <br/><b>Operation</b>: ${tags.operation}`;
+                    }
+                    return true;
+                }
+            });
+            modal.setContent(template);
 
-        const div = newElement('div', 'ofmeet-tags-modal', template);
+            modal.addFooterBtn('Save', 'btn btn-success tingle-btn tingle-btn--primary', function() {
+                // here goes some logic
+                modal.close();
+            });
 
-        $("#myModal").on('show.bs.modal', function () {
-            document.getElementById('tags-date').value = (new Date()).toISOString().split('T')[0]
-        });
+            modal.addFooterBtn('Cancel', 'btn btn-danger tingle-btn tingle-btn--danger', function() {
+                event.preventDefault();
+                tags = {location: "", date: (new Date()).toISOString().split('T')[0], expert: "", operator: "", operation: ""};
 
-        $("#myModal").on('hidden.bs.modal', function () {
-            tags.location = document.getElementById('tags-location').value;
-            tags.date = document.getElementById('tags-date').value;
-            tags.expert = document.getElementById('tags-expert').value;
-            tags.operator = document.getElementById('tags-operator').value;
-            tags.operation = document.getElementById('tags-operation').value;
+                document.getElementById('tags-location').value = tags.location;
+                document.getElementById('tags-date').value = tags.date;
+                document.getElementById('tags-expert').value = tags.expert;
+                document.getElementById('tags-operator').value = tags.operator;
+                document.getElementById('tags-operation').value = tags.operation;
 
-            if (tags.location != "")
-            {
-                document.getElementById("subtitles").innerHTML = `<b>Location</b>: ${tags.location} <br/><b>Date</b>: ${tags.date} <br/><b>Expert</b>: ${tags.expert} <br/><b>Operator</b>: ${tags.operator} <br/><b>Operation</b>: ${tags.operation}`;
-            }
-        });
+                document.getElementById("subtitles").innerHTML =  "";
+                modal.close();
+            });
+        }
 
-        $('#clearButton').on('click', function(event) {
-            event.preventDefault();
-            tags = {location: "", date: (new Date()).toISOString().split('T')[0], expert: "", operator: "", operation: ""};
-
-            document.getElementById('tags-location').value = tags.location;
-            document.getElementById('tags-date').value = tags.date;
-            document.getElementById('tags-expert').value = tags.expert;
-            document.getElementById('tags-operator').value = tags.operator;
-            document.getElementById('tags-operation').value = tags.operation;
-
-            document.getElementById("subtitles").innerHTML =  "";
-        });
-
-        $('#myModal').modal('show');
+        modal.open();
     }
 
     function getFilename(prefix, suffix)
@@ -539,7 +549,7 @@ var ofmeet = (function(of)
 
             recorderStreams[id].addEventListener('addtrack', (event) =>
             {
-              console.log(`ofmeet.js new ${event.track.kind} track added`);
+              console.debug(`ofmeet.js new ${event.track.kind} track added`);
             });
 
             recorderStreams[id].addTrack(recordingVideoTrack[id].clone().getVideoTracks()[0]);
@@ -582,10 +592,13 @@ var ofmeet = (function(of)
 
                     ysFixWebmDuration(blob, duration, function(fixedBlob) {
                         createAnchor(filenames[id], fixedBlob);
+                        idbKeyval.clear(customStore[id]);
+
+                        delete filenames[id];
+                        delete videoRecorder[id];
+                        delete recorderStreams[id];
+                        delete customStore[id];
                     });
-
-                    idbKeyval.clear(customStore[id]);
-
                 });
             }
             videoRecorder[id].start(1000);
@@ -597,7 +610,7 @@ var ofmeet = (function(of)
 
     function recoverRecording(dbname)
     {
-        console.log("recovering db " + dbname);
+        console.debug("recovering db " + dbname);
 
         dbnames.push(dbname);
         const store = new idbKeyval.Store(dbname, dbname);

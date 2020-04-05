@@ -204,7 +204,7 @@ public class OFMeetConfig
     public List<String> getButtonsImplemented() // BAO
     {
         // These should match the implementations that are provided in the Toolbox.web.js file in jitsi-meet.
-        return JiveGlobals.getListProperty( "ofmeet.buttons.implemented", Arrays.asList( "camera", "chat", "desktop", "etherpad", "feedback", "fodeviceselection", "fullscreen", "hangup", "info", "invite", "microphone", "profile", "raisehand", "settings", "sharedvideo", "shortcuts", "stats", "videoquality", "tileview" ) );
+        return JiveGlobals.getListProperty( "ofmeet.buttons.implemented", Arrays.asList( "microphone", "camera", "closedcaptions", "desktop", "fullscreen", "fodeviceselection", "hangup", "profile", "info", "chat", "recording", "livestreaming", "etherpad", "sharedvideo", "settings", "raisehand", "videoquality", "filmstrip", "invite", "feedback", "stats", "shortcuts", "tileview", "videobackgroundblur", "download", "help", "mute-everyone" ) );
     }
 
     public void resetButtonsImplemented()
@@ -219,7 +219,7 @@ public class OFMeetConfig
 
     public List<String> getButtonsEnabled() // BAO
     {
-        return JiveGlobals.getListProperty( "ofmeet.buttons.enabled", Arrays.asList( "camera", "chat", "desktop", "etherpad", "feedback", "fodeviceselection", "fullscreen", "hangup", "info", "invite", "microphone", "profile", "raisehand", "settings", "sharedvideo", "shortcuts", "stats", "videoquality", "tileview" ) );
+        return JiveGlobals.getListProperty( "ofmeet.buttons.enabled", Arrays.asList( "microphone", "camera", "closedcaptions", "desktop", "fullscreen", "fodeviceselection", "hangup", "profile", "info", "chat", "recording", "livestreaming", "etherpad", "sharedvideo", "settings", "raisehand", "videoquality", "filmstrip", "invite", "feedback", "stats", "shortcuts", "tileview", "videobackgroundblur", "download", "help", "mute-everyone" ) );
     }
 
     public void resetButtonsEnabled()

@@ -227,7 +227,8 @@ public class ConfigServlet extends HttpServlet
                 config.put( "globalConferenceId", globalConferenceId );
             }
             config.put( "disableRtx", ofMeetConfig.getDisableRtx() );
-            config.put( "bosh", getMostPreferredConnectionURL( request ) );
+            config.put( "bosh", new URI( "https", null, request.getServerName(), request.getServerPort(), "/http-bind/", null, null) );
+            config.put( "websocket", new URI( "wss", null, request.getServerName(), request.getServerPort(), "/ws/", null, null) );
 
             config.put( "channelLastN", ofMeetConfig.getChannelLastN() );
             config.put( "adaptiveLastN", ofMeetConfig.getAdaptiveLastN() );

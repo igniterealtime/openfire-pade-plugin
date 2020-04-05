@@ -601,7 +601,7 @@
             "show": "Afficher en premier plan",
             "speakerStats": "Afficher/cacher les statistiques de parole",
             "tileView": "Activer/désactiver la vue mosaïque",
-            "toggleCamera": "Activer/désactiver la caméra",
+            "toggleCamera": "Changer de caméra",
             "videomute": "Activer/désactiver la vidéo",
             "videoblur": "Activer/désactiver le flou de la vidéo"
         },
@@ -628,6 +628,7 @@
         "logout": "Déconnexion",
         "lowerYourHand": "Baisser la main",
         "moreActions": "Plus d'actions",
+        "moreOptions": "Plus d'options",
         "mute": "Muet / Actif",
         "noAudioSignalTitle": "Il n'y a pas d'entrée provenant de votre micro !",
         "noAudioSignalDesc": "Si vous n'avez pas délibérément coupé le son des paramètres du système ou du matériel, envisagez de changer le périphérique.",
@@ -728,7 +729,7 @@
             "join": "Touchez pour rejoindre",
             "roomname": "Saisissez un nom de salle"
         },
-        "appDescription": "Allez-y, chat vidéo avec toute l'équipe. En fait, invitez tout le monde que vous connaissez. {{app}} est une solution de visioconférence entièrement cryptée et 100% open source que vous pouvez utiliser toute la journée, tous les jours, gratuitement— aucun compte requis.",
+        "appDescription": "Allez-y, chat vidéo avec toute l'équipe. En fait, invitez tout le monde que vous connaissez. {{app}} est une solution de visioconférence entièrement chiffrée et 100% open source que vous pouvez utiliser toute la journée, tous les jours, gratuitement— aucun compte requis.",
         "audioVideoSwitch": {
             "audio": "Voix",
             "video": "Vidéo"
@@ -752,5 +753,12 @@
         "sendFeedback": "Envoyer votre avis",
         "terms": "Termes",
         "title": "Vidéoconférence Sécurisée, entièrement en vedette et gratuite"
+    },
+    "lonelyMeetingExperience": {
+        "button": "Inviter d'autres personnes",
+        "youAreAlone": "Vous êtes le seul participant de la réunion"
+    },
+    "helpView": {
+        "header": "Centre d'aide"
     }
 }

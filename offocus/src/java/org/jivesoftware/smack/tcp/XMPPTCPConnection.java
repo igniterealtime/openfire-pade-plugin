@@ -84,6 +84,12 @@ public class XMPPTCPConnection extends AbstractXMPPConnection
     {
 
     }
+
+    public static void setUseStreamManagementDefault(boolean flag)
+    {
+
+    }
+
     /**
      * Creates a new XMPP connection over TCP (optionally using proxies).
      * <p>

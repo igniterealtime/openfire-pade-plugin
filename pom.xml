@@ -40,8 +40,8 @@
     
         <module>web</module>
         <module>config</module>
-        <module>videobridge</module>            
-        <module>ofmeet</module>        
+        <!--module>videobridge</module>            
+        <module>ofmeet</module-->        
         <module>offocus</module>        
         <!--module>ofgasi</module>           
         <module>pade</module-->        

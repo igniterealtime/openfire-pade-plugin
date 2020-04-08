@@ -108,12 +108,16 @@ var ofmeet = (function(of)
         APP.conference.addConferenceListener(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, function(track)
         {
             console.debug("ofmeet.js track muted", track.getParticipantId(), track.getType(), track.isMuted());
-            const stream = recorderStreams[track.getParticipantId()];
 
-            if (stream)
+            if (track.getType() == "audio") recordingAudioTrack[track.getParticipantId()].getAudioTracks()[0].enabled = !track.isMuted();
+            if (track.getType() == "video") recordingVideoTrack[track.getParticipantId()].getVideoTracks()[0].enabled = !track.isMuted();
+
+            const recordingStream = recorderStreams[track.getParticipantId()];
+
+            if (recordingStream) // recording active
             {
-                if (track.getType() == "audio") stream.getAudioTracks()[0].enabled = !track.isMuted();
-                if (track.getType() == "video") stream.getVideoTracks()[0].enabled = !track.isMuted();
+                if (track.getType() == "audio") recordingStream.getAudioTracks()[0].enabled = !track.isMuted();
+                if (track.getType() == "video") recordingStream.getVideoTracks()[0].enabled = !track.isMuted();
             }
         });
 

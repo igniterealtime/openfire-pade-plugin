@@ -34,21 +34,25 @@ var ofmeet = (function(of)
     window.addEventListener("beforeunload", function(event)
     {
         console.debug("ofmeet.js beforeunload");
-        event.preventDefault();
-        event.returnValue = '';
 
-        if (of.recording) stopRecorder();
-
-        dbnames.forEach(function(dbname)
+        if (APP.connection)
         {
-            const deleteRequest = indexedDB.deleteDatabase(dbname)
+            event.preventDefault();
+            event.returnValue = '';
 
-            deleteRequest.onsuccess = function(event) {
-              console.debug("ofmeet.js me database deleted successfully", dbname);
-            };
-        });
+            if (of.recording) stopRecorder();
 
-        return event.returnValue;
+            dbnames.forEach(function(dbname)
+            {
+                const deleteRequest = indexedDB.deleteDatabase(dbname)
+
+                deleteRequest.onsuccess = function(event) {
+                  console.debug("ofmeet.js me database deleted successfully", dbname);
+                };
+            });
+
+            return event.returnValue;
+        }
     });
 
     function setup()

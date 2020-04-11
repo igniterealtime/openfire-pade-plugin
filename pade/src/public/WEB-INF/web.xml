@@ -32,5 +32,29 @@
     <servlet-mapping>
         <servlet-name>smartidcardcert</servlet-name>
         <url-pattern>/smartidcardcert</url-pattern>
-    </servlet-mapping>     
+    </servlet-mapping> 
+    <servlet>
+        <servlet-name>webhookServlet</servlet-name>
+        <servlet-class>org.ifsoft.webhook.WebhookServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>webhookServlet</servlet-name>
+        <url-pattern>/webhook</url-pattern>
+    </servlet-mapping>
+    <filter>
+        <filter-name>Github-XHubFilter</filter-name>
+        <filter-class>fr.brouillard.oss.security.xhub.servlet.XHubFilter</filter-class>
+        <init-param>
+            <param-name>x-hub-token</param-name>
+            <param-value>password4tests</param-value>
+        </init-param>
+        <init-param>
+            <param-name>x-hub-converter</param-name>
+            <param-value>HEXA_LOWERCASE</param-value>       <!-- convert the data as an hexadecimal string with lowercase letters  -->
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>Github-XHubFilter</filter-name>
+        <servlet-name>webhookServlet</servlet-name>
+    </filter-mapping>    
 </web-app>

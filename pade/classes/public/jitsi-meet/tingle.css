@@ -1195,27 +1195,3 @@ input[type=submit].btn-block {
         margin-bottom: 0
     }
 }
-.pade-col-container {
-  display: flex;
-  flex-wrap: wrap; 
-}
-
-.pade-col {
-  display: flex; 
-  padding: 0.5em;
-  width: 23%;
-  padding: 5px !important;
-  margin: 5px !important;  
-  background: #EEE;
-}
-.pade-col-content {
-  display: flex;
-  flex-direction: column;
-  padding: 1em !important;
-  padding: 10px;
-  cursor: pointer;
-  max-width: 230px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis; 
-}

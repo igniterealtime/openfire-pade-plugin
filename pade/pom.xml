@@ -431,6 +431,20 @@
             <artifactId>subethasmtp</artifactId>
             <version>4.0-RC6</version>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/fr.brouillard.oss.security.xhub/xhub4j-core -->
+        <dependency>
+            <groupId>fr.brouillard.oss.security.xhub</groupId>
+            <artifactId>xhub4j-core</artifactId>
+            <version>1.1.0</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/fr.brouillard.oss.security.xhub/xhub4j-servlet -->
+        <dependency>
+            <groupId>fr.brouillard.oss.security.xhub</groupId>
+            <artifactId>xhub4j-servlet</artifactId>
+            <version>1.1.0</version>
+        </dependency>
         
         <dependency>
             <groupId>com.lowagie</groupId>

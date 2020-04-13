@@ -160,18 +160,21 @@ var ofmeet = (function(of)
             recordingVideoTrack[APP.conference.getMyUserId()] = stream;
             recordingAudioTrack[APP.conference.getMyUserId()] = stream;
 
-            createRecordButton();
-            createPhotoButton();
-            createTagsButton();
-            createPadsButton();
+            if (interfaceConfig.OFMEET_RECORD_CONFERENCE)
+            {
+                createRecordButton();
+                createPhotoButton();
+
+                if (APP.conference.getMyUserId())
+                {
+                    showClock();
+                    clockTrack.joins = (new Date()).getTime();
+                }
+            }
+
+            if (interfaceConfig.OFMEET_TAG_CONFERENCE)    createTagsButton();
+            if (interfaceConfig.OFMEET_ENABLE_CRYPTPAD)   createPadsButton();
         });
-
-
-        if (APP.conference.getMyUserId())
-        {
-            showClock();
-            clockTrack.joins = (new Date()).getTime();
-        }
 
         console.debug("ofmeet.js setup", APP.connection);
     }
@@ -212,7 +215,7 @@ var ofmeet = (function(of)
 
     function createPadsButton()
     {
-        const padsButton = addToolbarItem('ofmeet-pads', '<div id="ofmeet-pads" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;"><img width="22" src="https://sandbox.cryptpad.info/customize/images/logo_white.png"/></div></div>', "CryptPad");
+        const padsButton = addToolbarItem('ofmeet-pads', '<div id="ofmeet-pads" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;"><img width="22" src="https://sandbox.cryptpad.info/customize/images/logo_white.png"/></div></div>', "CryptPad Collaboration Apps");
 
         if (padsButton) padsButton.addEventListener("click", function(evt)
         {

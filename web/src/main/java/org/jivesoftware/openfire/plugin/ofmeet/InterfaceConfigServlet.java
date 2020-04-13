@@ -77,6 +77,10 @@ public class InterfaceConfigServlet extends HttpServlet
             config.put( "DISABLE_FOCUS_INDICATOR",               JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.disable.focus.indicator",       false               ) );
             config.put( "ACTIVE_SPEAKER_AVATAR_SIZE",            JiveGlobals.getIntProperty(     "org.jitsi.videobridge.ofmeet.active.speaker.avatarsize",     100                 ) );
 
+            config.put( "OFMEET_RECORD_CONFERENCE",              JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.conference.recording",          true                ) );
+            config.put( "OFMEET_TAG_CONFERENCE",                 JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.conference.tags",               true                ) );
+            config.put( "OFMEET_ENABLE_CRYPTPAD",                JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.cryptpad",               true                ) );
+
             config.put( "filmStripOnly",                         ofMeetConfig.getFilmstripOnly()      );
             config.put( "VERTICAL_FILMSTRIP",                    ofMeetConfig.getVerticalFilmstrip()  );
             config.put( "FILM_STRIP_MAX_HEIGHT",                 ofMeetConfig.getFilmstripMaxHeight() );

@@ -1,6 +1,16 @@
 var ofmeet = (function(of)
 {
-    let modal = null;
+    const IMAGES = {};
+    IMAGES.pad = '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 30.122,30.122L 28.020,23.778L 11.050,6.808L 10,7.858L 6.808,11.050L 23.778,28.020 zM 3.98,8.222L 8.222,3.98l-2.1-2.1c-1.172-1.172-3.070-1.172-4.242,0c-1.172,1.17-1.172,3.072,0,4.242 L 3.98,8.222z"></path></g></svg></span>';
+    IMAGES.sheet = '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 4,10l 4,0 c 1.104,0, 2-0.896, 2-2L 10,4 c0-1.104-0.896-2-2-2L 4,2 C 2.896,2, 2,2.896, 2,4l0,4 C 2,9.104, 2.896,10, 4,10zM 14,10l 4,0 c 1.104,0, 2-0.896, 2-2L 20,4 c0-1.104-0.896-2-2-2L 14,2 C 12.896,2, 12,2.896, 12,4l0,4 C 12,9.104, 12.896,10, 14,10zM 24,10l 4,0 c 1.104,0, 2-0.896, 2-2L 30,4 c0-1.104-0.896-2-2-2l-4,0 c-1.104,0-2,0.896-2,2l0,4 C 22,9.104, 22.896,10, 24,10zM 2,18c0,1.104, 0.896,2, 2,2l 4,0 c 1.104,0, 2-0.896, 2-2L 10,14 c0-1.104-0.896-2-2-2L 4,12 C 2.896,12, 2,12.896, 2,14L 2,18 zM 12,18c0,1.104, 0.896,2, 2,2l 4,0 c 1.104,0, 2-0.896, 2-2L 20,14 c0-1.104-0.896-2-2-2L 14,12 C 12.896,12, 12,12.896, 12,14L 12,18 zM 22,18c0,1.104, 0.896,2, 2,2l 4,0 c 1.104,0, 2-0.896, 2-2L 30,14 c0-1.104-0.896-2-2-2l-4,0 c-1.104,0-2,0.896-2,2L 22,18 zM 2,28c0,1.104, 0.896,2, 2,2l 4,0 c 1.104,0, 2-0.896, 2-2l0-4 c0-1.104-0.896-2-2-2L 4,22 c-1.104,0-2,0.896-2,2L 2,28 zM 12,28c0,1.104, 0.896,2, 2,2l 4,0 c 1.104,0, 2-0.896, 2-2l0-4 c0-1.104-0.896-2-2-2L 14,22 c-1.104,0-2,0.896-2,2L 12,28 zM 22,28c0,1.104, 0.896,2, 2,2l 4,0 c 1.104,0, 2-0.896, 2-2l0-4 c0-1.104-0.896-2-2-2l-4,0 c-1.104,0-2,0.896-2,2L 22,28 z"></path></g></svg></span>';
+    IMAGES.code = '<svg width="32.24800109863281" height="32.24800109863281" viewBox="0 0 32.24800109863281 32.24800109863281" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 21.172,21.172L 19.39,15.792L 9.11,5.512L 5.512,9.11L 15.792,19.39 zM 0.746,0.746c-0.994,0.994-0.994,2.604,0,3.598l 2.648,2.648l 3.598-3.598L 4.344,0.746 C 3.35-0.248, 1.74-0.248, 0.746,0.746zM 30,6L 15.822,6 l 2,2L 30,8 l0,22 L 8,30 L 8,17.822 l-2-2L 6,30 c0,1.104, 0.896,2, 2,2l 22,0 c 1.104,0, 2-0.896, 2-2L 32,8 C 32,6.896, 31.104,6, 30,6z"></path></g></svg></span>';
+    IMAGES.slide = '<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="32" height="32.11199951171875" viewBox="0 0 32 32.11199951171875" enable-background="new 0 0 16 16" xml:space="preserve" fill="#000000"> <g><path d="M 9.030,16.5c 0.296,0, 0.592-0.132, 0.79-0.386l 4.404-5.67l 3.016,3.542c 0.192,0.222, 0.408,0.32, 0.766,0.352 C 18.296,14.336, 18.576,14.208, 18.766,13.98l 7-8.338c 0.356-0.422, 0.3-1.052-0.124-1.408c-0.422-0.358-1.052-0.298-1.408,0.124 l-6.24,7.432L 14.95,8.21C 14.752,7.982, 14.388,7.876, 14.166,7.86C 13.864,7.868, 13.582,8.008, 13.398,8.246L 8.24,14.886 C 7.9,15.322, 7.98,15.952, 8.416,16.29C 8.598,16.432, 8.814,16.5, 9.030,16.5zM 30.978,0L 28,0 L 6,0 L 3.022,0 C 2.458,0, 2,0.448, 2,1C 2,1.552, 2.458,2, 3.022,2L 4,2 l0,18 c0,1.104, 0.896,2, 2,2l 10,0 l0,3.122 L 10.328,30.26c-0.408,0.37-0.44,1.002-0.068,1.412c 0.374,0.408, 1.006,0.44, 1.412,0.068L 16,27.82l0,3.18 C 16,31.552, 16.448,32, 17,32 S 18,31.552, 18,31l0-3.18 l 4.328,3.92C 22.52,31.914, 22.76,32, 23,32c 0.272,0, 0.542-0.112, 0.74-0.328 c 0.372-0.41, 0.34-1.042-0.068-1.412L 18,25.122L 18,22 l 10,0 c 1.104,0, 2-0.896, 2-2L 30,2 l 0.978,0 C 31.542,2, 32,1.552, 32,1 C 32,0.448, 31.542,0, 30.978,0z M 28,20L 6,20 L 6,2 l 22,0 L 28,20 z"></path></g></svg></span>' ;
+    IMAGES.poll = '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 13.774,26.028A2.060,2.060 1080 1 0 17.894,26.028A2.060,2.060 1080 1 0 13.774,26.028zM 19.464,18.252c 2.898-1.596, 4.37-3.91, 4.37-6.876c0-5.094-4.018-7.376-8-7.376c-3.878,0-8,2.818-8,8.042 c0,1.104, 0.894,2, 2,2s 2-0.896, 2-2c0-2.778, 2.074-4.042, 4-4.042c 1.494,0, 4,0.438, 4,3.376c0,1.042-0.274,2.258-2.298,3.374 C 16.16,15.504, 13.834,17.462, 13.834,20c0,1.104, 0.894,2, 2,2s 2-0.896, 2-2C 17.834,19.628, 18.624,18.714, 19.464,18.252z"></path></g></svg></span>';
+    IMAGES.kanban = '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 31.966,3.896C 31.878,2.866, 31.046,2, 30,2L 2,2 C 0.954,2, 0.122,2.866, 0.034,3.896L0,3.896 l0,0.166 L0,8 l0,14.166 L0,24 l0,6 c0,1.104, 0.896,2, 2,2l 28,0 c 1.104,0, 2-0.896, 2-2L 32,8 L 32,4.062 L 32,3.896 L 31.966,3.896 z M 12,14L 12,8 l 8,0 l0,6 L 12,14 z M 20,16l0,6.166 L 12,22.166 L 12,16 L 20,16 z M 10,8l0,6 L 2,14 L 2,8 L 10,8 z M 2,16l 8,0 l0,6.166 L 2,22.166 L 2,16 z M 2,30l0-6 l 8,0 l0,6 L 2,30 z M 12,30l0-6 l 8,0 l0,6 L 12,30 z M 30,30l-8,0 l0-6 l 8,0 L 30,30 z M 30,22.166l-8,0 L 22,16 l 8,0 L 30,22.166 z M 30,14l-8,0 L 22,8 l 8,0 L 30,14 z"></path></g></svg></span>';
+    IMAGES.whiteboard = '<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="32" height="32" viewBox="0 0 32 32" enable-background="new 0 0 16 16" xml:space="preserve" fill="#000000"> <g><path d="M 30,20L 30,16 c0-1.104-0.896-2-2-2L 18,14 L 18,10 l 6,0 c 1.104,0, 2-0.896, 2-2L 26,6 c0-1.104-0.896-2-2-2L 10,4 C 8.896,4, 8,4.896, 8,6l0,2 c0,1.104, 0.896,2, 2,2l 6,0 l0,4 L 6,14 C 4.896,14, 4,14.896, 4,16l0,4 c-1.104,0-2,0.896-2,2l0,4 c0,1.104, 0.896,2, 2,2l 2,0 c 1.104,0, 2-0.896, 2-2l0-2 l0-2 c0-1.104-0.896-2-2-2L 6,16 l 10,0 l0,4 c-1.104,0-2,0.896-2,2l0,2 l0,2 c0,1.104, 0.896,2, 2,2l 2,0 c 1.104,0, 2-0.896, 2-2l0-2 l0-2 c0-1.104-0.896-2-2-2L 18,16 l 10,0 l0,4 c-1.104,0-2,0.896-2,2l0,2 l0,2 c0,1.104, 0.896,2, 2,2l 2,0 c 1.104,0, 2-0.896, 2-2l0-4 C 32,20.896, 31.104,20, 30,20z M 10,6l 14,0 l0,2 L 10,8 L 10,6 z M 6,24l0,2 L 4,26 l0-4 l 2,0 L 6,24 z M 18,26L 16,26 l0-4 l 2,0 L 18,26 z M 28,24l0-2 l 2,0 l0,4 l-2,0 L 28,24 z"></path></g></svg></span>';
+
+    let tagsModal = null;
+    let padsModal = null, padsModalOpened = false, padsList = [];
     let recordingAudioTrack = {};
     let recordingVideoTrack = {};
     let videoRecorder = {};
@@ -59,7 +69,7 @@ var ofmeet = (function(of)
     {
         if (!APP.connection)
         {
-            setTimeout(setup, 500);
+            setTimeout(setup, 100);
             return;
         }
 
@@ -108,12 +118,40 @@ var ofmeet = (function(of)
         APP.conference.addConferenceListener(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, function(track)
         {
             console.debug("ofmeet.js track muted", track.getParticipantId(), track.getType(), track.isMuted());
-            const stream = recorderStreams[track.getParticipantId()];
 
-            if (stream)
+            if (track.getType() == "audio") recordingAudioTrack[track.getParticipantId()].getAudioTracks()[0].enabled = !track.isMuted();
+            if (track.getType() == "video") recordingVideoTrack[track.getParticipantId()].getVideoTracks()[0].enabled = !track.isMuted();
+
+            const recordingStream = recorderStreams[track.getParticipantId()];
+
+            if (recordingStream) // recording active
             {
-                if (track.getType() == "audio") stream.getAudioTracks()[0].enabled = !track.isMuted();
-                if (track.getType() == "video") stream.getVideoTracks()[0].enabled = !track.isMuted();
+                if (track.getType() == "audio") recordingStream.getAudioTracks()[0].enabled = !track.isMuted();
+                if (track.getType() == "video") recordingStream.getVideoTracks()[0].enabled = !track.isMuted();
+            }
+        });
+
+        APP.conference.addConferenceListener(JitsiMeetJS.events.conference.MESSAGE_RECEIVED , function(id, text, ts)
+        {
+            var participant = APP.conference.getParticipantById(id);
+            var displayName = participant ? participant._displayName || id.split("-")[0] : "Me";
+
+            console.debug("ofmeet.js message", id, text, ts, displayName, participant, padsModalOpened);
+
+            if (text.indexOf("https://cryptpad.fr/") == 0)
+            {
+                if (padsModalOpened) notifyText(displayName, text, id, function(button)
+                {
+                    openPad(text);
+                })
+
+                if (padsModalOpened)
+                {
+                    addPad(text);
+                }
+                else {
+                    padsList.push(text);
+                }
             }
         });
 
@@ -122,17 +160,21 @@ var ofmeet = (function(of)
             recordingVideoTrack[APP.conference.getMyUserId()] = stream;
             recordingAudioTrack[APP.conference.getMyUserId()] = stream;
 
-            createRecordButton();
-            createPhotoButton();
-            createTagsButton();
+            if (interfaceConfig.OFMEET_RECORD_CONFERENCE)
+            {
+                createRecordButton();
+                createPhotoButton();
+
+                if (APP.conference.getMyUserId())
+                {
+                    showClock();
+                    clockTrack.joins = (new Date()).getTime();
+                }
+            }
+
+            if (interfaceConfig.OFMEET_TAG_CONFERENCE)    createTagsButton();
+            if (interfaceConfig.OFMEET_ENABLE_CRYPTPAD)   createPadsButton();
         });
-
-
-        if (APP.conference.getMyUserId())
-        {
-            showClock();
-            clockTrack.joins = (new Date()).getTime();
-        }
 
         console.debug("ofmeet.js setup", APP.connection);
     }
@@ -171,6 +213,17 @@ var ofmeet = (function(of)
         });
     }
 
+    function createPadsButton()
+    {
+        const padsButton = addToolbarItem('ofmeet-pads', '<div id="ofmeet-pads" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;"><img width="22" src="https://sandbox.cryptpad.info/customize/images/logo_white.png"/></div></div>', "CryptPad");
+
+        if (padsButton) padsButton.addEventListener("click", function(evt)
+        {
+            evt.stopPropagation();
+            doPads();
+        });
+    }
+
     function hideClock()
     {
         document.getElementById("clocktext").style.display = "none";
@@ -201,6 +254,185 @@ var ofmeet = (function(of)
         updateClock();
     }
 
+    function addPad(text)
+    {
+        const container = document.querySelector(".pade-col-container");
+        const values =  text.split('/');
+        const html = '<span class="pade-col-content">' + IMAGES[values[3]] + '</span><span class="pade-col-content">' + values[8] + '<br/>' + values[3] + '</span>';
+        const ele = document.createElement('li');
+        ele.innerHTML = html;
+        ele.classList.add("pade-col");
+        ele.setAttribute("data-url", text);
+        ele.setAttribute("data-type", values[3]);
+        container.appendChild(ele);
+    }
+
+    function doPads()
+    {
+        const template =
+            '<div class="modal-header">' +
+            '    <h4 class="modal-title">CryptPad</h4>' +
+            '</div>' +
+            '<div class="modal-body">' +
+            '    <div class="pade-col-container">' +
+            '        <li class="pade-col " data-type="pad">' +
+            '            <span class="pade-col-content">' + IMAGES.pad + '</span>' +
+            '            <span class="pade-col-content">New Rich Text</span>' +
+            '        </li>' +
+            '        <li class="pade-col " data-type="sheet">' +
+            '            <span class="pade-col-content">' + IMAGES.sheet + '</span>' +
+            '            <span class="pade-col-content">New Sheet</span>' +
+            '        </li>' +
+            '        <li class="pade-col " data-type="code">' +
+            '            <span class="pade-col-content">' + IMAGES.code + '</span>' +
+            '            <span class="pade-col-content">New Code</span>' +
+            '        </li>' +
+            '        <li class="pade-col " data-type="slide">' +
+            '            <span class="pade-col-content">' + IMAGES.slide + '</span>' +
+            '            <span class="pade-col-content">New Presentation</span>' +
+            '        </li><li class="pade-col " data-type="poll">' +
+            '            <span class="pade-col-content">' + IMAGES.poll + '</span>' +
+            '            <span class="pade-col-content">New Poll</span>' +
+            '        </li><li class="pade-col " data-type="kanban">' +
+            '            <span class="pade-col-content">' + IMAGES.kanban + '</span>' +
+            '            <span class="pade-col-content">New Kanban</span>' +
+            '        </li><li class="pade-col " data-type="whiteboard">' +
+            '            <span class="pade-col-content">' + IMAGES.whiteboard + '</span>' +
+            '            <span class="pade-col-content">New Whiteboard</span>' +
+            '        </li>' +
+            '   </div>' +
+            '</div>'
+
+        if (!padsModal)
+        {
+            const largeVideo = document.querySelector("#largeVideo");
+            const display = largeVideo.style.display;
+
+            padsModal = new tingle.modal({
+                footer: true,
+                stickyFooter: false,
+                closeMethods: ['overlay', 'button', 'escape'],
+                closeLabel: "Close",
+                cssClass: ['custom-class-1', 'custom-class-2'],
+
+                beforeOpen: function() {
+                    console.log("beforeOpen", padsModalOpened, padsList);
+
+                    if (!padsModalOpened)
+                    {
+                        padsList.forEach(function(text)
+                        {
+                            addPad(text);
+                        });
+
+                        const container = document.querySelector(".pade-col-container");
+
+                        container.addEventListener("click", function(evt)
+                        {
+                            evt.stopPropagation();
+                            const type = evt.target.parentNode.getAttribute("data-type");
+                            let url = evt.target.parentNode.getAttribute("data-url");
+
+                            if (type)
+                            {
+                                console.log("beforeOpen - click", type);
+                                if (!url) url = "https://cryptpad.fr/" + type + "/";
+                                openPad(url);
+                            }
+                        });
+
+                        padsModalOpened = true;
+                    }
+                }
+            });
+            padsModal.addFooterBtn('Share Clipboard', 'btn btn-success tingle-btn tingle-btn--primary', function() {
+                navigator.clipboard.readText().then(function(clipText)
+                {
+                    console.log("doPads", clipText);
+
+                    padsModal.close();
+
+                    //APP.UI.toggleChat();
+                    APP.conference._room.sendTextMessage(clipText)
+                    APP.UI.messageHandler.notify("Clipboard shared with other participants", null, null, "");
+                });
+            });
+
+            padsModal.addFooterBtn('Close', 'btn btn-success tingle-btn tingle-btn--primary', function() {
+                padsModal.close();
+            });
+
+            padsModal.addFooterBtn('Quit', 'btn btn-danger tingle-btn tingle-btn--danger', function() {
+                event.preventDefault();
+                padsModal.close();
+
+                const padContent = document.querySelector("#ofmeet-content");
+                if (padContent) padContent.parentNode.removeChild(padContent);
+                if (largeVideo) largeVideo.style.display = display;
+            });
+
+            padsModal.setContent(template);
+        }
+
+        padsModal.open();
+    }
+
+    function openPad(url)
+    {
+        console.debug("openPad", url);
+
+        const padContent = document.querySelector("#ofmeet-content");
+
+        if (padContent)
+        {
+            padsModal.close();
+            APP.UI.messageHandler.notify("Quit active pad before opening a new one", null, null, "");
+        }
+        else {
+            const largeVideo = document.querySelector("#largeVideo");
+            const iframe = largeVideo.cloneNode(false);
+
+            largeVideo.parentNode.appendChild(iframe);
+            largeVideo.style.display = "none";
+            iframe.requestFullscreen();
+
+            iframe.outerHTML = '<iframe src=' + url + ' id="ofmeet-content" style="width: 90%; height: 92%; border: 0;padding-left: 0px; padding-top: 0px;">'
+
+            const cryptpad = document.querySelector('#ofmeet-content');
+
+            cryptpad.addEventListener("load", function (evt)
+            {
+                console.debug("loading pad - ", this);
+                padsModal.close();
+            });
+        }
+    }
+
+    function notifyText(message, title, notifyId, callback)
+    {
+        console.debug("notifyText", title, message, notifyId);
+
+        if (!notifyId) notifyId = Math.random().toString(36).substr(2,9);
+
+        var prompt = new Notification(title,
+        {
+            body: message,
+            requireInteraction: true
+        });
+
+        prompt.onclick = function(event)
+        {
+            event.preventDefault();
+            if (callback) callback(notifyId, 0);
+        }
+
+        prompt.onclose = function(event)
+        {
+            event.preventDefault();
+            if (callback) callback(notifyId, 1);
+        }
+    }
+
     function doTags()
     {
         const template =
@@ -225,19 +457,19 @@ var ofmeet = (function(of)
         '       </div>' +
         '    </div>'
 
-        if (!modal)
+        if (!tagsModal)
         {
-            modal = new tingle.modal({
+            tagsModal = new tingle.modal({
                 footer: true,
                 stickyFooter: false,
                 closeMethods: ['overlay', 'button', 'escape'],
                 closeLabel: "Close",
                 cssClass: ['custom-class-1', 'custom-class-2'],
                 onOpen: function() {
-                    console.debug('modal open');
+                    console.debug('tags modal open');
                 },
                 onClose: function() {
-                    console.debug('modal closed');
+                    console.debug('tags modal closed');
                 },
                 beforeOpen: function() {
                     document.getElementById('tags-date').value = (new Date()).toISOString().split('T')[0]
@@ -256,14 +488,14 @@ var ofmeet = (function(of)
                     return true;
                 }
             });
-            modal.setContent(template);
+            tagsModal.setContent(template);
 
-            modal.addFooterBtn('Save', 'btn btn-success tingle-btn tingle-btn--primary', function() {
+            tagsModal.addFooterBtn('Save', 'btn btn-success tingle-btn tingle-btn--primary', function() {
                 // here goes some logic
-                modal.close();
+                tagsModal.close();
             });
 
-            modal.addFooterBtn('Cancel', 'btn btn-danger tingle-btn tingle-btn--danger', function() {
+            tagsModal.addFooterBtn('Cancel', 'btn btn-danger tingle-btn tingle-btn--danger', function() {
                 event.preventDefault();
                 tags = {location: "", date: (new Date()).toISOString().split('T')[0], subject: "", host: "", activity: ""};
 
@@ -274,12 +506,13 @@ var ofmeet = (function(of)
                 document.getElementById('tags-activity').value = tags.activity;
 
                 document.getElementById("subtitles").innerHTML =  "";
-                modal.close();
+                tagsModal.close();
             });
         }
 
-        modal.open();
+        tagsModal.open();
     }
+
 
     function getFilename(prefix, suffix)
     {

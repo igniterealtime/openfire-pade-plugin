@@ -1,5 +1,22 @@
 var ofmeet = (function(of)
 {
+    if (navigator.credentials)
+    {
+        navigator.credentials.get({password: true, federated: {providers: [ 'https://accounts.google.com' ]}}).then(function(credential)
+        {
+            console.log("credential management api get", credential);
+
+            if (credential)
+            {
+                localStorage.setItem("xmpp_username_override", credential.id);
+                localStorage.setItem("xmpp_password_override", credential.password);
+            }
+
+        }).catch(function(err){
+            console.error ("credential management api get error", err);
+        });
+    }
+
     const IMAGES = {};
     IMAGES.pad = '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 30.122,30.122L 28.020,23.778L 11.050,6.808L 10,7.858L 6.808,11.050L 23.778,28.020 zM 3.98,8.222L 8.222,3.98l-2.1-2.1c-1.172-1.172-3.070-1.172-4.242,0c-1.172,1.17-1.172,3.072,0,4.242 L 3.98,8.222z"></path></g></svg></span>';
     IMAGES.sheet = '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 4,10l 4,0 c 1.104,0, 2-0.896, 2-2L 10,4 c0-1.104-0.896-2-2-2L 4,2 C 2.896,2, 2,2.896, 2,4l0,4 C 2,9.104, 2.896,10, 4,10zM 14,10l 4,0 c 1.104,0, 2-0.896, 2-2L 20,4 c0-1.104-0.896-2-2-2L 14,2 C 12.896,2, 12,2.896, 12,4l0,4 C 12,9.104, 12.896,10, 14,10zM 24,10l 4,0 c 1.104,0, 2-0.896, 2-2L 30,4 c0-1.104-0.896-2-2-2l-4,0 c-1.104,0-2,0.896-2,2l0,4 C 22,9.104, 22.896,10, 24,10zM 2,18c0,1.104, 0.896,2, 2,2l 4,0 c 1.104,0, 2-0.896, 2-2L 10,14 c0-1.104-0.896-2-2-2L 4,12 C 2.896,12, 2,12.896, 2,14L 2,18 zM 12,18c0,1.104, 0.896,2, 2,2l 4,0 c 1.104,0, 2-0.896, 2-2L 20,14 c0-1.104-0.896-2-2-2L 14,12 C 12.896,12, 12,12.896, 12,14L 12,18 zM 22,18c0,1.104, 0.896,2, 2,2l 4,0 c 1.104,0, 2-0.896, 2-2L 30,14 c0-1.104-0.896-2-2-2l-4,0 c-1.104,0-2,0.896-2,2L 22,18 zM 2,28c0,1.104, 0.896,2, 2,2l 4,0 c 1.104,0, 2-0.896, 2-2l0-4 c0-1.104-0.896-2-2-2L 4,22 c-1.104,0-2,0.896-2,2L 2,28 zM 12,28c0,1.104, 0.896,2, 2,2l 4,0 c 1.104,0, 2-0.896, 2-2l0-4 c0-1.104-0.896-2-2-2L 14,22 c-1.104,0-2,0.896-2,2L 12,28 zM 22,28c0,1.104, 0.896,2, 2,2l 4,0 c 1.104,0, 2-0.896, 2-2l0-4 c0-1.104-0.896-2-2-2l-4,0 c-1.104,0-2,0.896-2,2L 22,28 z"></path></g></svg></span>';
@@ -44,6 +61,9 @@ var ofmeet = (function(of)
     window.addEventListener("beforeunload", function(event)
     {
         console.debug("ofmeet.js beforeunload");
+
+        localStorage.removeItem("xmpp_username_override");
+        localStorage.removeItem("xmpp_password_override");
 
         if (APP.connection)
         {
@@ -172,6 +192,28 @@ var ofmeet = (function(of)
                 }
             }
 
+            if (navigator.credentials && APP.connection.xmpp.connection._stropheConn.pass)
+            {
+                const id = APP.connection.xmpp.connection.jid.split("/")[0];
+                const pass = APP.connection.xmpp.connection._stropheConn.pass;
+
+                navigator.credentials.create({password: {id: id, password: pass}}).then(function(credential)
+                {
+                    credential.name = APP.conference.getLocalDisplayName();
+
+                    navigator.credentials.store(credential).then(function()
+                    {
+                        console.log("credential management api put", credential);
+
+                    }).catch(function (err) {
+                        console.error("credential management api put error", err);
+                    });
+
+                }).catch(function (err) {
+                    console.error("credential management api put error", err);
+                });
+            }
+
             if (interfaceConfig.OFMEET_TAG_CONFERENCE)    createTagsButton();
             if (interfaceConfig.OFMEET_ENABLE_CRYPTPAD)   createPadsButton();
         });
@@ -215,7 +257,7 @@ var ofmeet = (function(of)
 
     function createPadsButton()
     {
-        const padsButton = addToolbarItem('ofmeet-pads', '<div id="ofmeet-pads" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;"><img width="22" src="https://sandbox.cryptpad.info/customize/images/logo_white.png"/></div></div>', "CryptPad Collaboration Apps");
+        const padsButton = addToolbarItem('ofmeet-pads', '<div id="ofmeet-pads" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;"><img width="22" src="https://sandbox.cryptpad.info/customize/images/logo_white.png"/></div></div>', "CryptPad");
 
         if (padsButton) padsButton.addEventListener("click", function(evt)
         {

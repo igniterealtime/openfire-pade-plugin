@@ -194,7 +194,7 @@ public class ConfigServlet extends HttpServlet
             config.put( "hiddenDomain", "recorder." + xmppDomain );
             config.put( "startBitrate", startBitrate );
             config.put( "recordingType", "colibri" );
-            config.put( "disableAudioLevels", false );
+            config.put( "disableAudioLevels", true );   // reduces CPU. see https://community.jitsi.org/t/host-a-meeting-with-500-people-ideas/34672/3
             config.put( "stereo", false );
             config.put( "requireDisplayName", false );
             config.put( "startAudioOnly", ofMeetConfig.getStartAudioOnly() );

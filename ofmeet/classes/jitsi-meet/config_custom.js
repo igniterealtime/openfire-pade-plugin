@@ -1,3 +1,5 @@
+/* TODO - use this to set localstorage instead of keeping in localstorage
+
 if (navigator.credentials)
 {
     navigator.credentials.get({password: true, federated: {providers: [ 'https://accounts.google.com' ]}, mediation: "silent"}).then(function(credential)
@@ -14,6 +16,7 @@ if (navigator.credentials)
         console.error ("credential management api get error", err);
     });
 }
+*/
 
 if (location.hash.indexOf("config.webinar=true") > -1) config.webinar = true;
 if (location.hash.indexOf("config.webinar=false") > -1) config.webinar = false;

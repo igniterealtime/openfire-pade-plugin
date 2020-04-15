@@ -1,5 +1,3 @@
-console.log("WWWWWWWWWWWWWWWW", config);
-
 var ofmeet = (function(of)
 {
     const IMAGES = {};
@@ -27,10 +25,10 @@ var ofmeet = (function(of)
     {
         console.debug("ofmeet.js load");
 
+        setTimeout(setup, 1000);
+
         if (!config.webinar)
         {
-            setTimeout(setup, 1000);
-
             if (typeof indexedDB.databases == "function")
             {
                 indexedDB.databases().then(function(databases)
@@ -50,10 +48,11 @@ var ofmeet = (function(of)
     {
         console.debug("ofmeet.js beforeunload");
 
-        localStorage.removeItem("xmpp_username_override");
-        localStorage.removeItem("xmpp_password_override");
+        // TODO - remove this to use credential api instead of keeping in localstorage
+        //localStorage.removeItem("xmpp_username_override");
+        //localStorage.removeItem("xmpp_password_override");
 
-        if (APP.connection)
+        if (APP.connection && !config.webinar)
         {
             event.preventDefault();
             event.returnValue = '';
@@ -81,130 +80,138 @@ var ofmeet = (function(of)
             return;
         }
 
-        APP.conference.addConferenceListener(JitsiMeetJS.events.conference.CONFERENCE_JOINED, function()
+        if (!config.webinar)
         {
-            console.debug("ofmeet.js me joined");
-        });
-
-        APP.conference.addConferenceListener(JitsiMeetJS.events.conference.CONFERENCE_LEFT, function()
-        {
-            console.debug("ofmeet.js me left");
-
-            if (of.recording) stopRecorder();
-
-            const ids = Object.getOwnPropertyNames(recordingVideoTrack);
-
-            ids.forEach(function(id)
+            APP.conference.addConferenceListener(JitsiMeetJS.events.conference.CONFERENCE_JOINED, function()
             {
-                delete recordingAudioTrack[id];
-                delete recordingVideoTrack[id];
+                console.debug("ofmeet.js me joined");
             });
-        });
 
-        APP.conference.addConferenceListener(JitsiMeetJS.events.conference.TRACK_REMOVED, function(track)
-        {
-            console.debug("ofmeet.js track removed", track.getParticipantId());
-
-            if (track.getParticipantId() == APP.conference.getMyUserId())
+            APP.conference.addConferenceListener(JitsiMeetJS.events.conference.CONFERENCE_LEFT, function()
             {
-                clockTrack.leaves = (new Date()).getTime();
-                hideClock();
-            }
+                console.debug("ofmeet.js me left");
 
-            if (of.recording) stopRecorder();
-        });
+                if (of.recording) stopRecorder();
 
-        APP.conference.addConferenceListener(JitsiMeetJS.events.conference.TRACK_ADDED, function(track)
-        {
-            console.debug("ofmeet.js track added", track.getParticipantId(), track.getType());
+                const ids = Object.getOwnPropertyNames(recordingVideoTrack);
 
-            if (track.getType() == "audio") recordingAudioTrack[track.getParticipantId()] = track.stream;
-            if (track.getType() == "video") recordingVideoTrack[track.getParticipantId()] = track.stream;
-
-        });
-
-        APP.conference.addConferenceListener(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, function(track)
-        {
-            console.debug("ofmeet.js track muted", track.getParticipantId(), track.getType(), track.isMuted());
-
-            if (track.getType() == "audio") recordingAudioTrack[track.getParticipantId()].getAudioTracks()[0].enabled = !track.isMuted();
-            if (track.getType() == "video") recordingVideoTrack[track.getParticipantId()].getVideoTracks()[0].enabled = !track.isMuted();
-
-            const recordingStream = recorderStreams[track.getParticipantId()];
-
-            if (recordingStream) // recording active
-            {
-                if (track.getType() == "audio") recordingStream.getAudioTracks()[0].enabled = !track.isMuted();
-                if (track.getType() == "video") recordingStream.getVideoTracks()[0].enabled = !track.isMuted();
-            }
-        });
-
-        APP.conference.addConferenceListener(JitsiMeetJS.events.conference.MESSAGE_RECEIVED , function(id, text, ts)
-        {
-            var participant = APP.conference.getParticipantById(id);
-            var displayName = participant ? participant._displayName || id.split("-")[0] : "Me";
-
-            console.debug("ofmeet.js message", id, text, ts, displayName, participant, padsModalOpened);
-
-            if (text.indexOf("https://cryptpad.fr/") == 0)
-            {
-                if (padsModalOpened) notifyText(displayName, text, id, function(button)
+                ids.forEach(function(id)
                 {
-                    openPad(text);
-                })
+                    delete recordingAudioTrack[id];
+                    delete recordingVideoTrack[id];
+                });
+            });
 
-                if (padsModalOpened)
+            APP.conference.addConferenceListener(JitsiMeetJS.events.conference.TRACK_REMOVED, function(track)
+            {
+                console.debug("ofmeet.js track removed", track.getParticipantId());
+
+                if (track.getParticipantId() == APP.conference.getMyUserId())
                 {
-                    addPad(text);
+                    clockTrack.leaves = (new Date()).getTime();
+                    hideClock();
                 }
-                else {
-                    padsList.push(text);
-                }
-            }
-        });
 
-        navigator.mediaDevices.getUserMedia({audio: true, video: true}).then(function(stream)
-        {
-            recordingVideoTrack[APP.conference.getMyUserId()] = stream;
-            recordingAudioTrack[APP.conference.getMyUserId()] = stream;
+                if (of.recording) stopRecorder();
+            });
 
-            if (interfaceConfig.OFMEET_RECORD_CONFERENCE)
+            APP.conference.addConferenceListener(JitsiMeetJS.events.conference.TRACK_ADDED, function(track)
             {
-                createRecordButton();
-                createPhotoButton();
+                console.debug("ofmeet.js track added", track.getParticipantId(), track.getType());
 
-                if (APP.conference.getMyUserId())
-                {
-                    showClock();
-                    clockTrack.joins = (new Date()).getTime();
-                }
-            }
+                if (track.getType() == "audio") recordingAudioTrack[track.getParticipantId()] = track.stream;
+                if (track.getType() == "video") recordingVideoTrack[track.getParticipantId()] = track.stream;
 
-            if (navigator.credentials && APP.connection.xmpp.connection._stropheConn.pass)
+            });
+
+            APP.conference.addConferenceListener(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, function(track)
             {
-                const id = APP.connection.xmpp.connection.jid.split("/")[0];
-                const pass = APP.connection.xmpp.connection._stropheConn.pass;
+                console.debug("ofmeet.js track muted", track.getParticipantId(), track.getType(), track.isMuted());
 
-                navigator.credentials.create({password: {id: id, password: pass}}).then(function(credential)
+                if (track.getType() == "audio") recordingAudioTrack[track.getParticipantId()].getAudioTracks()[0].enabled = !track.isMuted();
+                if (track.getType() == "video") recordingVideoTrack[track.getParticipantId()].getVideoTracks()[0].enabled = !track.isMuted();
+
+                const recordingStream = recorderStreams[track.getParticipantId()];
+
+                if (recordingStream) // recording active
                 {
-                    credential.name = APP.conference.getLocalDisplayName();
+                    if (track.getType() == "audio") recordingStream.getAudioTracks()[0].enabled = !track.isMuted();
+                    if (track.getType() == "video") recordingStream.getVideoTracks()[0].enabled = !track.isMuted();
+                }
+            });
 
-                    navigator.credentials.store(credential).then(function()
+            APP.conference.addConferenceListener(JitsiMeetJS.events.conference.MESSAGE_RECEIVED , function(id, text, ts)
+            {
+                var participant = APP.conference.getParticipantById(id);
+                var displayName = participant ? participant._displayName || id.split("-")[0] : "Me";
+
+                console.debug("ofmeet.js message", id, text, ts, displayName, participant, padsModalOpened);
+
+                if (text.indexOf("https://cryptpad.fr/") == 0)
+                {
+                    if (padsModalOpened) notifyText(displayName, text, id, function(button)
                     {
-                        console.log("credential management api put", credential);
+                        openPad(text);
+                    })
 
-                    }).catch(function (err) {
-                        console.error("credential management api put error", err);
-                    });
+                    if (padsModalOpened)
+                    {
+                        addPad(text);
+                    }
+                    else {
+                        padsList.push(text);
+                    }
+                }
+            });
+
+            navigator.mediaDevices.getUserMedia({audio: true, video: true}).then(function(stream)
+            {
+                recordingVideoTrack[APP.conference.getMyUserId()] = stream;
+                recordingAudioTrack[APP.conference.getMyUserId()] = stream;
+
+                if (interfaceConfig.OFMEET_RECORD_CONFERENCE)
+                {
+                    createRecordButton();
+                    createPhotoButton();
+
+                    if (APP.conference.getMyUserId())
+                    {
+                        showClock();
+                        clockTrack.joins = (new Date()).getTime();
+                    }
+                }
+
+                if (interfaceConfig.OFMEET_TAG_CONFERENCE)    createTagsButton();
+                if (interfaceConfig.OFMEET_ENABLE_CRYPTPAD)   createPadsButton();
+            });
+
+        }
+
+        if (navigator.credentials && APP.connection.xmpp.connection._stropheConn.pass)
+        {
+            const id = APP.connection.xmpp.connection.jid.split("/")[0];
+            const pass = APP.connection.xmpp.connection._stropheConn.pass;
+
+            localStorage.setItem("xmpp_username_override", id);
+            localStorage.setItem("xmpp_password_override", pass);
+
+            navigator.credentials.create({password: {id: id, password: pass}}).then(function(credential)
+            {
+                credential.name = APP.conference.getLocalDisplayName();
+
+                navigator.credentials.store(credential).then(function()
+                {
+                    console.log("credential management api put", credential);
 
                 }).catch(function (err) {
                     console.error("credential management api put error", err);
                 });
-            }
 
-            if (interfaceConfig.OFMEET_TAG_CONFERENCE)    createTagsButton();
-            if (interfaceConfig.OFMEET_ENABLE_CRYPTPAD)   createPadsButton();
-        });
+            }).catch(function (err) {
+                console.error("credential management api put error", err);
+            });
+        }
+
 
         console.debug("ofmeet.js setup", APP.connection);
     }

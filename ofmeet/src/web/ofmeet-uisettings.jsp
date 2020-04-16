@@ -101,6 +101,7 @@
         final boolean conferenceRecording = ParamUtils.getBooleanParameter( request, "conferenceRecording" );
         final boolean conferenceTags = ParamUtils.getBooleanParameter( request, "conferenceTags" );
         final boolean enableCryptPad = ParamUtils.getBooleanParameter( request, "enableCryptPad" );        
+        final boolean cachePassword = ParamUtils.getBooleanParameter( request, "cachePassword" );        
         
         final boolean randomRoomNames = ParamUtils.getBooleanParameter( request, "randomRoomNames" );
         final boolean lipSync = ParamUtils.getBooleanParameter( request, "lipSync" );
@@ -157,7 +158,8 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.show.poweredby", Boolean.toString( showPoweredBy ) );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.conference.recording", Boolean.toString( conferenceRecording ) );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.conference.tags", Boolean.toString( conferenceTags ) );
-            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.cryptpad", Boolean.toString( enableCryptPad ) );            
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.cryptpad", Boolean.toString( enableCryptPad ) ); 
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.cache.password", Boolean.toString( cachePassword ) ); 
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.random.roomnames", Boolean.toString( randomRoomNames ) );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.watermark.link", watermarkLink );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.show.watermark", Boolean.toString( showWatermark ) );
@@ -293,6 +295,12 @@
                 <td nowrap colspan="2">
                     <input type="checkbox" name="enableCryptPad" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.cryptpad", true) ? "checked" : ""}>
                     <fmt:message key="ofmeet.enable.cryptpad" />
+                </td>
+            </tr>             
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="cachePassword" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.cache.password", true) ? "checked" : ""}>
+                    <fmt:message key="ofmeet.cache.password" />
                 </td>
             </tr>            
             <tr>

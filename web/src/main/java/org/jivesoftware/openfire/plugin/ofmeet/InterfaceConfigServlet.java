@@ -52,7 +52,7 @@ public class InterfaceConfigServlet extends HttpServlet
             config.put( "INITIAL_TOOLBAR_TIMEOUT",               JiveGlobals.getIntProperty(     "org.jitsi.videobridge.ofmeet.initial.toolbar.timeout",       20000               ) );
             config.put( "TOOLBAR_TIMEOUT",                       JiveGlobals.getIntProperty(     "org.jitsi.videobridge.ofmeet.toolbar.timeout",               4000                ) );
 
-            config.put( "SETTINGS_SECTIONS",                     new JSONArray( JiveGlobals.getListProperty( "org.jitsi.videobridge.ofmeet.settings.sections",    Arrays.asList( "language", "devices", "moderator" ) ) ) );
+            config.put( "SETTINGS_SECTIONS",                     new JSONArray( JiveGlobals.getListProperty( "org.jitsi.videobridge.ofmeet.settings.sections",    Arrays.asList( "language", "devices", "moderator", "profile", "calendar") ) ) );
 
             config.put( "CANVAS_EXTRA",                          JiveGlobals.getIntProperty(     "org.jitsi.videobridge.ofmeet.canvas.extra",                  104                 ) );
             config.put( "CANVAS_RADIUS",                         JiveGlobals.getIntProperty(     "org.jitsi.videobridge.ofmeet.canvas.radius",                 0                   ) );
@@ -80,6 +80,7 @@ public class InterfaceConfigServlet extends HttpServlet
             config.put( "OFMEET_RECORD_CONFERENCE",              JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.conference.recording",          true                ) );
             config.put( "OFMEET_TAG_CONFERENCE",                 JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.conference.tags",               true                ) );
             config.put( "OFMEET_ENABLE_CRYPTPAD",                JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.cryptpad",               true                ) );
+            config.put( "OFMEET_CACHE_PASSWORD",                 JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.cache.password",                true                ) );
 
             config.put( "filmStripOnly",                         ofMeetConfig.getFilmstripOnly()      );
             config.put( "VERTICAL_FILMSTRIP",                    ofMeetConfig.getVerticalFilmstrip()  );

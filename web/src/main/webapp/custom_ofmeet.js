@@ -9,6 +9,10 @@ var ofmeet = (function(of)
     IMAGES.kanban = '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 31.966,3.896C 31.878,2.866, 31.046,2, 30,2L 2,2 C 0.954,2, 0.122,2.866, 0.034,3.896L0,3.896 l0,0.166 L0,8 l0,14.166 L0,24 l0,6 c0,1.104, 0.896,2, 2,2l 28,0 c 1.104,0, 2-0.896, 2-2L 32,8 L 32,4.062 L 32,3.896 L 31.966,3.896 z M 12,14L 12,8 l 8,0 l0,6 L 12,14 z M 20,16l0,6.166 L 12,22.166 L 12,16 L 20,16 z M 10,8l0,6 L 2,14 L 2,8 L 10,8 z M 2,16l 8,0 l0,6.166 L 2,22.166 L 2,16 z M 2,30l0-6 l 8,0 l0,6 L 2,30 z M 12,30l0-6 l 8,0 l0,6 L 12,30 z M 30,30l-8,0 l0-6 l 8,0 L 30,30 z M 30,22.166l-8,0 L 22,16 l 8,0 L 30,22.166 z M 30,14l-8,0 L 22,8 l 8,0 L 30,14 z"></path></g></svg></span>';
     IMAGES.whiteboard = '<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="32" height="32" viewBox="0 0 32 32" enable-background="new 0 0 16 16" xml:space="preserve" fill="#000000"> <g><path d="M 30,20L 30,16 c0-1.104-0.896-2-2-2L 18,14 L 18,10 l 6,0 c 1.104,0, 2-0.896, 2-2L 26,6 c0-1.104-0.896-2-2-2L 10,4 C 8.896,4, 8,4.896, 8,6l0,2 c0,1.104, 0.896,2, 2,2l 6,0 l0,4 L 6,14 C 4.896,14, 4,14.896, 4,16l0,4 c-1.104,0-2,0.896-2,2l0,4 c0,1.104, 0.896,2, 2,2l 2,0 c 1.104,0, 2-0.896, 2-2l0-2 l0-2 c0-1.104-0.896-2-2-2L 6,16 l 10,0 l0,4 c-1.104,0-2,0.896-2,2l0,2 l0,2 c0,1.104, 0.896,2, 2,2l 2,0 c 1.104,0, 2-0.896, 2-2l0-2 l0-2 c0-1.104-0.896-2-2-2L 18,16 l 10,0 l0,4 c-1.104,0-2,0.896-2,2l0,2 l0,2 c0,1.104, 0.896,2, 2,2l 2,0 c 1.104,0, 2-0.896, 2-2l0-4 C 32,20.896, 31.104,20, 30,20z M 10,6l 14,0 l0,2 L 10,8 L 10,6 z M 6,24l0,2 L 4,26 l0-4 l 2,0 L 6,24 z M 18,26L 16,26 l0-4 l 2,0 L 18,26 z M 28,24l0-2 l 2,0 l0,4 l-2,0 L 28,24 z"></path></g></svg></span>';
 
+    const SMILIES = [":)", ":(", ":D", ":+1:", ":P", ":wave:", ":blush:", ":slightly_smiling_face:", ":scream:", ":*", ":-1:", ":mag:", ":heart:", ":innocent:", ":angry:", ":angel:", ";(", ":clap:", ";)", ":beer:"];
+
+    const nickColors = {}
+
     let tagsModal = null;
     let padsModal = null, padsModalOpened = false, padsList = [];
     let recordingAudioTrack = {};
@@ -142,7 +146,7 @@ var ofmeet = (function(of)
 
             APP.conference.addConferenceListener(JitsiMeetJS.events.conference.MESSAGE_RECEIVED , function(id, text, ts)
             {
-                var participant = APP.conference.getParticipantById(id);
+                var participant = APP.conference._room.getParticipantById(id);
                 var displayName = participant ? participant._displayName || id.split("-")[0] : "Me";
 
                 console.debug("ofmeet.js message", id, text, ts, displayName, participant, padsModalOpened);
@@ -184,36 +188,145 @@ var ofmeet = (function(of)
                 if (interfaceConfig.OFMEET_TAG_CONFERENCE)    createTagsButton();
                 if (interfaceConfig.OFMEET_ENABLE_CRYPTPAD)   createPadsButton();
             });
-
         }
 
-        if (navigator.credentials && APP.connection.xmpp.connection._stropheConn.pass)
+        if (APP.connection.xmpp.connection._stropheConn.pass)
         {
-            const id = APP.connection.xmpp.connection.jid.split("/")[0];
-            const pass = APP.connection.xmpp.connection._stropheConn.pass;
-
-            localStorage.setItem("xmpp_username_override", id);
-            localStorage.setItem("xmpp_password_override", pass);
-
-            navigator.credentials.create({password: {id: id, password: pass}}).then(function(credential)
+            if (navigator.credentials && interfaceConfig.OFMEET_CACHE_PASSWORD)
             {
-                credential.name = APP.conference.getLocalDisplayName();
+                const id = APP.connection.xmpp.connection.jid.split("/")[0];
+                const pass = APP.connection.xmpp.connection._stropheConn.pass;
 
-                navigator.credentials.store(credential).then(function()
+                localStorage.setItem("xmpp_username_override", id);
+                localStorage.setItem("xmpp_password_override", pass);
+
+                navigator.credentials.create({password: {id: id, password: pass}}).then(function(credential)
                 {
-                    console.log("credential management api put", credential);
+                    credential.name = APP.conference.getLocalDisplayName();
+
+                    navigator.credentials.store(credential).then(function()
+                    {
+                        console.log("credential management api put", credential);
+
+                    }).catch(function (err) {
+                        console.error("credential management api put error", err);
+                    });
 
                 }).catch(function (err) {
                     console.error("credential management api put error", err);
                 });
+            }
 
-            }).catch(function (err) {
-                console.error("credential management api put error", err);
-            });
+            getVCard();
+
+            // moderatot
+            // APP.conference._room.isModerator()
         }
 
-
         console.debug("ofmeet.js setup", APP.connection);
+    }
+
+    function getVCard()
+    {
+        const connection = APP.connection.xmpp.connection;
+        const $iq = APP.connection.xmpp.connection.$iq;
+        const Strophe = APP.connection.xmpp.connection.Strophe;
+
+        const iq = $iq({type: 'get', to: Strophe.getBareJidFromJid(APP.connection.xmpp.connection.jid)}).c('vCard', {xmlns: 'vcard-temp'});
+
+        connection.sendIQ(iq, function(response)
+        {
+            const emailTag = response.querySelector('vCard EMAIL USERID');
+            const email = emailTag ? emailTag.innerHTML : "";
+
+            const fullnameTag = response.querySelector('vCard FN');
+            const fullname = fullnameTag ? fullnameTag.innerHTML : "";
+
+            const username = Strophe.getNodeFromJid(APP.connection.xmpp.connection.jid);
+            const photo = response.querySelector('vCard PHOTO');
+
+            let avatar = (fullname == "") ? createAvatar(username) : createAvatar(fullname);
+
+            if (photo)
+            {
+                avatar = 'data:' + photo.querySelector('TYPE').innerHTML + ';base64,' + photo.querySelector('BINVAL').innerHTML;
+            }
+
+            console.debug("getVCard", email, fullname, username, avatar);
+
+            APP.conference.changeLocalAvatarUrl(avatar);
+
+            if (email != "") APP.conference.changeLocalEmail(email);
+            if (fullname != "") APP.conference.changeLocalDisplayName(fullname);
+
+        }, function(error) {
+            console.error(error);
+        });
+    }
+
+    function createAvatar(nickname, width, height, font)
+    {
+        console.debug("createAvatar", width, height, font);
+
+        if (!width) width = 32;
+        if (!height) height = 32;
+        if (!font) font = "16px Arial";
+
+        const canvas = document.createElement('canvas');
+        canvas.style.display = 'none';
+        canvas.width = width;
+        canvas.height = height;
+        document.body.appendChild(canvas);
+        const context = canvas.getContext('2d');
+        context.fillStyle = getRandomColor(nickname);
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.font = font;
+        context.fillStyle = "#fff";
+
+        let first, last, initials;
+
+        if (nickname)
+        {
+            let name = nickname.split(" ");
+            if (name.length == 1) name = nickname.split(".");
+            if (name.length == 1) name = nickname.split("-");
+            const l = name.length - 1;
+
+            if (name && name[0] && name.first != '')
+            {
+                first = name[0][0];
+                last = name[l] && name[l] != '' && l > 0 ? name[l][0] : null;
+
+                if (last) {
+                    initials = first + last;
+                    context.fillText(initials.toUpperCase(), 3, 23);
+                } else {
+                    initials = first;
+                    context.fillText(initials.toUpperCase(), 10, 23);
+                }
+            }
+        }
+
+        document.body.removeChild(canvas);
+        return canvas.toDataURL();
+    }
+
+    function getRandomColor(nickname)
+    {
+        if (nickColors[nickname])
+        {
+            return nickColors[nickname];
+        }
+        else {
+            var letters = '0123456789ABCDEF';
+            var color = '#';
+
+            for (var i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            nickColors[nickname] = color;
+            return color;
+        }
     }
 
     function createRecordButton()
@@ -293,6 +406,8 @@ var ofmeet = (function(of)
 
     function addPad(text)
     {
+        console.debug("addPad", text);
+
         const container = document.querySelector(".pade-col-container");
         const values =  text.split('/');
         const html = '<span class="pade-col-content">' + IMAGES[values[3]] + '</span><span class="pade-col-content">' + values[8] + '<br/>' + values[3] + '</span>';
@@ -451,7 +566,7 @@ var ofmeet = (function(of)
 
         if (!notifyId) notifyId = Math.random().toString(36).substr(2,9);
 
-        var prompt = new Notification(title,
+        const prompt = new Notification(title,
         {
             body: message,
             requireInteraction: true

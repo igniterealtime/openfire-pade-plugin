@@ -14,7 +14,7 @@ var ofmeet = (function(of)
     const nickColors = {}
 
     let tagsModal = null;
-    let padsModal = null, padsModalOpened = false, padsList = [];
+    let padsModal = null, padsModalOpened = false, padsList = [], captions = null;
     let recordingAudioTrack = {};
     let recordingVideoTrack = {};
     let videoRecorder = {};
@@ -114,6 +114,12 @@ var ofmeet = (function(of)
                 {
                     clockTrack.leaves = (new Date()).getTime();
                     hideClock();
+
+                    if (of.recognition)
+                    {
+                        of.recognitionActive = false;
+                        of.recognition.stop();
+                    }
                 }
 
                 if (of.recording) stopRecorder();
@@ -142,6 +148,24 @@ var ofmeet = (function(of)
                     if (track.getType() == "audio") recordingStream.getAudioTracks()[0].enabled = !track.isMuted();
                     if (track.getType() == "video") recordingStream.getVideoTracks()[0].enabled = !track.isMuted();
                 }
+
+                if (APP.conference.getMyUserId() == track.getParticipantId())
+                {
+                    if (of.recognition)
+                    {
+                        if (track.isMuted())    // speech recog synch
+                        {
+                            console.debug("muted, stopping speech transcription");
+
+                            of.recognitionActive = false;
+                            of.recognition.stop();
+
+                        } else {
+                            console.debug("unmuted, starting speech transcription");
+                            of.recognition.start();
+                        }
+                    }
+                }
             });
 
             APP.conference.addConferenceListener(JitsiMeetJS.events.conference.MESSAGE_RECEIVED , function(id, text, ts)
@@ -165,6 +189,12 @@ var ofmeet = (function(of)
                     else {
                         padsList.push(text);
                     }
+                }
+                else
+
+                if (text.indexOf("http") != 0 && captions)
+                {
+                    captions.innerHTML = displayName + " : " + text;
                 }
             });
 
@@ -223,7 +253,10 @@ var ofmeet = (function(of)
             // APP.conference._room.isModerator()
         }
 
-        setTimeout(setupHttpFileUpload, 1000);
+        if (interfaceConfig.OFMEET_ALLOW_UPLOADS)           setTimeout(setupHttpFileUpload, 1000);
+        if (interfaceConfig.OFMEET_SHOW_CAPTIONS)           captions = document.getElementById("captions");
+        if (interfaceConfig.OFMEET_ENABLE_TRANSCRIPTION)    setupSpeechRecognition();
+
         console.debug("ofmeet.js setup", APP.connection);
     }
 
@@ -1049,6 +1082,75 @@ var ofmeet = (function(of)
 
     //-------------------------------------------------------
     //
+    //  SpeechRecognition
+    //
+    //-------------------------------------------------------
+
+    function sendSpeechRecognition(result)
+    {
+        if (result != "" && APP.conference && APP.conference._room)
+        {
+            var message = "[" + result + "]";
+            console.debug("Speech recog result", APP.conference._room, message);
+
+            APP.conference._room.sendTextMessage(message);
+            of.currentTranslation = [];
+        }
+    }
+
+    function setupSpeechRecognition()
+    {
+        console.debug("setupSpeechRecognition");
+
+        of.recognition = new webkitSpeechRecognition();
+        //of.recognition.lang = OFMEET_CONFIG.transcribeLanguage;
+        of.recognition.continuous = true;
+        of.recognition.interimResults = false;
+
+        of.recognition.onresult = function(event)
+        {
+            console.debug("Speech recog event", event)
+
+            if(event.results[event.resultIndex].isFinal==true)
+            {
+                var transcript = event.results[event.resultIndex][0].transcript;
+                console.debug("Speech recog transcript", transcript);
+                sendSpeechRecognition(transcript);
+            }
+        }
+
+        of.recognition.onspeechend  = function(event)
+        {
+            console.debug("Speech recog onspeechend", event);
+        }
+
+        of.recognition.onstart = function(event)
+        {
+            console.debug("Speech to text started", event);
+            of.recognitionActive = true;
+        }
+
+        of.recognition.onend = function(event)
+        {
+            console.debug("Speech to text ended", event);
+
+            if (of.recognitionActive)
+            {
+                console.warn("Speech to text restarted");
+                of.recognition.start();
+            }
+        }
+
+        of.recognition.onerror = function(event)
+        {
+            console.error("Speech to text error", event);
+        }
+
+        of.recognition.start();
+    }
+
+    //-------------------------------------------------------
+    //
     //  File upload handler
     //
     //-------------------------------------------------------
@@ -1218,6 +1320,7 @@ var ofmeet = (function(of)
     }({}));
 
     of.recording = false;
+
     return of;
 
 }(ofmeet || {}));

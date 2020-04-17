@@ -21,6 +21,9 @@ if (navigator.credentials)
 if (location.hash.indexOf("config.webinar=true") > -1) config.webinar = true;
 if (location.hash.indexOf("config.webinar=false") > -1) config.webinar = false;
 
+if (location.hash.indexOf("interfaceConfig.OFMEET_RECORD_CONFERENCE=true") > -1) interfaceConfig.OFMEET_RECORD_CONFERENCE = true;
+if (location.hash.indexOf("interfaceConfig.OFMEET_RECORD_CONFERENCE=false") > -1) interfaceConfig.OFMEET_RECORD_CONFERENCE = false;
+
 if (config.webinar)
 {
     interfaceConfig.TOOLBAR_BUTTONS = [

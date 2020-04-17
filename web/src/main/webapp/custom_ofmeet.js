@@ -223,6 +223,7 @@ var ofmeet = (function(of)
             // APP.conference._room.isModerator()
         }
 
+        setTimeout(setupHttpFileUpload, 1000);
         console.debug("ofmeet.js setup", APP.connection);
     }
 
@@ -1016,6 +1017,12 @@ var ofmeet = (function(of)
         });
     }
 
+    //-------------------------------------------------------
+    //
+    //  Toolbar handler
+    //
+    //-------------------------------------------------------
+
     function newElement(el, id, html, className, label)
     {
         const ele = document.createElement(el);
@@ -1038,6 +1045,100 @@ var ofmeet = (function(of)
             placeHolder.appendChild(tool);
         }
         return tool;
+    }
+
+    //-------------------------------------------------------
+    //
+    //  File upload handler
+    //
+    //-------------------------------------------------------
+
+    function setupHttpFileUpload()
+    {
+        var dropZone = document.getElementById("videospace");
+
+        if (!dropZone)
+        {
+            setTimeout(setupHttpFileUpload, 1000);
+            return;
+        }
+
+        console.debug("setupHttpFileUpload", dropZone);
+        dropZone.addEventListener('dragover', handleDragOver, false);
+        dropZone.addEventListener('drop', handleDropFileSelect, false);
+
+    }
+
+    function handleDragOver(evt)
+    {
+        evt.stopPropagation();
+        evt.preventDefault();
+        evt.dataTransfer.dropEffect = 'copy';
+    }
+
+    function handleDropFileSelect(evt)
+    {
+        evt.stopPropagation();
+        evt.preventDefault();
+
+        var files = evt.dataTransfer.files;
+
+        for (var i = 0, f; f = files[i]; i++)
+        {
+            uploadFile(f);
+        }
+    }
+
+    function uploadFile(file)
+    {
+        console.debug("uploadFile", file);
+
+        var getUrl = null;
+        var putUrl = null;
+        var errorText = null;
+
+        const connection = APP.connection.xmpp.connection;
+        const $iq = APP.connection.xmpp.connection.$iq;
+
+        const iq = $iq({type: 'get', to: "httpfileupload." + connection.domain}).c('request', {xmlns: 'urn:xmpp:http:upload'}).c('filename').t(file.name).up().c('size').t(file.size);
+
+        connection.sendIQ(iq, function(response)
+        {
+            response.querySelectorAll('slot').forEach(function(slot)
+            {
+                const putUrl = slot.querySelector('put').innerHTML;
+                const getUrl = slot.querySelector('get').innerHTML;
+
+                console.debug("uploadFile", putUrl, getUrl);
+
+                if (putUrl != null & getUrl != null)
+                {
+                    var req = new XMLHttpRequest();
+
+                    req.onreadystatechange = function()
+                    {
+                      if (this.readyState == 4 && this.status >= 200 && this.status < 400)
+                      {
+                        console.debug("uploadFile ok", this.statusText);
+                        APP.conference._room.sendTextMessage(getUrl);
+                      }
+                      else
+
+                      if (this.readyState == 4 && this.status >= 400)
+                      {
+                        console.error("uploadFile error", this.statusText);
+                        APP.conference._room.sendTextMessage(this.statusText);
+                       }
+
+                    };
+                    req.open("PUT", putUrl, true);
+                    req.send(file);
+                }
+            });
+
+        }, function(error) {
+            console.error(error);
+        });
     }
 
     //-------------------------------------------------------

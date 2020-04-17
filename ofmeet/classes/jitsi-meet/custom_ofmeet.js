@@ -816,15 +816,15 @@ var ofmeet = (function(of)
             return hoursLabel + ":" + minutesLabel + ":" + secondsLabel;
         }
 
-        const vtt = ["WEBVTT\n", "\n00:00:00.000 --> 24:00:00.000 position:10% line:1% align:left size:100%"];
+        const vtt = ["WEBVTT\r\n", "\r\n00:00:00.000 --> 24:00:00.000 position:10% line:1% align:left size:100%"];
 
         if (tags.location != "")
         {
-            vtt.push("\n<b>Location</b>: " + tags.location);
-            vtt.push("\n<b>Date</b>: " +  tags.date);
-            vtt.push("\n<b>Subject</b>: " +  tags.subject);
-            vtt.push("\n<b>Host</b>: " +  tags.host);
-            vtt.push("\n<b>Activity</b>: " +  tags.activity);
+            vtt.push("\r\n<b>Location</b>: " + tags.location);
+            vtt.push("\r\n<b>Date</b>: " +  tags.date);
+            vtt.push("\r\n<b>Subject</b>: " +  tags.subject);
+            vtt.push("\r\n<b>Host</b>: " +  tags.host);
+            vtt.push("\r\n<b>Activity</b>: " +  tags.activity);
         }
 
         let recordSeconds = 0;
@@ -837,8 +837,8 @@ var ofmeet = (function(of)
 
             const timestamp = getTimeStamp(recordSeconds);
 
-            vtt.push("\n\n" + timestamp + ".000 --> " + timestamp + ".999 position:10% line:-10% align:left size:100%");
-            vtt.push("\n" + getTimeStamp(totalSeconds));
+            vtt.push("\r\n\r\n" + timestamp + ".000 --> " + timestamp + ".999 position:10% line:-10% align:left size:100%");
+            vtt.push("\r\n" + getTimeStamp(totalSeconds));
         }
 
         console.debug("ofmeet.js createVttDataUrl", vtt);

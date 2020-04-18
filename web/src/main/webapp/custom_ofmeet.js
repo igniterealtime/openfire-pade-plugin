@@ -14,7 +14,7 @@ var ofmeet = (function(of)
     const nickColors = {}
 
     let tagsModal = null;
-    let padsModal = null, padsModalOpened = false, padsList = [], captions = null;
+    let padsModal = null, padsModalOpened = false, padsList = [], captions = {msgs: []};
     let recordingAudioTrack = {};
     let recordingVideoTrack = {};
     let videoRecorder = {};
@@ -192,9 +192,10 @@ var ofmeet = (function(of)
                 }
                 else
 
-                if (text.indexOf("http") != 0 && captions)
+                if (text.indexOf("http") != 0 && captions.ele && !captions.msgsDisabled)
                 {
-                    captions.innerHTML = displayName + " : " + text;
+                    captions.ele.innerHTML = displayName + " : " + text;
+                    captions.msgs.push({text: text, stamp: (new Date()).getTime()});
                 }
             });
 
@@ -214,11 +215,38 @@ var ofmeet = (function(of)
                         clockTrack.joins = (new Date()).getTime();
                     }
                 }
-
-                if (interfaceConfig.OFMEET_TAG_CONFERENCE)    createTagsButton();
-                if (interfaceConfig.OFMEET_ENABLE_CRYPTPAD)   createPadsButton();
             });
+
+            if (interfaceConfig.OFMEET_TAG_CONFERENCE)
+            {
+                if (interfaceConfig.OFMEET_SHOW_CAPTIONS)
+                {
+                    captions.ele = document.getElementById("captions");
+                }
+
+                if (interfaceConfig.OFMEET_ENABLE_TRANSCRIPTION && window.webkitSpeechRecognition)
+                {
+                    captions.ele = document.getElementById("captions");
+                    setupSpeechRecognition();
+                }
+
+                captions.msgsDisabled = !interfaceConfig.OFMEET_SHOW_CAPTIONS;
+                captions.transcriptDisabled = !interfaceConfig.OFMEET_ENABLE_TRANSCRIPTION;
+
+                createTagsButton();
+            }
+
+            if (interfaceConfig.OFMEET_ENABLE_CRYPTPAD)
+            {
+                createPadsButton();
+            }
         }
+
+        if (interfaceConfig.OFMEET_ALLOW_UPLOADS)
+        {
+            setTimeout(setupHttpFileUpload, 1000);
+        }
+
 
         if (APP.connection.xmpp.connection._stropheConn.pass)
         {
@@ -253,11 +281,7 @@ var ofmeet = (function(of)
             // APP.conference._room.isModerator()
         }
 
-        if (interfaceConfig.OFMEET_ALLOW_UPLOADS)           setTimeout(setupHttpFileUpload, 1000);
-        if (interfaceConfig.OFMEET_SHOW_CAPTIONS)           captions = document.getElementById("captions");
-        if (interfaceConfig.OFMEET_ENABLE_TRANSCRIPTION)    setupSpeechRecognition();
-
-        console.debug("ofmeet.js setup", APP.connection);
+        console.debug("ofmeet.js setup", APP.connection, captions);
     }
 
     function getVCard()
@@ -388,7 +412,7 @@ var ofmeet = (function(of)
 
     function createTagsButton()
     {
-        const tagsButton = addToolbarItem('ofmeet-tags', '<div id="ofmeet-tags" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;"><svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" width="22" height="22" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512.34 512.34" style="enable-background:new 0 0 512.34 512.34;" xml:space="preserve"> <g transform="translate(1 1)"> <g> <g> <path d="M411.13,342.12c5.207,0,8.678-3.471,8.678-8.678c0-5.207-4.339-8.678-8.678-8.678l-190.915,7.81 c-5.207,0-8.678,3.471-8.678,8.678c0,5.207,4.339,8.678,8.678,8.678L411.13,342.12z"/> <path d="M414.601,402.866l-190.915,7.81c-5.207,0-8.678,3.471-8.678,8.678c0,5.207,4.339,8.678,8.678,8.678l190.915-7.81 c5.207,0,8.678-3.471,8.678-8.678C423.279,406.337,418.94,401.998,414.601,402.866z"/> <path d="M214.14,194.595l190.915-7.81c5.207,0,8.678-3.471,8.678-8.678s-4.339-8.678-8.678-8.678l-190.915,7.81 c-5.207,0-8.678,3.471-8.678,8.678S209.801,194.595,214.14,194.595z"/> <path d="M407.658,264.018c5.207,0,8.678-3.471,8.678-8.678s-4.339-8.678-8.678-8.678l-190.915,7.81 c-5.207,0-8.678,3.471-8.678,8.678s4.339,8.678,8.678,8.678L407.658,264.018z"/> <path d="M484.892,68.764c0-9.546-6.075-18.224-15.62-21.695c-52.093-23.911-109.017-34.577-165.812-32.43 c-0.523-0.239-1.08-0.428-1.673-0.546C230.628-6.734,155.997-5.866,85.706,15.829C77.028,19.3,70.086,27.11,68.35,36.656 L8.472,400.262c-1.736,9.546,2.603,19.092,10.414,25.166l2.603,1.736c52.27,37.703,113.848,61.855,178.048,68.305 c35.27,10.677,71.581,15.871,108.325,15.871c61.614,0,123.227-15.62,178.766-45.993l2.603-1.736 c8.678-4.339,13.017-13.885,13.017-23.43L484.892,68.764z M29.299,411.544c-2.603-1.736-4.339-4.339-3.471-7.81L85.706,39.259 c0-2.603,2.603-5.207,5.207-6.075c34.712-11.281,70.292-16.488,105.871-16.488c17.313,0,33.763,1.728,50.211,4.321 c-16.896,3.199-33.628,7.555-50.066,13.039c-0.965,0.317-1.927,0.642-2.89,0.967c-0.011,0.004-0.022,0.008-0.033,0.011 c-20.873,7.047-41.114,15.872-60.572,26.788c-9.546,5.207-13.017,16.488-13.017,25.166l6.353,134.685l-1.146-0.176 c-4.339-0.868-8.678,2.603-9.546,6.942c-0.868,4.339,2.603,8.678,6.942,9.546l4.552,0.7l2.926,62.034l-17.024-3.724 c-4.339-0.868-9.546,2.603-10.414,6.942s2.603,9.546,6.942,10.414l21.359,4.672l2.895,61.375l-33.799-5.302 c-4.339-0.868-8.678,2.603-9.546,6.942s2.603,8.678,6.942,9.546l37.206,5.836l2.713,57.513c0.502,2.508,1.009,4.722,1.678,6.818 c0.412,1.526,0.967,3.008,1.668,4.426c-39.005-11.282-76.276-28.626-109.217-52.898L29.299,411.544z M480.553,447.991 l-2.603,1.736c-96.325,53.803-214.346,58.142-315.01,13.017l-2.603-0.868c-3.012-0.753-4.712-2.815-5.111-5.614 c-0.006-0.043-0.013-0.086-0.018-0.13c-0.049-0.387-0.077-0.785-0.077-1.198L137.774,86.12c0-3.471,1.736-7.81,4.339-9.546 c98.929-54.671,218.685-59.878,320.217-13.885c3.471,0.868,5.207,3.471,5.207,6.942l17.356,370.549 C484.892,443.652,483.157,446.256,480.553,447.991z"/> <path d="M302.655,129.51c19.092,0,34.712-15.62,34.712-34.712c0-19.092-15.62-34.712-34.712-34.712s-34.712,15.62-34.712,34.712 C267.943,113.889,283.563,129.51,302.655,129.51z M302.655,77.442c9.546,0,17.356,7.81,17.356,17.356s-7.81,17.356-17.356,17.356 c-9.546,0-17.356-7.81-17.356-17.356S293.109,77.442,302.655,77.442z"/> </g> </g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> </svg></div></div>', "Conference TAGS");
+        const tagsButton = addToolbarItem('ofmeet-tags', '<div id="ofmeet-tags" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;"><svg height="24" width="24" viewBox="0 0 24 24"><path d="M18 11.016V9.985a.96.96 0 00-.984-.984h-3c-.563 0-1.031.422-1.031.984v4.031c0 .563.469.984 1.031.984h3a.96.96 0 00.984-.984v-1.031h-1.5v.516h-2.016v-3H16.5v.516H18zm-6.984 0V9.985c0-.563-.469-.984-1.031-.984h-3a.96.96 0 00-.984.984v4.031a.96.96 0 00.984.984h3c.563 0 1.031-.422 1.031-.984v-1.031h-1.5v.516H7.5v-3h2.016v.516h1.5zm7.968-7.032C20.062 3.984 21 4.922 21 6v12c0 1.078-.938 2.016-2.016 2.016H5.015c-1.125 0-2.016-.938-2.016-2.016V6c0-1.078.891-2.016 2.016-2.016h13.969z"></path></svg></div></div>', "Conference Captions/Subtitles");
 
         if (tagsButton) tagsButton.addEventListener("click", function(evt)
         {
@@ -624,7 +648,7 @@ var ofmeet = (function(of)
         const template =
         '    <!-- Modal Header -->' +
         '    <div class="modal-header">' +
-        '      <h4 class="modal-title">Conference TAGS</h4>' +
+        '      <h4 class="modal-title">Conference Captions/Sub Titles</h4>' +
         '    </div>' +
 
         '    <!-- Modal body -->' +
@@ -694,6 +718,39 @@ var ofmeet = (function(of)
                 document.getElementById("subtitles").innerHTML =  "";
                 tagsModal.close();
             });
+
+            const msgCaptions = (captions.msgsDisabled ? 'Enable' : 'Disable') + ' Message Captions';
+            const msgClass = (captions.msgsDisabled ? 'btn-secondary' : 'btn-success') + ' btn tingle-btn tingle-btn--pull-right';
+
+            if (captions.ele)
+            {
+                tagsModal.addFooterBtn(msgCaptions, msgClass, function(evt) {
+                    captions.msgsDisabled = !captions.msgsDisabled;
+                    evt.target.classList.remove(captions.msgsDisabled ? 'btn-success' : 'btn-secondary');
+                    evt.target.classList.add(captions.msgsDisabled ? 'btn-secondary' : 'btn-success');
+                    evt.target.innerHTML = (captions.msgsDisabled ? 'Enable' : 'Disable') + ' Message Captions';
+                    if (captions.ele) captions.ele.innerHTML = "";
+                });
+            }
+
+            if (of.recognition)
+            {
+                const transcriptCaptions = (captions.transcriptDisabled ? 'Enable' : 'Disable') + ' Voice Transcription';
+                const transcriptClass = (captions.transcriptDisabled ? 'btn-secondary' : 'btn-success') + ' btn tingle-btn tingle-btn--pull-right';
+
+                tagsModal.addFooterBtn(transcriptCaptions, transcriptClass, function(evt)
+                {
+                    captions.transcriptDisabled = !captions.transcriptDisabled;
+                    of.recognitionActive = !captions.transcriptDisabled;
+                    evt.target.classList.remove(captions.transcriptDisabled ? 'btn-success' : 'btn-secondary');
+                    evt.target.classList.add(captions.transcriptDisabled ? 'btn-secondary' : 'btn-success');
+                    evt.target.innerHTML = (captions.transcriptDisabled ? 'Enable' : 'Disable') + ' Voice Transcription';
+
+                    if (captions.transcriptDisabled) of.recognition.stop();
+                    if (!captions.transcriptDisabled) of.recognition.start();
+                    if (captions.ele) captions.ele.innerHTML = "";
+                });
+            }
         }
 
         tagsModal.open();
@@ -875,6 +932,19 @@ var ofmeet = (function(of)
             vtt.push(getTimeStamp(totalSeconds));
         }
 
+        captions.msgs.forEach(function(msg)
+        {
+            const seconds = parseInt((msg.stamp - clockTrack.start) / 1000);
+
+            if (seconds > 0)
+            {
+                const start = getTimeStamp(seconds);
+                const end = getTimeStamp(seconds + 3);
+                vtt.push(start + ".000 --> " + end + ".999 position:30% line:-10% align:left size:100%");
+                vtt.push(msg.text);
+            }
+        });
+
         console.debug("ofmeet.js createVttDataUrl", vtt);
         const url = "data:application/json;base64," + btoa(vtt.join('\n'))
         return url
@@ -962,6 +1032,7 @@ var ofmeet = (function(of)
         icon.style.fill = "red";
         APP.UI.messageHandler.notify("Conference Recording Started", null, null, "");
 
+        captions.msgs = [];
         clockTrack.start = (new Date()).getTime();
         const ids = Object.getOwnPropertyNames(recordingVideoTrack);
 
@@ -1088,7 +1159,7 @@ var ofmeet = (function(of)
 
     function sendSpeechRecognition(result)
     {
-        if (result != "" && APP.conference && APP.conference._room)
+        if (result != "" && APP.conference && APP.conference._room && !captions.transcriptDisabled)
         {
             var message = "[" + result + "]";
             console.debug("Speech recog result", APP.conference._room, message);
@@ -1136,14 +1207,14 @@ var ofmeet = (function(of)
 
             if (of.recognitionActive)
             {
-                console.warn("Speech to text restarted");
-                of.recognition.start();
+                console.debug("Speech to text restarted");
+                setTimeout(function() {of.recognition.start()}, 1000);
             }
         }
 
         of.recognition.onerror = function(event)
         {
-            console.error("Speech to text error", event);
+            console.debug("Speech to text error", event);
         }
 
         of.recognition.start();

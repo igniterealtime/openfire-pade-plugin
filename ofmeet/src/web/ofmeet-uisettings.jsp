@@ -317,13 +317,13 @@
             </tr>             
             <tr>
                 <td nowrap colspan="2">
-                    <input type="checkbox" name="showCaptions" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.show.captions", true) ? "checked" : ""}>
+                    <input type="checkbox" name="showCaptions" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.show.captions", false) ? "checked" : ""}>
                     <fmt:message key="ofmeet.show.captions" />
                 </td>
             </tr>    
             <tr>
                 <td nowrap colspan="2">
-                    <input type="checkbox" name="enableTranscription" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.transcription", true) ? "checked" : ""}>
+                    <input type="checkbox" name="enableTranscription" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.transcription", false) ? "checked" : ""}>
                     <fmt:message key="ofmeet.enable.transcription" />
                 </td>
             </tr>                            

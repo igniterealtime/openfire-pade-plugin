@@ -14,7 +14,7 @@ var ofmeet = (function(of)
     const nickColors = {}
 
     let tagsModal = null;
-    let padsModal = null, padsModalOpened = false, padsList = [], captions = null;
+    let padsModal = null, padsModalOpened = false, padsList = [], captions = {};
     let recordingAudioTrack = {};
     let recordingVideoTrack = {};
     let videoRecorder = {};
@@ -192,9 +192,9 @@ var ofmeet = (function(of)
                 }
                 else
 
-                if (text.indexOf("http") != 0 && captions)
+                if (text.indexOf("http") != 0 && captions.ele && !captions.msgsDisabled)
                 {
-                    captions.innerHTML = displayName + " : " + text;
+                    captions.ele.innerHTML = displayName + " : " + text;
                 }
             });
 
@@ -254,7 +254,7 @@ var ofmeet = (function(of)
         }
 
         if (interfaceConfig.OFMEET_ALLOW_UPLOADS)           setTimeout(setupHttpFileUpload, 1000);
-        if (interfaceConfig.OFMEET_SHOW_CAPTIONS)           captions = document.getElementById("captions");
+        if (interfaceConfig.OFMEET_SHOW_CAPTIONS)           captions.ele = document.getElementById("captions");
         if (interfaceConfig.OFMEET_ENABLE_TRANSCRIPTION)    setupSpeechRecognition();
 
         console.debug("ofmeet.js setup", APP.connection);
@@ -694,6 +694,23 @@ var ofmeet = (function(of)
                 document.getElementById("subtitles").innerHTML =  "";
                 tagsModal.close();
             });
+
+            const msgCaptions = (captions.msgsDisabled ? 'Enable' : 'Disable') + ' Message Captions';
+
+            tagsModal.addFooterBtn(msgCaptions, 'btn btn-secondary tingle-btn tingle-btn--pull-right', function() {
+                captions.msgsDisabled = !captions.msgsDisabled;
+                tagsModal.close();
+            });
+
+            if (of.recognition)
+            {
+                const transcriptCaptions = (captions.transcriptDisabled ? 'Enable' : 'Disable') + ' Voice Transcription';
+
+                tagsModal.addFooterBtn(transcriptCaptions, 'btn btn-secondary tingle-btn tingle-btn--pull-right', function() {
+                    captions.transcriptDisabled = !captions.transcriptDisabled;
+                    tagsModal.close();
+                });
+            }
         }
 
         tagsModal.open();
@@ -1088,7 +1105,7 @@ var ofmeet = (function(of)
 
     function sendSpeechRecognition(result)
     {
-        if (result != "" && APP.conference && APP.conference._room)
+        if (result != "" && APP.conference && APP.conference._room && !captions.transcriptDisabled)
         {
             var message = "[" + result + "]";
             console.debug("Speech recog result", APP.conference._room, message);

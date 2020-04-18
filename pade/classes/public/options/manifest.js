@@ -548,13 +548,6 @@ this.manifest = {
         {
             "tab": i18n.get("General"),
             "group": i18n.get("URL Protocol Handlers"),
-            "name": "registerMEETProtocol",
-            "type": "checkbox",
-            "label": i18n.get("WEB+MEET: meeting-room - Openfire meeting")
-        },
-        {
-            "tab": i18n.get("General"),
-            "group": i18n.get("URL Protocol Handlers"),
             "name": "registerUrlProtocols",
             "type": "button",
             "text": i18n.get("Register URL Protocols")
@@ -692,13 +685,6 @@ this.manifest = {
         {
             "tab": i18n.get("Meetings"),
             "group": i18n.get("General Settings"),
-            "name": "p2pMode",
-            "type": "checkbox",
-            "label": i18n.get("Enable P2P Mode")
-        },
-        {
-            "tab": i18n.get("Meetings"),
-            "group": i18n.get("General Settings"),
             "name": "startWithAudioMuted",
             "type": "checkbox",
             "label": i18n.get("Start with Audio Muted")
@@ -720,23 +706,16 @@ this.manifest = {
         {
             "tab": i18n.get("Meetings"),
             "group": i18n.get("General Settings"),
-            "name": "recordAudio",
+            "name": "recordMeeting",
             "type": "checkbox",
-            "label": i18n.get("Record Audio")
+            "label": i18n.get("Record Meeting")
         },
         {
             "tab": i18n.get("Meetings"),
             "group": i18n.get("General Settings"),
-            "name": "recordVideo",
+            "name": "showCaptions",
             "type": "checkbox",
-            "label": i18n.get("Record Audio/Video")
-        },
-        {
-            "tab": i18n.get("Meetings"),
-            "group": i18n.get("General Settings"),
-            "name": "postVideoRecordingUrl",
-            "type": "checkbox",
-            "label": i18n.get("Post Audio/Video recording URL to chat")
+            "label": i18n.get("Show text messages as sub-titles/captions on screen")
         },
         {
             "tab": i18n.get("Meetings"),
@@ -848,36 +827,6 @@ this.manifest = {
         {
             "tab": i18n.get("Meetings"),
             "group": i18n.get("General Settings"),
-            "name": "channelLastN",
-            "type": "slider",
-            "label": i18n.get("Maximum Video Streams"),
-            "max": 32,
-            "min": -1,
-            "step": 1
-        },
-        {
-            "tab": i18n.get("Meetings"),
-            "group": i18n.get("General Settings"),
-            "name": "startAudioMuted",
-            "type": "slider",
-            "label": i18n.get("Start Audio muted after"),
-            "max": 15,
-            "min": 1,
-            "step": 1
-        },
-        {
-            "tab": i18n.get("Meetings"),
-            "group": i18n.get("General Settings"),
-            "name": "startVideoMuted",
-            "type": "slider",
-            "label": i18n.get("Start Video muted after"),
-            "max": 15,
-            "min": 1,
-            "step": 1
-        },
-        {
-            "tab": i18n.get("Meetings"),
-            "group": i18n.get("General Settings"),
             "name": "startBitrate",
             "type": "slider",
             "label": i18n.get("Start Bitrate"),
@@ -892,8 +841,8 @@ this.manifest = {
             "type": "slider",
             "label": i18n.get("Resolution"),
             "max": 1080,
-            "min": 320,
-            "step": 160
+            "min": 324,
+            "step": 108
         },
         {
             "tab": i18n.get("Meetings"),
@@ -911,13 +860,6 @@ this.manifest = {
             "name": "VERTICAL_FILMSTRIP",
             "type": "checkbox",
             "label": i18n.get("Enable Vertical Filmstrip")
-        },
-        {
-            "tab": i18n.get("Meetings"),
-            "group": i18n.get("UI Settings"),
-            "name": "enableCaptions",
-            "type": "checkbox",
-            "label": i18n.get("Show Chat as Captions/Sub-titles")
         },
         {
             "tab": i18n.get("Meetings"),

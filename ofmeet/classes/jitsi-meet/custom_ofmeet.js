@@ -1,5 +1,11 @@
 var ofmeet = (function(of)
 {
+    //-------------------------------------------------------
+    //
+    //  defines
+    //
+    //-------------------------------------------------------
+
     const IMAGES = {};
     IMAGES.pad = '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 30.122,30.122L 28.020,23.778L 11.050,6.808L 10,7.858L 6.808,11.050L 23.778,28.020 zM 3.98,8.222L 8.222,3.98l-2.1-2.1c-1.172-1.172-3.070-1.172-4.242,0c-1.172,1.17-1.172,3.072,0,4.242 L 3.98,8.222z"></path></g></svg></span>';
     IMAGES.sheet = '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 4,10l 4,0 c 1.104,0, 2-0.896, 2-2L 10,4 c0-1.104-0.896-2-2-2L 4,2 C 2.896,2, 2,2.896, 2,4l0,4 C 2,9.104, 2.896,10, 4,10zM 14,10l 4,0 c 1.104,0, 2-0.896, 2-2L 20,4 c0-1.104-0.896-2-2-2L 14,2 C 12.896,2, 12,2.896, 12,4l0,4 C 12,9.104, 12.896,10, 14,10zM 24,10l 4,0 c 1.104,0, 2-0.896, 2-2L 30,4 c0-1.104-0.896-2-2-2l-4,0 c-1.104,0-2,0.896-2,2l0,4 C 22,9.104, 22.896,10, 24,10zM 2,18c0,1.104, 0.896,2, 2,2l 4,0 c 1.104,0, 2-0.896, 2-2L 10,14 c0-1.104-0.896-2-2-2L 4,12 C 2.896,12, 2,12.896, 2,14L 2,18 zM 12,18c0,1.104, 0.896,2, 2,2l 4,0 c 1.104,0, 2-0.896, 2-2L 20,14 c0-1.104-0.896-2-2-2L 14,12 C 12.896,12, 12,12.896, 12,14L 12,18 zM 22,18c0,1.104, 0.896,2, 2,2l 4,0 c 1.104,0, 2-0.896, 2-2L 30,14 c0-1.104-0.896-2-2-2l-4,0 c-1.104,0-2,0.896-2,2L 22,18 zM 2,28c0,1.104, 0.896,2, 2,2l 4,0 c 1.104,0, 2-0.896, 2-2l0-4 c0-1.104-0.896-2-2-2L 4,22 c-1.104,0-2,0.896-2,2L 2,28 zM 12,28c0,1.104, 0.896,2, 2,2l 4,0 c 1.104,0, 2-0.896, 2-2l0-4 c0-1.104-0.896-2-2-2L 14,22 c-1.104,0-2,0.896-2,2L 12,28 zM 22,28c0,1.104, 0.896,2, 2,2l 4,0 c 1.104,0, 2-0.896, 2-2l0-4 c0-1.104-0.896-2-2-2l-4,0 c-1.104,0-2,0.896-2,2L 22,28 z"></path></g></svg></span>';
@@ -8,13 +14,13 @@ var ofmeet = (function(of)
     IMAGES.poll = '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 13.774,26.028A2.060,2.060 1080 1 0 17.894,26.028A2.060,2.060 1080 1 0 13.774,26.028zM 19.464,18.252c 2.898-1.596, 4.37-3.91, 4.37-6.876c0-5.094-4.018-7.376-8-7.376c-3.878,0-8,2.818-8,8.042 c0,1.104, 0.894,2, 2,2s 2-0.896, 2-2c0-2.778, 2.074-4.042, 4-4.042c 1.494,0, 4,0.438, 4,3.376c0,1.042-0.274,2.258-2.298,3.374 C 16.16,15.504, 13.834,17.462, 13.834,20c0,1.104, 0.894,2, 2,2s 2-0.896, 2-2C 17.834,19.628, 18.624,18.714, 19.464,18.252z"></path></g></svg></span>';
     IMAGES.kanban = '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 31.966,3.896C 31.878,2.866, 31.046,2, 30,2L 2,2 C 0.954,2, 0.122,2.866, 0.034,3.896L0,3.896 l0,0.166 L0,8 l0,14.166 L0,24 l0,6 c0,1.104, 0.896,2, 2,2l 28,0 c 1.104,0, 2-0.896, 2-2L 32,8 L 32,4.062 L 32,3.896 L 31.966,3.896 z M 12,14L 12,8 l 8,0 l0,6 L 12,14 z M 20,16l0,6.166 L 12,22.166 L 12,16 L 20,16 z M 10,8l0,6 L 2,14 L 2,8 L 10,8 z M 2,16l 8,0 l0,6.166 L 2,22.166 L 2,16 z M 2,30l0-6 l 8,0 l0,6 L 2,30 z M 12,30l0-6 l 8,0 l0,6 L 12,30 z M 30,30l-8,0 l0-6 l 8,0 L 30,30 z M 30,22.166l-8,0 L 22,16 l 8,0 L 30,22.166 z M 30,14l-8,0 L 22,8 l 8,0 L 30,14 z"></path></g></svg></span>';
     IMAGES.whiteboard = '<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="32" height="32" viewBox="0 0 32 32" enable-background="new 0 0 16 16" xml:space="preserve" fill="#000000"> <g><path d="M 30,20L 30,16 c0-1.104-0.896-2-2-2L 18,14 L 18,10 l 6,0 c 1.104,0, 2-0.896, 2-2L 26,6 c0-1.104-0.896-2-2-2L 10,4 C 8.896,4, 8,4.896, 8,6l0,2 c0,1.104, 0.896,2, 2,2l 6,0 l0,4 L 6,14 C 4.896,14, 4,14.896, 4,16l0,4 c-1.104,0-2,0.896-2,2l0,4 c0,1.104, 0.896,2, 2,2l 2,0 c 1.104,0, 2-0.896, 2-2l0-2 l0-2 c0-1.104-0.896-2-2-2L 6,16 l 10,0 l0,4 c-1.104,0-2,0.896-2,2l0,2 l0,2 c0,1.104, 0.896,2, 2,2l 2,0 c 1.104,0, 2-0.896, 2-2l0-2 l0-2 c0-1.104-0.896-2-2-2L 18,16 l 10,0 l0,4 c-1.104,0-2,0.896-2,2l0,2 l0,2 c0,1.104, 0.896,2, 2,2l 2,0 c 1.104,0, 2-0.896, 2-2l0-4 C 32,20.896, 31.104,20, 30,20z M 10,6l 14,0 l0,2 L 10,8 L 10,6 z M 6,24l0,2 L 4,26 l0-4 l 2,0 L 6,24 z M 18,26L 16,26 l0-4 l 2,0 L 18,26 z M 28,24l0-2 l 2,0 l0,4 l-2,0 L 28,24 z"></path></g></svg></span>';
-
+    IMAGES.person = '<svg width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 16,0C 7.164,0,0,7.164,0,16s 7.164,16, 16,16s 16-7.164, 16-16C 32,7.162, 24.836,0, 16,0z M 16.568,7.984 C 16.74,7.594, 16.972,7.25, 17.266,6.956c 0.296-0.296, 0.636-0.528, 1.028-0.7C 18.684,6.084, 19.11,6, 19.564,6 c 0.458,0, 0.88,0.084, 1.27,0.256c 0.39,0.17, 0.732,0.404, 1.026,0.7c 0.296,0.294, 0.53,0.638, 0.7,1.028 c 0.172,0.39, 0.258,0.812, 0.258,1.27c0,0.458-0.086,0.88-0.258,1.27c-0.17,0.39-0.404,0.732-0.7,1.028 c-0.296,0.294-0.636,0.528-1.026,0.7c-0.39,0.17-0.812,0.256-1.27,0.256c-0.456,0-0.88-0.086-1.27-0.256 c-0.39-0.172-0.732-0.404-1.028-0.7C 16.972,11.256, 16.74,10.914, 16.568,10.524C 16.396,10.134, 16.31,9.71, 16.31,9.254 C 16.31,8.796, 16.396,8.374, 16.568,7.984z M 11.502,7.468c 0.486-0.484, 1.070-0.726, 1.754-0.726c 0.704,0, 1.3,0.242, 1.784,0.726 C 15.526,7.954, 15.768,8.54, 15.768,9.226c0,0.704-0.244,1.298-0.73,1.784C 14.556,11.494, 13.96,11.736, 13.256,11.736 c-0.682,0-1.268-0.242-1.754-0.728c-0.486-0.486-0.73-1.080-0.73-1.784C 10.774,8.54, 11.016,7.954, 11.502,7.468z M 7.136,7.926 c 0.37-0.372, 0.822-0.558, 1.354-0.558c 0.534,0, 0.98,0.186, 1.342,0.558c 0.36,0.37, 0.54,0.812, 0.54,1.326 c0,0.534-0.182,0.984-0.54,1.356C 9.47,10.98, 9.024,11.166, 8.49,11.166c-0.532,0-0.984-0.186-1.354-0.556 C 6.764,10.238, 6.578,9.786, 6.578,9.254C 6.578,8.74, 6.764,8.296, 7.136,7.926z M 24,26L 15.21,26 l0-4 L 9.704,22 L 9.704,18 L 6.418,18 L 6.418,14.362 c0-0.646-0.016-1.194, 0.432-1.64c 0.446-0.446, 0.994-0.67, 1.64-0.67c 0.552,0, 1.030,0.166, 1.428,0.5 c 0.4,0.334, 0.664,0.746, 0.8,1.242c 0.322-0.38, 0.704-0.674, 1.14-0.886c 0.438-0.208, 0.904-0.314, 1.398-0.314 c 0.78,0, 1.46,0.234, 2.042,0.7c 0.58,0.466, 0.966,1.052, 1.156,1.754c 0.4-0.38, 0.864-0.686, 1.4-0.912 c 0.532-0.228, 1.104-0.342, 1.712-0.342c 0.61,0, 1.186,0.114, 1.728,0.342c 0.54,0.228, 1.012,0.542, 1.412,0.942 c 0.4,0.4, 0.718,0.87, 0.954,1.412C 23.898,17.030, 24,17.606, 24,18.216L 24,26 z"></path></g></svg>'
     const SMILIES = [":)", ":(", ":D", ":+1:", ":P", ":wave:", ":blush:", ":slightly_smiling_face:", ":scream:", ":*", ":-1:", ":mag:", ":heart:", ":innocent:", ":angry:", ":angel:", ";(", ":clap:", ";)", ":beer:"];
 
-    const nickColors = {}
+    const nickColors = {}, padsList = [], captions = {msgs: []}, breakout = {duration: 60, rooms: 10};
 
-    let tagsModal = null;
-    let padsModal = null, padsModalOpened = false, padsList = [], captions = {msgs: []};
+    let tagsModal = null, padsModal = null, breakoutModal = null, padsModalOpened = false;
+    let participants = {};
     let recordingAudioTrack = {};
     let recordingVideoTrack = {};
     let videoRecorder = {};
@@ -24,6 +30,12 @@ var ofmeet = (function(of)
     let dbnames = [];
     let clockTrack = {start: 0, stop: 0, joins: 0, leaves: 0};
     let tags = {location: "", date: (new Date()).toISOString().split('T')[0], subject: "", host: "", activity: ""};
+
+    //-------------------------------------------------------
+    //
+    //  window events
+    //
+    //-------------------------------------------------------
 
     window.addEventListener("DOMContentLoaded", function()
     {
@@ -76,6 +88,12 @@ var ofmeet = (function(of)
         }
     });
 
+    //-------------------------------------------------------
+    //
+    //  setup
+    //
+    //-------------------------------------------------------
+
     function setup()
     {
         if (!APP.connection)
@@ -125,23 +143,70 @@ var ofmeet = (function(of)
                 if (of.recording) stopRecorder();
             });
 
+            APP.conference.addConferenceListener(JitsiMeetJS.events.conference.USER_JOINED, function (id)
+            {
+                participants[id] = APP.conference.getParticipantById(id);
+                console.debug("user join", id, participants);
+
+                if (breakout.kanban)
+                {
+                    const label = participants[id]._displayName || 'Anonymous';
+                    const jid = participants[id]._jid;
+
+                    breakout.kanban.addElement("participants",
+                    {
+                        id: id,
+                        title: label,
+                        drag: function(el, source) {
+                          console.debug("START DRAG: " + el.dataset.eid);
+                        },
+                        dragend: function(el) {
+                          console.debug("END DRAG: " + el.dataset.eid);
+                        },
+                        drop: function(el) {
+                          console.debug("DROPPED: " + el.dataset.eid);
+                        }
+                    });
+                }
+            });
+
+            APP.conference.addConferenceListener(JitsiMeetJS.events.conference.USER_LEFT, function (id)
+            {
+                console.debug("user left", id);
+
+                if (breakout.kanban)
+                {
+                    breakout.kanban.removeElement(id);
+                }
+
+                delete participants[id];
+            });
+
             APP.conference.addConferenceListener(JitsiMeetJS.events.conference.TRACK_ADDED, function(track)
             {
-                console.debug("ofmeet.js track added", track.getParticipantId(), track.getType());
+                const id = track.getParticipantId();
+                console.debug("ofmeet.js track added", id, track.getType());
 
-                if (track.getType() == "audio") recordingAudioTrack[track.getParticipantId()] = track.stream;
-                if (track.getType() == "video") recordingVideoTrack[track.getParticipantId()] = track.stream;
+                if (track.getType() == "audio") recordingAudioTrack[id] = track.stream;
+                if (track.getType() == "video") recordingVideoTrack[id] = track.stream;
 
+                if (participants[id]) participants[id]._trackAdded = true;
+
+                if (APP.conference.getMyUserId() == id)
+                {
+
+                }
             });
 
             APP.conference.addConferenceListener(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, function(track)
             {
-                console.debug("ofmeet.js track muted", track.getParticipantId(), track.getType(), track.isMuted());
+                const id = track.getParticipantId();
+                console.debug("ofmeet.js track muted", id, track.getType(), track.isMuted());
 
-                if (track.getType() == "audio") recordingAudioTrack[track.getParticipantId()].getAudioTracks()[0].enabled = !track.isMuted();
-                if (track.getType() == "video") recordingVideoTrack[track.getParticipantId()].getVideoTracks()[0].enabled = !track.isMuted();
+                if (track.getType() == "audio") recordingAudioTrack[id].getAudioTracks()[0].enabled = !track.isMuted();
+                if (track.getType() == "video") recordingVideoTrack[id].getVideoTracks()[0].enabled = !track.isMuted();
 
-                const recordingStream = recorderStreams[track.getParticipantId()];
+                const recordingStream = recorderStreams[id];
 
                 if (recordingStream) // recording active
                 {
@@ -149,7 +214,7 @@ var ofmeet = (function(of)
                     if (track.getType() == "video") recordingStream.getVideoTracks()[0].enabled = !track.isMuted();
                 }
 
-                if (APP.conference.getMyUserId() == track.getParticipantId())
+                if (APP.conference.getMyUserId() == id)
                 {
                     if (of.recognition)
                     {
@@ -171,7 +236,7 @@ var ofmeet = (function(of)
             APP.conference.addConferenceListener(JitsiMeetJS.events.conference.MESSAGE_RECEIVED , function(id, text, ts)
             {
                 var participant = APP.conference._room.getParticipantById(id);
-                var displayName = participant ? participant._displayName || id.split("-")[0] : "Me";
+                var displayName = participant ? participant._displayName : "Anonymous";
 
                 console.debug("ofmeet.js message", id, text, ts, displayName, participant, padsModalOpened);
 
@@ -242,10 +307,7 @@ var ofmeet = (function(of)
             }
         }
 
-        if (interfaceConfig.OFMEET_ALLOW_UPLOADS)
-        {
-            setTimeout(setupHttpFileUpload, 1000);
-        }
+        setTimeout(postLoadSetup, 1000);
 
 
         if (APP.connection.xmpp.connection._stropheConn.pass)
@@ -264,7 +326,7 @@ var ofmeet = (function(of)
 
                     navigator.credentials.store(credential).then(function()
                     {
-                        console.log("credential management api put", credential);
+                        console.debug("credential management api put", credential);
 
                     }).catch(function (err) {
                         console.error("credential management api put error", err);
@@ -276,13 +338,19 @@ var ofmeet = (function(of)
             }
 
             getVCard();
-
-            // moderatot
-            // APP.conference._room.isModerator()
         }
 
-        console.debug("ofmeet.js setup", APP.connection, captions);
+        APP.connection.xmpp.connection.addHandler(handleMucMessage, "urn:xmpp:json:0", "message");
+
+
+        console.log("ofmeet.js setup", APP.connection, captions);
     }
+
+    //-------------------------------------------------------
+    //
+    //  functions - vcard/avatar
+    //
+    //-------------------------------------------------------
 
     function getVCard()
     {
@@ -386,6 +454,12 @@ var ofmeet = (function(of)
             return color;
         }
     }
+
+    //-------------------------------------------------------
+    //
+    //  functions - record, tags and pads
+    //
+    //-------------------------------------------------------
 
     function createRecordButton()
     {
@@ -526,7 +600,7 @@ var ofmeet = (function(of)
                 cssClass: ['custom-class-1', 'custom-class-2'],
 
                 beforeOpen: function() {
-                    console.log("beforeOpen", padsModalOpened, padsList);
+                    console.debug("beforeOpen", padsModalOpened, padsList);
 
                     if (!padsModalOpened)
                     {
@@ -545,7 +619,7 @@ var ofmeet = (function(of)
 
                             if (type)
                             {
-                                console.log("beforeOpen - click", type);
+                                console.debug("beforeOpen - click", type);
                                 if (!url) url = "https://cryptpad.fr/" + type + "/";
                                 openPad(url);
                             }
@@ -558,7 +632,7 @@ var ofmeet = (function(of)
             padsModal.addFooterBtn('Share Clipboard', 'btn btn-success tingle-btn tingle-btn--primary', function() {
                 navigator.clipboard.readText().then(function(clipText)
                 {
-                    console.log("doPads", clipText);
+                    console.debug("doPads", clipText);
 
                     padsModal.close();
 
@@ -1123,6 +1197,310 @@ var ofmeet = (function(of)
 
     //-------------------------------------------------------
     //
+    //  Breakout Rooms
+    //
+    //-------------------------------------------------------
+
+    function handleMucMessage(msg)
+    {
+        const Strophe = APP.connection.xmpp.connection.Strophe;
+        const participant = Strophe.getResourceFromJid(msg.getAttribute("from"));
+
+        if (msg.getAttribute("type") == "error")
+        {
+            console.error(msg);
+            return true;
+        }
+
+        const payload = msg.querySelector('json');
+
+        if (payload)
+        {
+            const json = JSON.parse(payload.innerHTML);
+            console.debug("handleMucMessage", participant, json);
+            const label = json.action == 'breakout' ? 'joining' : 'leaving';
+
+            APP.UI.messageHandler.notify(json.label + ", you will be " + label + " breakout room in 30 seconds", null, null, "");
+            setTimeout(function() {location.href = json.url}, 3000);
+        }
+
+        return true;
+    }
+
+    function broadcastBreakout(type, xmpp, json)
+    {
+        console.debug("broadcastBreakout", json);
+        const $msg = APP.connection.xmpp.connection.$msg;
+        xmpp.send($msg({type: type, to: json.jid}).c("body").t("dummy").up().c("json", {xmlns: "urn:xmpp:json:0"}).t(JSON.stringify(json)));
+    }
+
+    function roomAction(jid, action)
+    {
+        console.debug("joinRoom", jid);
+        const xmpp = APP.connection.xmpp.connection._stropheConn;
+        const $pres = APP.connection.xmpp.connection.$pres;
+        const Strophe = APP.connection.xmpp.connection.Strophe;
+        xmpp.send($pres({type: (action == 'join' ? undefined : 'unavailable'), to: jid + '/' + APP.conference.getMyUserId()}).c("x",{xmlns: Strophe.NS.MUC}));
+    }
+
+    function toggleBreakout()
+    {
+        const Strophe = APP.connection.xmpp.connection.Strophe;
+        const xmpp = APP.connection.xmpp.connection._stropheConn;
+        const pos = location.href.lastIndexOf("/");
+        const rootUrl = location.href.substring(0, pos);
+
+        console.debug("toggleBreakout", rootUrl, breakout);
+
+        if (!breakout.started)
+        {
+            breakout.recall = [];
+
+            for (let i=0; i<breakout.rooms; i++)
+            {
+                if (breakout.kanban.findBoard("room_" + i))
+                {
+                    const items = breakout.kanban.getBoardElements("room_" + i);
+
+                    items.forEach(function(node)
+                    {
+                        const id = node.getAttribute("data-eid");
+                        const webinar = node.getAttribute("data-webinar");
+                        const room = node.getAttribute("data-roomid");
+                        const label = node.getAttribute("data-label");
+                        const jid = node.getAttribute("data-jid");
+                        const url = rootUrl + '/' + room;
+                        const json = {action: 'breakout', id: id, room: room, label: label, jid: jid, url: url, return: location.href, webinar: webinar};
+                        breakout.recall.push(json);
+                        broadcastBreakout("chat", xmpp, json);
+                    });
+                }
+            }
+        }
+        else {
+            for (let i=0; i<breakout.recall.length; i++)
+            {
+                const webinar = breakout.recall[i].webinar;
+                const jid = breakout.recall[i].room + "@" + Strophe.getDomainFromJid(breakout.recall[i].jid);
+                const json = {action: 'returnback', jid: jid, url: location.href + '#config.webinar=' + webinar};
+
+                roomAction(jid, 'join');
+                setTimeout(function()  {broadcastBreakout("groupchat", xmpp, json); roomAction(jid, 'leave')}, 1000);
+            }
+        }
+
+        breakout.started = !breakout.started;
+    }
+
+    function allocateToRooms(roomCount)
+    {
+        console.debug("allocateToRooms", roomCount, breakout);
+
+        for (let i=0; i<breakout.rooms; i++)
+        {
+            if (breakout.kanban.findBoard("room_" + i))
+            {
+                breakout.kanban.removeBoard("room_" + i);
+            }
+        }
+
+        breakout.kanban.removeBoard("participants");
+
+        const boards = [{
+            id: "participants",
+            title: "Meeting Participants",
+            class: "participants",
+            item: []
+        }]
+
+        const ids = Object.getOwnPropertyNames(participants);
+
+        for (let i=0; i<roomCount; i++)
+        {
+            boards[i+1] = {
+                id: "room_" + i,
+                title: "Room " + (i+1).toString(),
+                class: "room",
+                item: []
+            }
+
+            const roomid = APP.conference.roomName + '-' + Math.random().toString(36).substr(2,9);
+
+            for (let j=0; j<ids.length; j++)
+            {
+                if (j % roomCount == i) // allocate participant j to room i
+                {
+                    console.debug("allocateToRooms - participant", j, ids[j], participants[ids[j]]);
+
+                    const label = participants[ids[j]]._displayName || 'Anonymous';
+                    const jid = participants[ids[j]]._jid;
+                    const webinar = participants[ids[j]]._trackAdded ? "false" : "true";
+
+                    boards[i+1].item.push({
+                        id: ids[j],
+                        title: label,
+                        label: label,
+                        jid: jid,
+                        webinar: webinar,
+                        roomid: roomid,
+                        drag: function(el, source) {
+                          console.debug("START DRAG: " + el.dataset.eid);
+                        },
+                        dragend: function(el) {
+                          console.debug("END DRAG: " + el.dataset.eid);
+                        },
+                        drop: function(el) {
+                          console.debug("DROPPED: " + el.dataset.eid);
+                        }
+                    });
+                }
+            };
+        }
+
+        breakout.kanban.addBoards(boards);
+    }
+
+    function createBreakout()
+    {
+        const config =
+        {
+            element: ".breakout-kanban",
+            gutter: "5px",
+            widthBoard: "300px",
+            dragBoards: false,
+            itemHandleOptions:{
+              enabled: true,
+            },
+            click: function(el) {
+              console.debug("Trigger on all items click!");
+            },
+            dropEl: function(el, target, source, sibling){
+              console.debug(target.parentElement.getAttribute('data-id'));
+              console.debug(el, target, source, sibling)
+            },
+            addItemButton: false,
+            boards: [
+              {
+                id: "participants",
+                title: "Meeting Participants",
+                class: "participants",
+                dragTo: [],
+                item: []
+              }
+            ]
+        }
+
+        const ids = Object.getOwnPropertyNames(participants);
+
+        ids.forEach(function(id)
+        {
+            config.boards[0].item.push({
+                id: id,
+                title: participants[id]._displayName || 'Anonymous',
+                drag: function(el, source) {
+                  console.debug("START DRAG: " + el.dataset.eid);
+                },
+                dragend: function(el) {
+                  console.debug("END DRAG: " + el.dataset.eid);
+                },
+                drop: function(el) {
+                  console.debug("DROPPED: " + el.dataset.eid);
+                }
+            });
+        });
+
+        console.debug("createBreakout", config);
+        breakout.kanban = new jKanban(config);
+    }
+
+    function doBreakout()
+    {
+        const ids = Object.getOwnPropertyNames(participants);
+        const count = Math.round(ids.length / 2);
+
+        const template =
+            '<div class="modal-header">' +
+            '    <h4 class="modal-title">Breakout Rooms - <span id="breakout-title">' + ids.length + '</span> Participants</h4>' +
+            '       <label for="breakout-duration" class="col-form-label">Duration (mins):</label>' +
+            '       <input id="breakout-duration" type="number" min="0" max="480" step="30" name="breakout-duration" value="' + breakout.duration + '"/>' +
+            '       <label for="breakout-rooms" class="col-form-label">Rooms:</label>' +
+            '       <input id="breakout-rooms" type="number" min="1" max="10" name="breakout-rooms" value="' + count + '"/>' +
+            '</div>' +
+            '<div class="modal-body">' +
+            '    <div class="pade-col-container breakout-kanban"></div>' +
+            '</div>'
+
+        if (!breakoutModal)
+        {
+            breakoutModal = new tingle.modal({
+                footer: true,
+                stickyFooter: false,
+                closeMethods: ['overlay', 'button', 'escape'],
+                closeLabel: "Close",
+                cssClass: ['custom-class-1', 'custom-class-2'],
+
+                beforeOpen: function() {
+                    console.debug("beforeOpen", breakout);
+
+                    if (!breakout.created)
+                    {
+                        createBreakout();
+                        breakout.created = true;
+                    }
+                }
+            });
+
+            breakoutModal.addFooterBtn('Close', 'btn btn-danger tingle-btn tingle-btn--primary', function()
+            {
+                breakoutModal.close();
+            });
+
+            breakoutModal.addFooterBtn('Allocate', 'btn btn-success tingle-btn tingle-btn--primary', function()
+            {
+                const roomCount = parseInt(document.getElementById('breakout-rooms').value);
+                allocateToRooms(roomCount);
+                breakout.rooms = roomCount;
+            });
+
+            const label = breakout.started ? 'Return Back' : 'Break Out';
+
+            breakoutModal.addFooterBtn(label, 'btn btn-success tingle-btn tingle-btn--primary', function(evt)
+            {
+                if (breakout.rooms > 0)
+                {
+                    toggleBreakout();
+                    evt.target.classList.remove(breakout.started ? 'btn-success' : 'btn-secondary');
+                    evt.target.classList.add(breakout.started ? 'btn-secondary' : 'btn-success');
+                    evt.target.innerHTML = breakout.started ? 'Return Back' : 'Break Out';
+                }
+            });
+
+            breakoutModal.setContent(template);
+        }
+        else {
+            document.getElementById('breakout-rooms').value = count;
+            document.getElementById('breakout-title').innerHTML = ids.length;
+        }
+
+        breakoutModal.open();
+    }
+
+    function breakoutRooms()
+    {
+        //participants = {a: {_displayName: 'AAAAAAAAAAA'}, b: {_displayName: 'BBBBBBBBBBBBB'}, c: {_displayName: 'CCCCCCCCCCCCCCCC'}, d: {_displayName: 'DDDDDDDDDDDDDDDDDDD'}, a1: {_displayName: 'AAAAAAAAAAA'}, b1: {_displayName: 'BBBBBBBBBBBBB'}, c1: {_displayName: 'CCCCCCCCCCCCCCCC'}, d1: {_displayName: 'DDDDDDDDDDDDDDDDDDD'}}
+
+        console.debug("breakoutRooms");
+        const breakoutButton = addToolbarItem('ofmeet-breakout', '<div id="ofmeet-breakout" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.person + '</div></div>', "Breakout Rooms");
+
+        if (breakoutButton) breakoutButton.addEventListener("click", function(evt)
+        {
+            evt.stopPropagation();
+            doBreakout();
+        });
+    }
+
+    //-------------------------------------------------------
+    //
     //  Toolbar handler
     //
     //-------------------------------------------------------
@@ -1226,20 +1604,27 @@ var ofmeet = (function(of)
     //
     //-------------------------------------------------------
 
-    function setupHttpFileUpload()
+    function postLoadSetup()
     {
         var dropZone = document.getElementById("videospace");
 
         if (!dropZone)
         {
-            setTimeout(setupHttpFileUpload, 1000);
+            setTimeout(postLoadSetup, 1000);
             return;
         }
 
-        console.debug("setupHttpFileUpload", dropZone);
-        dropZone.addEventListener('dragover', handleDragOver, false);
-        dropZone.addEventListener('drop', handleDropFileSelect, false);
+        if (APP.conference._room.isModerator() && !config.webinar)
+        {
+            breakoutRooms();
+        }
 
+        if (interfaceConfig.OFMEET_ALLOW_UPLOADS)
+        {
+            console.debug("postLoadSetup", dropZone);
+            dropZone.addEventListener('dragover', handleDragOver, false);
+            dropZone.addEventListener('drop', handleDropFileSelect, false);
+        }
     }
 
     function handleDragOver(evt)

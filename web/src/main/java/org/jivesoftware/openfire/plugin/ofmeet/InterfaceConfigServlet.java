@@ -79,6 +79,7 @@ public class InterfaceConfigServlet extends HttpServlet
 
             config.put( "OFMEET_RECORD_CONFERENCE",              JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.conference.recording",          true                ) );
             config.put( "OFMEET_TAG_CONFERENCE",                 JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.conference.tags",               true                ) );
+            config.put( "OFMEET_ENABLE_BREAKOUT",                JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.breakout",               false                ) );
             config.put( "OFMEET_ENABLE_CRYPTPAD",                JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.cryptpad",               true                ) );
             config.put( "OFMEET_CACHE_PASSWORD",                 JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.cache.password",                true                ) );
             config.put( "OFMEET_ALLOW_UPLOADS",                  JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.allow.uploads",                 true                ) );

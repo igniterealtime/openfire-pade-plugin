@@ -1113,7 +1113,7 @@ input[type=submit].btn-block {
 }
 
 .col-form-label {
-    padding-top: calc(.375rem + 1px);
+    /*padding-top: calc(.375rem + 1px);*/
     padding-bottom: calc(.375rem + 1px);
     margin-bottom: 0;
     font-size: inherit;

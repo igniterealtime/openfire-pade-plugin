@@ -105,6 +105,7 @@
         final boolean showCaptions = ParamUtils.getBooleanParameter( request, "showCaptions" );        
         final boolean enableTranscription = ParamUtils.getBooleanParameter( request, "enableTranscription" );          
         final boolean allowUploads = ParamUtils.getBooleanParameter( request, "allowUploads" );           
+        final boolean enableBreakout = ParamUtils.getBooleanParameter( request, "enableBreakout" );           
         
         final boolean randomRoomNames = ParamUtils.getBooleanParameter( request, "randomRoomNames" );
         final boolean lipSync = ParamUtils.getBooleanParameter( request, "lipSync" );
@@ -166,6 +167,7 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.show.captions", Boolean.toString( showCaptions ) ); 
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.transcription ", Boolean.toString( enableTranscription  ) );                        
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.allow.uploads", Boolean.toString( allowUploads ) );             
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.breakout", Boolean.toString( enableBreakout ) );              
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.random.roomnames", Boolean.toString( randomRoomNames ) );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.watermark.link", watermarkLink );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.show.watermark", Boolean.toString( showWatermark ) );
@@ -314,7 +316,13 @@
                     <input type="checkbox" name="allowUploads" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.allow.uploads", true) ? "checked" : ""}>
                     <fmt:message key="ofmeet.allow.uploads" />
                 </td>
-            </tr>             
+            </tr>   
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="enableBreakout" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.breakout", false) ? "checked" : ""}>
+                    <fmt:message key="ofmeet.enable.breakout" />
+                </td>
+            </tr>            
             <tr>
                 <td nowrap colspan="2">
                     <input type="checkbox" name="showCaptions" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.show.captions", false) ? "checked" : ""}>

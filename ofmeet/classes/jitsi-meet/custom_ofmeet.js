@@ -1463,6 +1463,22 @@ var ofmeet = (function(of)
         breakout.kanban.addBoards(boards);
     }
 
+    function visitBreakoutRoom(boardId)
+    {
+        console.debug("visitBreakoutRoom", boardId);
+        const roomindex = boardId.substring(5);
+        const roomid = breakout.rooms[parseInt(roomindex)];
+
+        if (roomid)
+        {
+            const pos = location.href.lastIndexOf("/");
+            const rootUrl = location.href.substring(0, pos);
+            const url = rootUrl + '/' + roomid;
+
+            open(url, roomid);
+        }
+    }
+
     function createBreakout()
     {
         const config =
@@ -1474,6 +1490,10 @@ var ofmeet = (function(of)
             itemHandleOptions:{
               enabled: true,
             },
+            buttonClick: function(el, boardId) {
+                console.debug("Board clicked", boardId);
+                if (boardId != "participants") visitBreakoutRoom(boardId)
+            },
             click: function(el) {
               console.debug("Trigger on all items click!");
             },
@@ -1481,7 +1501,7 @@ var ofmeet = (function(of)
               console.debug(target.parentElement.getAttribute('data-id'));
               console.debug(el, target, source, sibling)
             },
-            addItemButton: false,
+            addItemButton: true,
             boards: [
               {
                 id: "participants",

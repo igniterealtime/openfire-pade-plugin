@@ -465,8 +465,7 @@ var dragula = require("dragula");
       nodeItem.addEventListener("click", function(e) {
         e.preventDefault();
         self.options.buttonClick(this, boardId);
-        // if(typeof(this.clickfn) === 'function')
-        //     this.clickfn(this);
+        if(typeof(this.clickfn) === 'function') this.clickfn(this);
       });
     }
 

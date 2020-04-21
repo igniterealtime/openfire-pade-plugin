@@ -335,6 +335,7 @@ var ofmeet = (function(of)
             }
 
             getVCard();
+            getBookmarks();
         }
 
         APP.connection.xmpp.connection.addHandler(handleMucMessage, "urn:xmpp:json:0", "message");
@@ -345,9 +346,41 @@ var ofmeet = (function(of)
 
     //-------------------------------------------------------
     //
-    //  functions - vcard/avatar
+    //  functions - vcard/avatar/bookmarks
     //
     //-------------------------------------------------------
+
+    function getBookmarks()
+    {
+        const connection = APP.connection.xmpp.connection;
+        const $iq = APP.connection.xmpp.connection.$iq;
+        const Strophe = APP.connection.xmpp.connection.Strophe;
+        const thisRoom = APP.conference._room.room.roomjid;
+
+        const stanza = $iq({'from': connection.jid, 'type': 'get'}).c('query', { 'xmlns': "jabber:iq:private"}).c('storage', { 'xmlns': 'storage:bookmarks' });
+
+        connection.sendIQ(stanza, function(iq) {
+
+            iq.querySelectorAll('conference').forEach(function(conference)
+            {
+                if (thisRoom == conference.getAttribute("jid"))
+                {
+                    const ofmeet_recording = conference.getAttribute("ofmeet_recording");
+                    const ofmeet_tags = conference.getAttribute("ofmeet_tags");
+                    const ofmeet_cryptpad = conference.getAttribute("ofmeet_cryptpad");
+                    const ofmeet_captions = conference.getAttribute("ofmeet_captions");
+                    const ofmeet_transcription = conference.getAttribute("ofmeet_transcription");
+                    const ofmeet_uploads = conference.getAttribute("ofmeet_uploads");
+                    const ofmeet_breakout = conference.getAttribute("ofmeet_breakout");
+
+                    // TODO - This cannot be used until Jitsi-Meet is in an iframe and loaded after bookmarks are fetched
+                }
+            });
+
+        }, function(error){
+            console.error("bookmarks error", error);
+        });
+    }
 
     function getVCard()
     {
@@ -1270,13 +1303,21 @@ var ofmeet = (function(of)
         xmpp.send($msg({type: type, to: json.jid}).c("json", {xmlns: "urn:xmpp:json:0"}).t(JSON.stringify(json)));
     }
 
-    function roomAction(jid, action)
+    function exitRoom(jid)
+    {
+        console.debug("exitRoom", jid);
+        const xmpp = APP.connection.xmpp.connection._stropheConn;
+        const $pres = APP.connection.xmpp.connection.$pres;
+        xmpp.send($pres({type: 'unavailable', to: jid + '/' + APP.conference.getMyUserId()}));
+    }
+
+    function joinRoom(jid)
     {
         console.debug("joinRoom", jid);
         const xmpp = APP.connection.xmpp.connection._stropheConn;
         const $pres = APP.connection.xmpp.connection.$pres;
         const Strophe = APP.connection.xmpp.connection.Strophe;
-        xmpp.send($pres({type: (action == 'join' ? undefined : 'unavailable'), to: jid + '/' + APP.conference.getMyUserId()}).c("x",{xmlns: Strophe.NS.MUC}));
+        xmpp.send($pres({to: jid + '/' + APP.conference.getMyUserId()}).c("x",{xmlns: Strophe.NS.MUC}));
     }
 
     function endBreakout()
@@ -1339,8 +1380,14 @@ var ofmeet = (function(of)
                 const jid = breakout.recall[i].room + "@" + Strophe.getDomainFromJid(breakout.recall[i].jid);
                 const json = {action: 'reassemble', jid: jid, url: location.href + '#config.webinar=' + webinar};
 
-                roomAction(jid, 'join');
-                setTimeout(function()  {broadcastBreakout("groupchat", xmpp, json); roomAction(jid, 'leave')}, 1000);
+                joinRoom(jid);
+
+                setTimeout(function()
+                {
+                    broadcastBreakout("groupchat", xmpp, json);
+                    setTimeout(function() {exitRoom(jid)}, 1000);
+
+                }, 1000);
             }
 
             breakoutStatus("Breakout has ended");

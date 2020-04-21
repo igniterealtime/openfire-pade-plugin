@@ -65,6 +65,7 @@ public class InterfaceConfigServlet extends HttpServlet
             config.put( "JITSI_WATERMARK_LINK",                  JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.watermark.link",                ""                  ) );
             config.put( "SHOW_BRAND_WATERMARK",                  JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.brand.show.watermark",          false               ) );
             config.put( "BRAND_WATERMARK_LINK",                  JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.brand.watermark.link",          ""                  ) );
+            config.put( "RECENT_LIST_ENABLED",                   JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.recent.list.enabled",           true                ) );
             config.put( "SHOW_POWERED_BY",                       JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.show.poweredby",                false               ) );
             config.put( "GENERATE_ROOMNAMES_ON_WELCOME_PAGE",    JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.random.roomnames",              true                ) );
             config.put( "APP_NAME",                              JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.application.name",              "Openfire Meetings" ) );

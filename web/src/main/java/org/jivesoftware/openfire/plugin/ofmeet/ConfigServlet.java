@@ -196,7 +196,7 @@ public class ConfigServlet extends HttpServlet
             config.put( "recordingType", "colibri" );
             config.put( "disableAudioLevels", true );   // reduces CPU. see https://community.jitsi.org/t/host-a-meeting-with-500-people-ideas/34672/3
             config.put( "stereo", false );
-            config.put( "requireDisplayName", false );
+            config.put( "requireDisplayName", true );
             config.put( "startAudioOnly", ofMeetConfig.getStartAudioOnly() );
             if ( ofMeetConfig.getStartAudioMuted() != null )
             {

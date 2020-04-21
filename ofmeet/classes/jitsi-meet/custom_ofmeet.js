@@ -17,7 +17,7 @@ var ofmeet = (function(of)
     IMAGES.person = '<svg width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 16,0C 7.164,0,0,7.164,0,16s 7.164,16, 16,16s 16-7.164, 16-16C 32,7.162, 24.836,0, 16,0z M 16.568,7.984 C 16.74,7.594, 16.972,7.25, 17.266,6.956c 0.296-0.296, 0.636-0.528, 1.028-0.7C 18.684,6.084, 19.11,6, 19.564,6 c 0.458,0, 0.88,0.084, 1.27,0.256c 0.39,0.17, 0.732,0.404, 1.026,0.7c 0.296,0.294, 0.53,0.638, 0.7,1.028 c 0.172,0.39, 0.258,0.812, 0.258,1.27c0,0.458-0.086,0.88-0.258,1.27c-0.17,0.39-0.404,0.732-0.7,1.028 c-0.296,0.294-0.636,0.528-1.026,0.7c-0.39,0.17-0.812,0.256-1.27,0.256c-0.456,0-0.88-0.086-1.27-0.256 c-0.39-0.172-0.732-0.404-1.028-0.7C 16.972,11.256, 16.74,10.914, 16.568,10.524C 16.396,10.134, 16.31,9.71, 16.31,9.254 C 16.31,8.796, 16.396,8.374, 16.568,7.984z M 11.502,7.468c 0.486-0.484, 1.070-0.726, 1.754-0.726c 0.704,0, 1.3,0.242, 1.784,0.726 C 15.526,7.954, 15.768,8.54, 15.768,9.226c0,0.704-0.244,1.298-0.73,1.784C 14.556,11.494, 13.96,11.736, 13.256,11.736 c-0.682,0-1.268-0.242-1.754-0.728c-0.486-0.486-0.73-1.080-0.73-1.784C 10.774,8.54, 11.016,7.954, 11.502,7.468z M 7.136,7.926 c 0.37-0.372, 0.822-0.558, 1.354-0.558c 0.534,0, 0.98,0.186, 1.342,0.558c 0.36,0.37, 0.54,0.812, 0.54,1.326 c0,0.534-0.182,0.984-0.54,1.356C 9.47,10.98, 9.024,11.166, 8.49,11.166c-0.532,0-0.984-0.186-1.354-0.556 C 6.764,10.238, 6.578,9.786, 6.578,9.254C 6.578,8.74, 6.764,8.296, 7.136,7.926z M 24,26L 15.21,26 l0-4 L 9.704,22 L 9.704,18 L 6.418,18 L 6.418,14.362 c0-0.646-0.016-1.194, 0.432-1.64c 0.446-0.446, 0.994-0.67, 1.64-0.67c 0.552,0, 1.030,0.166, 1.428,0.5 c 0.4,0.334, 0.664,0.746, 0.8,1.242c 0.322-0.38, 0.704-0.674, 1.14-0.886c 0.438-0.208, 0.904-0.314, 1.398-0.314 c 0.78,0, 1.46,0.234, 2.042,0.7c 0.58,0.466, 0.966,1.052, 1.156,1.754c 0.4-0.38, 0.864-0.686, 1.4-0.912 c 0.532-0.228, 1.104-0.342, 1.712-0.342c 0.61,0, 1.186,0.114, 1.728,0.342c 0.54,0.228, 1.012,0.542, 1.412,0.942 c 0.4,0.4, 0.718,0.87, 0.954,1.412C 23.898,17.030, 24,17.606, 24,18.216L 24,26 z"></path></g></svg>'
     const SMILIES = [":)", ":(", ":D", ":+1:", ":P", ":wave:", ":blush:", ":slightly_smiling_face:", ":scream:", ":*", ":-1:", ":mag:", ":heart:", ":innocent:", ":angry:", ":angel:", ";(", ":clap:", ";)", ":beer:"];
 
-    const nickColors = {}, padsList = [], captions = {msgs: []}, breakout = {duration: 60, rooms: 10};
+    const nickColors = {}, padsList = [], captions = {msgs: []}, breakout = {rooms: [], duration: 60, roomCount: 10, wait: 10};
 
     let tagsModal = null, padsModal = null, breakoutModal = null, padsModalOpened = false;
     let participants = {};
@@ -157,16 +157,13 @@ var ofmeet = (function(of)
                     {
                         id: id,
                         title: label,
-                        drag: function(el, source) {
-                          console.debug("START DRAG: " + el.dataset.eid);
-                        },
-                        dragend: function(el) {
-                          console.debug("END DRAG: " + el.dataset.eid);
-                        },
                         drop: function(el) {
-                          console.debug("DROPPED: " + el.dataset.eid);
+                          breakoutDragAndDrop(el);
                         }
                     });
+
+                    const ids = Object.getOwnPropertyNames(participants);
+                    document.getElementById('breakout-rooms').value = Math.round(ids.length / 2)
                 }
             });
 
@@ -338,6 +335,7 @@ var ofmeet = (function(of)
             }
 
             getVCard();
+            getBookmarks();
         }
 
         APP.connection.xmpp.connection.addHandler(handleMucMessage, "urn:xmpp:json:0", "message");
@@ -348,9 +346,41 @@ var ofmeet = (function(of)
 
     //-------------------------------------------------------
     //
-    //  functions - vcard/avatar
+    //  functions - vcard/avatar/bookmarks
     //
     //-------------------------------------------------------
+
+    function getBookmarks()
+    {
+        const connection = APP.connection.xmpp.connection;
+        const $iq = APP.connection.xmpp.connection.$iq;
+        const Strophe = APP.connection.xmpp.connection.Strophe;
+        const thisRoom = APP.conference._room.room.roomjid;
+
+        const stanza = $iq({'from': connection.jid, 'type': 'get'}).c('query', { 'xmlns': "jabber:iq:private"}).c('storage', { 'xmlns': 'storage:bookmarks' });
+
+        connection.sendIQ(stanza, function(iq) {
+
+            iq.querySelectorAll('conference').forEach(function(conference)
+            {
+                if (thisRoom == conference.getAttribute("jid"))
+                {
+                    const ofmeet_recording = conference.getAttribute("ofmeet_recording");
+                    const ofmeet_tags = conference.getAttribute("ofmeet_tags");
+                    const ofmeet_cryptpad = conference.getAttribute("ofmeet_cryptpad");
+                    const ofmeet_captions = conference.getAttribute("ofmeet_captions");
+                    const ofmeet_transcription = conference.getAttribute("ofmeet_transcription");
+                    const ofmeet_uploads = conference.getAttribute("ofmeet_uploads");
+                    const ofmeet_breakout = conference.getAttribute("ofmeet_breakout");
+
+                    // TODO - This cannot be used until Jitsi-Meet is in an iframe and loaded after bookmarks are fetched
+                }
+            });
+
+        }, function(error){
+            console.error("bookmarks error", error);
+        });
+    }
 
     function getVCard()
     {
@@ -486,7 +516,7 @@ var ofmeet = (function(of)
 
     function createTagsButton()
     {
-        const tagsButton = addToolbarItem('ofmeet-tags', '<div id="ofmeet-tags" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;"><svg height="24" width="24" viewBox="0 0 24 24"><path d="M18 11.016V9.985a.96.96 0 00-.984-.984h-3c-.563 0-1.031.422-1.031.984v4.031c0 .563.469.984 1.031.984h3a.96.96 0 00.984-.984v-1.031h-1.5v.516h-2.016v-3H16.5v.516H18zm-6.984 0V9.985c0-.563-.469-.984-1.031-.984h-3a.96.96 0 00-.984.984v4.031a.96.96 0 00.984.984h3c.563 0 1.031-.422 1.031-.984v-1.031h-1.5v.516H7.5v-3h2.016v.516h1.5zm7.968-7.032C20.062 3.984 21 4.922 21 6v12c0 1.078-.938 2.016-2.016 2.016H5.015c-1.125 0-2.016-.938-2.016-2.016V6c0-1.078.891-2.016 2.016-2.016h13.969z"></path></svg></div></div>', "Conference Captions/Subtitles");
+        const tagsButton = addToolbarItem('ofmeet-tags', '<div id="ofmeet-tags" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;"><svg height="24" width="24" viewBox="0 0 24 24"><path d="M18 11.016V9.985a.96.96 0 00-.984-.984h-3c-.563 0-1.031.422-1.031.984v4.031c0 .563.469.984 1.031.984h3a.96.96 0 00.984-.984v-1.031h-1.5v.516h-2.016v-3H16.5v.516H18zm-6.984 0V9.985c0-.563-.469-.984-1.031-.984h-3a.96.96 0 00-.984.984v4.031a.96.96 0 00.984.984h3c.563 0 1.031-.422 1.031-.984v-1.031h-1.5v.516H7.5v-3h2.016v.516h1.5zm7.968-7.032C20.062 3.984 21 4.922 21 6v12c0 1.078-.938 2.016-2.016 2.016H5.015c-1.125 0-2.016-.938-2.016-2.016V6c0-1.078.891-2.016 2.016-2.016h13.969z"></path></svg></div></div>', "Enable Conference Captions/Subtitles");
 
         if (tagsButton) tagsButton.addEventListener("click", function(evt)
         {
@@ -497,7 +527,7 @@ var ofmeet = (function(of)
 
     function createPadsButton()
     {
-        const padsButton = addToolbarItem('ofmeet-pads', '<div id="ofmeet-pads" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;"><img width="22" src="https://sandbox.cryptpad.info/customize/images/logo_white.png"/></div></div>', "CryptPad");
+        const padsButton = addToolbarItem('ofmeet-pads', '<div id="ofmeet-pads" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;"><img width="22" src="https://sandbox.cryptpad.info/customize/images/logo_white.png"/></div></div>', "Launch CryptPad Application");
 
         if (padsButton) padsButton.addEventListener("click", function(evt)
         {
@@ -1201,6 +1231,45 @@ var ofmeet = (function(of)
     //
     //-------------------------------------------------------
 
+    function breakoutDragAndDrop(el)
+    {
+        if (!el.dataset.eid) return;
+
+        const id = el.dataset.eid;
+        const label = participants[id]._displayName || 'Anonymous';
+        const jid = participants[id]._jid;
+        const webinar = participants[id]._trackAdded ? "false" : "true";
+
+        const boardId = breakout.kanban.getParentBoardID(id);
+
+        if (boardId && jid)
+        {
+            if (boardId == "participants") return;
+
+            const roomindex = boardId.substring(5);
+            const roomid = breakout.rooms[parseInt(roomindex)]
+
+            console.debug("breakoutDragAndDrop", id, roomindex, roomid, label, jid, webinar);
+
+            el.setAttribute('data-jid', jid);
+            el.setAttribute('data-label', label);
+            el.setAttribute('data-roomid', roomid);
+            el.setAttribute('data-roomindex', roomindex);
+            el.setAttribute('data-webinar', webinar);
+        }
+        else {
+            breakout.kanban.removeElement(id);
+            breakout.kanban.addElement("participants",
+            {
+                id: id,
+                title: label,
+                drop: function(el) {
+                  breakoutDragAndDrop(el);
+                }
+            });
+        }
+    }
+
     function handleMucMessage(msg)
     {
         const Strophe = APP.connection.xmpp.connection.Strophe;
@@ -1218,10 +1287,10 @@ var ofmeet = (function(of)
         {
             const json = JSON.parse(payload.innerHTML);
             console.debug("handleMucMessage", participant, json);
-            const label = json.action == 'breakout' ? 'joining' : 'leaving';
+            const label = json.action == 'breakout' ? 'Joining' : 'Leaving';
 
-            APP.UI.messageHandler.notify(json.label + ", you will be " + label + " breakout room in 30 seconds", null, null, "");
-            setTimeout(function() {location.href = json.url}, 3000);
+            APP.UI.messageHandler.notify(label + " breakout in " + breakout.wait + " seconds", null, null, "");
+            setTimeout(function() {location.href = json.url}, breakout.wait * 1000);
         }
 
         return true;
@@ -1231,16 +1300,34 @@ var ofmeet = (function(of)
     {
         console.debug("broadcastBreakout", json);
         const $msg = APP.connection.xmpp.connection.$msg;
-        xmpp.send($msg({type: type, to: json.jid}).c("body").t("dummy").up().c("json", {xmlns: "urn:xmpp:json:0"}).t(JSON.stringify(json)));
+        xmpp.send($msg({type: type, to: json.jid}).c("json", {xmlns: "urn:xmpp:json:0"}).t(JSON.stringify(json)));
     }
 
-    function roomAction(jid, action)
+    function exitRoom(jid)
+    {
+        console.debug("exitRoom", jid);
+        const xmpp = APP.connection.xmpp.connection._stropheConn;
+        const $pres = APP.connection.xmpp.connection.$pres;
+        xmpp.send($pres({type: 'unavailable', to: jid + '/' + APP.conference.getMyUserId()}));
+    }
+
+    function joinRoom(jid)
     {
         console.debug("joinRoom", jid);
         const xmpp = APP.connection.xmpp.connection._stropheConn;
         const $pres = APP.connection.xmpp.connection.$pres;
         const Strophe = APP.connection.xmpp.connection.Strophe;
-        xmpp.send($pres({type: (action == 'join' ? undefined : 'unavailable'), to: jid + '/' + APP.conference.getMyUserId()}).c("x",{xmlns: Strophe.NS.MUC}));
+        xmpp.send($pres({to: jid + '/' + APP.conference.getMyUserId()}).c("x",{xmlns: Strophe.NS.MUC}));
+    }
+
+    function endBreakout()
+    {
+        if (breakout.started) toggleBreakout();
+    }
+
+    function startBreakout()
+    {
+        if (!breakout.started) toggleBreakout();
     }
 
     function toggleBreakout()
@@ -1256,7 +1343,7 @@ var ofmeet = (function(of)
         {
             breakout.recall = [];
 
-            for (let i=0; i<breakout.rooms; i++)
+            for (let i=0; i<breakout.roomCount; i++)
             {
                 if (breakout.kanban.findBoard("room_" + i))
                 {
@@ -1276,27 +1363,48 @@ var ofmeet = (function(of)
                     });
                 }
             }
+
+            if (breakout.duration > 0)
+            {
+                breakout.timeout = setTimeout(toggleBreakout, 60000 * breakout.duration);
+                breakoutStatus("Breakout started and finishes in " + breakout.duration + " minutes ");
+            }
+            else {
+                breakoutStatus("Breakout started. Click on reassemble to end and recall participants");
+            }
         }
         else {
             for (let i=0; i<breakout.recall.length; i++)
             {
                 const webinar = breakout.recall[i].webinar;
                 const jid = breakout.recall[i].room + "@" + Strophe.getDomainFromJid(breakout.recall[i].jid);
-                const json = {action: 'returnback', jid: jid, url: location.href + '#config.webinar=' + webinar};
+                const json = {action: 'reassemble', jid: jid, url: location.href + '#config.webinar=' + webinar};
 
-                roomAction(jid, 'join');
-                setTimeout(function()  {broadcastBreakout("groupchat", xmpp, json); roomAction(jid, 'leave')}, 1000);
+                joinRoom(jid);
+
+                setTimeout(function()
+                {
+                    broadcastBreakout("groupchat", xmpp, json);
+                    setTimeout(function() {exitRoom(jid)}, 1000);
+
+                }, 1000);
             }
+
+            breakoutStatus("Breakout has ended");
+            if (breakout.timeout) clearTimeout(breakout.timeout);
         }
 
         breakout.started = !breakout.started;
+        breakout.button.classList.remove(breakout.started ? 'btn-success' : 'btn-secondary');
+        breakout.button.classList.add(breakout.started ? 'btn-secondary' : 'btn-success');
+        breakout.button.innerHTML = breakout.started ? 'Reassemble' : 'Breakout';
     }
 
     function allocateToRooms(roomCount)
     {
         console.debug("allocateToRooms", roomCount, breakout);
 
-        for (let i=0; i<breakout.rooms; i++)
+        for (let i=0; i<breakout.roomCount; i++)
         {
             if (breakout.kanban.findBoard("room_" + i))
             {
@@ -1324,7 +1432,7 @@ var ofmeet = (function(of)
                 item: []
             }
 
-            const roomid = APP.conference.roomName + '-' + Math.random().toString(36).substr(2,9);
+            breakout.rooms[i] = APP.conference.roomName + '-' + Math.random().toString(36).substr(2,9);
 
             for (let j=0; j<ids.length; j++)
             {
@@ -1342,15 +1450,10 @@ var ofmeet = (function(of)
                         label: label,
                         jid: jid,
                         webinar: webinar,
-                        roomid: roomid,
-                        drag: function(el, source) {
-                          console.debug("START DRAG: " + el.dataset.eid);
-                        },
-                        dragend: function(el) {
-                          console.debug("END DRAG: " + el.dataset.eid);
-                        },
+                        roomid: breakout.rooms[i],
+                        roomindex: i,
                         drop: function(el) {
-                          console.debug("DROPPED: " + el.dataset.eid);
+                          breakoutDragAndDrop(el);
                         }
                     });
                 }
@@ -1397,20 +1500,19 @@ var ofmeet = (function(of)
             config.boards[0].item.push({
                 id: id,
                 title: participants[id]._displayName || 'Anonymous',
-                drag: function(el, source) {
-                  console.debug("START DRAG: " + el.dataset.eid);
-                },
-                dragend: function(el) {
-                  console.debug("END DRAG: " + el.dataset.eid);
-                },
                 drop: function(el) {
-                  console.debug("DROPPED: " + el.dataset.eid);
+                  breakoutDragAndDrop(el);
                 }
             });
         });
 
         console.debug("createBreakout", config);
         breakout.kanban = new jKanban(config);
+    }
+
+    function breakoutStatus(text)
+    {
+        document.getElementById('breakout-status').innerHTML = text;
     }
 
     function doBreakout()
@@ -1425,6 +1527,7 @@ var ofmeet = (function(of)
             '       <input id="breakout-duration" type="number" min="0" max="480" step="30" name="breakout-duration" value="' + breakout.duration + '"/>' +
             '       <label for="breakout-rooms" class="col-form-label">Rooms:</label>' +
             '       <input id="breakout-rooms" type="number" min="1" max="10" name="breakout-rooms" value="' + count + '"/>' +
+            '       <div id="breakout-status" style="width:30%; color:red"></div>' +
             '</div>' +
             '<div class="modal-body">' +
             '    <div class="pade-col-container breakout-kanban"></div>' +
@@ -1458,20 +1561,33 @@ var ofmeet = (function(of)
             breakoutModal.addFooterBtn('Allocate', 'btn btn-success tingle-btn tingle-btn--primary', function()
             {
                 const roomCount = parseInt(document.getElementById('breakout-rooms').value);
-                allocateToRooms(roomCount);
-                breakout.rooms = roomCount;
+                const ids = Object.getOwnPropertyNames(participants);
+
+                if (ids.length > 0 && roomCount > 0)
+                {
+                    allocateToRooms(roomCount);
+                    breakoutStatus("Allocated " + ids.length + " participants to " + roomCount + " rooms");
+                }
+                else {
+                    breakoutStatus("Missing participants or rooms");
+                }
+
+                breakout.roomCount = roomCount;
             });
 
-            const label = breakout.started ? 'Return Back' : 'Break Out';
+            const label = breakout.started ? 'Reassemble' : 'Breakout';
 
             breakoutModal.addFooterBtn(label, 'btn btn-success tingle-btn tingle-btn--primary', function(evt)
             {
-                if (breakout.rooms > 0)
+                breakout.button = evt.target;
+                breakout.duration = parseInt(document.getElementById('breakout-duration').value);
+
+                if (breakout.roomCount > 0)
                 {
                     toggleBreakout();
-                    evt.target.classList.remove(breakout.started ? 'btn-success' : 'btn-secondary');
-                    evt.target.classList.add(breakout.started ? 'btn-secondary' : 'btn-success');
-                    evt.target.innerHTML = breakout.started ? 'Return Back' : 'Break Out';
+                }
+                else {
+                    breakoutStatus("Allocate participants first before breakout");
                 }
             });
 
@@ -1479,6 +1595,7 @@ var ofmeet = (function(of)
         }
         else {
             document.getElementById('breakout-rooms').value = count;
+            document.getElementById('breakout-duration').innerHTML = breakout.duration;
             document.getElementById('breakout-title').innerHTML = ids.length;
         }
 
@@ -1487,10 +1604,8 @@ var ofmeet = (function(of)
 
     function breakoutRooms()
     {
-        //participants = {a: {_displayName: 'AAAAAAAAAAA'}, b: {_displayName: 'BBBBBBBBBBBBB'}, c: {_displayName: 'CCCCCCCCCCCCCCCC'}, d: {_displayName: 'DDDDDDDDDDDDDDDDDDD'}, a1: {_displayName: 'AAAAAAAAAAA'}, b1: {_displayName: 'BBBBBBBBBBBBB'}, c1: {_displayName: 'CCCCCCCCCCCCCCCC'}, d1: {_displayName: 'DDDDDDDDDDDDDDDDDDD'}}
-
         console.debug("breakoutRooms");
-        const breakoutButton = addToolbarItem('ofmeet-breakout', '<div id="ofmeet-breakout" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.person + '</div></div>', "Breakout Rooms");
+        const breakoutButton = addToolbarItem('ofmeet-breakout', '<div id="ofmeet-breakout" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.person + '</div></div>', "Create Breakout Rooms");
 
         if (breakoutButton) breakoutButton.addEventListener("click", function(evt)
         {
@@ -1614,7 +1729,7 @@ var ofmeet = (function(of)
             return;
         }
 
-        if (APP.conference._room.isModerator() && !config.webinar)
+        if (interfaceConfig.OFMEET_ENABLE_BREAKOUT && APP.conference._room.isModerator() && !config.webinar)
         {
             breakoutRooms();
         }

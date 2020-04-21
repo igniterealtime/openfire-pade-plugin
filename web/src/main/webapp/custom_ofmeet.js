@@ -516,7 +516,7 @@ var ofmeet = (function(of)
 
     function createTagsButton()
     {
-        const tagsButton = addToolbarItem('ofmeet-tags', '<div id="ofmeet-tags" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;"><svg height="24" width="24" viewBox="0 0 24 24"><path d="M18 11.016V9.985a.96.96 0 00-.984-.984h-3c-.563 0-1.031.422-1.031.984v4.031c0 .563.469.984 1.031.984h3a.96.96 0 00.984-.984v-1.031h-1.5v.516h-2.016v-3H16.5v.516H18zm-6.984 0V9.985c0-.563-.469-.984-1.031-.984h-3a.96.96 0 00-.984.984v4.031a.96.96 0 00.984.984h3c.563 0 1.031-.422 1.031-.984v-1.031h-1.5v.516H7.5v-3h2.016v.516h1.5zm7.968-7.032C20.062 3.984 21 4.922 21 6v12c0 1.078-.938 2.016-2.016 2.016H5.015c-1.125 0-2.016-.938-2.016-2.016V6c0-1.078.891-2.016 2.016-2.016h13.969z"></path></svg></div></div>', "Conference Captions/Subtitles");
+        const tagsButton = addToolbarItem('ofmeet-tags', '<div id="ofmeet-tags" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;"><svg height="24" width="24" viewBox="0 0 24 24"><path d="M18 11.016V9.985a.96.96 0 00-.984-.984h-3c-.563 0-1.031.422-1.031.984v4.031c0 .563.469.984 1.031.984h3a.96.96 0 00.984-.984v-1.031h-1.5v.516h-2.016v-3H16.5v.516H18zm-6.984 0V9.985c0-.563-.469-.984-1.031-.984h-3a.96.96 0 00-.984.984v4.031a.96.96 0 00.984.984h3c.563 0 1.031-.422 1.031-.984v-1.031h-1.5v.516H7.5v-3h2.016v.516h1.5zm7.968-7.032C20.062 3.984 21 4.922 21 6v12c0 1.078-.938 2.016-2.016 2.016H5.015c-1.125 0-2.016-.938-2.016-2.016V6c0-1.078.891-2.016 2.016-2.016h13.969z"></path></svg></div></div>', "Enable Conference Captions/Subtitles");
 
         if (tagsButton) tagsButton.addEventListener("click", function(evt)
         {
@@ -527,7 +527,7 @@ var ofmeet = (function(of)
 
     function createPadsButton()
     {
-        const padsButton = addToolbarItem('ofmeet-pads', '<div id="ofmeet-pads" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;"><img width="22" src="https://sandbox.cryptpad.info/customize/images/logo_white.png"/></div></div>', "CryptPad");
+        const padsButton = addToolbarItem('ofmeet-pads', '<div id="ofmeet-pads" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;"><img width="22" src="https://sandbox.cryptpad.info/customize/images/logo_white.png"/></div></div>', "Launch CryptPad Application");
 
         if (padsButton) padsButton.addEventListener("click", function(evt)
         {
@@ -1463,6 +1463,22 @@ var ofmeet = (function(of)
         breakout.kanban.addBoards(boards);
     }
 
+    function visitBreakoutRoom(boardId)
+    {
+        console.debug("visitBreakoutRoom", boardId);
+        const roomindex = boardId.substring(5);
+        const roomid = breakout.rooms[parseInt(roomindex)];
+
+        if (roomid)
+        {
+            const pos = location.href.lastIndexOf("/");
+            const rootUrl = location.href.substring(0, pos);
+            const url = rootUrl + '/' + roomid;
+
+            open(url, roomid);
+        }
+    }
+
     function createBreakout()
     {
         const config =
@@ -1474,6 +1490,10 @@ var ofmeet = (function(of)
             itemHandleOptions:{
               enabled: true,
             },
+            buttonClick: function(el, boardId) {
+                console.debug("Board clicked", boardId);
+                if (boardId != "participants") visitBreakoutRoom(boardId)
+            },
             click: function(el) {
               console.debug("Trigger on all items click!");
             },
@@ -1481,7 +1501,7 @@ var ofmeet = (function(of)
               console.debug(target.parentElement.getAttribute('data-id'));
               console.debug(el, target, source, sibling)
             },
-            addItemButton: false,
+            addItemButton: true,
             boards: [
               {
                 id: "participants",
@@ -1605,7 +1625,7 @@ var ofmeet = (function(of)
     function breakoutRooms()
     {
         console.debug("breakoutRooms");
-        const breakoutButton = addToolbarItem('ofmeet-breakout', '<div id="ofmeet-breakout" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.person + '</div></div>', "Breakout Rooms");
+        const breakoutButton = addToolbarItem('ofmeet-breakout', '<div id="ofmeet-breakout" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.person + '</div></div>', "Create Breakout Rooms");
 
         if (breakoutButton) breakoutButton.addEventListener("click", function(evt)
         {
@@ -1729,7 +1749,7 @@ var ofmeet = (function(of)
             return;
         }
 
-        if (APP.conference._room.isModerator() && !config.webinar)
+        if (interfaceConfig.OFMEET_ENABLE_BREAKOUT && APP.conference._room.isModerator() && !config.webinar)
         {
             breakoutRooms();
         }

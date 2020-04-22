@@ -556,8 +556,8 @@ var ofmeet = (function(of)
             ++totalSeconds;
 
             const secs = pad(totalSeconds % 60);
-            const mins = pad(parseInt(totalSeconds / 60));
-            const hrs = pad(parseInt(totalSeconds / 3600, 10));
+            const mins = pad(parseInt((totalSeconds / 60) % 60));
+            const hrs = pad(parseInt((totalSeconds / 3600) % 24, 10));
 
             textElem.textContent = hrs + ":" + mins + ":" + secs;
             setTimeout(updateClock, 1000);

@@ -68,8 +68,8 @@ public class InterfaceConfigServlet extends HttpServlet
             config.put( "RECENT_LIST_ENABLED",                   JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.recent.list.enabled",           true                ) );
             config.put( "SHOW_POWERED_BY",                       JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.show.poweredby",                false               ) );
             config.put( "GENERATE_ROOMNAMES_ON_WELCOME_PAGE",    JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.random.roomnames",              true                ) );
-            config.put( "DISPLAY_WELCOME_PAGE_CONTENT",          JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.random.show.welcomepage.content",     true          ) );
-            config.put( "DISPLAY_WELCOME_PAGE_TOOLBAR_ADDITIONAL_CONTENT",JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.random.show.welcomepage.toolbarcontent", false) );
+            config.put( "DISPLAY_WELCOME_PAGE_CONTENT",          JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.content",           true                ) );
+            config.put( "DISPLAY_WELCOME_PAGE_TOOLBAR_ADDITIONAL_CONTENT",JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.toolbarcontent",          false) );
             config.put( "APP_NAME",                              JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.application.name",              "Openfire Meetings" ) );
             config.put( "LANG_DETECTION",                        JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.languagedetection",      false               ) );
             config.put( "INVITATION_POWERED_BY",                 JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.invitation.poweredby",          true                ) );

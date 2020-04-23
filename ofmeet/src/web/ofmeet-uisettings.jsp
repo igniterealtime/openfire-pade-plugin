@@ -106,7 +106,9 @@
         final boolean enableTranscription = ParamUtils.getBooleanParameter( request, "enableTranscription" );          
         final boolean allowUploads = ParamUtils.getBooleanParameter( request, "allowUploads" );           
         final boolean enableBreakout = ParamUtils.getBooleanParameter( request, "enableBreakout" );           
-        
+        final boolean welcomepageContent = ParamUtils.getBooleanParameter( request, "welcomepageContent" );
+        final boolean welcomepageToolbarContent = ParamUtils.getBooleanParameter( request, "welcomepageToolbarContent" );
+        final boolean enableLanguageDetection = ParamUtils.getBooleanParameter( request, "enableLanguageDetection" );        
         final boolean randomRoomNames = ParamUtils.getBooleanParameter( request, "randomRoomNames" );
         final boolean lipSync = ParamUtils.getBooleanParameter( request, "lipSync" );
 
@@ -168,7 +170,11 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.transcription ", Boolean.toString( enableTranscription  ) );                        
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.allow.uploads", Boolean.toString( allowUploads ) );             
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.breakout", Boolean.toString( enableBreakout ) );              
-            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.random.roomnames", Boolean.toString( randomRoomNames ) );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.random.roomnames", Boolean.toString( randomRoomNames ) );            
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.content", Boolean.toString( welcomepageContent ) );            
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.toolbarcontent", Boolean.toString( welcomepageToolbarContent ) );            
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.languagedetection", Boolean.toString( enableLanguageDetection ) );            
+            
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.watermark.link", watermarkLink );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.show.watermark", Boolean.toString( showWatermark ) );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.brand.watermark.link", brandWatermarkLink );
@@ -341,6 +347,24 @@
                     <fmt:message key="ofmeet.random.roomnames.enabled" />
                 </td>
             </tr>
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="welcomepageContent" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.content", true) ? "checked" : ""}>
+                    <fmt:message key="ofmeet.welcomepage.content" />
+                </td>
+            </tr>
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="welcomepageToolbarContent" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.toolbarcontent", false) ? "checked" : ""}>
+                    <fmt:message key="ofmeet.welcomepage.toolbarcontent" />
+                </td>
+            </tr>
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="enableLanguageDetection" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.languagedetection", false) ? "checked" : ""}>
+                    <fmt:message key="ofmeet.enable.languagedetection" />
+                </td>
+            </tr>            
             <tr>
                 <td nowrap colspan="2">
                     <input type="checkbox" name="lipSync" ${ofmeetConfig.lipSync ? "checked" : ""}>

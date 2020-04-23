@@ -339,6 +339,7 @@ var ofmeet = (function(of)
         }
 
         APP.connection.xmpp.connection.addHandler(handleMucMessage, "urn:xmpp:json:0", "message");
+        APP.connection.xmpp.connection.addHandler(handlePresence, null, "presence");
 
 
         console.log("ofmeet.js setup", APP.connection, captions);
@@ -1006,8 +1007,8 @@ var ofmeet = (function(of)
         function getTimeStamp(secs)
         {
             const secondsLabel = pad(secs % 60);
-            const minutesLabel = pad(parseInt(secs / 60));
-            const hoursLabel = pad(parseInt(secs/3600, 10));
+            const minutesLabel = pad(parseInt((secs / 60) % 60));
+            const hoursLabel = pad(parseInt((secs/3600) % 24, 10));
             return hoursLabel + ":" + minutesLabel + ":" + secondsLabel;
         }
 
@@ -1270,6 +1271,13 @@ var ofmeet = (function(of)
         }
     }
 
+    function handlePresence(presence)
+    {
+        console.debug("handlePresence", presence);
+
+        return true;
+    }
+
     function handleMucMessage(msg)
     {
         const Strophe = APP.connection.xmpp.connection.Strophe;
@@ -1296,11 +1304,11 @@ var ofmeet = (function(of)
         return true;
     }
 
-    function broadcastBreakout(type, xmpp, json)
+    function broadcastBreakout(type, jid, xmpp, json)
     {
-        console.debug("broadcastBreakout", json);
+        console.debug("broadcastBreakout", type, jid, xmpp, json);
         const $msg = APP.connection.xmpp.connection.$msg;
-        xmpp.send($msg({type: type, to: json.jid}).c("json", {xmlns: "urn:xmpp:json:0"}).t(JSON.stringify(json)));
+        xmpp.send($msg({type: type, to: jid}).c("json", {xmlns: "urn:xmpp:json:0"}).t(JSON.stringify(json)));
     }
 
     function exitRoom(jid)
@@ -1348,6 +1356,7 @@ var ofmeet = (function(of)
                 if (breakout.kanban.findBoard("room_" + i))
                 {
                     const items = breakout.kanban.getBoardElements("room_" + i);
+                    let json = null;
 
                     items.forEach(function(node)
                     {
@@ -1357,10 +1366,12 @@ var ofmeet = (function(of)
                         const label = node.getAttribute("data-label");
                         const jid = node.getAttribute("data-jid");
                         const url = rootUrl + '/' + room;
-                        const json = {action: 'breakout', id: id, room: room, label: label, jid: jid, url: url, return: location.href, webinar: webinar};
-                        breakout.recall.push(json);
-                        broadcastBreakout("chat", xmpp, json);
+
+                        json = {action: 'breakout', id: id, room: room, label: label, jid: jid, url: url, return: location.href, webinar: webinar};
+                        broadcastBreakout("chat", jid, xmpp, json);
                     });
+
+                    breakout.recall.push(json);
                 }
             }
 
@@ -1384,7 +1395,7 @@ var ofmeet = (function(of)
 
                 setTimeout(function()
                 {
-                    broadcastBreakout("groupchat", xmpp, json);
+                    broadcastBreakout("groupchat", Strophe.getBareJidFromJid(jid), xmpp, json);
                     setTimeout(function() {exitRoom(jid)}, 1000);
 
                 }, 1000);

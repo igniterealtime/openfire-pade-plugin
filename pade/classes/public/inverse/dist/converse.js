@@ -64784,13 +64784,13 @@ utils_core.addMentionsMarkup = function (text, references, chatbox) {
   references.sort((a, b) => b.begin - a.begin).forEach(ref =>
   {
     const prefix = text.slice(0, ref.begin);
-    const offset = ((prefix.match(/&lt;/g) || []).length + (prefix.match(/&gt;/g) || []).length) * 3;
+    const offset = ((prefix.match(/&l/g) || []).length + (prefix.match(/&g/g) || []).length) * 3;
     const begin = parseInt(ref.begin) + parseInt(offset);
     const end = parseInt(ref.end) + parseInt(offset);
     const mention = text.slice(begin, end)
     chatbox;
 
-    //console.log("---->WWWWWWWWWWWWW", offset, begin, end, prefix, ref);
+    console.log("---->WWWWWWWWWWWWW", offset, begin, end, prefix, ref);
     // BAO
 
     let data_mention = "";

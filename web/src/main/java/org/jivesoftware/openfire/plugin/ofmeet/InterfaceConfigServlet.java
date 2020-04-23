@@ -89,6 +89,8 @@ public class InterfaceConfigServlet extends HttpServlet
             config.put( "OFMEET_ALLOW_UPLOADS",                  JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.allow.uploads",                 true                ) );
             config.put( "OFMEET_SHOW_CAPTIONS",                  JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.show.captions",                 false               ) );
             config.put( "OFMEET_ENABLE_TRANSCRIPTION",           JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.transcription",          false               ) );
+            config.put( "OFMEET_WELCOME_PAGE_CONTENT",           JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.welcome.content",               ""                  ) );
+            config.put( "OFMEET_WELCOME_PAGE_TOOLBARCONTENT",    JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.welcome.toolbarcontent",        ""                  ) );
 
             config.put( "filmStripOnly",                         ofMeetConfig.getFilmstripOnly()      );
             config.put( "VERTICAL_FILMSTRIP",                    ofMeetConfig.getVerticalFilmstrip()  );

@@ -105,9 +105,13 @@
         final boolean showCaptions = ParamUtils.getBooleanParameter( request, "showCaptions" );        
         final boolean enableTranscription = ParamUtils.getBooleanParameter( request, "enableTranscription" );          
         final boolean allowUploads = ParamUtils.getBooleanParameter( request, "allowUploads" );           
-        final boolean enableBreakout = ParamUtils.getBooleanParameter( request, "enableBreakout" );           
+        final boolean enableBreakout = ParamUtils.getBooleanParameter( request, "enableBreakout" ); 
+        
         final boolean welcomepageContent = ParamUtils.getBooleanParameter( request, "welcomepageContent" );
         final boolean welcomepageToolbarContent = ParamUtils.getBooleanParameter( request, "welcomepageToolbarContent" );
+        final String welcomeContent = ParamUtils.getParameter( request, "welcomeContent" );
+        final String welcomeToolbarContent = ParamUtils.getParameter( request, "welcomeToolbarContent" );
+        
         final boolean enableLanguageDetection = ParamUtils.getBooleanParameter( request, "enableLanguageDetection" );        
         final boolean randomRoomNames = ParamUtils.getBooleanParameter( request, "randomRoomNames" );
         final boolean lipSync = ParamUtils.getBooleanParameter( request, "lipSync" );
@@ -173,6 +177,8 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.random.roomnames", Boolean.toString( randomRoomNames ) );            
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.content", Boolean.toString( welcomepageContent ) );            
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.toolbarcontent", Boolean.toString( welcomepageToolbarContent ) );            
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcome.content",  welcomeContent );            
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcome.toolbarcontent", welcomeToolbarContent );            
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.languagedetection", Boolean.toString( enableLanguageDetection ) );            
             
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.watermark.link", watermarkLink );
@@ -347,19 +353,7 @@
                     <fmt:message key="ofmeet.random.roomnames.enabled" />
                 </td>
             </tr>
-            <tr>
-                <td nowrap colspan="2">
-                    <input type="checkbox" name="welcomepageContent" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.content", true) ? "checked" : ""}>
-                    <fmt:message key="ofmeet.welcomepage.content" />
-                </td>
-            </tr>
-            <tr>
-                <td nowrap colspan="2">
-                    <input type="checkbox" name="welcomepageToolbarContent" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.toolbarcontent", false) ? "checked" : ""}>
-                    <fmt:message key="ofmeet.welcomepage.toolbarcontent" />
-                </td>
-            </tr>
-            <tr>
+           <tr>
                 <td nowrap colspan="2">
                     <input type="checkbox" name="enableLanguageDetection" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.languagedetection", false) ? "checked" : ""}>
                     <fmt:message key="ofmeet.enable.languagedetection" />
@@ -374,6 +368,33 @@
         </table>
     </admin:contentBox>
 
+    <fmt:message key="ofmeet.welcome.title" var="boxtitleWelcome"/>
+    <admin:contentBox title="${boxtitleWelcome}">
+        <p><fmt:message key="ofmeet.welcome.description"/></p>
+        <table cellpadding="3" cellspacing="0" border="0" width="100%">
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="welcomepageContent" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.content", true) ? "checked" : ""}>
+                    <fmt:message key="ofmeet.welcomepage.content" />
+                </td>
+            </tr>
+            <tr>
+                <td width="200"><fmt:message key="ofmeet.welcome.content"/>:</td>
+                <td><textarea placeholder="<fmt:message key="ofmeet.welcome.content.placeholder"/>" cols="60" rows="5" name="welcomeContent">${admin:getProperty( "org.jitsi.videobridge.ofmeet.welcome.content", "")}</textarea></td>
+            </tr>            
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="welcomepageToolbarContent" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.toolbarcontent", false) ? "checked" : ""}>
+                    <fmt:message key="ofmeet.welcomepage.toolbarcontent" />
+                </td>
+            </tr>
+            <tr>
+                <td width="200"><fmt:message key="ofmeet.welcome.toolbarcontent"/>:</td>
+                <td><textarea placeholder="<fmt:message key="ofmeet.welcome.toolbarcontent.placeholder"/>" cols="60" rows="5" name="welcomeToolbarContent">${admin:getProperty( "org.jitsi.videobridge.ofmeet.welcome.toolbarcontent", "")}</textarea></td>
+            </tr> 
+        </table>
+    </admin:contentBox>
+    
     <fmt:message key="ofmeet.filmstrip.title" var="boxtitleFilmstrip"/>
     <admin:contentBox title="${boxtitleFilmstrip}">
         <p><fmt:message key="ofmeet.filmstrip.description"/></p>

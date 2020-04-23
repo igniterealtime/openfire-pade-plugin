@@ -18,6 +18,12 @@ if (navigator.credentials)
 }
 */
 
+const welcomeEle = document.getElementById("welcome-page-additional-content-template");
+if (welcomeEle) welcomeEle.innerHTML = interfaceConfig.OFMEET_WELCOME_PAGE_CONTENT;
+
+const settingsEle = document.getElementById("settings-toolbar-additional-content-template");
+if (settingsEle) settingsEle.innerHTML = interfaceConfig.OFMEET_WELCOME_PAGE_TOOLBARCONTENT;
+
 if (location.hash.indexOf("config.webinar=true") > -1) config.webinar = true;
 if (location.hash.indexOf("config.webinar=false") > -1) config.webinar = false;
 

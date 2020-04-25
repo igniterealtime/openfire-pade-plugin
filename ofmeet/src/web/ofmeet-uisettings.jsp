@@ -109,6 +109,8 @@
         
         final boolean welcomepageContent = ParamUtils.getBooleanParameter( request, "welcomepageContent" );
         final boolean welcomepageToolbarContent = ParamUtils.getBooleanParameter( request, "welcomepageToolbarContent" );
+        final String welcomeTitle = ParamUtils.getParameter( request, "welcomeTitle" );      
+        final String welcomeDesc = ParamUtils.getParameter( request, "welcomeDesc" );          
         final String welcomeContent = ParamUtils.getParameter( request, "welcomeContent" );
         final String welcomeToolbarContent = ParamUtils.getParameter( request, "welcomeToolbarContent" );
         
@@ -177,7 +179,9 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.random.roomnames", Boolean.toString( randomRoomNames ) );            
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.content", Boolean.toString( welcomepageContent ) );            
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.toolbarcontent", Boolean.toString( welcomepageToolbarContent ) );            
-            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcome.content",  welcomeContent );            
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.title",  welcomeTitle );     
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.description",  welcomeDesc );  
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcome.content",  welcomeContent );              
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcome.toolbarcontent", welcomeToolbarContent );            
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.languagedetection", Boolean.toString( enableLanguageDetection ) );            
             
@@ -370,17 +374,29 @@
 
     <fmt:message key="ofmeet.welcome.title" var="boxtitleWelcome"/>
     <admin:contentBox title="${boxtitleWelcome}">
-        <p><fmt:message key="ofmeet.welcome.description"/></p>
+        <p><fmt:message key="ofmeet.welcome.description"/></p><br/>
         <table cellpadding="3" cellspacing="0" border="0" width="100%">
+            <tr>
+                <td width="200"><fmt:message key="ofmeet.welcomepage.title"/>:</td>
+                <td><textarea placeholder="<fmt:message key="ofmeet.welcomepage.title.placeholder"/>" cols="60" rows="5" name="welcomeTitle">${admin:getProperty( "org.jitsi.videobridge.ofmeet.welcomepage.title", "Openfire Meetings")}</textarea></td>
+            </tr>  
+            <tr>
+                <td width="200"><fmt:message key="ofmeet.welcomepage.description"/>:</td>
+                <td><textarea placeholder="<fmt:message key="ofmeet.welcomepage.description.placeholder"/>" cols="60" rows="5" name="welcomeDesc">${admin:getProperty( "org.jitsi.videobridge.ofmeet.welcomepage.description", "")}</textarea></td>
+            </tr>             
+            <tr>
+                <td width="200"><fmt:message key="ofmeet.welcome.toolbarcontent"/>:</td>
+                <td><textarea placeholder="<fmt:message key="ofmeet.welcome.toolbarcontent.placeholder"/>" cols="60" rows="5" name="welcomeToolbarContent">${admin:getProperty( "org.jitsi.videobridge.ofmeet.welcome.toolbarcontent", "")}</textarea></td>
+            </tr>             
+            <tr>
+                <td width="200"><fmt:message key="ofmeet.welcome.content"/>:</td>
+                <td><textarea placeholder="<fmt:message key="ofmeet.welcome.content.placeholder"/>" cols="60" rows="5" name="welcomeContent">${admin:getProperty( "org.jitsi.videobridge.ofmeet.welcome.content", "")}</textarea></td>
+            </tr>  
             <tr>
                 <td nowrap colspan="2">
                     <input type="checkbox" name="welcomepageContent" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.content", true) ? "checked" : ""}>
                     <fmt:message key="ofmeet.welcomepage.content" />
                 </td>
-            </tr>
-            <tr>
-                <td width="200"><fmt:message key="ofmeet.welcome.content"/>:</td>
-                <td><textarea placeholder="<fmt:message key="ofmeet.welcome.content.placeholder"/>" cols="60" rows="5" name="welcomeContent">${admin:getProperty( "org.jitsi.videobridge.ofmeet.welcome.content", "")}</textarea></td>
             </tr>            
             <tr>
                 <td nowrap colspan="2">
@@ -388,10 +404,6 @@
                     <fmt:message key="ofmeet.welcomepage.toolbarcontent" />
                 </td>
             </tr>
-            <tr>
-                <td width="200"><fmt:message key="ofmeet.welcome.toolbarcontent"/>:</td>
-                <td><textarea placeholder="<fmt:message key="ofmeet.welcome.toolbarcontent.placeholder"/>" cols="60" rows="5" name="welcomeToolbarContent">${admin:getProperty( "org.jitsi.videobridge.ofmeet.welcome.toolbarcontent", "")}</textarea></td>
-            </tr> 
         </table>
     </admin:contentBox>
     

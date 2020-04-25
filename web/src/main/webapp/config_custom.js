@@ -46,5 +46,9 @@ if (config.webinar)
         'settings', 'videoquality', 'feedback', 'stats', 'shortcuts', 'raisehand'
     ]
 
+    interfaceConfig.SETTINGS_SECTIONS = [
+        'language', 'profile'
+    ]
+
     interfaceConfig.FILM_STRIP_MAX_HEIGHT = 1;
 }

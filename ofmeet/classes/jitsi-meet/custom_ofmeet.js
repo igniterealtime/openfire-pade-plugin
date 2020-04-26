@@ -455,7 +455,7 @@ var ofmeet = (function(of)
                 last = name[l] && name[l] != '' && l > 0 ? name[l][0] : null;
 
                 if ( nickname.search(", ") > 0 ) {  // ... even if scheme is "Lastname, Firstname", initials should be "FL" anyway
-                    [ first, last ] = [ last, first ]
+                    [ first, last ] = [ last, first ];
                 }
                     
                 if (last) {

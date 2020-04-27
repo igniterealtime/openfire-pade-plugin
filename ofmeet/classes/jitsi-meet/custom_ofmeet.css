@@ -1,0 +1,18 @@
+/* <<<
+ * 20200427/G.Jaekel@DNB.DE   make raisehand more noticeable
+ */
+
+@keyframes raisehand {
+  from {background-color: #165ecc;}
+  to {background-color: red;}
+}
+
+.raisehandindicator {
+animation-name: raisehand;
+animation-duration: 2s;
+animation-direction: alternate;
+animation-delay: 5s;
+animation-iteration-count: infinite;
+}
+
+/* >>> */

@@ -447,15 +447,17 @@ var ofmeet = (function(of)
             let name = nickname.split(" ");
             if (name.length == 1) name = nickname.split(".");
             if (name.length == 1) name = nickname.split("-");
-            const l = name.length - 1;
+            if (name.length == 1) name = nickname.split(",");
+
+            const len = name.length - 1;
 
             if (name && name[0] && name.first != '')
             {
                 first = name[0][0];
-                last = name[l] && name[l] != '' && l > 0 ? name[l][0] : null;
+                last = name[len] && name[len] != '' && len > 0 ? name[len][0] : null;
 
                 if (last) {
-                    initials = first + last;
+                    initials = nickname.indexOf(",") == -1 ? first + last : last + first;
                     context.fillText(initials.toUpperCase(), 3, 23);
                 } else {
                     initials = first;

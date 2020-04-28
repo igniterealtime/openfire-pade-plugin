@@ -73,7 +73,8 @@
             }
         }
 
-        final boolean webinar = ParamUtils.getBooleanParameter( request, "webinar" );
+        final boolean websockets = ParamUtils.getBooleanParameter( request, "websockets" );
+        final boolean webinar = ParamUtils.getBooleanParameter( request, "webinar" );        
         final boolean useIPv6 = ParamUtils.getBooleanParameter( request, "useipv6" );
         final boolean useNicks = ParamUtils.getBooleanParameter( request, "usenicks" );
         final String videoConstraintsIdealAspectRatio = request.getParameter( "videoConstraintsIdealAspectRatio" );
@@ -127,7 +128,8 @@
             JiveGlobals.setProperty( "voicebridge.default.proxy.sipserver", server );
             JiveGlobals.setProperty( "voicebridge.default.proxy.outboundproxy", outboundproxy );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.iceservers", iceServers );
-            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.webinar", Boolean.toString( webinar ) );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.websockets", Boolean.toString( websockets ) );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.webinar", Boolean.toString( webinar ) );                        
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.useipv6", Boolean.toString( useIPv6 ) );            
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.usenicks", Boolean.toString( useNicks ) );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.sip.username", clientusername );
@@ -212,6 +214,12 @@
                     <fmt:message key="config.page.configuration.ofmeet.webinar.enabled_desc" />
                 </td>
             </tr>
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="websockets" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.websockets", false) ? "checked" : ""}>
+                    <fmt:message key="config.page.configuration.ofmeet.websockets.enabled" />
+                </td>
+            </tr>            
             <tr>
                 <td nowrap colspan="2">
                     <input type="checkbox" name="enableRtx" ${ofmeetConfig.disableRtx ? "" : "checked"}>

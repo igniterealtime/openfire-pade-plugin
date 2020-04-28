@@ -86,6 +86,7 @@ public class ConfigServlet extends HttpServlet
             int minHDHeight = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.min.hdheight", 540 );
             boolean useNicks = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.usenicks", false );
             boolean webinar = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.webinar", false );
+            boolean websockets = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.websockets", false );
             boolean useIPv6 = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.useipv6", false );
             boolean useStunTurn = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.use.stunturn", false );
             boolean recordVideo = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.media.record", false );
@@ -230,8 +231,10 @@ public class ConfigServlet extends HttpServlet
             }
             config.put( "disableRtx", ofMeetConfig.getDisableRtx() );
             config.put( "bosh", new URI( "https", null, request.getServerName(), request.getServerPort(), "/http-bind/", null, null) );
-            config.put( "websocket", new URI( "wss", null, request.getServerName(), request.getServerPort(), "/ws/", null, null) );
-
+            if (websockets)
+            {
+                config.put( "websocket", new URI( "wss", null, request.getServerName(), request.getServerPort(), "/ws/", null, null) );
+            }
             config.put( "channelLastN", ofMeetConfig.getChannelLastN() );
             config.put( "adaptiveLastN", ofMeetConfig.getAdaptiveLastN() );
             config.put( "disableSimulcast", !ofMeetConfig.getSimulcast() );

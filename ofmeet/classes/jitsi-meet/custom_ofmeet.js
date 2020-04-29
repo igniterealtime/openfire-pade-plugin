@@ -445,9 +445,9 @@ var ofmeet = (function(of)
         if (nickname)
         {
             let name = nickname.split(" ");
+            if (name.length == 1) name = nickname.split(",");
             if (name.length == 1) name = nickname.split(".");
             if (name.length == 1) name = nickname.split("-");
-            if (name.length == 1) name = nickname.split(",");
 
             const len = name.length - 1;
 

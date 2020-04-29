@@ -114,7 +114,9 @@
         final String welcomeContent = ParamUtils.getParameter( request, "welcomeContent" );
         final String welcomeToolbarContent = ParamUtils.getParameter( request, "welcomeToolbarContent" );
         
-        final boolean enableLanguageDetection = ParamUtils.getBooleanParameter( request, "enableLanguageDetection" );        
+        final String language = ParamUtils.getParameter( request, "language" );                
+        final boolean enableLanguageDetection = ParamUtils.getBooleanParameter( request, "enableLanguageDetection" );  
+        
         final boolean randomRoomNames = ParamUtils.getBooleanParameter( request, "randomRoomNames" );
         final boolean lipSync = ParamUtils.getBooleanParameter( request, "lipSync" );
 
@@ -184,7 +186,7 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcome.content",  welcomeContent );              
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcome.toolbarcontent", welcomeToolbarContent );            
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.languagedetection", Boolean.toString( enableLanguageDetection ) );            
-            
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.default.language", language );             
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.watermark.link", watermarkLink );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.show.watermark", Boolean.toString( showWatermark ) );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.brand.watermark.link", brandWatermarkLink );
@@ -369,6 +371,24 @@
                     <fmt:message key="ofmeet.lipSync.enabled" />
                 </td>
             </tr>
+        </table>
+    </admin:contentBox>
+    
+    <fmt:message key="config.page.configuration.language.title" var="boxtitle"/>
+    <admin:contentBox title="${boxtitle}">
+        <table cellpadding="3" cellspacing="0" border="0" width="100%">
+            <tbody>
+            <c:forEach items="${ofmeetConfig.languages}" var="language">
+            <tr valign="top">
+                <td width="1%" nowrap>
+                    <input type="radio" name="language" value="${language.getCode()}" id="${language.getCode()}" ${(ofmeetConfig.language == language ? "checked" : "")}>
+                </td>
+                <td width="99%">
+                    <label for="${language.getCode()}">${language}</label>
+                </td>
+            </tr>
+            </c:forEach>
+            </tbody>
         </table>
     </admin:contentBox>
 

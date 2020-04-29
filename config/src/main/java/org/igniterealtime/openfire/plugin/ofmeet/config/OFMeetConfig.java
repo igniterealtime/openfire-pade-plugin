@@ -623,6 +623,42 @@ public class OFMeetConfig
         JiveGlobals.deleteProperty( "ofmeet.webrtcIceTcpDisable" );
     }
 
+    public void resetLanguage()
+    {
+        JiveGlobals.deleteProperty( "org.jitsi.videobridge.ofmeet.default.language" );
+    }
+
+    public void setLanguage(Language language)
+    {
+        JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.default.language", language.getCode() );
+    }
+
+    public Language[] getLanguages()
+    {
+        return Language.values();
+    }
+
+    public Language getLanguage()
+    {
+        final String jitsiLanguage = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.default.language" );
+        if ( jitsiLanguage != null )
+        {
+            final Language result = Language.byConverseCode( jitsiLanguage );
+            if ( result != null )
+            {
+                return result;
+            }
+        }
+
+        final Language result = Language.byLocale( JiveGlobals.getLocale() );
+        if ( result != null )
+        {
+            return result;
+        }
+
+        return Language.English;
+    }
+
     public final StringProperty jigasiSipUserId = new StringProperty( "ofmeet.jigasi.sip.user-id", null );
     public StringProperty getJigasiSipUserId() { return jigasiSipUserId; }
 

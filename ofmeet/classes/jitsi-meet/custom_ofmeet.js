@@ -233,7 +233,7 @@ var ofmeet = (function(of)
             APP.conference.addConferenceListener(JitsiMeetJS.events.conference.MESSAGE_RECEIVED , function(id, text, ts)
             {
                 var participant = APP.conference._room.getParticipantById(id);
-                var displayName = participant ? participant._displayName : "Anonymous";
+                var displayName = participant ? (participant._displayName || "Anonymous") : "Me";
 
                 console.debug("ofmeet.js message", id, text, ts, displayName, participant, padsModalOpened);
 
@@ -1494,7 +1494,7 @@ var ofmeet = (function(of)
 
     function createBreakout()
     {
-        const config =
+        const kanbanConfig =
         {
             element: ".breakout-kanban",
             gutter: "5px",
@@ -1530,7 +1530,7 @@ var ofmeet = (function(of)
 
         ids.forEach(function(id)
         {
-            config.boards[0].item.push({
+            kanbanConfig.boards[0].item.push({
                 id: id,
                 title: participants[id]._displayName || 'Anonymous',
                 drop: function(el) {
@@ -1539,8 +1539,8 @@ var ofmeet = (function(of)
             });
         });
 
-        console.debug("createBreakout", config);
-        breakout.kanban = new jKanban(config);
+        console.debug("createBreakout", kanbanConfig);
+        breakout.kanban = new jKanban(kanbanConfig);
     }
 
     function breakoutStatus(text)
@@ -1700,7 +1700,7 @@ var ofmeet = (function(of)
         console.debug("setupSpeechRecognition");
 
         of.recognition = new webkitSpeechRecognition();
-        //of.recognition.lang = OFMEET_CONFIG.transcribeLanguage;
+        of.recognition.lang = config.defaultLanguage;
         of.recognition.continuous = true;
         of.recognition.interimResults = false;
 

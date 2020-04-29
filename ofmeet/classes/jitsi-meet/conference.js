@@ -19,7 +19,6 @@ import {
     createDeviceChangedEvent,
     createStartSilentEvent,
     createScreenSharingEvent,
-    createStreamSwitchDelayEvent,
     createTrackMutedEvent,
     sendAnalytics
 } from './react/features/analytics';
@@ -113,6 +112,7 @@ import {
 import { getJitsiMeetGlobalNS } from './react/features/base/util';
 import { showDesktopPicker } from './react/features/desktop-picker';
 import { appendSuffix } from './react/features/display-name';
+import { setE2EEKey } from './react/features/e2ee';
 import {
     maybeOpenFeedbackDialog,
     submitFeedback
@@ -645,6 +645,8 @@ export default {
     init(options) {
         this.roomName = options.roomName;
 
+        window.addEventListener('hashchange', this.onHashChange.bind(this), false);
+
         return (
 
             // Initialize the device list first. This way, when creating tracks
@@ -1175,6 +1177,34 @@ export default {
             bubbles: true,
             cancelable: false
         }));
+    },
+
+    /**
+     * Handled location hash change events.
+     */
+    onHashChange() {
+        const items = {};
+        const parts = window.location.hash.substr(1).split('&');
+
+        for (const part of parts) {
+            const param = part.split('=');
+            const key = param[0];
+
+            if (!key) {
+                continue; // eslint-disable-line no-continue
+            }
+
+            items[key] = param[1];
+        }
+
+        if (typeof items.e2eekey !== undefined) {
+            APP.store.dispatch(setE2EEKey(items.e2eekey));
+
+            // Clean URL in browser history.
+            const cleanUrl = window.location.href.split('#')[0];
+
+            history.replaceState(history.state, document.title, cleanUrl);
+        }
     },
 
     /**
@@ -1786,7 +1816,7 @@ export default {
                 const desktopVideoStream = streams.find(stream => stream.getType() === MEDIA_TYPE.VIDEO);
 
                 if (desktopVideoStream) {
-                    this.useVideoStream(desktopVideoStream);
+                    await this.useVideoStream(desktopVideoStream);
                 }
 
                 this._desktopAudioStream = streams.find(stream => stream.getType() === MEDIA_TYPE.AUDIO);
@@ -2231,18 +2261,6 @@ export default {
                 }
             });
         });
-
-        /* eslint-disable max-params */
-        APP.UI.addListener(
-            UIEvents.RESOLUTION_CHANGED,
-            (id, oldResolution, newResolution, delay) => {
-                sendAnalytics(createStreamSwitchDelayEvent(
-                    {
-                        'old_resolution': oldResolution,
-                        'new_resolution': newResolution,
-                        value: delay
-                    }));
-            });
 
         APP.UI.addListener(UIEvents.AUTH_CLICKED, () => {
             AuthHandler.authenticate(room);

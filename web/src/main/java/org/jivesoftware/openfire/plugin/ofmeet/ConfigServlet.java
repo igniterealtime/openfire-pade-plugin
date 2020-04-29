@@ -84,6 +84,7 @@ public class ConfigServlet extends HttpServlet
 
 
             int minHDHeight = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.min.hdheight", 540 );
+            String defaultLanguage = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.default.language", null );
             boolean useNicks = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.usenicks", false );
             boolean webinar = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.webinar", false );
             boolean websockets = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.websockets", false );
@@ -147,6 +148,10 @@ public class ConfigServlet extends HttpServlet
             }
             config.put( "enforcedBridge", "jitsi-videobridge." + xmppDomain );
             config.put( "useStunTurn", useStunTurn );
+            if ( defaultLanguage != null && !defaultLanguage.trim().isEmpty() )
+            {
+                config.put( "defaultLanguage", defaultLanguage.trim() );
+            }
             config.put( "webinar", webinar );
             config.put( "useIPv6", useIPv6 );
             config.put( "useNicks", useNicks );

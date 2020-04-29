@@ -147,7 +147,7 @@ public class ConfigServlet extends HttpServlet
             }
             config.put( "enforcedBridge", "jitsi-videobridge." + xmppDomain );
             config.put( "useStunTurn", useStunTurn );
-            if ( defaultLanguage != null && !defaultLanguage.trim().istEmpty() )
+            if ( defaultLanguage != null && !defaultLanguage.trim().isEmpty() )
             {
                 config.put( "defaultLanguage", defaultLanguage.trim() );
             }

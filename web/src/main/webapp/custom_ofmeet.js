@@ -145,26 +145,8 @@ var ofmeet = (function(of)
 
             APP.conference.addConferenceListener(JitsiMeetJS.events.conference.USER_JOINED, function (id)
             {
-                participants[id] = APP.conference.getParticipantById(id);
                 console.debug("user join", id, participants);
-
-                if (breakout.kanban)
-                {
-                    const label = participants[id]._displayName || 'Anonymous';
-                    const jid = participants[id]._jid;
-
-                    breakout.kanban.addElement("participants",
-                    {
-                        id: id,
-                        title: label,
-                        drop: function(el) {
-                          breakoutDragAndDrop(el);
-                        }
-                    });
-
-                    const ids = Object.getOwnPropertyNames(participants);
-                    document.getElementById('breakout-rooms').value = Math.round(ids.length / 2)
-                }
+                addParticipant(id);
             });
 
             APP.conference.addConferenceListener(JitsiMeetJS.events.conference.USER_LEFT, function (id)
@@ -347,9 +329,59 @@ var ofmeet = (function(of)
 
     //-------------------------------------------------------
     //
-    //  functions - vcard/avatar/bookmarks
+    //  functions - vcard/avatar/bookmarks/occupants
     //
     //-------------------------------------------------------
+
+    function addParticipant(id)
+    {
+        const participant = APP.conference.getParticipantById(id);
+
+        console.debug("addParticipant", id, participant);
+
+        if (participant && !participants[id] && breakout.kanban)
+        {
+            participants[id] = participant;
+            const label = participants[id]._displayName || 'Anonymous';
+            const jid = participants[id]._jid;
+
+            breakout.kanban.addElement("participants",
+            {
+                id: id,
+                title: label,
+                drop: function(el) {
+                  breakoutDragAndDrop(el);
+                }
+            });
+
+            const ids = Object.getOwnPropertyNames(participants);
+            document.getElementById('breakout-rooms').value = Math.round(ids.length / 2)
+        }
+    }
+
+
+    function getOccupants()
+    {
+        const connection = APP.connection.xmpp.connection;
+        const $iq = APP.connection.xmpp.connection.$iq;
+        const Strophe = APP.connection.xmpp.connection.Strophe;
+        const thisRoom = APP.conference._room.room.roomjid;
+
+        const stanza = $iq({'to': thisRoom, 'type': 'get'}).c('query', { 'xmlns': "http://jabber.org/protocol/disco#items"});
+
+        connection.sendIQ(stanza, function(iq) {
+
+            iq.querySelectorAll('item').forEach(function(item)
+            {
+                console.debug("getOccupants", item);
+                const id = Strophe.getResourceFromJid(item.getAttribute("jid"));
+                addParticipant(id);
+            });
+
+        }, function(error){
+            console.error("get occupants error", error);
+        });
+    }
 
     function getBookmarks()
     {
@@ -1644,6 +1676,7 @@ var ofmeet = (function(of)
         {
             evt.stopPropagation();
             doBreakout();
+            getOccupants();
         });
     }
 

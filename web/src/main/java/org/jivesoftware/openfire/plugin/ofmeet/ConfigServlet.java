@@ -235,10 +235,10 @@ public class ConfigServlet extends HttpServlet
                 config.put( "globalConferenceId", globalConferenceId );
             }
             config.put( "disableRtx", ofMeetConfig.getDisableRtx() );
-            config.put( "bosh", new URI( "https", null, request.getServerName(), request.getServerPort(), "/http-bind/", null, null) );
+            config.put( "bosh", new URI( request.getScheme(), null, request.getServerName(), request.getServerPort(), "/http-bind/", null, null) );
             if (websockets)
             {
-                config.put( "websocket", new URI( "wss", null, request.getServerName(), request.getServerPort(), "/ws/", null, null) );
+                config.put( "websocket", new URI( "https".equals(request.getScheme()) ? "wss" : "ws", null, request.getServerName(), request.getServerPort(), "/ws/", null, null) );
             }
             config.put( "channelLastN", ofMeetConfig.getChannelLastN() );
             config.put( "adaptiveLastN", ofMeetConfig.getAdaptiveLastN() );

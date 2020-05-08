@@ -42,7 +42,7 @@
         {
             errors.put( "csrf", "CSRF Failure!" );
         }
-
+        final boolean conferenceadmin = ParamUtils.getBooleanParameter( request, "conferenceadmin" );
         final boolean securityenabled = ParamUtils.getBooleanParameter( request, "securityenabled" );
         final boolean disableRtx = !ParamUtils.getBooleanParameter( request, "enableRtx" );
         final String authusername = request.getParameter( "authusername" );
@@ -123,6 +123,7 @@
         if ( errors.isEmpty() )
         {
             JiveGlobals.setProperty( "ofmeet.security.enabled", Boolean.toString( securityenabled ) );
+            JiveGlobals.setProperty( "ofmeet.conference.admin", Boolean.toString( conferenceadmin ) );            
             JiveGlobals.setProperty( "voicebridge.default.proxy.sipauthuser", authusername );
             JiveGlobals.setProperty( "voicebridge.default.proxy.sippassword", sippassword );
             JiveGlobals.setProperty( "voicebridge.default.proxy.sipserver", server );
@@ -340,6 +341,12 @@
                     <fmt:message key="config.page.configuration.security.enabled_description" />
                 </td>
             </tr>
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="conferenceadmin" ${admin:getBooleanProperty( "ofmeet.conference.admin", true) ? "checked" : ""}>
+                    <fmt:message key="config.page.configuration.security.conference.admin" />
+                </td>
+            </tr>            
         </table>
     </admin:contentBox>
 

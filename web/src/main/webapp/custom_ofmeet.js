@@ -15,19 +15,13 @@ var ofmeet = (function(of)
     IMAGES.kanban = '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 31.966,3.896C 31.878,2.866, 31.046,2, 30,2L 2,2 C 0.954,2, 0.122,2.866, 0.034,3.896L0,3.896 l0,0.166 L0,8 l0,14.166 L0,24 l0,6 c0,1.104, 0.896,2, 2,2l 28,0 c 1.104,0, 2-0.896, 2-2L 32,8 L 32,4.062 L 32,3.896 L 31.966,3.896 z M 12,14L 12,8 l 8,0 l0,6 L 12,14 z M 20,16l0,6.166 L 12,22.166 L 12,16 L 20,16 z M 10,8l0,6 L 2,14 L 2,8 L 10,8 z M 2,16l 8,0 l0,6.166 L 2,22.166 L 2,16 z M 2,30l0-6 l 8,0 l0,6 L 2,30 z M 12,30l0-6 l 8,0 l0,6 L 12,30 z M 30,30l-8,0 l0-6 l 8,0 L 30,30 z M 30,22.166l-8,0 L 22,16 l 8,0 L 30,22.166 z M 30,14l-8,0 L 22,8 l 8,0 L 30,14 z"></path></g></svg></span>';
     IMAGES.whiteboard = '<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="32" height="32" viewBox="0 0 32 32" enable-background="new 0 0 16 16" xml:space="preserve" fill="#000000"> <g><path d="M 30,20L 30,16 c0-1.104-0.896-2-2-2L 18,14 L 18,10 l 6,0 c 1.104,0, 2-0.896, 2-2L 26,6 c0-1.104-0.896-2-2-2L 10,4 C 8.896,4, 8,4.896, 8,6l0,2 c0,1.104, 0.896,2, 2,2l 6,0 l0,4 L 6,14 C 4.896,14, 4,14.896, 4,16l0,4 c-1.104,0-2,0.896-2,2l0,4 c0,1.104, 0.896,2, 2,2l 2,0 c 1.104,0, 2-0.896, 2-2l0-2 l0-2 c0-1.104-0.896-2-2-2L 6,16 l 10,0 l0,4 c-1.104,0-2,0.896-2,2l0,2 l0,2 c0,1.104, 0.896,2, 2,2l 2,0 c 1.104,0, 2-0.896, 2-2l0-2 l0-2 c0-1.104-0.896-2-2-2L 18,16 l 10,0 l0,4 c-1.104,0-2,0.896-2,2l0,2 l0,2 c0,1.104, 0.896,2, 2,2l 2,0 c 1.104,0, 2-0.896, 2-2l0-4 C 32,20.896, 31.104,20, 30,20z M 10,6l 14,0 l0,2 L 10,8 L 10,6 z M 6,24l0,2 L 4,26 l0-4 l 2,0 L 6,24 z M 18,26L 16,26 l0-4 l 2,0 L 18,26 z M 28,24l0-2 l 2,0 l0,4 l-2,0 L 28,24 z"></path></g></svg></span>';
     IMAGES.person = '<svg width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 16,0C 7.164,0,0,7.164,0,16s 7.164,16, 16,16s 16-7.164, 16-16C 32,7.162, 24.836,0, 16,0z M 16.568,7.984 C 16.74,7.594, 16.972,7.25, 17.266,6.956c 0.296-0.296, 0.636-0.528, 1.028-0.7C 18.684,6.084, 19.11,6, 19.564,6 c 0.458,0, 0.88,0.084, 1.27,0.256c 0.39,0.17, 0.732,0.404, 1.026,0.7c 0.296,0.294, 0.53,0.638, 0.7,1.028 c 0.172,0.39, 0.258,0.812, 0.258,1.27c0,0.458-0.086,0.88-0.258,1.27c-0.17,0.39-0.404,0.732-0.7,1.028 c-0.296,0.294-0.636,0.528-1.026,0.7c-0.39,0.17-0.812,0.256-1.27,0.256c-0.456,0-0.88-0.086-1.27-0.256 c-0.39-0.172-0.732-0.404-1.028-0.7C 16.972,11.256, 16.74,10.914, 16.568,10.524C 16.396,10.134, 16.31,9.71, 16.31,9.254 C 16.31,8.796, 16.396,8.374, 16.568,7.984z M 11.502,7.468c 0.486-0.484, 1.070-0.726, 1.754-0.726c 0.704,0, 1.3,0.242, 1.784,0.726 C 15.526,7.954, 15.768,8.54, 15.768,9.226c0,0.704-0.244,1.298-0.73,1.784C 14.556,11.494, 13.96,11.736, 13.256,11.736 c-0.682,0-1.268-0.242-1.754-0.728c-0.486-0.486-0.73-1.080-0.73-1.784C 10.774,8.54, 11.016,7.954, 11.502,7.468z M 7.136,7.926 c 0.37-0.372, 0.822-0.558, 1.354-0.558c 0.534,0, 0.98,0.186, 1.342,0.558c 0.36,0.37, 0.54,0.812, 0.54,1.326 c0,0.534-0.182,0.984-0.54,1.356C 9.47,10.98, 9.024,11.166, 8.49,11.166c-0.532,0-0.984-0.186-1.354-0.556 C 6.764,10.238, 6.578,9.786, 6.578,9.254C 6.578,8.74, 6.764,8.296, 7.136,7.926z M 24,26L 15.21,26 l0-4 L 9.704,22 L 9.704,18 L 6.418,18 L 6.418,14.362 c0-0.646-0.016-1.194, 0.432-1.64c 0.446-0.446, 0.994-0.67, 1.64-0.67c 0.552,0, 1.030,0.166, 1.428,0.5 c 0.4,0.334, 0.664,0.746, 0.8,1.242c 0.322-0.38, 0.704-0.674, 1.14-0.886c 0.438-0.208, 0.904-0.314, 1.398-0.314 c 0.78,0, 1.46,0.234, 2.042,0.7c 0.58,0.466, 0.966,1.052, 1.156,1.754c 0.4-0.38, 0.864-0.686, 1.4-0.912 c 0.532-0.228, 1.104-0.342, 1.712-0.342c 0.61,0, 1.186,0.114, 1.728,0.342c 0.54,0.228, 1.012,0.542, 1.412,0.942 c 0.4,0.4, 0.718,0.87, 0.954,1.412C 23.898,17.030, 24,17.606, 24,18.216L 24,26 z"></path></g></svg>'
-    const SMILIES = [":)", ":(", ":D", ":+1:", ":P", ":wave:", ":blush:", ":slightly_smiling_face:", ":scream:", ":*", ":-1:", ":mag:", ":heart:", ":innocent:", ":angry:", ":angel:", ";(", ":clap:", ";)", ":beer:"];
+    IMAGES.contact = '<svg width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 2,0C 0.896,0,0,0.896,0,2l0,28 c0,1.104, 0.896,2, 2,2l 2,0 L 4,0 L 2,0 zM 26,0L 6,0 l0,32 l 20,0 c 1.104,0, 2-0.896, 2-2L 28,2 C 28,0.896, 27.104,0, 26,0z M 16.89,7.708 c 1.672,0, 3.026,1.356, 3.026,3.026c0,1.672-1.356,3.028-3.026,3.028c-1.672,0-3.028-1.356-3.028-3.028 C 13.862,9.062, 15.218,7.708, 16.89,7.708z M 12,21.614c0-3.668, 2.218-6.64, 4.952-6.64s 4.952,2.974, 4.952,6.64S 12,25.28, 12,21.614zM 30,2L 32,2L 32,8L 30,8zM 30,10L 32,10L 32,16L 30,16zM 30,18L 32,18L 32,24L 30,24z"></path></g></svg>';
 
+    const SMILIES = [":)", ":(", ":D", ":+1:", ":P", ":wave:", ":blush:", ":slightly_smiling_face:", ":scream:", ":*", ":-1:", ":mag:", ":heart:", ":innocent:", ":angry:", ":angel:", ";(", ":clap:", ";)", ":beer:"];
     const nickColors = {}, padsList = [], captions = {msgs: []}, breakout = {rooms: [], duration: 60, roomCount: 10, wait: 10};
 
-    let tagsModal = null, padsModal = null, breakoutModal = null, padsModalOpened = false;
-    let participants = {};
-    let recordingAudioTrack = {};
-    let recordingVideoTrack = {};
-    let videoRecorder = {};
-    let recorderStreams = {};
-    let customStore = {};
-    let filenames = {};
-    let dbnames = [];
+    let tagsModal = null, padsModal = null, breakoutModal = null, contactsModal = null;
+    let padsModalOpened = false, contactsModalOpened = false, swRegistration = null, participants = {}, recordingAudioTrack = {}, recordingVideoTrack = {}, videoRecorder = {}, recorderStreams = {}, customStore = {}, filenames = {}, dbnames = [];
     let clockTrack = {start: 0, stop: 0, joins: 0, leaves: 0};
     let tags = {location: "", date: (new Date()).toISOString().split('T')[0], subject: "", host: "", activity: ""};
 
@@ -107,6 +101,7 @@ var ofmeet = (function(of)
             APP.conference.addConferenceListener(JitsiMeetJS.events.conference.CONFERENCE_JOINED, function()
             {
                 console.debug("ofmeet.js me joined");
+                if (interfaceConfig.OFMEET_CONTACTS_MGR) setupPushNotification();
             });
 
             APP.conference.addConferenceListener(JitsiMeetJS.events.conference.CONFERENCE_LEFT, function()
@@ -322,7 +317,6 @@ var ofmeet = (function(of)
 
         APP.connection.xmpp.connection.addHandler(handleMucMessage, "urn:xmpp:json:0", "message");
         APP.connection.xmpp.connection.addHandler(handlePresence, null, "presence");
-
 
         console.log("ofmeet.js setup", APP.connection, captions);
     }
@@ -605,7 +599,7 @@ var ofmeet = (function(of)
     {
         console.debug("addPad", text);
 
-        const container = document.querySelector(".pade-col-container");
+        const container = document.querySelector(".crypt-pads");
         const values =  text.split('/');
         const html = '<span class="pade-col-content">' + IMAGES[values[3]] + '</span><span class="pade-col-content">' + values[8] + '<br/>' + values[3] + '</span>';
         const ele = document.createElement('li');
@@ -623,7 +617,7 @@ var ofmeet = (function(of)
             '    <h4 class="modal-title">CryptPad</h4>' +
             '</div>' +
             '<div class="modal-body">' +
-            '    <div class="pade-col-container">' +
+            '    <div class="pade-col-container crypt-pads">' +
             '        <li class="pade-col " data-type="pad">' +
             '            <span class="pade-col-content">' + IMAGES.pad + '</span>' +
             '            <span class="pade-col-content">New Rich Text</span>' +
@@ -674,7 +668,7 @@ var ofmeet = (function(of)
                             addPad(text);
                         });
 
-                        const container = document.querySelector(".pade-col-container");
+                        const container = document.querySelector(".crypt-pads");
 
                         container.addEventListener("click", function(evt)
                         {
@@ -1878,6 +1872,298 @@ var ofmeet = (function(of)
         }, function(error) {
             console.error(error);
         });
+    }
+
+    //-------------------------------------------------------
+    //
+    //  push notification
+    //
+    //-------------------------------------------------------
+
+    function setupPushNotification()
+    {
+        if ('serviceWorker' in navigator && 'PushManager' in window)
+        {
+            console.debug('Service Worker and Push is supported');
+
+            navigator.serviceWorker.register('./webpush-sw.js').then(function(registration)
+            {
+                swRegistration = registration;
+                console.debug('Service Worker is registered', swRegistration);
+
+                swRegistration.pushManager.getSubscription().then(function(subscription)
+                {
+                    if (subscription && !localStorage["pade.vapid.keys"])
+                    {
+                        subscription.unsubscribe();
+                        subscription = null;
+                    }
+
+                    if (!subscription) {
+                        makeSubscription(function(err, subscription, keys)
+                        {
+                            if (err)
+                            {
+                                console.error('makeSubscription error, no push messaging', err);
+                            }
+                            else {
+                                handleSubscription(subscription, keys);
+                            }
+                        })
+                    }
+                    else {
+                        handleSubscription(subscription, JSON.parse(localStorage["pade.vapid.keys"]));
+                    }
+
+                }).catch(function(error) {
+                    console.error('Error unsubscribing, no push messaging', error);
+                });
+
+            }).catch(function(error) {
+                console.error('Service Worker Error, no push messaging', error);
+            });
+        } else {
+            console.warn('Push messaging is not supported');
+        }
+    }
+
+    function makeSubscription(callback)
+    {
+        const keys = window.WebPushLib.generateVAPIDKeys();
+        console.debug('makeSubscription', keys);
+
+        swRegistration.pushManager.subscribe({userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(keys.publicKey)}).then(function(subscription)
+        {
+            console.debug('User is subscribed.');
+            localStorage["pade.vapid.keys"] = JSON.stringify(keys);
+            if (callback) callback(false, subscription, keys);
+
+        }).catch(function(err) {
+            console.error('Failed to subscribe the user: ', err);
+            if (callback) callback(true);
+        });
+    }
+
+    function handleSubscription(subscription, keys)
+    {
+        console.debug('handleSubscription', subscription, keys);
+
+        const secret = btoa(JSON.stringify({privateKey: keys.privateKey, publicKey: keys.publicKey, subscription: subscription}));
+        window.WebPushLib.setVapidDetails('xmpp:' + APP.connection.xmpp.connection.domain, keys.publicKey, keys.privateKey);
+        window.WebPushLib.selfSecret = secret;
+
+        listenForWebPush();
+        createContactsButton();
+        publishWebPush();
+    }
+
+    function listenForWebPush()
+    {
+        const connection = APP.connection.xmpp.connection;
+        const Strophe = APP.connection.xmpp.connection.Strophe;
+
+        connection.addHandler(function(message)
+        {
+            console.debug('webpush handler', message);
+            const handleElement = message.querySelector('webpush');
+
+            if (handleElement && message.getAttribute("type") != 'error')
+            {
+                const secret = handleElement.innerHTML;
+                const id = Strophe.getResourceFromJid(message.getAttribute("from"));
+                const participant = APP.conference.getParticipantById(id);
+                const myName = APP.conference.getLocalDisplayName();
+
+                console.debug('webpush contact', id, participant);
+
+                if (participant && participant._displayName)
+                {
+                    localStorage['pade.webpush.' + participant._displayName] = atob(secret);
+                }
+                else if (APP.conference.getMyUserId() == id && myName) {
+                    localStorage['pade.webpush.' + myName] = atob(secret);
+                }
+
+            }
+
+            return true;
+
+        }, "urn:xmpp:push:0", "message");
+
+        navigator.serviceWorker.onmessage = function(event)
+        {
+            console.debug("Broadcasted from service worker : ", event.data);
+
+            if (event.data.options)    // subscription renewal.
+            {
+                makeSubscription(function(err, subscription, keys)
+                {
+                    if (!err)
+                    {
+                        handleSubscription(subscription, keys);
+                    }
+                })
+            }
+        }
+    }
+
+    function createContactsButton()
+    {
+        const contactsButton = addToolbarItem('ofmeet-contacts', '<div id="ofmeet-contacts" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.contact + '</div></div>', "Contacts Manager");
+
+        if (contactsButton) contactsButton.addEventListener("click", function(evt)
+        {
+            evt.stopPropagation();
+            doContacts();
+        });
+    }
+
+    function doContacts()
+    {
+        const template =
+            '<div class="modal-header">' +
+            '    <h4 class="modal-title">Contacts Manager</h4>' +
+            '</div>' +
+            '<div class="modal-body">' +
+            '    <div class="pade-col-container meeting-contacts">' +
+            '   </div>' +
+            '</div>'
+
+        if (!contactsModal)
+        {
+            contactsModal = new tingle.modal({
+                footer: true,
+                stickyFooter: false,
+                closeMethods: ['overlay', 'button', 'escape'],
+                closeLabel: "Close",
+                cssClass: ['custom-class-1', 'custom-class-2'],
+
+                beforeOpen: function() {
+                    console.debug("beforeOpen");
+
+                    const container = document.querySelector(".meeting-contacts");
+
+                    if (!contactsModalOpened)
+                    {
+                        container.addEventListener("click", function(evt)
+                        {
+                            evt.stopPropagation();
+                            const parent = evt.target.parentNode;
+                            const contact = parent.getAttribute("data-contact");
+                            const ele = parent.querySelector(".meeting-icon");
+                            const selected = parent.querySelector(".meeting-icon > img");
+
+                            if (ele && contact)
+                            {
+                                console.debug("beforeOpen - click", contact, ele);
+                                if (ele) ele.innerHTML = selected ? IMAGES.contact : '<img data-contact="' + contact + '" width="24" height="24" src="./check-solid.png">';
+                            }
+                        });
+
+                        contactsModalOpened = true;
+                    }
+
+                    container.innerHTML = "";
+
+                    for (var i = 0; i < localStorage.length; i++)
+                    {
+                        if (localStorage.key(i).indexOf("pade.webpush.") == 0)
+                        {
+                            addContact(localStorage.key(i).substring(13));
+                        }
+                    }
+                }
+            });
+            contactsModal.addFooterBtn('Invite Selected', 'btn btn-danger tingle-btn tingle-btn--primary', function() {
+                const container = document.querySelector(".meeting-contacts");
+
+                container.querySelectorAll(".meeting-icon > img").forEach(function(icon) {
+                    const contact = icon.getAttribute("data-contact");
+
+                    sendWebPush(interfaceConfig.APP_NAME, contact, function(name, error) {
+                        if (error) icon.outerHTML = '<img data-contact="' + name + '" width="24" height="24" src="./times-solid.png">';
+                    });
+                });
+            });
+
+            contactsModal.addFooterBtn('Reset Selected', 'btn btn-success tingle-btn tingle-btn--primary', function() {
+                const container = document.querySelector(".meeting-contacts");
+
+                container.querySelectorAll(".meeting-icon > img").forEach(function(icon) {
+                    icon.outerHTML = IMAGES.contact;
+                });
+            });
+
+            contactsModal.addFooterBtn('Close', 'btn btn-success tingle-btn tingle-btn--primary', function() {
+                contactsModal.close();
+            });
+
+            contactsModal.setContent(template);
+        }
+
+        contactsModal.open();
+    }
+
+    function addContact(name)
+    {
+        console.debug("addContact", name);
+
+        const container = document.querySelector(".meeting-contacts");
+        const html = '<span class="pade-col-content meeting-icon">' + IMAGES.contact + '</span><span class="pade-col-content">' + name + '</span>';
+        const ele = document.createElement('li');
+        ele.innerHTML = html;
+        ele.classList.add("pade-col");
+        ele.setAttribute("data-contact", name);
+        container.appendChild(ele);
+    }
+
+    function publishWebPush()
+    {
+        const connection = APP.connection.xmpp.connection;
+        const $msg = APP.connection.xmpp.connection.$msg;
+
+        if (window.WebPushLib && window.WebPushLib.selfSecret)
+        {
+            console.debug("publishWebPush", window.WebPushLib.selfSecret);
+            connection.send($msg({to: APP.conference._room.room.roomjid, type: 'groupchat'}).c('webpush', {xmlns: "urn:xmpp:push:0"}).t(window.WebPushLib.selfSecret));
+        }
+    }
+
+    function sendWebPush(body, name, callback)
+    {
+        console.debug('sendWebPush', body, name);
+
+        if (localStorage['pade.webpush.' + name])
+        {
+            const secret = JSON.parse(localStorage['pade.webpush.' + name]);
+            const payload = {msgBody: body, msgType: 'meeting', url: location.href};
+            console.debug("sendWebPush secret", secret, payload);
+
+            window.WebPushLib.setVapidDetails('xmpp:' + APP.conference._room.room.myroomjid, secret.publicKey, secret.privateKey);
+
+            window.WebPushLib.sendNotification(secret.subscription, JSON.stringify(payload), {TTL: 60}).then(response => {
+                console.log("Web Push Notification is sended!");
+                if (callback) callback(name);
+            }).catch(e => {
+                console.error('Failed to notify', name, e)
+                if (callback) callback(name, e);
+            })
+        }
+    }
+
+    function urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding)
+        .replace(/-/g, '+')
+        .replace(/_/g, '/');
+
+        const rawData = window.atob(base64);
+        const outputArray = new Uint8Array(rawData.length);
+
+        for (let i = 0; i < rawData.length; ++i) {
+            outputArray[i] = rawData.charCodeAt(i);
+        }
+        return outputArray;
     }
 
     //-------------------------------------------------------

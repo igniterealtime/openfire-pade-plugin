@@ -103,7 +103,8 @@
         final boolean enableCryptPad = ParamUtils.getBooleanParameter( request, "enableCryptPad" );        
         final boolean cachePassword = ParamUtils.getBooleanParameter( request, "cachePassword" );     
         final boolean showCaptions = ParamUtils.getBooleanParameter( request, "showCaptions" );        
-        final boolean enableTranscription = ParamUtils.getBooleanParameter( request, "enableTranscription" );          
+        final boolean enableTranscription = ParamUtils.getBooleanParameter( request, "enableTranscription" );  
+        final boolean contactManager = ParamUtils.getBooleanParameter( request, "contactManager" );  
         final boolean allowUploads = ParamUtils.getBooleanParameter( request, "allowUploads" );           
         final boolean enableBreakout = ParamUtils.getBooleanParameter( request, "enableBreakout" ); 
         
@@ -175,7 +176,8 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.cryptpad", Boolean.toString( enableCryptPad ) ); 
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.cache.password", Boolean.toString( cachePassword ) ); 
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.show.captions", Boolean.toString( showCaptions ) ); 
-            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.transcription ", Boolean.toString( enableTranscription  ) );                        
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.transcription", Boolean.toString( enableTranscription  ) );                        
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.contacts.manager", Boolean.toString( contactManager  ) );                        
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.allow.uploads", Boolean.toString( allowUploads ) );             
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.breakout", Boolean.toString( enableBreakout ) );              
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.random.roomnames", Boolean.toString( randomRoomNames ) );            
@@ -351,6 +353,12 @@
                 <td nowrap colspan="2">
                     <input type="checkbox" name="enableTranscription" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.transcription", false) ? "checked" : ""}>
                     <fmt:message key="ofmeet.enable.transcription" />
+                </td>
+            </tr>                            
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="contactManager" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.contacts.manager", false) ? "checked" : ""}>
+                    <fmt:message key="ofmeet.contacts.manager" />
                 </td>
             </tr>                            
             <tr>

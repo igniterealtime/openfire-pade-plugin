@@ -30,6 +30,7 @@ import org.jivesoftware.openfire.spi.ConnectionManagerImpl;
 import org.jivesoftware.openfire.spi.ConnectionType;
 import org.jivesoftware.openfire.user.UserManager;
 import org.jivesoftware.util.StringUtils;
+import org.jivesoftware.util.JiveGlobals;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xmpp.packet.JID;
@@ -145,14 +146,18 @@ public class FocusPlugin implements Plugin
             }
         }
 
-        // Ensure that the 'focus' user can grant permissions in persistent MUCs by making it a sysadmin of the conference service(s).
-        final JID focusUserJid = new JID( "focus@" + XMPPServer.getInstance().getServerInfo().getXMPPDomain() );
-        for ( final MultiUserChatService mucService : XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatServices() )
+        if ( JiveGlobals.getBooleanProperty( "ofmeet.conference.admin", true ) )
         {
-            if ( !mucService.isSysadmin( focusUserJid ) )
+            // Ensure that the 'focus' user can grant permissions in persistent MUCs by making it a sysadmin of the conference service(s).
+            final JID focusUserJid = new JID( "focus@" + XMPPServer.getInstance().getServerInfo().getXMPPDomain() );
+
+            for ( final MultiUserChatService mucService : XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatServices() )
             {
-                Log.info( "Adding 'focus' user as a sysadmin to the '{}' MUC service.", mucService.getServiceName() );
-                mucService.addSysadmin( focusUserJid );
+                if ( !mucService.isSysadmin( focusUserJid ) )
+                {
+                    Log.info( "Adding 'focus' user as a sysadmin to the '{}' MUC service.", mucService.getServiceName() );
+                    mucService.addSysadmin( focusUserJid );
+                }
             }
         }
     }

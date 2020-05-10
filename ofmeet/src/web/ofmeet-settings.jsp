@@ -51,6 +51,11 @@
         final String outboundproxy = request.getParameter( "outboundproxy" );
         final String iceServers = request.getParameter( "iceservers" );
 
+        final boolean p2pEnabled = ParamUtils.getBooleanParameter( request, "p2pEnabled" );        
+        final boolean p2pUseStunTurn = ParamUtils.getBooleanParameter( request, "p2pUseStunTurn" );   
+        final boolean p2pDisableH264 = ParamUtils.getBooleanParameter( request, "p2pDisableH264" );   
+        final boolean p2pPreferH264 = ParamUtils.getBooleanParameter( request, "p2pPreferH264" );           
+
         final boolean startaudioonly = ParamUtils.getBooleanParameter( request, "startaudioonly" );
 
         final String startaudiomuted = request.getParameter( "startaudiomuted" );
@@ -152,6 +157,11 @@
             ofmeetConfig.setSimulcast( simulcast );
             ofmeetConfig.setAdaptiveSimulcast( adaptivesimulcast );
             ofmeetConfig.setFocusPassword( focuspassword );
+            
+            ofmeetConfig.setP2pEnabled( p2pEnabled );
+            ofmeetConfig.setP2pPreferH264( p2pPreferH264 );
+            ofmeetConfig.setP2pDisableH264( p2pDisableH264 );
+            ofmeetConfig.setP2pUseStunTurn( p2pUseStunTurn );            
 
             container.populateJitsiSystemPropertiesWithJivePropertyValues();
 
@@ -252,6 +262,36 @@
             </tr>
         </table>
     </admin:contentBox>
+    
+    <fmt:message key="config.page.configuration.p2p.title" var="boxtitlep2p"/>
+    <admin:contentBox title="${boxtitlep2p}">
+        <table cellpadding="3" cellspacing="0" border="0" width="100%">
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="p2pEnabled" ${!ofmeetConfig.p2pEnabled ? "" : "checked"}>
+                    <fmt:message key="config.page.configuration.p2p.enabled" />
+                </td>
+            </tr>
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="p2pPreferH264" ${!ofmeetConfig.p2pPreferH264 ? "" : "checked"}>
+                    <fmt:message key="config.page.configuration.p2p.preferh264" />
+                </td>
+            </tr>   
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="p2pDisableH264" ${!ofmeetConfig.p2pDisableH264 ? "" : "checked"}>
+                    <fmt:message key="config.page.configuration.p2p.disableh264" />
+                </td>
+            </tr>              
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="p2pUseStunTurn" ${!ofmeetConfig.p2pUseStunTurn ? "" : "checked"}>
+                    <fmt:message key="config.page.configuration.p2p.usestunturn" />
+                </td>
+            </tr>             
+        </table>
+    </admin:contentBox>    
 
     <fmt:message key="config.page.configuration.media.title" var="boxtitlemedia"/>
     <admin:contentBox title="${boxtitlemedia}">

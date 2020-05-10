@@ -466,28 +466,31 @@ var ofmeet = (function(of)
         context.font = font;
         context.fillStyle = "#fff";
 
-        let first, last, initials;
-
         if (nickname)
         {
-            let name = nickname.split(" ");
-            if (name.length == 1) name = nickname.split(",");
-            if (name.length == 1) name = nickname.split(".");
-            if (name.length == 1) name = nickname.split("-");
+            // try to split nickname into words at different symbols with preference
+            let words = nickname.split(/[, ]/); // "John W. Doe" -> "John "W." "Doe"  or  "Doe,John W." -> "Doe" "John" "W."
+            if (words.length == 1) words = nickname.split("."); // "John.Doe" -> "John" "Doe"  or  "John.W.Doe" -> "John" "W" "Doe"
+            if (words.length == 1) words = nickname.split("-"); // "John-Doe" -> "John" "Doe"  or  "John-W-Doe" -> "John" "W" "Doe"
 
-            const len = name.length - 1;
-
-            if (name && name[0] && name.first != '')
+            if (words && words[0] && words.first != '')
             {
-                first = name[0][0];
-                last = name[len] && name[len] != '' && len > 0 ? name[len][0] : null;
-
-                if (last) {
-                    initials = nickname.indexOf(",") == -1 ? first + last : last + first;
+                const firstInitial = words[0][0]; // first letter of first word
+                var lastInitial = null; // first letter of last word, if any                
+                
+                const lastWordIdx = words.length - 1; // index of last word
+                if (lastWordIdx > 0 && words[lastWordIdx] && words[lastWordIdx] != '')
+                {
+                    lastInitial = words[lastWordIdx][0]; // first letter of last word
+                }
+                
+                // if nickname consist of more than one words, compose the initials as two letter
+                if (lastInitial) { 
+                    // if any comma is in the nickname, treat it to have the lastname in front, i.e. compose reversed
+                    const initials = nickname.indexOf(",") == -1 ? firstInitial + lastInitial : lastInitial + firstInitial;
                     context.fillText(initials.toUpperCase(), 3, 23);
                 } else {
-                    initials = first;
-                    context.fillText(initials.toUpperCase(), 10, 23);
+                    context.fillText(firstInitial.toUpperCase(), 10, 23);
                 }
             }
         }

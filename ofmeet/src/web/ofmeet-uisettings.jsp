@@ -413,13 +413,13 @@
                 <td><textarea placeholder="<fmt:message key="ofmeet.welcomepage.description.placeholder"/>" cols="60" rows="5" name="welcomeDesc">${admin:getProperty( "org.jitsi.videobridge.ofmeet.welcomepage.description", "")}</textarea></td>
             </tr>             
             <tr>
-                <td width="200"><fmt:message key="ofmeet.welcome.toolbarcontent"/>:</td>
-                <td><textarea placeholder="<fmt:message key="ofmeet.welcome.toolbarcontent.placeholder"/>" cols="60" rows="5" name="welcomeToolbarContent">${admin:getProperty( "org.jitsi.videobridge.ofmeet.welcome.toolbarcontent", "")}</textarea></td>
-            </tr>             
-            <tr>
                 <td width="200"><fmt:message key="ofmeet.welcome.content"/>:</td>
                 <td><textarea placeholder="<fmt:message key="ofmeet.welcome.content.placeholder"/>" cols="60" rows="5" name="welcomeContent">${admin:getProperty( "org.jitsi.videobridge.ofmeet.welcome.content", "")}</textarea></td>
             </tr>  
+            <tr>
+                <td width="200"><fmt:message key="ofmeet.welcome.toolbarcontent"/>:</td>
+                <td><textarea placeholder="<fmt:message key="ofmeet.welcome.toolbarcontent.placeholder"/>" cols="60" rows="5" name="welcomeToolbarContent">${admin:getProperty( "org.jitsi.videobridge.ofmeet.welcome.toolbarcontent", "")}</textarea></td>
+            </tr>             
             <tr>
                 <td nowrap colspan="2">
                     <input type="checkbox" name="welcomepageContent" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.content", true) ? "checked" : ""}>

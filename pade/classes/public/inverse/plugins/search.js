@@ -79,7 +79,7 @@
                          '<div style="overflow-x:hidden; overflow-y:scroll; height: 400px;" id="pade-search-results"></div>' +
                          '</div>' +
                          '</div>' +
-                         '<div class="modal-footer"> <button type="button" class="btn btn-success btn-search">Search</button><button type="button" class="btn btn-success btn-pdf">PDF</button><button type="button" class="btn btn-danger" data-dismiss="modal">Close</button> </div>' +
+                         '<div class="modal-footer"> <button type="button" class="btn btn-success btn-search">Search</button><button type="button" class="btn btn-success btn-pdf">PDF</button>' + (getSetting("showWordCloud", false) ? '<button type="button" class="btn btn-success btn-word-cloud">Word Cloud</button>' : '') + '<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button> </div>' +
                          '</div> </div> </div>';
                 },
                 afterRender() {
@@ -111,6 +111,7 @@
                     'keyup #pade-search-keywords': 'clickSearch',
                     'click .btn-search': 'doSearch',
                     'click .btn-pdf': 'doPDF',
+                    'click .btn-word-cloud': 'doWordCloud',
                     'click .btn-danger': 'doDestroy'
                 },
 
@@ -123,6 +124,28 @@
 
                 doDestroy() {
 
+                },
+                doWordCloud() {
+                    let cloudData = "";
+                    const conv = this.model.get("pdf_body") || [];
+
+                    conv.forEach(function(line)
+                    {
+                        cloudData = cloudData + line[1] + ' ' + line[2] + ' ';
+                    });
+
+                    if (cloudData.length > 0)
+                    {
+                        this.el.querySelector("#pade-search-results").innerHTML = "";
+
+                        makeWordCloud({
+                            width: 700,
+                            height: 500,
+                            font: "Helvetica",
+                            container: {element: this.el, selector: "#pade-search-results"},
+                            words: processData(cloudData)
+                        });
+                    }
                 },
                 doPDF() {
                     const margins = {
@@ -251,7 +274,7 @@
                 if (getSetting("showToolbarIcons", true))
                 {
                     const id = view.model.get("box_id");
-                    const search = addToolbarItem(view, id, "pade-search-" + id, '<a class="plugin-search fa fa-search" title="Search conversations for keywords"></a>');
+                    const search = padeapi.addToolbarItem(view, id, "pade-search-" + id, '<a class="plugin-search fa fa-search" title="Search conversations for keywords"></a>');
 
                     console.debug('search - renderToolbar', search, view.model);
 
@@ -340,75 +363,6 @@
 
                     return this.__super__.parseMessageForCommands.apply(this, arguments);
                 }
-            },
-
-            MessageView: {
-
-                renderChatMessage: async function renderChatMessage()
-                {
-                    await this.__super__.renderChatMessage.apply(this, arguments);
-
-                    var source = this.model.get("from") || this.model.get("jid");
-                    var box_jid = Strophe.getBareJidFromJid(source);
-                    var view = _converse.chatboxviews.get(box_jid);
-
-                    if (view)
-                    {
-                        this.el.querySelectorAll('.badge-hash-tag').forEach(function(hashtag)
-                        {
-                            var oldMsg = view.model.messages.findWhere({'msgid': hashtag.getAttribute("data-hashtag")});
-
-                            if (oldMsg)
-                            {
-                                const nick = Strophe.getResourceFromJid(oldMsg.get('from'));
-                                hashtag.title = nick + ": " + oldMsg.get('message');
-                                hashtag.innerText = "this";
-                            }
-
-                            hashtag.addEventListener('click', function(evt)
-                            {
-                                evt.stopPropagation();
-
-                                console.debug("pade.hashtag click", evt.target);
-
-                                const tag = document.getElementById("msg-" + evt.target.getAttribute("data-hashtag"));
-
-                                // can't find old message, we default to groupchat room
-
-                                if (tag) tag.scrollIntoView({block: "end", inline: "nearest", behavior: "smooth"});
-                                else {
-                                    const roomJid = evt.target.getAttribute("data-hashtag") + "@conference." + _converse.connection.domain;
-                                    _converse.api.rooms.open(roomJid, {name: evt.target.getAttribute("data-hashtag"), nick: getSetting("displayname")});
-
-                                }
-                            }, false);
-                        });
-
-                        this.el.querySelectorAll('.mention').forEach(function(mention)
-                        {
-                            mention.addEventListener('click', function(evt)
-                            {
-                                evt.stopPropagation();
-
-                                console.debug("pade.mention click", evt.target);
-
-                                const jid = evt.target.getAttribute("data-jid");
-
-                                if (jid) {
-                                    _converse.api.chats.open(jid, {fullname: evt.target.getAttribute("data-mention")});
-                                }
-                                else {
-                                    const contact = _converse.roster.findWhere({'user_id': evt.target.getAttribute("data-mention")});
-
-                                    if (contact) {
-                                        _converse.api.chats.open(contact.get("jid"), {fullname: contact.get("nickname") || contact.get("fullname")});
-                                    }
-                                }
-
-                            }, false);
-                        });
-                    }
-                }
             }
         }
     });
@@ -421,5 +375,73 @@
             distance.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
             distance.right <= (window.innerWidth || document.documentElement.clientWidth)
         );
+    }
+
+    function processData(strings)
+    {
+        if(!strings) return;
+
+        // strip stringified objects, common words and punctuations from the string
+        strings = strings.removeStopWords().toLowerCase().replace(/object Object/g, '').replace(/[\+\.,\/#!$%\^&\*{}=_`~]/g,'');
+
+        // convert the str back in an array
+        strings = strings.split(' ');
+
+        // Count frequency of word occurance
+        var wordCount = {};
+
+        for(var i = 0; i < strings.length; i++) {
+            if(!wordCount[strings[i]])
+                wordCount[strings[i]] = 0;
+
+            wordCount[strings[i]]++; // {'hi': 12, 'foo': 2 ...}
+        }
+
+        console.debug("processData", strings, wordCount);
+
+        var wordCountArr = [];
+
+        for(var prop in wordCount) {
+            wordCountArr.push({text: prop, size: wordCount[prop] * 10});
+        }
+
+        return wordCountArr;
+    }
+
+    function makeWordCloud(options)
+    {
+        if(options == undefined) options = {}
+        if(options.width == undefined) options.width = 300
+        if(options.height == undefined) options.height = 300
+        if(options.font == undefined) options.font = "Arial"
+        if(options.container == undefined) options.container = "body"
+        if(options.words == undefined) options.words = [{text: "This", size: 40}, {text: "is", size: 40}, {text: "an", size: 40}, {text: "Example", size: 40}]
+
+        var fill = d3.scale.category20();
+
+        d3.layout.cloud().size([options.width, options.height])
+        .words(options.words)
+        .rotate(function(d) { return ~~(Math.random() * 3) * 45 - 45; })
+        .font(options.font)
+        .fontSize(function(d) { return d.size; })
+        .on("end", function(words) {
+            d3.select(options.container.selector, options.container.element).append("svg")
+            .attr("width", options.width)
+            .attr("height", options.height)
+            .append("g")
+            .attr("transform", "translate(" + (options.width/2) + "," + (options.height/2) + ")")
+            .selectAll("text")
+            .data(words)
+            .enter().append("text")
+            .style("font-size", function(d) { return d.size + "px"; })
+            .style("font-family", options.font)
+            .style("fill", function(d, i) { return fill(i); })
+            .attr("text-anchor", "middle")
+            .attr("transform", function(d) {
+                return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+            })
+            .text(function(d) { return d.text; });
+        })
+        .start();
     }
 }));

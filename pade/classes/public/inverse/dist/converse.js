@@ -182,7 +182,7 @@
 /******/    __webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
 /******/
 /******/    // __webpack_public_path__
-/******/    __webpack_require__.p = "./dist/";
+/******/    __webpack_require__.p = "./dist/";  // BAO
 /******/
 /******/    // on error function for async loading
 /******/    __webpack_require__.oe = function(err) { console.error(err); throw err; };
@@ -36545,7 +36545,11 @@ __p += '\n    <div class="chat-msg__content chat-msg__content--' +
 __e(o.sender) +
 ' ' +
 __e(o.is_me_message ? 'chat-msg__content--action' : '') +
-'">\n        <span class="chat-msg__heading">\n            ';
+'">\n        ';
+ if (o.first_unread) { // BAO
+__p += '<div class="message date-separator"><hr class="separator"><span class="separator-text">' + __e(o.__('unread messages')) + '</span></div>\n';
+ };
+__p += '<span class="chat-msg__heading">\n            ';
  if (o.is_me_message) { ;
 __p += '<time timestamp="' +
 __e(o.isodate) +
@@ -37137,7 +37141,7 @@ __e(bm.get('jid')) +
 __e(bm.get('jid')) +
 '" title="' +
 __e(o.open_title) + // BAO
-'" href="#"><img class="room-avatar avatar" src="' + createAvatar(bm.get('jid')) + '" height="30" width="30">' +
+'" href="#"><img class="room-avatar avatar" src="' + padeapi.createAvatar(bm.get('jid')) + '" height="30" width="30">' +
 __e(bm.getDisplayName()) +
 '</a>\n            <a class="list-item-action remove-bookmark fa fa-bookmark align-self-center ';
  if (bm.get('bookmarked')) { ;
@@ -37973,7 +37977,7 @@ __p += ' title="' +
 __e(o.jid) +
 '" ';
  } ;
- __p += ' ><img class="room-avatar avatar" src="' + createAvatar(o.jid) + '" height="36" width="36">\n        '; // BAO begins
+ __p += ' ><img class="room-avatar avatar" src="' + padeapi.createAvatar(o.jid) + '" height="36" width="36">\n        '; // BAO begins
   if (o.name && o.name !== o.Strophe.getNodeFromJid(o.jid)) { ;
  __p += '\n            ' +
  __e( o.name ) +
@@ -38500,7 +38504,7 @@ __e(o.jid) +
 __e(o.name) +
 '"\n       title="' +
 __e(o.open_title) + // BAO
-'" href="#"><img class="room-avatar avatar" src="' + createAvatar(o.jid) + '" height="30" width="30">' +
+'" href="#"><img class="room-avatar avatar" src="' + padeapi.createAvatar(o.jid) + '" height="30" width="30">' +
 __e(o.name) +
 '</a>\n    <a class="right room-info icon-room-info"\n       data-room-jid="' +
 __e(o.jid) +
@@ -38942,7 +38946,7 @@ __p += '\n        <a class="list-item-link open-room available-room w-100"\n    
 __e(room.get('jid')) +
 '"\n            title="' +
 __e(o.open_title) + // BAO
-'" href="#"><img class="room-avatar avatar" src="' + createAvatar(room.get('jid')) + '" height="30" width="30">' +
+'" href="#"><img class="room-avatar avatar" src="' + padeapi.createAvatar(room.get('jid')) + '" height="30" width="30">' +
 __e(room.getDisplayName()) +
 '</a>\n\n        ';
  if (o.allow_bookmarks) { ;
@@ -54621,7 +54625,7 @@ converse_core_converse.initialize = async function (settings, callback) {
   // ----------------------
 
  // BAO
-    this.generateResource = () => `/${chrome.i18n.getMessage('manifest_shortExtensionName').toLowerCase()}-converse-${converse_core_converse.VERSION_NAME}-${BrowserDetect.browser + BrowserDetect.version + BrowserDetect.OS}-${Math.floor(Math.random() * 139749528).toString()}`;
+    this.generateResource = () => `/${chrome.i18n.getMessage('manifest_shortExtensionName').toLowerCase()}-converse-${converse_core_converse.VERSION_NAME}-${padeapi.getResource()}`;
 
   this.setConnectionStatus = function (connection_status, message) {
     converse_core_converse.connfeedback.set({
@@ -56473,10 +56477,10 @@ converse_core.plugins.add('converse-chat', {
         {
             const key = text.split("\n")[0];
 
-            if (__origins[key])
+            if (padeapi.origins[key])
             {
-                attach_to = __origins[key];
-                delete __origins[key];
+                attach_to = padeapi.origins[key];
+                delete padeapi.origins[key];
             }
         }
 
@@ -56697,17 +56701,28 @@ converse_core.plugins.add('converse-chat', {
        * @private
        * @param {_converse.Message} message
        */
-      incrementUnreadMsgCounter(message) {
+      incrementUnreadMsgCounter(message) {  // BAO issue #119 (converse #1999)
         if (!message || !message.get('message')) {
           return;
         }
 
         if (converse_chat_utils.isNewMessage(message) && this.isHidden()) {
-          this.save({
-            'num_unread': this.get('num_unread') + 1
-          });
-
+           this.setFirstUnreadMsgId(message);
+           this.save({'num_unread': this.get('num_unread') + 1});
           _converse.incrementMsgCounter();
+        }
+      },
+
+      setFirstUnreadMsgId (message) { // BAO issue #119 (converse #1999)
+        if (this.get('num_unread') == 0) {
+            let first_unread_id = this.get('first_unread_id');
+
+            if (first_unread_id) {
+              const msg = this.messages.get(first_unread_id);
+              if (msg) msg.set("first_unread", false);
+            }
+            message.set("first_unread", true);
+            this.set({'first_unread_id': message.get('id')});
         }
       },
 
@@ -58379,11 +58394,16 @@ converse_core.plugins.add('converse-emoji', {
        */
 
       addMarkdown (text) {
-        var renderer = new marked.Renderer();
-        markedForms(renderer);
-        var markedText = marked(text.replace(/&gt;+/g, '>'), {renderer: renderer});
-        var checkText = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;").replace(/'/g, "&#39;");
+        var markedText = text;
 
+        if (window.marked)
+        {
+            var renderer = new marked.Renderer();
+            markedForms(renderer);
+            markedText = marked(text.replace(/&gt;+/g, '>'), {renderer: renderer});
+        }
+
+        var checkText = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;").replace(/'/g, "&#39;");
         //console.debug("addMarkdown", markedText, checkText, text);
 
         if (markedText.indexOf(checkText) > -1 || markedText.indexOf(text) > -1)
@@ -59585,10 +59605,10 @@ converse_core.plugins.add('converse-muc', {
         {
             const key = text.split("\n")[0];
 
-            if (__origins[key])
+            if (padeapi.origins[key])
             {
-                attach_to = __origins[key];
-                delete __origins[key];
+                attach_to = padeapi.origins[key];
+                delete padeapi.origins[key];
             }
         }
 
@@ -60758,10 +60778,12 @@ converse_core.plugins.add('converse-muc', {
               return;
             }
 
-            this.messages.create({
-              'type': 'info',
-              message
-            });
+            if (_converse.api.settings.get("muc_show_room_info")) {
+                this.messages.create({
+                  'type': 'info',
+                  message
+                });
+            }
           }
         });
       },
@@ -60979,7 +61001,7 @@ converse_core.plugins.add('converse-muc', {
        * @method _converse.ChatRoom#incrementUnreadMsgCounter
        * @param { XMLElement } - The <messsage> stanza
        */
-      incrementUnreadMsgCounter(message) {
+      incrementUnreadMsgCounter(message) { // BAO issue #119 (converse #1999)
         if (!message) {
           return;
         }
@@ -60991,9 +61013,8 @@ converse_core.plugins.add('converse-muc', {
         }
 
         if (utils_form.isNewMessage(message) && this.isHidden()) {
-          const settings = {
-            'num_unread_general': this.get('num_unread_general') + 1
-          };
+          this.setFirstUnreadMsgId (message);
+          const settings = {'num_unread_general': this.get('num_unread_general') + 1};
 
           if (this.isUserMentioned(message)) {
             settings.num_unread = this.get('num_unread') + 1;
@@ -61054,7 +61075,10 @@ converse_core.plugins.add('converse-muc', {
       },
 
       getDisplayName() {
-        return this.get('nick') || this.get('jid');
+        let fullname = undefined;   // BAO
+        const vcard = _converse.vcards.findWhere({'jid': this.get('jid')});
+        if (vcard) fullname = vcard.get('fullname');
+        return fullname || this.get('nick') || this.get('jid');
       },
 
       isMember() {
@@ -64784,13 +64808,13 @@ utils_core.addMentionsMarkup = function (text, references, chatbox) {
   references.sort((a, b) => b.begin - a.begin).forEach(ref =>
   {
     const prefix = text.slice(0, ref.begin);
-    const offset = ((prefix.match(/&l/g) || []).length + (prefix.match(/&g/g) || []).length) * 3;
+    const offset = ((prefix.match(/&lt;/g) || []).length + (prefix.match(/&gt;/g) || []).length) * 3;
     const begin = parseInt(ref.begin) + parseInt(offset);
     const end = parseInt(ref.end) + parseInt(offset);
     const mention = text.slice(begin, end)
     chatbox;
 
-    console.log("---->WWWWWWWWWWWWW", offset, begin, end, prefix, ref);
+    //console.log("---->WWWWWWWWWWWWW", offset, begin, end, prefix, ref);
     // BAO
 
     let data_mention = "";
@@ -65303,7 +65327,7 @@ converse_core.plugins.add('converse-message-view', {
 
         const isValidChange = prop => Object.prototype.hasOwnProperty.call(this.model.changed, prop);
 
-        const props = ['moderated', 'retracted', 'correcting', 'message', 'type', 'upload', 'received', 'editable'];
+        const props = ['moderated', 'retracted', 'correcting', 'message', 'type', 'upload', 'received', 'editable', 'first_unread'];    // BAO
 
         if (props.filter(isValidChange).length) {
           await this.debouncedRender();
@@ -65420,6 +65444,7 @@ converse_core.plugins.add('converse-message-view', {
           'occupant': this.model.occupant,
           'pretty_time': time.format(_converse.time_format),
           'retraction_text': is_retracted ? this.getRetractionText() : null,
+          'first_unread': this.model.get('first_unread'),   // BAO issue #119 (converse #1999)
           'roles': roles,
           'time': time.toISOString(),
           'username': this.model.getDisplayName()
@@ -66933,7 +66958,7 @@ converse_core.plugins.add('converse-chatview', {
 
             const replyText = '> ' + prefix + replyMessage;
             this.insertIntoTextArea(replyText + "\n\n", false, false);
-            __origins[replyText] = msgId;
+            padeapi.origins[replyText] = msgId;
         }
       },
 
@@ -74402,6 +74427,7 @@ converse_core.plugins.add('converse-muc-views', {
       'show_retraction_warning': true,
       'muc_disable_slash_commands': false,
       'muc_show_join_leave': true,
+      'muc_show_room_info': true,               // BAO
       'muc_show_join_leave_status': true,
       'muc_mention_autocomplete_min_chars': 0,
       'muc_mention_autocomplete_filter': 'contains',
@@ -75177,7 +75203,7 @@ converse_core.plugins.add('converse-muc-views', {
 
       getAutoCompleteList() {
         return this.model.occupants.filter('nick').map(o => ({
-          'label': o.get('nick'),
+          'label': o.getDisplayName(),  // BAO
           'value': "@".concat(o.get('nick'))
         }));
       },

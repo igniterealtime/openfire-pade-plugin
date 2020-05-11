@@ -25,7 +25,7 @@
             _converse.api.listen.on('renderToolbar', function(view)
             {
                 var id = view.model.get("box_id");
-                const wgQueues = addToolbarItem(view, id, "pade-fastpath-" + id, '<a class="fas fa-headset" title="Fastpath: Workgroup Queues"></a>');
+                const wgQueues = padeapi.addToolbarItem(view, id, "pade-fastpath-" + id, '<a class="fas fa-headset" title="Fastpath: Workgroup Queues"></a>');
 
                 wgQueues.addEventListener('click', function(evt)
                 {
@@ -49,7 +49,7 @@
         return ele;
     }
 
-    function addToolbarItem (view, id, label, html)
+    function padeapi.addToolbarItem (view, id, label, html)
     {
         let placeHolder = view.el.querySelector('#place-holder');
 
@@ -462,32 +462,6 @@
 
         } else {
             console.warn("workgroup offer from unaccepted source", properties.workgroupJid);
-        }
-    }
-
-    function notifyText(message, title, notifyId, callback)
-    {
-        console.debug("notifyText", title, message, notifyId);
-
-        if (!notifyId) notifyId = Math.random().toString(36).substr(2,9);
-
-        var prompt = new Notification(title,
-        {
-            body: message,
-            icon: 'fastpath/converse.png',
-            requireInteraction: true
-        });
-
-        prompt.onclick = function(event)
-        {
-            event.preventDefault();
-            if (callback) callback(notifyId, 0);
-        }
-
-        prompt.onclose = function(event)
-        {
-            event.preventDefault();
-            if (callback) callback(notifyId, 1);
         }
     }
 }));

@@ -88,22 +88,19 @@
                 doInvite() {
                     var invitees = this.el.querySelectorAll(".check-invitee");
 
-                    if (bgWindow)
+                    var chatRoom = getSelectedChatBox();
+
+                    if (chatRoom)
                     {
-                        var chatRoom = getSelectedChatBox();
+                        var roomJid = chatRoom.model.get("jid");
 
-                        if (chatRoom)
+                        for (var i=0; i<invitees.length; i++)
                         {
-                            var roomJid = chatRoom.model.get("jid");
+                            console.debug('inviting - jid', invitees[i].getAttribute("data-jid"), invitees[i].checked);
 
-                            for (var i=0; i<invitees.length; i++)
+                            if (invitees[i].checked)
                             {
-                                console.debug('inviting - jid', invitees[i].getAttribute("data-jid"), invitees[i].checked);
-
-                                if (invitees[i].checked)
-                                {
-                                    chatRoom.model.directInvite(invitees[i].getAttribute("data-jid"), "Please join me in");
-                                }
+                                chatRoom.model.directInvite(invitees[i].getAttribute("data-jid"), "Please join me in");
                             }
                         }
                     }
@@ -117,7 +114,7 @@
                 if (!view.el.querySelector(".fa-male") && getSetting("showToolbarIcons", true))
                 {
                     var id = view.model.get("box_id");
-                    addToolbarItem(view, id, "pade-directory-" + id, '<a title="Search User Directory"><span class="fa fa-male"></span><span class="fa fa-female"></span></a>');
+                    padeapi.addToolbarItem(view, id, "pade-directory-" + id, '<a title="Search User Directory"><span class="fa fa-male"></span><span class="fa fa-female"></span></a>');
 
                     var directory = document.getElementById("pade-directory-" + id);
 
@@ -312,11 +309,11 @@
                     var user = e.target;
                     var phone = getSetting("exten", null)
 
-                    if (phone && phone != "" && bgWindow.pade.chatAPIAvailable)
+                    if (phone && phone != "" && bgWindow && bgWindow.pade.chatAPIAvailable)
                     {
                         console.debug("findUsers phone - click", user.name);
 
-                        bgWindow.makePhoneCall(phone, user.name, function(err)
+                        if (bgWindow) bgWindow.makePhoneCall(phone, user.name, function(err)
                         {
                             if (err) alert("Telephone call failed!!");
                         });

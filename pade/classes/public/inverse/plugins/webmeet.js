@@ -22,14 +22,12 @@
      var _converse = null,  baseUrl = null, messageCount = 0, h5pViews = {}, pasteInputs = {}, videoRecorder = null, userProfiles = {};
      var ViewerDialog = null, viewerDialog = null, PreviewDialog = null, previewDialog = null, GeoLocationDialog = null, geoLocationDialog = null, NotepadDialog = null, notepadDialog = null, QRCodeDialog = null, qrcodeDialog = null, PDFDialog = null, pdfDialog = null;
 
-     // The following line registers your plugin.
-    converse.plugins.add("webmeet", {
-        'dependencies': [],
+     window.chatThreads = {};
 
-        'initialize': function () {
-            /* Inside this method, you have access to the private
-             * `_converse` object.
-             */
+    converse.plugins.add("webmeet", {
+        dependencies: [],
+
+        initialize: function () {
             _converse = this._converse;
 
             Strophe = converse.env.Strophe;
@@ -41,12 +39,6 @@
             _ = converse.env._;
             Backbone = converse.env.Backbone;
             dayjs = converse.env.dayjs;
-
-            if (bgWindow)
-            {
-                bgWindow._converse = _converse;
-                bgWindow.converse = converse;
-            }
 
             baseUrl = "https://" + _converse.api.settings.get("bosh_service_url").split("/")[2];
             _converse.log("The \"webmeet\" plugin is being initialized");
@@ -87,7 +79,7 @@
 
                 editDocument() {
                     var url = this.model.get("url");
-                    bgWindow.openWebAppsWindow(chrome.extension.getURL("wodo/index.html#" + url), null, 1400, 900)
+                    if (bgWindow) bgWindow.openWebAppsWindow(chrome.extension.getURL("wodo/index.html#" + url), null, 1400, 900)
                 }
             });
 
@@ -345,14 +337,11 @@
                 webinar_invitation: 'Please join webinar at'
             });
 
-            /* The user can then pass in values for the configuration
-             * settings when `converse.initialize` gets called.
-             * For example:
-             *
-             *      converse.initialize({
-             *           "initialize_message": "My plugin has been initialized"
-             *      });
-             */
+            if (getSetting("enableThreading", false))
+            {
+                // set active thread id
+                resetAllMsgCount();
+            }
 
             _converse.on('messageAdded', function (data) {
                 // The message is at `data.message`
@@ -372,32 +361,154 @@
                 }
             });
 
+            _converse.api.listen.on('messageSend', function(data)
+            {
+                // The message is at `data.message`
+                // The original chatbox is at `data.chatbox`.
+                console.debug("messageSend", data);
+
+                var id = data.chatbox.get("box_id");
+                var body = data.message.get("message");
+
+                if (getSetting("enableTranslation", false) && !body.startsWith("/"))
+                {
+                    const tronId = 'translate-' + id;
+
+                    chrome.storage.local.get(tronId, function(obj)
+                    {
+                        if (obj && obj[tronId])
+                        {
+                            fetch("https://translate.googleapis.com/translate_a/single?client=gtx&sl=" + obj[tronId].source + "&tl=" + obj[tronId].target + "&dt=t&q=" + body).then(function(response){ return response.json()}).then(function(json)
+                            {
+                                console.debug('translation ok', json[0][0][0]);
+                                data.chatbox.sendMessage("*" + json[0][0][0] + "*");
+
+                            }).catch(function (err) {
+                                console.error('translation error', err);
+                            });
+                        }
+                    });
+                }
+            });
+
             _converse.on('message', function (data)
             {
                 var message = data.stanza;
+                var isTranslation = message.getAttribute("data-translation");
+                if (isTranslation) return;
+
+                var chatbox = data.chatbox;
+                var attachTo = data.stanza.querySelector('attach-to');
                 var body = message.querySelector('body');
                 var history = message.querySelector('forwarded');
+
+                //console.debug("pade plugin message", history, body, chatbox, message);
+
+                if (!history && body && chatbox)
+                {
+                    // add translation
+
+                    var id = chatbox.get("box_id");
+
+                    if (getSetting("enableTranslation", false) && !body.innerHTML.startsWith("/"))
+                    {
+                        const tronId = 'translate-' + id;
+
+                        chrome.storage.local.get(tronId, function(obj)
+                        {
+                            if (obj && obj[tronId])
+                            {
+                                fetch("https://translate.googleapis.com/translate_a/single?client=gtx&sl=" + obj[tronId].target + "&tl=" + obj[tronId].source + "&dt=t&q=" + body.innerHTML).then(function(response){ return response.json()}).then(function(json)
+                                {
+                                    console.debug('translation ok', json[0][0][0]);
+
+                                    const msgType = message.getAttribute("type");
+                                    const msgFrom = message.getAttribute("from");
+                                    const body = "*" + json[0][0][0] + "*";
+
+                                    const stanza = '<message data-translation="true" type="' + msgType + '" to="' + _converse.connection.jid + '" from="' + msgFrom + '"><body>' + body + '</body></message>';
+                                    _converse.connection.injectMessage(stanza);
+
+                                }).catch(function (err) {
+                                    console.error('translation error', err);
+                                });
+                            }
+                        });
+                    }
+                }
             });
 
             _converse.api.listen.on('chatRoomViewInitialized', function (view)
             {
                 const jid = view.model.get("jid");
-                const chat_area = view.el.querySelector('.chat-area');
-                const occupants_area = view.el.querySelector('.occupants.col-md-3.col-4');
+                console.debug("chatRoomViewInitialized", jid);
 
-                console.debug("chatRoomViewInitialized", jid, chat_area.classList, occupants_area.classList);
-
-                if (!getSetting("alwaysShowOccupants", false))
+                if (getSetting("enableThreading", false))
                 {
-                    chat_area.classList.add('full');
-                    occupants_area.classList.add('hiddenx');
+                    const box_id = view.model.get("box_id");
+                    const topicId = 'topic-' + box_id;
+
+                    if (window.chatThreads[topicId])
+                    {
+                        const topic = window.chatThreads[topicId].topic;
+                        if (topic) view.model.set("thread", topic);
+                    }
+                }
+
+                if (bgWindow && bgWindow.pade)
+                {
+                    bgWindow.pade.autoJoinRooms[view.model.get("jid")] = {jid: jid, type: view.model.get("type")};
+                }
+
+                if (getSetting("enableThreading", false))
+                {
+                    const box_id = view.model.get("box_id");
+                    const topicId = 'topic-' + box_id;
+
+                    if (window.chatThreads[topicId])
+                    {
+                        const topic = window.chatThreads[topicId].topic;
+                        if (topic) view.model.set("thread", topic);
+                    }
                 }
             });
 
             _converse.api.listen.on('chatBoxInsertedIntoDOM', function (view)
             {
-                const jid = view.model.get("jid");
-                console.debug("chatBoxInsertedIntoDOM", jid);
+                console.debug("chatBoxInsertedIntoDOM", view.model);
+
+                if (bgWindow && bgWindow.pade)
+                {
+                    bgWindow.pade.autoJoinPrivateChats[view.model.get("jid")] = {jid: view.model.get("jid"), type: view.model.get("type")};
+                }
+            });
+
+            _converse.api.listen.on('chatBoxClosed', function (chatbox)
+            {
+                console.debug("chatBoxClosed", chatbox);
+
+                if (bgWindow)
+                {
+                    if (chatbox.model.get("type") == "chatbox") delete bgWindow.pade.autoJoinPrivateChats[chatbox.model.get("jid")];
+                    if (chatbox.model.get("type") == "chatroom") delete bgWindow.pade.autoJoinRooms[chatbox.model.get("jid")];
+                }
+
+                // reset threads
+
+                if (getSetting("enableThreading", false))
+                {
+                    const box_id = chatbox.model.get("box_id");
+                    const topicId = 'topic-' + box_id;
+
+                    if (window.chatThreads[topicId])
+                    {
+                        chrome.storage.local.get(topicId, function(obj)
+                        {
+                            resetMsgCount(obj, topicId);
+                        });
+
+                    }
+                }
             });
 
             _converse.api.listen.on('renderToolbar', function(view)
@@ -434,7 +545,7 @@
                     if (view.model.get('type') === "chatroom" && getSetting("moderatorTools", true))
                     {
                         html = '<a class="fa fa-wrench" title="Open Groupchat Moderator Tools GUI"></a>';
-                        var moderatorTools = addToolbarItem(view, id, "moderator-tools-" + id, html);
+                        var moderatorTools = padeapi.addToolbarItem(view, id, "moderator-tools-" + id, html);
 
                         if (moderatorTools) moderatorTools.addEventListener('click', function(evt)
                         {
@@ -444,10 +555,10 @@
                         }, false);
                     }
 
-                    if (view.model.get('type') === "chatbox" && bgWindow.pade.geoloc[jid])
+                    if (view.model.get('type') === "chatbox" && padeapi.geoloc[jid])
                     {
                         html = '<a class="fas fa-location-arrow" title="Geolocation"></a>';
-                        var geoLocButton = addToolbarItem(view, id, "webmeet-geolocation-" + id, html);
+                        var geoLocButton = padeapi.addToolbarItem(view, id, "webmeet-geolocation-" + id, html);
 
                         if (geoLocButton) geoLocButton.addEventListener('click', function(evt)
                         {
@@ -461,7 +572,7 @@
                     if (bgWindow.pade.ofmeetUrl)
                     {
                         html = '<a class="fas fa-video" title="Audio/Video/Screenshare Conference"></a>';
-                        var handleJitsiMeet = addToolbarItem(view, id, "webmeet-jitsi-meet-" + id, html);
+                        var handleJitsiMeet = padeapi.addToolbarItem(view, id, "webmeet-jitsi-meet-" + id, html);
 
                         if (handleJitsiMeet) handleJitsiMeet.addEventListener('click', function(evt)
                         {
@@ -484,7 +595,7 @@
                         if (domain == 'conference.' + _converse.connection.domain || domain == _converse.connection.domain)
                         {
                             html = '<a class="far fa-file-pdf" title="Save conversation to PDF"></a>';
-                            var savePDF = addToolbarItem(view, id, "webmeet-savepdf-" + id, html);
+                            var savePDF = padeapi.addToolbarItem(view, id, "webmeet-savepdf-" + id, html);
 
                             if (savePDF)
                             {
@@ -507,7 +618,7 @@
                         if (bgWindow.pade.activeH5p)
                         {
                             var html = '<a class="fa fa-h-square" title="Add H5P Content"></a>';
-                            var h5pButton = addToolbarItem(view, id, "h5p-" + id, html);
+                            var h5pButton = padeapi.addToolbarItem(view, id, "h5p-" + id, html);
 
                             if (h5pButton) h5pButton.addEventListener('click', function(evt)
                             {
@@ -524,7 +635,7 @@
                         if (getSetting("enableBlast", false))   // check for chat api plugin
                         {
                             html = '<a class="fas fa-bullhorn" title="Message Blast. Send same message to many people"></a>';
-                            var messageblast = addToolbarItem(view, id, "webmeet-messageblast-" + id, html);
+                            var messageblast = padeapi.addToolbarItem(view, id, "webmeet-messageblast-" + id, html);
 
                             if (messageblast) messageblast.addEventListener('click', function(evt)
                             {
@@ -538,7 +649,7 @@
                     if (bgWindow.pade.activeUrl && getSetting("enableCollaboration", false))
                     {
                         var html = '<a class="fa fa-file" title="Add Collaborative Document"></a>';
-                        var oobButton = addToolbarItem(view, id, "oob-" + id, html);
+                        var oobButton = padeapi.addToolbarItem(view, id, "oob-" + id, html);
 
                         if (oobButton) oobButton.addEventListener('click', function(evt)
                         {
@@ -556,7 +667,7 @@
                     if (getSetting("webinarMode", false) && bgWindow.pade.ofmeetUrl)
                     {
                         html = '<a class="fa fa-file-powerpoint-o" title="Webinar. Make a web presentation to others"></a>';
-                        var handleWebinarPresenter = addToolbarItem(view, id, "webmeet-webinar-" + id, html);
+                        var handleWebinarPresenter = padeapi.addToolbarItem(view, id, "webmeet-webinar-" + id, html);
 
                         if (handleWebinarPresenter) handleWebinarPresenter.addEventListener('click', function(evt)
                         {
@@ -576,7 +687,7 @@
                     if (getSetting("enableTasksTool", false))
                     {
                         html = '<a class="fa fa-tasks" title="Tasks"></a>';
-                        var tasks = addToolbarItem(view, id, "webmeet-tasks-" + id, html);
+                        var tasks = padeapi.addToolbarItem(view, id, "webmeet-tasks-" + id, html);
 
                         if (tasks) tasks.addEventListener('click', function(evt)
                         {
@@ -591,7 +702,7 @@
                     if (getSetting("enableNotesTool", true))
                     {
                         html = '<a class="fa fa-pencil-alt" title="Notepad"></a>';
-                        var notepad = addToolbarItem(view, id, "webmeet-notepad-" + id, html);
+                        var notepad = padeapi.addToolbarItem(view, id, "webmeet-notepad-" + id, html);
 
                         if (notepad) notepad.addEventListener('click', function(evt)
                         {
@@ -603,7 +714,7 @@
                     }
 
                     html = '<a class="fas fa-desktop" title="ScreenCast. Click to start and stop"></a>';
-                    var screencast = addToolbarItem(view, id, "webmeet-screencast-" + id, html);
+                    var screencast = padeapi.addToolbarItem(view, id, "webmeet-screencast-" + id, html);
 
                     if (screencast) screencast.addEventListener('click', function(evt)
                     {
@@ -613,39 +724,6 @@
 
                     }, false);
                 }
-
-                html = '<a class="fa fa-sync" title="Refresh"></a>';
-                var refresh = addToolbarItem(view, id, "webmeet-refresh-" + id, html);
-
-                if (refresh) refresh.addEventListener('click', function(evt)
-                {
-                    evt.stopPropagation();
-                    view.close();
-                    setTimeout(function() { openChatbox(view); });
-
-                }, false);
-
-                html = '<a class="far fa-trash-alt" title="Trash local storage of chat history"></a>';
-                var trash = addToolbarItem(view, id, "webmeet-trash-" + id, html);
-
-                if (trash) trash.addEventListener('click', function(evt)
-                {
-                    evt.stopPropagation();
-                    view.clearMessages();
-
-                }, false);
-
-
-                html = '<a class="fa fa-angle-double-down" title="Scroll to the bottom"></a>';
-                var scrolldown = addToolbarItem(view, id, "webmeet-scrolldown-" + id, html);
-
-                if (scrolldown) scrolldown.addEventListener('click', function(evt)
-                {
-                    evt.stopPropagation();
-                    view.viewUnreadMessages()
-
-                }, false);
-
 
                 // file upload by drag & drop
 
@@ -816,26 +894,34 @@
                     //console.debug('webmeet - renderChatMessage', this.model.get("fullname"), this.model.getDisplayName(), this.model);
                     // intercepting email IM
 
-                    if (this.model.vcard)
+                    const body = this.model.get('message');
+
+                    if (getSetting("enableThreading", false))
                     {
-                        if (!this.model.get("fullname") && this.model.get("from").indexOf("\\40") > -1)
+                        const msgThread = this.model.get('thread');
+                        const source = this.model.get("from");
+                        const box_jid = Strophe.getBareJidFromJid(source);
+                        const box = _converse.chatboxes.get(box_jid);
+
+                        if (box)
                         {
-                            this.model.vcard.attributes.fullname = Strophe.unescapeNode(this.model.get("from").split("@")[0]);
-                        }
+                            const box_id = box.get("box_id");
+                            const topicId = 'topic-' + box_id;
 
-                        var nick = this.model.getDisplayName();
+                            console.debug("renderChatMessage", box_jid, box_id, msgThread, window.chatThreads[topicId]);
 
-                        if (nick && _converse.DEFAULT_IMAGE == this.model.vcard.attributes.image)
-                        {
-                            var dataUri = createAvatar(nick);
-                            var avatar = dataUri.split(";base64,");
+                            if (!window.chatThreads[topicId]) window.chatThreads[topicId] = {topic: msgThread}
 
-                            this.model.vcard.attributes.image = avatar[1];
-                            this.model.vcard.attributes.image_type = "image/png";
+                            if (window.chatThreads[topicId][msgThread] == undefined) window.chatThreads[topicId][msgThread] = 0;
+                            window.chatThreads[topicId][msgThread]++;
+
+                            if (window.chatThreads[topicId].topic)
+                            {
+                                if (!msgThread || msgThread != window.chatThreads[topicId].topic) return false; // thread mode, filter non thread messages
+                            }
                         }
                     }
 
-                    var body = this.model.get('message');
                     var oobUrl = this.model.get('oob_url');
                     var oobDesc = this.model.get('oob_desc');
                     var nonCollab = !oobDesc || oobDesc == ""
@@ -923,36 +1009,83 @@
                 }
             },
 
-            RosterFilterView: {
+            ChatBoxView: {
 
-              shouldBeVisible() {
-                return _converse.roster && getSetting("converseRosterFilter") && (_converse.roster.length >= 5 || this.isActive());
-              }
-            },
+                setChatRoomSubject: function() {
 
-            RosterContactView: {
+                    const retValue = this.__super__.setChatRoomSubject.apply(this, arguments);
 
-                renderAvatar: function() {
-
-                    if (this.model.vcard)
+                    if (getSetting("enableThreading", false))
                     {
-                        var nick = this.model.getDisplayName();
+                        const subject = this.model.get('subject');
+                        const id = this.model.get("box_id");
+                        const topicId = 'topic-' + id;
 
-                        if (nick && _converse.DEFAULT_IMAGE == this.model.vcard.attributes.image)
+                        if (getSetting("broadcastThreading", false))
                         {
-                            var dataUri = createAvatar(nick);
-                            var avatar = dataUri.split(";base64,");
+                            let publicMsg = "has reset threading";
+                            if (window.chatThreads[topicId].topic) publicMsg = "is threading with " + window.chatThreads[topicId].topic;
+                            this.model.sendMessage("/me " + publicMsg);
+                        }
+                        else {
+                            let privateMsg = "This groupchat has no threading";
+                            if (window.chatThreads[topicId].topic) privateMsg = "This groupchat thread is set to " + window.chatThreads[topicId].topic;
+                            this.showHelpMessages([privateMsg]);
+                            this.viewUnreadMessages();
+                        }
 
-                            this.model.vcard.set("image", avatar[1]);
-                            this.model.vcard.set("image_type", "image/png");
+                        chrome.storage.local.get(topicId, function(obj)
+                        {
+                            if (!obj) obj = {};
+                            if (!obj[topicId]) obj[topicId] = {};
+                            if (!obj[topicId][subject.text]) obj[topicId][subject.text] = subject;
+
+                            chrome.storage.local.set(obj, function() {
+                                console.debug("new subject added", subject, id, obj);
+                            });
+                        });
+                    }
+
+                    return retValue;
+                },
+
+                modifyChatBody: function(text) {
+
+                    if (getSetting("enableThreading", false))
+                    {
+                        const match = text.replace(/^\s*/, "").match(/^\/(.*?)(?: (.*))?$/) || [false, '', ''];
+                        const command = match[1].toLowerCase();
+
+                        if ((command === "subject" || command === "topic") && match[2])
+                        {
+                            console.debug("new threaded conversation", match[2]);
+
+                            const id = this.model.get("box_id");
+                            const topicId = 'topic-' + id;
+
+                            if (!window.chatThreads[topicId]) window.chatThreads[topicId] = {};
+                            if (window.chatThreads[topicId][match[2]] == undefined) window.chatThreads[topicId][match[2]] = 0;
+
+                            window.chatThreads[topicId].topic = match[2];
+                            this.model.set("thread", match[2]);
+                            const view = this;
+
+                            chrome.storage.local.get(topicId, function(obj)
+                            {
+                                if (!obj) obj = {};
+                                if (!obj[topicId]) obj[topicId] = {};
+
+                                obj[topicId].thread = match[2];
+
+                                chrome.storage.local.set(obj, function() {
+                                    console.debug("active subject set", match[2], id, obj);
+                                });
+                            });
                         }
                     }
 
-                    this.__super__.renderAvatar.apply(this, arguments);
-                }
-            },
-
-            ChatBoxView: {
+                    return text;
+                },
 
                 onPaste(ev) {
                     console.debug("onPaste", ev);
@@ -992,25 +1125,10 @@
                     this.__super__.toggleCall.apply(this, arguments);
                 }
             },
-
-            /* Override converse.js's XMPPStatus Backbone model so that we can override the
-             * function that sends out the presence stanza.
-             */
-            'XMPPStatus': {
-                'sendPresence': function (type, status_message, jid) {
-                    // The "_converse" object is available via the __super__
-                    // attribute.
+            XMPPStatus: {
+                sendPresence: function (type, status_message, jid) {
                     var _converse = this.__super__._converse;
-
-                    // Custom code can come here ...
-
-                    // You can call the original overridden method, by
-                    // accessing it via the __super__ attribute.
-                    // When calling it, you need to apply the proper
-                    // context as reference by the "this" variable.
                     this.__super__.sendPresence.apply(this, arguments);
-
-                    // Custom code can come here ...
                 }
             }
         },
@@ -1019,13 +1137,13 @@
         {
             if (!geoLocationDialog)
             {
-                geoLocationDialog = new GeoLocationDialog({'model': new converse.env.Backbone.Model({jid: jid, nick: nick, geoloc: bgWindow.pade.geoloc[jid], view: view}) });
+                geoLocationDialog = new GeoLocationDialog({'model': new converse.env.Backbone.Model({jid: jid, nick: nick, geoloc: padeapi.geoloc[jid], view: view}) });
             }
             else {
                geoLocationDialog.model.set("jid", jid);
                geoLocationDialog.model.set("nick", nick);
                geoLocationDialog.model.set("view", view);
-               geoLocationDialog.model.set("geoloc", bgWindow.pade.geoloc[jid]);
+               geoLocationDialog.model.set("geoloc", padeapi.geoloc[jid]);
             }
             geoLocationDialog.show();
         }
@@ -1061,19 +1179,6 @@
            }
             notepadDialog.show();
         });
-    }
-
-    var openChatbox = function openChatbox(view)
-    {
-        let jid = view.model.get("jid");
-        let type = view.model.get("type");
-
-        if (jid)
-        {
-            if (type == "chatbox") _converse.api.chats.open(jid);
-            else
-            if (type == "chatroom") _converse.api.rooms.open(jid);
-        }
     }
 
     var setupPastingHandlers = function(view, id, jid, type)
@@ -1874,4 +1979,38 @@
         });
     }
 
+    var resetAllMsgCount = function()
+    {
+        chrome.storage.local.get(null, function(obj)
+        {
+            const boxes = Object.getOwnPropertyNames(obj);
+
+            boxes.forEach(function(box)
+            {
+                if (box.startsWith("topic-"))
+                {
+                    resetMsgCount(obj, box);
+                }
+            });
+        });
+    }
+
+    var resetMsgCount = function(obj, box)
+    {
+        if (obj[box])
+        {
+            window.chatThreads[box] = {topic: obj[box].thread};
+
+            const topics = Object.getOwnPropertyNames(obj[box]);
+
+            topics.forEach(function(topic)
+            {
+                if (typeof obj[box][topic] == "object")
+                {
+                    window.chatThreads[box][topic] = 0;
+                    console.debug("initialise message thread", box, topic);
+                }
+            });
+        }
+    }
 }));

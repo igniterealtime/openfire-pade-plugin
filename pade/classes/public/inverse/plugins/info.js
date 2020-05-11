@@ -80,7 +80,7 @@
                     var jid = view.model.get("jid");
                     var id = view.model.get("box_id");
 
-                    addToolbarItem(view, id, "pade-info-" + id, '<a class="fas fa-info" title="Information"></a>');
+                    padeapi.addToolbarItem(view, id, "pade-info-" + id, '<a class="fas fa-info" title="Information"></a>');
 
                     var occupants = view.el.querySelector('.occupants');
 
@@ -146,7 +146,7 @@
                             if (!data) data = {};
                             if (!data[feedId]) data[feedId] = {};
 
-                            var feed = {path: match[2], url: chrome.pade ? "https://" + bgWindow.pade.server + "/pade/download?url=" + match[2] : match[2]};
+                            var feed = {path: match[2], url: chrome.pade ? "https://" + getSetting("server") + "/pade/download?url=" + match[2] : match[2]};
 
                             fetch(feed.url).then(function(response)
                             {
@@ -289,7 +289,7 @@
                     var urlName = bgWindow.pade.collabDocs[urls[i]];
                     console.debug('createMylinks', urls[i], urlName);
 
-                    if (urlName != "Video conferencing web client")
+                    if (bgWindow && urlName != "Video conferencing web client")
                     {
                         if (isH5PURL(urls[i]))
                         {
@@ -1137,7 +1137,7 @@
                 const bosh = "wss://" + getSetting("server") + "/ws/";
 
                 const query = `audio=true&trace=true&pwd=${password}&username=${username}&name=${name}&avatar=${avatar}&docurl=${url}&docname=${file}&domain=${domain}&bosh=${bosh}`;
-                bgWindow.openWebAppsWindow(chrome.extension.getURL("akowe/index.html?" + query), null, 1400, 900);
+                if (bgWindow) bgWindow.openWebAppsWindow(chrome.extension.getURL("akowe/index.html?" + query), null, 1400, 900);
             }
             else {  // insert into textarea
                 replyInverseChat(url);

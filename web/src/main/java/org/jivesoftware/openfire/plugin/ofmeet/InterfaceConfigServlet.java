@@ -74,6 +74,7 @@ public class InterfaceConfigServlet extends HttpServlet
             config.put( "LANG_DETECTION",                        JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.languagedetection",      false               ) );
             config.put( "INVITATION_POWERED_BY",                 JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.invitation.poweredby",          true                ) );
             config.put( "VIDEO_LAYOUT_FIT",                      JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.video.layout.fit",              "both"              ) );
+            config.put( "TILE_VIEW_MAX_COLUMNS",                 JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.tileview.columns.max",          "5"                 ) );
             config.put( "SHOW_CONTACTLIST_AVATARS",              JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.show.contactlist.avatars",      false               ) );
             config.put( "RANDOM_AVATAR_URL_PREFIX",              JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.random.avatar.url.prefix",      ""                  ) );
             config.put( "RANDOM_AVATAR_URL_SUFFIX",              JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.random.avatar.url.suffix",      ""                  ) );

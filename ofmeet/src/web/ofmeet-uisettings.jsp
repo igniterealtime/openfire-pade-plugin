@@ -42,6 +42,8 @@
             errors.put( "csrf", "CSRF Failure!" );
         }
 
+        final String cryptpadurl = request.getParameter( "cryptpadurl" );
+
         final String webappContextPath = request.getParameter( "webappcontextpath" );
         if ( webappContextPath != null && !StringUtils.escapeHTMLTags( webappContextPath ).equals( webappContextPath ) )
         {
@@ -69,6 +71,14 @@
         } catch (NumberFormatException ex ) {
             errors.put( "canvasRadius", "Cannot parse value as integer value." );
         }
+        
+        final String tileviewColumns = request.getParameter( "tileviewColumns" );
+        try {
+            Integer.parseInt( tileviewColumns );
+        } catch (NumberFormatException ex ) {
+            errors.put( "tileviewColumns", "Cannot parse value as integer value." );
+        }
+        
         final String shadowColor = request.getParameter( "shadowColor" );
         final String initialToolbarTimeout = request.getParameter( "initialToolbarTimeout" );
         try {
@@ -164,6 +174,7 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.active.speaker.avatarsize", activeSpkrAvatarSize );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.canvas.extra", canvasExtra );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.canvas.radius", canvasRadius );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.tileview.columns.max", tileviewColumns );            
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.shadow.color", shadowColor );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.initial.toolbar.timeout", initialToolbarTimeout );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.toolbar.timeout", toolbarTimeout );
@@ -193,6 +204,7 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.show.watermark", Boolean.toString( showWatermark ) );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.brand.watermark.link", brandWatermarkLink );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.brand.show.watermark", Boolean.toString( brandShowWatermark ) );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.cryptpad.url", cryptpadurl );
 
             ofmeetConfig.setWebappContextPath( webappContextPath );
             ofmeetConfig.setFilmstripMaxHeight( filmstripMaxHeight );
@@ -263,6 +275,10 @@
                 <td width="200"><fmt:message key="ofmeet.connectivity.webappcontextpath"/>:</td>
                 <td><input type="text" size="60" maxlength="100" name="webappcontextpath" value="${ofmeetConfig.webappContextPath}"></td>
             </tr>
+            <tr>
+                <td width="200"><fmt:message key="ofmeet.cryptpad.url"/>:</td>
+                <td><input type="text" size="60" maxlength="100" name="cryptpadurl" value="${admin:getProperty("org.jitsi.videobridge.ofmeet.cryptpad.url", "https://cryptpad.fr")}"></td>
+            </tr>            
         </table>
     </admin:contentBox>
 
@@ -285,6 +301,10 @@
                 <td width="200"><fmt:message key="ofmeet.canvas.radius"/>:</td>
                 <td><input type="text" size="60" maxlength="100" name="canvasRadius" value="${admin:getIntProperty("org.jitsi.videobridge.ofmeet.canvas.radius", 7)}"></td>
             </tr>
+            <tr>
+                <td width="200"><fmt:message key="ofmeet.tileview.columns.max"/>:</td>
+                <td><input type="text" size="60" maxlength="100" name="tileviewColumns" value="${admin:getIntProperty("org.jitsi.videobridge.ofmeet.tileview.columns.max", 5)}"></td>
+            </tr>            
             <tr>
                 <td width="200"><fmt:message key="ofmeet.shadow.color"/>:</td>
                 <td><input type="text" size="60" maxlength="100" name="shadowColor" value="${admin:getProperty("org.jitsi.videobridge.ofmeet.shadow.color", "#ffffff")}"></td>

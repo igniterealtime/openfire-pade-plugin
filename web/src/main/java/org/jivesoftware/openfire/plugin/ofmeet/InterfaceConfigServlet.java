@@ -74,7 +74,7 @@ public class InterfaceConfigServlet extends HttpServlet
             config.put( "LANG_DETECTION",                        JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.languagedetection",      false               ) );
             config.put( "INVITATION_POWERED_BY",                 JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.invitation.poweredby",          true                ) );
             config.put( "VIDEO_LAYOUT_FIT",                      JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.video.layout.fit",              "both"              ) );
-            config.put( "TILE_VIEW_MAX_COLUMNS",                 JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.tileview.columns.max",          "5"                 ) );
+            config.put( "TILE_VIEW_MAX_COLUMNS",                 JiveGlobals.getIntProperty(     "org.jitsi.videobridge.ofmeet.tileview.columns.max",          5                   ) );
             config.put( "SHOW_CONTACTLIST_AVATARS",              JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.show.contactlist.avatars",      false               ) );
             config.put( "RANDOM_AVATAR_URL_PREFIX",              JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.random.avatar.url.prefix",      ""                  ) );
             config.put( "RANDOM_AVATAR_URL_SUFFIX",              JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.random.avatar.url.suffix",      ""                  ) );
@@ -84,7 +84,7 @@ public class InterfaceConfigServlet extends HttpServlet
 
             config.put( "OFMEET_RECORD_CONFERENCE",              JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.conference.recording",          true                ) );
             config.put( "OFMEET_TAG_CONFERENCE",                 JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.conference.tags",               true                ) );
-            config.put( "OFMEET_ENABLE_BREAKOUT",                JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.breakout",               false                ) );
+            config.put( "OFMEET_ENABLE_BREAKOUT",                JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.breakout",               false               ) );
             config.put( "OFMEET_ENABLE_CRYPTPAD",                JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.cryptpad",               true                ) );
             config.put( "OFMEET_CACHE_PASSWORD",                 JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.cache.password",                true                ) );
             config.put( "OFMEET_ALLOW_UPLOADS",                  JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.allow.uploads",                 true                ) );
@@ -95,6 +95,7 @@ public class InterfaceConfigServlet extends HttpServlet
             config.put( "OFMEET_WELCOME_PAGE_DESCRIPTION",       JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.welcomepage.description",       ""                  ) );
             config.put( "OFMEET_WELCOME_PAGE_CONTENT",           JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.welcome.content",               ""                  ) );
             config.put( "OFMEET_WELCOME_PAGE_TOOLBARCONTENT",    JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.welcome.toolbarcontent",        ""                  ) );
+            config.put( "OFMEET_CRYPTPAD_URL",                   JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.cryptpad.url", "https://cryptpad.fr"                ) );
 
             config.put( "filmStripOnly",                         ofMeetConfig.getFilmstripOnly()      );
             config.put( "VERTICAL_FILMSTRIP",                    ofMeetConfig.getVerticalFilmstrip()  );

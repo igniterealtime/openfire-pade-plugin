@@ -214,7 +214,7 @@ var ofmeet = (function(of)
 
                 console.debug("ofmeet.js message", id, text, ts, displayName, participant, padsModalOpened);
 
-                if (text.indexOf("https://cryptpad.fr/") == 0)
+                if (text.indexOf(interfaceConfig.OFMEET_CRYPTPAD_URL) == 0)
                 {
                     if (padsModalOpened) notifyText(displayName, text, id, function(button)
                     {
@@ -476,16 +476,16 @@ var ofmeet = (function(of)
             if (words && words[0] && words.first != '')
             {
                 const firstInitial = words[0][0]; // first letter of first word
-                var lastInitial = null; // first letter of last word, if any                
-                
+                var lastInitial = null; // first letter of last word, if any
+
                 const lastWordIdx = words.length - 1; // index of last word
                 if (lastWordIdx > 0 && words[lastWordIdx] && words[lastWordIdx] != '')
                 {
                     lastInitial = words[lastWordIdx][0]; // first letter of last word
                 }
-                
+
                 // if nickname consist of more than one words, compose the initials as two letter
-                if (lastInitial) { 
+                if (lastInitial) {
                     // if any comma is in the nickname, treat it to have the lastname in front, i.e. compose reversed
                     const initials = nickname.indexOf(",") == -1 ? firstInitial + lastInitial : lastInitial + firstInitial;
                     context.fillText(initials.toUpperCase(), 3, 23);
@@ -682,7 +682,7 @@ var ofmeet = (function(of)
                             if (type)
                             {
                                 console.debug("beforeOpen - click", type);
-                                if (!url) url = "https://cryptpad.fr/" + type + "/";
+                                if (!url) url = interfaceConfig.OFMEET_CRYPTPAD_URL + "/" + type + "/";
                                 openPad(url);
                             }
                         });

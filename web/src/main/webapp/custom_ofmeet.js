@@ -22,7 +22,7 @@ var ofmeet = (function(of)
 
     let tagsModal = null, padsModal = null, breakoutModal = null, contactsModal = null;
     let padsModalOpened = false, contactsModalOpened = false, swRegistration = null, participants = {}, recordingAudioTrack = {}, recordingVideoTrack = {}, videoRecorder = {}, recorderStreams = {}, customStore = {}, filenames = {}, dbnames = [];
-    let clockTrack = {start: 0, stop: 0, joins: 0, leaves: 0};
+    let clockTrack = {start: 0, stop: 0, joins: 0, leaves: 0}, handsRaised = 0;
     let tags = {location: "", date: (new Date()).toISOString().split('T')[0], subject: "", host: "", activity: ""};
 
     //-------------------------------------------------------
@@ -171,6 +171,11 @@ var ofmeet = (function(of)
                 }
             });
 
+            APP.conference.addConferenceListener(JitsiMeetJS.events.conference.PARTICIPANT_PROPERTY_CHANGED, function(e, t, n, r)
+            {
+                console.debug("ofmeet.js property changed", e, t, n, r);
+            });
+
             APP.conference.addConferenceListener(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, function(track)
             {
                 const id = track.getParticipantId();
@@ -230,9 +235,9 @@ var ofmeet = (function(of)
                 }
                 else
 
-                if (text.indexOf("http") != 0 && captions.ele && !captions.msgsDisabled)
+                if (text.indexOf("http") != 0 && !captions.msgsDisabled)
                 {
-                    captions.ele.innerHTML = displayName + " : " + text;
+                    if (captions.ele) captions.ele.innerHTML = displayName + " : " + text;
                     captions.msgs.push({text: text, stamp: (new Date()).getTime()});
                 }
             });
@@ -255,16 +260,12 @@ var ofmeet = (function(of)
                 }
             });
 
+            captions.ele = document.getElementById("captions");
+
             if (interfaceConfig.OFMEET_TAG_CONFERENCE)
             {
-                if (interfaceConfig.OFMEET_SHOW_CAPTIONS)
-                {
-                    captions.ele = document.getElementById("captions");
-                }
-
                 if (interfaceConfig.OFMEET_ENABLE_TRANSCRIPTION && window.webkitSpeechRecognition)
                 {
-                    captions.ele = document.getElementById("captions");
                     setupSpeechRecognition();
                 }
 
@@ -856,7 +857,7 @@ var ofmeet = (function(of)
             const msgCaptions = (captions.msgsDisabled ? 'Enable' : 'Disable') + ' Message Captions';
             const msgClass = (captions.msgsDisabled ? 'btn-secondary' : 'btn-success') + ' btn tingle-btn tingle-btn--pull-right';
 
-            if (captions.ele)
+            if (interfaceConfig.OFMEET_SHOW_CAPTIONS)
             {
                 tagsModal.addFooterBtn(msgCaptions, msgClass, function(evt) {
                     captions.msgsDisabled = !captions.msgsDisabled;
@@ -933,6 +934,7 @@ var ofmeet = (function(of)
         {
             context.font = font;
             context.fillStyle = "#fff";
+            context.fillText("Hands Raised: " + handsRaised, 50, 25);
             context.fillText("Location: " + tags.location, 50, 50);
             context.fillText("Date: " +  tags.date, 50, 75);
             context.fillText("Subject: " +  tags.subject, 50, 100);
@@ -1303,6 +1305,21 @@ var ofmeet = (function(of)
     function handlePresence(presence)
     {
         console.debug("handlePresence", presence);
+
+        const raisedHand = presence.querySelector("jitsi_participant_raisedHand");
+
+        if (raisedHand)
+        {
+            const ofhandRaised = raisedHand.innerHTML == "true";
+            const Strophe = APP.connection.xmpp.connection.Strophe;
+            const id = Strophe.getResourceFromJid(presence.getAttribute("from"));
+            if (participants[id]) participants[id].ofhandRaised = ofhandRaised;
+            handsRaised = handsRaised + (ofhandRaised ? +1 : ( handsRaised > 0 ? -1 : 0));
+
+            const label = handsRaised > 0 ? ("Hands Raised: " + handsRaised) : "";
+            if (captions.ele) captions.ele.innerHTML = label;
+            captions.msgs.push({text: label, stamp: (new Date()).getTime()});
+        }
         return true;
     }
 

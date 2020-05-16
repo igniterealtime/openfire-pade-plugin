@@ -10,7 +10,7 @@ self.addEventListener('push', function (event) {
         vibrate: [100, 50, 100],
         data: data,
         actions: [
-          {action: 'read', title: 'Read', icon: './check-solid.png'},
+          {action: 'join', title: 'Join', icon: './check-solid.png'},
           {action: 'ignore', title: 'Ignore', icon: './times-solid.png'},
         ]
     };
@@ -35,8 +35,12 @@ self.addEventListener('notificationclose', function(e) {
 self.addEventListener('notificationclick', function(event) {
     console.debug('notificationclick', event);
 
-    event.notification.close();
-    event.waitUntil(
-        clients.openWindow(event.notification.data.url)
-    );
+    if (event.action === 'ignore') {
+        event.notification.close();
+    } else {
+        event.waitUntil(
+            clients.openWindow(event.notification.data.url)
+        );
+        event.notification.close();
+    }
 }, false);

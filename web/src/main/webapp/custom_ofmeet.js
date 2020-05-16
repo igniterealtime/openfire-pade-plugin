@@ -2143,7 +2143,7 @@ var ofmeet = (function(of)
         const connection = APP.connection.xmpp.connection;
         const $msg = APP.connection.xmpp.connection.$msg;
 
-        if (window.WebPushLib && window.WebPushLib.selfSecret)
+        if (window.WebPushLib && window.WebPushLib.selfSecret && APP.conference._room.room)
         {
             console.debug("publishWebPush", window.WebPushLib.selfSecret);
             connection.send($msg({to: APP.conference._room.room.roomjid, type: 'groupchat'}).c('webpush', {xmlns: "urn:xmpp:push:0"}).t(window.WebPushLib.selfSecret));

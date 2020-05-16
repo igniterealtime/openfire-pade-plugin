@@ -10,7 +10,7 @@ self.addEventListener('push', function (event) {
         vibrate: [100, 50, 100],
         data: data,
         actions: [
-          {action: 'read', title: 'Read', icon: './check-solid.png'},
+          {action: 'join', title: 'Join', icon: './check-solid.png'},
           {action: 'ignore', title: 'Ignore', icon: './times-solid.png'},
         ]
     };

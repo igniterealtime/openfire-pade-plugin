@@ -35,8 +35,12 @@ self.addEventListener('notificationclose', function(e) {
 self.addEventListener('notificationclick', function(event) {
     console.debug('notificationclick', event);
 
-    event.notification.close();
-    event.waitUntil(
-        clients.openWindow(event.notification.data.url)
-    );
+    if (event.action === 'ignore') {
+        event.notification.close();
+    } else {
+        event.waitUntil(
+            clients.openWindow(event.notification.data.url)
+        );
+        event.notification.close();
+    }
 }, false);

@@ -90,7 +90,7 @@ var ofmeet = (function(of)
 
     function setup()
     {
-        if (!APP.connection)
+        if (!APP.connection || !APP.conference)
         {
             setTimeout(setup, 100);
             return;
@@ -101,7 +101,6 @@ var ofmeet = (function(of)
             APP.conference.addConferenceListener(JitsiMeetJS.events.conference.CONFERENCE_JOINED, function()
             {
                 console.debug("ofmeet.js me joined");
-                if (interfaceConfig.OFMEET_CONTACTS_MGR) setupPushNotification();
             });
 
             APP.conference.addConferenceListener(JitsiMeetJS.events.conference.CONFERENCE_LEFT, function()
@@ -166,7 +165,7 @@ var ofmeet = (function(of)
 
                 if (participants[id]) participants[id]._trackAdded = true;
 
-                if (APP.conference.getMyUserId() == id)
+                if (APP.conference.getMyUserId() == id  && !config.webinar)
                 {
 
                 }
@@ -281,9 +280,6 @@ var ofmeet = (function(of)
             }
         }
 
-        setTimeout(postLoadSetup, 1000);
-
-
         if (APP.connection.xmpp.connection._stropheConn.pass)
         {
             if (navigator.credentials && interfaceConfig.OFMEET_CACHE_PASSWORD)
@@ -317,6 +313,8 @@ var ofmeet = (function(of)
 
         APP.connection.xmpp.connection.addHandler(handleMucMessage, "urn:xmpp:json:0", "message");
         APP.connection.xmpp.connection.addHandler(handlePresence, null, "presence");
+
+        setTimeout(postLoadSetup, 5000);
 
         console.log("ofmeet.js setup", APP.connection, captions);
     }
@@ -1305,7 +1303,6 @@ var ofmeet = (function(of)
     function handlePresence(presence)
     {
         console.debug("handlePresence", presence);
-
         return true;
     }
 
@@ -1792,10 +1789,12 @@ var ofmeet = (function(of)
             return;
         }
 
-        if (interfaceConfig.OFMEET_ENABLE_BREAKOUT && APP.conference._room.isModerator() && !config.webinar)
+        if (interfaceConfig.OFMEET_ENABLE_BREAKOUT && APP.conference._room.isModerator())
         {
             breakoutRooms();
         }
+
+        if (interfaceConfig.OFMEET_CONTACTS_MGR) setupPushNotification();
 
         if (interfaceConfig.OFMEET_ALLOW_UPLOADS)
         {
@@ -2084,7 +2083,9 @@ var ofmeet = (function(of)
                     const contact = icon.getAttribute("data-contact");
 
                     sendWebPush(interfaceConfig.APP_NAME, contact, function(name, error) {
-                        if (error) icon.outerHTML = '<img data-contact="' + name + '" width="24" height="24" src="./times-solid.png">';
+                        let image = './delivered.png';
+                        if (error) image = './times-solid.png';
+                        icon.outerHTML = '<img data-contact="' + name + '" width="24" height="24" src="' + image + '">';
                     });
                 });
             });

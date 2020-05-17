@@ -1,10 +1,11 @@
 /* <<<
  * 20200427/G.Jaekel@DNB.DE   make raisehand more noticeable
+ * 20200512/G.Jaekel@DNB.DE   make it even a bit more noticeable, humans seems more sensible to motion ...
  */
 
 @keyframes raisehand {
   from {background-color: #165ecc;}
-  to {background-color: red;}
+  to {background-color: red; transform: scale(1.1);}
 }
 
 .raisehandindicator {

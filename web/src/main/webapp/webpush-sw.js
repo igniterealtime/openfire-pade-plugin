@@ -15,7 +15,7 @@ self.addEventListener('push', function (event) {
         ]
     };
     event.waitUntil(
-        self.registration.showNotification("Openfire Meetings", options)
+        self.registration.showNotification(data.msgSubject, options)
     );
 });
 

@@ -51,6 +51,7 @@ var ofmeet = (function(of)
                     })
                 })
             }
+            if (window.webkitSpeechRecognition) setupVoiceCommand()
         }
     });
 
@@ -87,6 +88,64 @@ var ofmeet = (function(of)
     //  setup
     //
     //-------------------------------------------------------
+
+    function setupVoiceCommand()
+    {
+        const enter_room_button = document.getElementById('enter_room_button');
+
+        if (enter_room_button)
+        {
+            const button = newElement('div', "speak_room_button", "SPEAK", 'welcome-page-button', "Speak Meeting Room Name");
+
+            button.addEventListener("click", function(evt)
+            {
+                evt.stopPropagation();
+                button.disabled = true;
+                button.style.visibility= "hidden";
+
+                const recognition = new webkitSpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = config.defaultLanguage;
+
+                recognition.onresult = function(e)
+                {
+                    console.debug("Speech command event", e)
+
+                    if(e.results[e.resultIndex].isFinal)
+                    {
+                        const resultat = e.results[event.resultIndex][0].transcript;
+                        console.debug("Speech command transcript", resultat);
+
+                        document.getElementById('enter_room_field').value = resultat;
+                        recognition.stop();
+                        window.location.replace(encodeURI(resultat));
+                    }
+                };
+
+                recognition.onspeechend  = function(event)
+                {
+                    console.debug("Speech command onspeechend", event);
+                }
+
+                recognition.onstart = function(event)
+                {
+                    console.debug("Speech command started", event);
+                }
+
+                recognition.onerror = function(e)
+                {
+                    console.debug("Speech command error", e)
+                    recognition.stop();
+                }
+
+                recognition.start();
+            });
+
+            button.style.margin = "5px";
+            enter_room_button.parentNode.appendChild(button);
+        }
+    }
 
     function setup()
     {

@@ -1870,6 +1870,8 @@ var ofmeet = (function(of)
     {
         var dropZone = document.getElementById("videospace");
 
+        console.debug("postLoadSetup", dropZone);
+
         if (!dropZone)
         {
             setTimeout(postLoadSetup, 1000);

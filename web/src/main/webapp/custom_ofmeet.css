@@ -9,11 +9,25 @@
 }
 
 .raisehandindicator {
-animation-name: raisehand;
-animation-duration: 2s;
-animation-direction: alternate;
-animation-delay: 5s;
-animation-iteration-count: infinite;
+  animation-name: raisehand;
+  animation-duration: 2s;
+  animation-direction: alternate;
+  animation-delay: 5s;
+  animation-iteration-count: infinite;
+}
+
+/* >>> */
+
+
+/* <<<
+ * 20200522/G.Jaekel@DNB.DE     On small browser windows, the left toolbar renders to wide. Make it wrapping around.
+ */
+
+.new-toolbox {
+  bottom:calc((40px * 3) * -1); /* was: calc((40px * 2) * -1); */
+}
+.button-group-left {
+  flex-wrap: wrap;
 }
 
 /* >>> */

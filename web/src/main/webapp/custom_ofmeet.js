@@ -2175,8 +2175,9 @@ var ofmeet = (function(of)
 
                 container.querySelectorAll(".meeting-icon > img").forEach(function(icon) {
                     const contact = icon.getAttribute("data-contact");
-
-                    sendWebPush(interfaceConfig.APP_NAME, contact, function(name, error) {
+                    const message = '"' + APP.conference.getLocalDisplayName() + '" invites you to join the room "' + APP.conference.roomName + '".';
+                    
+                    sendWebPush(message, contact, function(name, error) {
                         let image = './delivered.png';
                         if (error) image = './times-solid.png';
                         icon.outerHTML = '<img data-contact="' + name + '" width="24" height="24" src="' + image + '">';
@@ -2252,7 +2253,8 @@ var ofmeet = (function(of)
         if (localStorage['pade.webpush.' + name])
         {
             const secret = JSON.parse(localStorage['pade.webpush.' + name]);
-            const payload = {msgSubject: APP.conference.getLocalDisplayName(), msgBody: body, msgType: 'meeting', url: location.href};
+            const payload = {msgSubject: interfaceConfig.APP_NAME, msgBody: body, msgType: 'meeting', url: location.href};
+
             console.debug("sendWebPush secret", secret, payload);
 
             window.WebPushLib.setVapidDetails('xmpp:' + APP.conference._room.room.myroomjid, secret.publicKey, secret.privateKey);

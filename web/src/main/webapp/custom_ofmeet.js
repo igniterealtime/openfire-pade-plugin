@@ -1376,7 +1376,9 @@ var ofmeet = (function(of)
             const ofHandRaised = raisedHand.innerHTML == "true";
             if (participants[id]) participants[id].ofHandRaised = ofHandRaised;
             handsRaised = handsRaised + (ofHandRaised ? +1 : ( handsRaised > 0 ? -1 : 0));
-            const label = handsRaised > 0 ? ("Hands Raised: " + handsRaised) : "";
+            const handsTotal = 1 + APP.conference.getNumberOfParticipantsWithTracks();
+            const handsPercentage = Math.round(100*handsRaised/handsTotal);
+            const label = handsRaised > 0 ? ("Hands Raised: " + handsRaised + " of " + handsTotal + " (" + handsPercentage + "%)" ) : "";
             if (captions.ele) captions.ele.innerHTML = label;
             captions.msgs.push({text: label, stamp: (new Date()).getTime()});
         }

@@ -1376,7 +1376,9 @@ var ofmeet = (function(of)
             const ofHandRaised = raisedHand.innerHTML == "true";
             if (participants[id]) participants[id].ofHandRaised = ofHandRaised;
             handsRaised = handsRaised + (ofHandRaised ? +1 : ( handsRaised > 0 ? -1 : 0));
-            const label = handsRaised > 0 ? ("Hands Raised: " + handsRaised) : "";
+            const handsTotal = 1 + APP.conference.listMembers().length;
+            const handsPercentage = Math.round(100*handsRaised/handsTotal);
+            const label = handsRaised > 0 ? ("Hands Raised: " + handsRaised + " of " + handsTotal + " (" + handsPercentage + "%)" ) : "";
             if (captions.ele) captions.ele.innerHTML = label;
             captions.msgs.push({text: label, stamp: (new Date()).getTime()});
         }
@@ -1870,6 +1872,8 @@ var ofmeet = (function(of)
     {
         var dropZone = document.getElementById("videospace");
 
+        console.debug("postLoadSetup", dropZone);
+
         if (!dropZone)
         {
             setTimeout(postLoadSetup, 1000);
@@ -2173,8 +2177,9 @@ var ofmeet = (function(of)
 
                 container.querySelectorAll(".meeting-icon > img").forEach(function(icon) {
                     const contact = icon.getAttribute("data-contact");
+                    const message = APP.conference.getLocalDisplayName() + ' invites you to join the room ' + APP.conference.roomName + '.';
 
-                    sendWebPush(interfaceConfig.APP_NAME, contact, function(name, error) {
+                    sendWebPush(message, contact, function(name, error) {
                         let image = './delivered.png';
                         if (error) image = './times-solid.png';
                         icon.outerHTML = '<img data-contact="' + name + '" width="24" height="24" src="' + image + '">';
@@ -2250,7 +2255,8 @@ var ofmeet = (function(of)
         if (localStorage['pade.webpush.' + name])
         {
             const secret = JSON.parse(localStorage['pade.webpush.' + name]);
-            const payload = {msgSubject: APP.conference.getLocalDisplayName(), msgBody: body, msgType: 'meeting', url: location.href};
+            const payload = {msgSubject: interfaceConfig.APP_NAME, msgBody: body, msgType: 'meeting', url: location.href};
+
             console.debug("sendWebPush secret", secret, payload);
 
             window.WebPushLib.setVapidDetails('xmpp:' + APP.conference._room.room.myroomjid, secret.publicKey, secret.privateKey);

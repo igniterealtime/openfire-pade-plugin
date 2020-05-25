@@ -1076,34 +1076,6 @@
                 parseMessageForCommands: function(text) {
 
                     return handleCommand(this, text) || this.__super__.parseMessageForCommands.apply(this, arguments);
-                },
-
-                toggleCall: function toggleCall(ev) {
-                    console.debug("toggleCall", this.model);
-
-                    if (getSetting("enableSip", false))
-                    {
-                        ev.stopPropagation();
-
-                        if ( _converse.view_mode === 'overlayed')
-                        {
-
-                        }
-                        else
-
-                        if (bgWindow) {
-                            console.debug('callButtonClicked');
-                            var room = Strophe.getNodeFromJid(this.model.attributes.jid).toLowerCase();
-
-                            if (this.model.get("message_type") == "chat")
-                            {
-                                room = bgWindow.makeRoomName(room);
-                            }
-
-                            bgWindow.openWebAppsWindow(chrome.extension.getURL("webcam/sip-video.html?url=sip:" + room), null, 800, 640)
-                        }
-                    }
-                    this.__super__.toggleCall.apply(this, arguments);
                 }
             },
             XMPPStatus: {
@@ -1263,7 +1235,7 @@
                     if (!firstTime) // meeting closed and root url is loaded
                     {
                         view.close();
-                        setTimeout(function() { openChatbox(view) });
+                        setTimeout(function() { padeapi.openChatbox(view) });
                     }
 
                     if (firstTime) firstTime = false;   // ignore when jitsi-meet room url is loaded

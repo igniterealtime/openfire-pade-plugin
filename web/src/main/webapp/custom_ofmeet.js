@@ -1376,7 +1376,7 @@ var ofmeet = (function(of)
             const ofHandRaised = raisedHand.innerHTML == "true";
             if (participants[id]) participants[id].ofHandRaised = ofHandRaised;
             handsRaised = handsRaised + (ofHandRaised ? +1 : ( handsRaised > 0 ? -1 : 0));
-            const handsTotal = 1 + APP.conference.getNumberOfParticipantsWithTracks();
+            const handsTotal = 1 + APP.conference.listMembers().length;
             const handsPercentage = Math.round(100*handsRaised/handsTotal);
             const label = handsRaised > 0 ? ("Hands Raised: " + handsRaised + " of " + handsTotal + " (" + handsPercentage + "%)" ) : "";
             if (captions.ele) captions.ele.innerHTML = label;
@@ -2177,8 +2177,8 @@ var ofmeet = (function(of)
 
                 container.querySelectorAll(".meeting-icon > img").forEach(function(icon) {
                     const contact = icon.getAttribute("data-contact");
-                    const message = '"' + APP.conference.getLocalDisplayName() + '" invites you to join the room "' + APP.conference.roomName + '".';
-                    
+                    const message = APP.conference.getLocalDisplayName() + ' invites you to join the room ' + APP.conference.roomName + '.';
+
                     sendWebPush(message, contact, function(name, error) {
                         let image = './delivered.png';
                         if (error) image = './times-solid.png';

@@ -1,6 +1,7 @@
 target/
 work/
 *.class
+*.cmd
 
 # Ignore Intellij Idea project files
 *.iml

@@ -94,17 +94,17 @@ public class PadePlugin implements Plugin, MUCEventListener
         contextPublic.setWelcomeFiles(new String[]{"index.html"});
         HttpBindManager.getInstance().addJettyHandler(contextPublic);
 
+        contextWinSSO = new WebAppContext(null, pluginDirectory.getPath() + "/classes/win-sso", "/sso");
+        contextWinSSO.setClassLoader(this.getClass().getClassLoader());
+
+        final List<ContainerInitializer> initializers7 = new ArrayList<>();
+        initializers7.add(new ContainerInitializer(new JettyJasperInitializer(), null));
+        contextWinSSO.setAttribute("org.eclipse.jetty.containerInitializers", initializers7);
+        contextWinSSO.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
+        contextWinSSO.setWelcomeFiles(new String[]{"index.jsp"});
+
         if (OSUtils.IS_WINDOWS)
         {
-            contextWinSSO = new WebAppContext(null, pluginDirectory.getPath() + "/classes/win-sso", "/sso");
-            contextWinSSO.setClassLoader(this.getClass().getClassLoader());
-
-            final List<ContainerInitializer> initializers7 = new ArrayList<>();
-            initializers7.add(new ContainerInitializer(new JettyJasperInitializer(), null));
-            contextWinSSO.setAttribute("org.eclipse.jetty.containerInitializers", initializers7);
-            contextWinSSO.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
-            contextWinSSO.setWelcomeFiles(new String[]{"index.jsp"});
-
             NegotiateSecurityFilter securityFilter = new NegotiateSecurityFilter();
             FilterHolder filterHolder = new FilterHolder();
             filterHolder.setFilter(securityFilter);
@@ -113,9 +113,9 @@ public class PadePlugin implements Plugin, MUCEventListener
 
             contextWinSSO.addFilter(filterHolder, "/*", enums);
             contextWinSSO.addServlet(new ServletHolder(new WaffleInfoServlet()), "/waffle");
-            contextWinSSO.addServlet(new ServletHolder(new org.ifsoft.sso.Password()), "/password");
-            HttpBindManager.getInstance().addJettyHandler(contextWinSSO);
         }
+        contextWinSSO.addServlet(new ServletHolder(new org.ifsoft.sso.Password()), "/password");
+        HttpBindManager.getInstance().addJettyHandler(contextWinSSO);
 
         try
         {

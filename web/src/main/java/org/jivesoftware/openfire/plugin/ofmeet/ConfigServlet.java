@@ -82,7 +82,6 @@ public class ConfigServlet extends HttpServlet
 
             String recordingKey = null;
 
-
             int minHDHeight = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.min.hdheight", 540 );
             String defaultLanguage = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.default.language", null );
             boolean useNicks = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.usenicks", false );
@@ -109,6 +108,7 @@ public class ConfigServlet extends HttpServlet
             boolean logStats = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.stats.logging", false );
             String iceServers = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.iceservers", "" );
             String xirsysUrl = JiveGlobals.getProperty( "ofmeet.xirsys.url", null );
+            boolean ofmeetWinSSOEnabled = JiveGlobals.getBooleanProperty( "ofmeet.winsso.enabled", false );
 
             if ( xirsysUrl != null )
             {
@@ -229,6 +229,8 @@ public class ConfigServlet extends HttpServlet
 
             config.put( "useRoomAsSharedDocumentName", false );
             config.put( "logStats", logStats );
+            config.put( "ofmeetWinSSOEnabled", ofmeetWinSSOEnabled );
+
             config.put( "conferences", conferences );
             if ( globalConferenceId != null && !globalConferenceId.isEmpty() )
             {

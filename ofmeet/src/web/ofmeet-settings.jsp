@@ -127,7 +127,7 @@
 
         if ( errors.isEmpty() )
         {
-            JiveGlobals.setProperty( "ofmeet.security.enabled", Boolean.toString( securityenabled ) );
+            JiveGlobals.setProperty( "ofmeet.winsso.enabled", Boolean.toString( securityenabled ) );
             JiveGlobals.setProperty( "ofmeet.conference.admin", Boolean.toString( conferenceadmin ) );            
             JiveGlobals.setProperty( "voicebridge.default.proxy.sipauthuser", authusername );
             JiveGlobals.setProperty( "voicebridge.default.proxy.sippassword", sippassword );
@@ -377,8 +377,8 @@
             </tr>
             <tr>
                 <td nowrap colspan="2">
-                    <input type="checkbox" name="securityenabled" ${admin:getBooleanProperty( "ofmeet.security.enabled", true) ? "checked" : ""}>
-                    <fmt:message key="config.page.configuration.security.enabled_description" />
+                    <input type="checkbox" name="securityenabled" ${admin:getBooleanProperty( "ofmeet.winsso.enabled", false) ? "checked" : ""}>
+                    <fmt:message key="config.page.configuration.winsso.enabled_description" />
                 </td>
             </tr>
             <tr>

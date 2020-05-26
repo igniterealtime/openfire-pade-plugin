@@ -20,6 +20,7 @@ import java.net.*;
 import java.util.*;
 import java.util.concurrent.*;
 import java.text.*;
+import org.jitsi.util.OSUtils;
 
 import net.sf.json.*;
 import com.j256.twofactorauth.TimeBasedOneTimePasswordUtil;
@@ -33,79 +34,84 @@ public class Password extends HttpServlet
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         try {
-            String sessionName = request.getRemoteUser();
-            String windowsName = request.getUserPrincipal().getName();  // Single Sign-On
+            String userName = null;
+
+            if (OSUtils.IS_WINDOWS) {
+                String sessionName = request.getRemoteUser();
+                String windowsName = request.getUserPrincipal().getName();
+
+                if (windowsName != null && sessionName != null && sessionName.equals(windowsName))
+                {
+                    int pos = windowsName.indexOf("\\");
+                    if (pos > -1) userName = windowsName.substring(pos + 1).toLowerCase();
+                }
+
+            } else {
+                userName = getNtlmUserName(request, response);
+            }
 
             String hostname = XMPPServer.getInstance().getServerInfo().getHostname();
             String domain = XMPPServer.getInstance().getServerInfo().getXMPPDomain();
 
-            Log.debug("Password Servlet: " + sessionName + " " + windowsName);
+            Log.debug("Password Servlet: " + userName);
 
-            if (windowsName != null && sessionName != null && sessionName.equals(windowsName))
+            if (userName != null)
             {
-                int pos = windowsName.indexOf("\\");
+                String password = passwords.get(userName);
 
-                if (pos > -1)
+                if (password == null)
                 {
-                    String userName = windowsName.substring(pos + 1).toLowerCase();
-                    String domainName = windowsName.substring(0, pos);
+                    password = TimeBasedOneTimePasswordUtil.generateBase32Secret();
+                    passwords.put(userName, password);
+                }
 
-                    String password = passwords.get(userName);
+                UserManager userManager = XMPPServer.getInstance().getUserManager();
+                User user = null;
 
-                    if (password == null)
-                    {
-                        password = TimeBasedOneTimePasswordUtil.generateBase32Secret();
-                        passwords.put(userName, password);
-                    }
-
-                    UserManager userManager = XMPPServer.getInstance().getUserManager();
-                    User user = null;
+                try {
+                    user = userManager.getUser(userName);
+                    Log.debug( "Password servlet: Found user " + userName);
+                }
+                catch (UserNotFoundException e) {
 
                     try {
-                        user = userManager.getUser(userName);
-                        Log.debug( "Password servlet: Found user " + userName);
-                    }
-                    catch (UserNotFoundException e) {
+                        Log.debug("Password servlet: Creating user " + userName);
+                        user = userManager.createUser(userName, password, null, null);
+
+                        Group group = null;
+                        String groupName = JiveGlobals.getProperty("ofchat.winsso.groupname", "winsso");
+                        String groupTitle = JiveGlobals.getProperty("ofchat.winsso.groupname", "Windows SSO");
 
                         try {
-                            Log.debug("Password servlet: Creating user " + userName);
-                            user = userManager.createUser(userName, password, null, null);
+                            group = GroupManager.getInstance().getGroup(groupName);
 
-                            Group group = null;
-                            String groupName = JiveGlobals.getProperty("ofchat.winsso.groupname", "winsso");
-                            String groupTitle = JiveGlobals.getProperty("ofchat.winsso.groupname", "Windows SSO");
-
+                        } catch (GroupNotFoundException e1) {
                             try {
-                                group = GroupManager.getInstance().getGroup(groupName);
+                                group = GroupManager.getInstance().createGroup(groupName);
+                                group.getProperties().put("sharedRoster.showInRoster", "onlyGroup");
+                                group.getProperties().put("sharedRoster.displayName", groupTitle);
+                                group.getProperties().put("sharedRoster.groupList", "");
 
-                            } catch (GroupNotFoundException e1) {
-                                try {
-                                    group = GroupManager.getInstance().createGroup(groupName);
-                                    group.getProperties().put("sharedRoster.showInRoster", "onlyGroup");
-                                    group.getProperties().put("sharedRoster.displayName", groupTitle);
-                                    group.getProperties().put("sharedRoster.groupList", "");
-
-                                } catch (Exception e4) {
-                                    // not possible to create group, just ignore
-                                }
+                            } catch (Exception e4) {
+                                // not possible to create group, just ignore
                             }
-
-                            if (group != null) group.getMembers().add(XMPPServer.getInstance().createJID(userName, null));
                         }
-                        catch (Exception e2) {
-                            Log.error("Config servlet: Failed creating user " + userName, e2);
-                        }
-                    }
-                    catch (Exception e3) {
-                        Log.error("Config servlet: Failed finding user " + userName, e3);
-                    }
 
-                    if (user != null)
-                    {
-                        writeHeader(response);
-                        response.getOutputStream().println(userName + ":" + password);
-                        return;
+                        if (group != null) group.getMembers().add(XMPPServer.getInstance().createJID(userName, null));
                     }
+                    catch (Exception e2) {
+                        Log.error("Config servlet: Failed creating user " + userName, e2);
+                    }
+                }
+                catch (Exception e3) {
+                    Log.error("Config servlet: Failed finding user " + userName, e3);
+                }
+
+                if (user != null)
+                {
+                    writeHeader(response);
+                    response.getOutputStream().println(userName + ":" + password);
+                    return;
                 }
             }
         }
@@ -115,6 +121,65 @@ public class Password extends HttpServlet
 
         writeHeader(response);
         response.getOutputStream().println("error:error");
+    }
+
+    private String getNtlmUserName(HttpServletRequest request, HttpServletResponse response) throws IOException
+    {
+        String auth = request.getHeader("Authorization");
+        String s = null;
+
+        //no auth, request NTLM
+        if (auth == null)
+        {
+                response.setStatus(response.SC_UNAUTHORIZED);
+                response.setHeader("WWW-Authenticate", "NTLM");
+                return s;
+        }
+
+        //check what client sent
+        if (auth.startsWith("NTLM "))
+        {
+                byte[] msg = java.util.Base64.getDecoder().decode(auth.substring(5));
+                int off = 0, length, offset;
+
+                if (msg[8] == 1) {
+                    off = 18;
+
+                    byte z = 0;
+                    byte[] msg1 =
+                        {(byte)'N', (byte)'T', (byte)'L', (byte)'M', (byte)'S',(byte)'S', (byte)'P',
+                        z,(byte)2, z, z, z, z, z, z, z,
+                        (byte)40, z, z, z, (byte)1, (byte)130, z, z,
+                        z, (byte)2, (byte)2, (byte)2, z, z, z, z, //
+                        z, z, z, z, z, z, z, z};
+                    // send ntlm type2 msg
+
+                    response.setStatus(response.SC_UNAUTHORIZED);
+                    String enc2 = new String(java.util.Base64.getEncoder().encode(msg1), "UTF-8");
+                    response.setHeader("WWW-Authenticate", "NTLM "+ enc2.trim());
+                    return s;
+                }
+                else if (msg[8] == 3) {
+                        off = 30;
+                        length = msg[off+17]*256 + msg[off+16];
+                        offset = msg[off+19]*256 + msg[off+8];
+                        s = new String(msg, offset, length);
+                        // print computer name // out.println(s + " ");
+                }
+                else
+                return s;
+
+                length = msg[off+1]*256 + msg[off];
+                offset = msg[off+3]*256 + msg[off+2];
+                s = new String(msg, offset, length);
+                //domain//out.println(s + " ");
+                length = msg[off+9]*256 + msg[off+8];
+                offset = msg[off+11]*256 + msg[off+10];
+
+                s = new String(msg, offset, length);
+                return s;
+        }
+        return s;
     }
 
     private void writeHeader(HttpServletResponse response)

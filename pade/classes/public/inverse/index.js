@@ -306,7 +306,7 @@ var padeapi = (function(api)
         loadCSS("plugins/css/flatpickr.css");
 
         loadJS("plugins/libs/rss-library.js");
-        loadJS("../js/jquery.min.js");
+        loadJS("../js/jquery.js");
 
         loadJS("plugins/payments.js");
         loadJS("plugins/search.js");
@@ -1235,7 +1235,7 @@ var padeapi = (function(api)
                                     }, false);
                                 }
 
-                                // adding message reactions
+                                // adding message actions
 
                                 var messageActionButtons = this.el.querySelector('.chat-msg__actions');
 
@@ -1290,7 +1290,6 @@ var padeapi = (function(api)
                                         ele.title = "React negative to this message";
                                         messageActionButtons.appendChild(ele);
                                     }
-
                                 }
                             }
 

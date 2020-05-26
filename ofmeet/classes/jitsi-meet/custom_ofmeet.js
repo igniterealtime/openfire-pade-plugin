@@ -342,7 +342,7 @@ var ofmeet = (function(of)
             }
         }
 
-        if (APP.connection.xmpp.connection._stropheConn.pass)
+        if (APP.connection.xmpp.connection._stropheConn.pass || config.ofmeetWinSSOEnabled)
         {
             if (navigator.credentials && interfaceConfig.OFMEET_CACHE_PASSWORD)
             {
@@ -474,6 +474,7 @@ var ofmeet = (function(of)
         const connection = APP.connection.xmpp.connection;
         const $iq = APP.connection.xmpp.connection.$iq;
         const Strophe = APP.connection.xmpp.connection.Strophe;
+        const username = Strophe.getNodeFromJid(APP.connection.xmpp.connection.jid);
 
         const iq = $iq({type: 'get', to: Strophe.getBareJidFromJid(APP.connection.xmpp.connection.jid)}).c('vCard', {xmlns: 'vcard-temp'});
 
@@ -483,9 +484,7 @@ var ofmeet = (function(of)
             const email = emailTag ? emailTag.innerHTML : "";
 
             const fullnameTag = response.querySelector('vCard FN');
-            const fullname = fullnameTag ? fullnameTag.innerHTML : "";
-
-            const username = Strophe.getNodeFromJid(APP.connection.xmpp.connection.jid);
+            const fullname = fullnameTag ? fullnameTag.innerHTML : username;
             const photo = response.querySelector('vCard PHOTO');
 
             let avatar = (fullname == "") ? createAvatar(username) : createAvatar(fullname);
@@ -2262,7 +2261,7 @@ var ofmeet = (function(of)
             window.WebPushLib.setVapidDetails('xmpp:' + APP.conference._room.room.myroomjid, secret.publicKey, secret.privateKey);
 
             window.WebPushLib.sendNotification(secret.subscription, JSON.stringify(payload), {TTL: 60}).then(response => {
-                console.log("Web Push Notification is sended!");
+                console.debug("Web Push Notification is sended!");
                 if (callback) callback(name);
             }).catch(e => {
                 console.error('Failed to notify', name, e)

@@ -49,8 +49,6 @@
         final String sippassword = request.getParameter( "sippassword" );
         final String server = request.getParameter( "server" );
         final String outboundproxy = request.getParameter( "outboundproxy" );
-        final String iceServers = request.getParameter( "iceservers" );
-
         final boolean p2pEnabled = ParamUtils.getBooleanParameter( request, "p2pEnabled" );        
         final boolean p2pUseStunTurn = ParamUtils.getBooleanParameter( request, "p2pUseStunTurn" );   
         final boolean p2pDisableH264 = ParamUtils.getBooleanParameter( request, "p2pDisableH264" );   
@@ -133,7 +131,6 @@
             JiveGlobals.setProperty( "voicebridge.default.proxy.sippassword", sippassword );
             JiveGlobals.setProperty( "voicebridge.default.proxy.sipserver", server );
             JiveGlobals.setProperty( "voicebridge.default.proxy.outboundproxy", outboundproxy );
-            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.iceservers", iceServers );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.websockets", Boolean.toString( websockets ) );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.webinar", Boolean.toString( webinar ) );                        
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.useipv6", Boolean.toString( useIPv6 ) );            
@@ -247,17 +244,6 @@
                 <td nowrap colspan="2">
                     <input type="checkbox" name="usenicks" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.usenicks", false) ? "checked" : ""}>
                     <fmt:message key="config.page.configuration.ofmeet.usenicks.enabled_desc" />
-                </td>
-            </tr>
-
-            <tr>
-                <td colspan="2" align="left" width="200"><fmt:message key="config.page.configuration.ofmeet.iceservers"/>:</td>
-            </tr>
-            <tr>
-                <td colspan="2">
-                    <input type="text" size="100" maxlength="256" name="iceservers"
-                           value="${admin:getProperty("org.jitsi.videobridge.ofmeet.iceservers", "")}"
-                           placeholder="{ 'iceServers': [{ 'url': 'stun:stun.l.google.com:19302' }] }">
                 </td>
             </tr>
         </table>

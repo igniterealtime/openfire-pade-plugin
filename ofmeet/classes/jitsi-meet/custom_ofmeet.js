@@ -224,8 +224,6 @@ var ofmeet = (function(of)
                 if (track.getType() == "audio") recordingAudioTrack[id] = track.stream;
                 if (track.getType() == "video") recordingVideoTrack[id] = track.stream;
 
-                if (participants[id]) participants[id]._trackAdded = true;
-
                 if (APP.conference.getMyUserId() == id  && !config.webinar)
                 {
 
@@ -274,8 +272,8 @@ var ofmeet = (function(of)
 
             APP.conference.addConferenceListener(JitsiMeetJS.events.conference.MESSAGE_RECEIVED , function(id, text, ts)
             {
-                var participant = APP.conference._room.getParticipantById(id);
-                var displayName = participant ? (participant._displayName || "Anonymous") : "Me";
+                var participant = APP.conference.getParticipantById(id);
+                var displayName = participant ? (participant._displayName || 'Anonymous-' + id) : "Me";
 
                 console.debug("ofmeet.js message", id, text, ts, displayName, participant, padsModalOpened);
 
@@ -293,13 +291,18 @@ var ofmeet = (function(of)
                     else {
                         padsList.push(text);
                     }
-                }
-                else
+                } else {
 
-                if (text.indexOf("http") != 0 && !captions.msgsDisabled)
+                    if (text.indexOf("http") != 0 && !captions.msgsDisabled)
+                    {
+                        if (captions.ele) captions.ele.innerHTML = displayName + " : " + text;
+                        captions.msgs.push({text: text, stamp: (new Date()).getTime()});
+                    }
+                }
+
+                if (breakout.started)
                 {
-                    if (captions.ele) captions.ele.innerHTML = displayName + " : " + text;
-                    captions.msgs.push({text: text, stamp: (new Date()).getTime()});
+                    messageBreakoutRooms(text);
                 }
             });
 
@@ -389,6 +392,7 @@ var ofmeet = (function(of)
 
     function addParticipant(id)
     {
+        const Strophe = APP.connection.xmpp.connection.Strophe;
         const participant = APP.conference.getParticipantById(id);
 
         console.debug("addParticipant", id, participant);
@@ -396,8 +400,8 @@ var ofmeet = (function(of)
         if (participant && !participants[id] && breakout.kanban)
         {
             participants[id] = participant;
-            const label = participants[id]._displayName || 'Anonymous';
             const jid = participants[id]._jid;
+            const label = participants[id]._displayName || 'Anonymous-' + id;
 
             breakout.kanban.addElement("participants",
             {
@@ -1328,9 +1332,9 @@ var ofmeet = (function(of)
         if (!el.dataset.eid) return;
 
         const id = el.dataset.eid;
-        const label = participants[id]._displayName || 'Anonymous';
+        const label = participants[id]._displayName || 'Anonymous-' + id;
         const jid = participants[id]._jid;
-        const webinar = participants[id]._trackAdded ? "false" : "true";
+        const webinar = participants[id]._tracks.length > 0 ? "false" : "true";
 
         const boardId = breakout.kanban.getParentBoardID(id);
 
@@ -1432,7 +1436,7 @@ var ofmeet = (function(of)
         console.debug("exitRoom", jid);
         const xmpp = APP.connection.xmpp.connection._stropheConn;
         const $pres = APP.connection.xmpp.connection.$pres;
-        xmpp.send($pres({type: 'unavailable', to: jid + '/' + APP.conference.getMyUserId()}));
+        xmpp.send($pres({type: 'unavailable', to: jid + '/' + APP.conference.getLocalDisplayName()}));
     }
 
     function joinRoom(jid)
@@ -1441,7 +1445,7 @@ var ofmeet = (function(of)
         const xmpp = APP.connection.xmpp.connection._stropheConn;
         const $pres = APP.connection.xmpp.connection.$pres;
         const Strophe = APP.connection.xmpp.connection.Strophe;
-        xmpp.send($pres({to: jid + '/' + APP.conference.getMyUserId()}).c("x",{xmlns: Strophe.NS.MUC}));
+        xmpp.send($pres({to: jid + '/' + APP.conference.getLocalDisplayName()}).c("x",{xmlns: Strophe.NS.MUC}));
     }
 
     function endBreakout()
@@ -1527,6 +1531,28 @@ var ofmeet = (function(of)
         breakout.button.innerHTML = breakout.started ? 'Reassemble' : 'Breakout';
     }
 
+    function messageBreakoutRooms(text)
+    {
+        console.debug("messageBreakoutRooms", text, breakout);
+
+        const xmpp = APP.connection.xmpp.connection._stropheConn;
+        const $msg = APP.connection.xmpp.connection.$msg;
+
+        for (let i=0; i<breakout.recall.length; i++)
+        {
+            const jid = breakout.recall[i].room + "@" + Strophe.getDomainFromJid(breakout.recall[i].jid);
+
+            joinRoom(jid);
+
+            setTimeout(function()
+            {
+                xmpp.send($msg({type: 'groupchat', to: jid}).c("body").t(text));
+                setTimeout(function() {exitRoom(jid)}, 1000);
+
+            }, 1000);
+        }
+    }
+
     function allocateToRooms(roomCount)
     {
         console.debug("allocateToRooms", roomCount, breakout);
@@ -1567,9 +1593,9 @@ var ofmeet = (function(of)
                 {
                     console.debug("allocateToRooms - participant", j, ids[j], participants[ids[j]]);
 
-                    const label = participants[ids[j]]._displayName || 'Anonymous';
+                    const label = participants[ids[j]]._displayName || 'Anonymous-' + id;
                     const jid = participants[ids[j]]._jid;
-                    const webinar = participants[ids[j]]._trackAdded ? "false" : "true";
+                    const webinar = participants[ids[j]]._tracks.length > 0 ? "false" : "true";
 
                     boards[i+1].item.push({
                         id: ids[j],
@@ -1646,7 +1672,7 @@ var ofmeet = (function(of)
         {
             kanbanConfig.boards[0].item.push({
                 id: id,
-                title: participants[id]._displayName || 'Anonymous',
+                title: participants[id]._displayName || 'Anonymous-' + id,
                 drop: function(el) {
                   breakoutDragAndDrop(el);
                 }

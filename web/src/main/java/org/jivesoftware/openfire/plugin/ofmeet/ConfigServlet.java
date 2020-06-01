@@ -109,6 +109,7 @@ public class ConfigServlet extends HttpServlet
             String iceServers = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.iceservers", "" );
             String xirsysUrl = JiveGlobals.getProperty( "ofmeet.xirsys.url", null );
             boolean ofmeetWinSSOEnabled = JiveGlobals.getBooleanProperty( "ofmeet.winsso.enabled", false );
+            boolean enablePreJoinPage = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.prejoin.page", false );
 
             if ( xirsysUrl != null )
             {
@@ -152,6 +153,7 @@ public class ConfigServlet extends HttpServlet
             {
                 config.put( "defaultLanguage", defaultLanguage.trim() );
             }
+            config.put( "prejoinPageEnabled", enablePreJoinPage );
             config.put( "webinar", webinar );
             config.put( "useIPv6", useIPv6 );
             config.put( "useNicks", useNicks );

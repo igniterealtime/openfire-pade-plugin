@@ -5,7 +5,7 @@
         factory(converse);
     }
 }(this, function (converse) {
-    var Strophe, $iq, $msg, $pres, $build, b64_sha1, _ ,Backbone, dayjs, _converse, localStream;
+    var Strophe, $iq, $msg, $pres, $build, b64_sha1, _ ,Backbone, dayjs, _converse, localStream, callee;
 
     converse.plugins.add("jinglecalls", {
         dependencies: [],
@@ -38,15 +38,45 @@
               _converse.api.disco.own.features.add('urn:xmpp:jingle:apps:rtp:video');
             });
 
-            _converse.api.listen.on('connected', function()
+            _converse.api.listen.on('chatBoxClosed', function (chatbox)
             {
-                _converse.connection.jingle.doListen();
-                _converse.connection.jingle.getStunAndTurnCredentials();
+                if (localStream) terminateCall();
             });
 
-            _converse.api.listen.on('chatBoxInsertedIntoDOM', function (view)
+            _converse.api.listen.on('renderToolbar', function(view)
             {
+                const toolbar = view.el.querySelector('.toggle-call');
 
+                if (toolbar && view.model.get("type") == "chatroom" && !getSetting("enableAudioConfWidget", false)) {
+                   toolbar.style.display = 'none';
+                }
+                else
+
+                if (view.model.get("type") == "chatbox") {
+                    toolbar.style.display = 'none';
+                    const contact = _converse.presences.findWhere({'jid': view.model.get("jid")});
+
+                    if (contact && contact.resources.models.length > 0)
+                    {
+                        const jid = view.model.get("jid") + '/' + contact.resources.models[0].get('name');
+                        const stanza = $iq({'to': jid, 'type': 'get'}).c('query', {'xmlns': "http://jabber.org/protocol/disco#info"});
+
+                        _converse.connection.sendIQ(stanza, function(iq) {
+                            console.debug("features", view.model.get("jid"), iq);
+                            const canJingle = iq.querySelector("feature[var='urn:xmpp:jingle:apps:rtp:video']");
+                            if (canJingle) toolbar.style.display = '';
+                        });
+                    }
+                }
+            });
+
+            _converse.api.listen.on('connected', function()
+            {
+                Promise.all([_converse.api.waitUntil('controlBoxInitialized'), _converse.api.waitUntil('VCardsInitialized'), _converse.api.waitUntil('rosterContactsFetched'), _converse.api.waitUntil('chatBoxesFetched'), _converse.api.waitUntil('roomsPanelRendered'), _converse.api.waitUntil('bookmarksInitialized')]).then(() =>
+                {
+                    _converse.connection.jingle.doListen();
+                    _converse.connection.jingle.getStunAndTurnCredentials();
+                });
             });
 
             setupJingle();
@@ -62,18 +92,24 @@
 
                     if (this.model.get("type") == "chatbox")
                     {
-                        var jingleConfirm = _converse.api.settings.get("jinglecalls_confirm");
-
-                        if (confirm(jingleConfirm))
+                        if (localStream)
                         {
-                            const jid = this.model.attributes.jid;
-                            const contact = _converse.presences.findWhere({'jid': jid});
+                            terminateCall();
 
-                            if (contact && contact.resources.models.length > 0)
+                        } else {
+                            var jingleConfirm = _converse.api.settings.get("jinglecalls_confirm");
+
+                            if (confirm(jingleConfirm))
                             {
-                                getUserMediaWithConstraints(['audio', 'video'], jid, makeCall);
+                                const jid = this.model.attributes.jid;
+                                const contact = _converse.presences.findWhere({'jid': jid});
+
+                                if (contact && contact.resources.models.length > 0)
+                                {
+                                    getUserMediaWithConstraints(['audio', 'video'], jid, makeCall);
+                                }
+                                else alert('unable to call, ' + jid + ' not online');
                             }
-                            else alert('unable to call, ' + jid + ' not online');
                         }
                     }
                 }
@@ -81,7 +117,7 @@
         }
     });
 
-    function setupWebRTC()
+    function setupWebRTC(callState)
     {
         if (localStream)
         {
@@ -90,14 +126,54 @@
 
             if (view)
             {
-                const div = view.el.querySelector(".chat-content");
-                div.innerHTML  = "<div id='largevideocontainer' style='width:100%;top:0px;bottom:0px;left:0px;position:absolute;'> </div> <div id='minivideocontainer' style='width:160px;height:120px;position:absolute;right:10px;top:10px;'> <video id='minivideo' autoplay='autoplay' style='width:160px;height:120px;position:absolute;'></video></div>";
+                const div = view.el.querySelector(".jinglecalls");
+                div.style.maxWidth = "40%";
+                div.classList.remove('hiddenx');
+                div.innerHTML = '<div class="row"><div class="col" style="vertical-align:top;min-width:100%;max-height:70%;margin-left:0px;padding-right:0px;" id="largevideocontainer"></div><div class="col" style="vertical-align:top;min-width:100%;max-height:30%;margin-left:0px;padding-right:0px;"><video style="vertical-align:bottom;min-width:100%;max-height:30%;margin-left:0px;padding-right:0px;" id="minivideo" autoplay="autoplay"/></div><div style="cursor:pointer;position: absolute; bottom: 5%; left: 10%; z-index: 100;"><span id="mute_audio_jingle"><svg style="fill:white;margin-left:4px" height="32" width="32" viewBox="0 0 32 32"><path d="M23.063 14.688h2.25c0 4.563-3.625 8.313-8 8.938v4.375h-2.625v-4.375c-4.375-.625-8-4.375-8-8.938h2.25c0 4 3.375 6.75 7.063 6.75s7.063-2.75 7.063-6.75zm-7.063 4c-2.188 0-4-1.813-4-4v-8c0-2.188 1.813-4 4-4s4 1.813 4 4v8c0 2.188-1.813 4-4 4z"></path></svg></span><span id="terminate_jingle"><svg style="fill:red;margin-left:4px" height="32" width="32" viewBox="0 0 32 32"><path d="M16 12c-2.125 0-4.188.313-6.125.938v4.125c0 .5-.313 1.063-.75 1.25a13.87 13.87 0 00-3.563 2.438c-.25.25-.563.375-.938.375s-.688-.125-.938-.375L.373 17.438c-.25-.25-.375-.563-.375-.938s.125-.688.375-.938c4.063-3.875 9.563-6.25 15.625-6.25s11.563 2.375 15.625 6.25c.25.25.375.563.375.938s-.125.688-.375.938l-3.313 3.313c-.25.25-.563.375-.938.375s-.688-.125-.938-.375a13.87 13.87 0 00-3.563-2.438c-.438-.188-.75-.625-.75-1.188V13c-1.938-.625-4-1-6.125-1z"></path></svg></span><span id="mute_video_jingle"><svg style="fill:white;margin-left:4px" height="32" width="32" viewBox="0 0 32 32"><path d="M22.688 14l5.313-5.313v14.625l-5.313-5.313v4.688c0 .75-.625 1.313-1.375 1.313h-16C4.563 24 4 23.437 4 22.687V9.312c0-.75.563-1.313 1.313-1.313h16c.75 0 1.375.563 1.375 1.313V14z"></path></svg></span></div></div>';
 
                 $('#minivideo')[0].muted = true;
                 $('#minivideo')[0].volume = 0;
 
                 RTC.attachMediaStream($('#minivideo'), localStream);
+                view.showHelpMessages([callState + ' Call']);
+
+                view.el.querySelector("#mute_audio_jingle").addEventListener("click", function(evt)
+                {
+                    console.debug("setupWebRTC - mute audio");
+                    const disabled = '<svg style="fill:white;margin-left:4px" height="24" width="24" viewBox="0 0 32 32"><path d="M5.688 4l22.313 22.313-1.688 1.688-5.563-5.563c-1 .625-2.25 1-3.438 1.188v4.375h-2.625v-4.375c-4.375-.625-8-4.375-8-8.938h2.25c0 4 3.375 6.75 7.063 6.75 1.063 0 2.125-.25 3.063-.688l-2.188-2.188c-.25.063-.563.125-.875.125-2.188 0-4-1.813-4-4v-1l-8-8zM20 14.875l-8-7.938v-.25c0-2.188 1.813-4 4-4s4 1.813 4 4v8.188zm5.313-.187a8.824 8.824 0 01-1.188 4.375L22.5 17.375c.375-.813.563-1.688.563-2.688h2.25z"></path></svg>';
+                    const enabled = '<svg style="fill:white;margin-left:4px" height="32" width="32" viewBox="0 0 32 32"><path d="M23.063 14.688h2.25c0 4.563-3.625 8.313-8 8.938v4.375h-2.625v-4.375c-4.375-.625-8-4.375-8-8.938h2.25c0 4 3.375 6.75 7.063 6.75s7.063-2.75 7.063-6.75zm-7.063 4c-2.188 0-4-1.813-4-4v-8c0-2.188 1.813-4 4-4s4 1.813 4 4v8c0 2.188-1.813 4-4 4z"></path></svg>';
+
+                    const active = localStream.getAudioTracks()[0].enabled;
+                    localStream.getAudioTracks()[0].enabled =  !active;
+                    view.el.querySelector("#mute_audio_jingle").innerHTML = !active ? enabled : disabled;
+                });
+
+                view.el.querySelector("#mute_video_jingle").addEventListener("click", function(evt)
+                {
+                    console.debug("setupWebRTC - mute video");
+                    const disabled = '<svg style="fill:white;margin-left:4px" height="24" width="24" viewBox="0 0 32 32"><path d="M4.375 2.688L28 26.313l-1.688 1.688-4.25-4.25c-.188.125-.5.25-.75.25h-16c-.75 0-1.313-.563-1.313-1.313V9.313c0-.75.563-1.313 1.313-1.313h1L2.687 4.375zm23.625 6v14.25L13.062 8h8.25c.75 0 1.375.563 1.375 1.313v4.688z"></path></svg>';
+                    const enabled = '<svg style="fill:white;margin-left:4px" height="32" width="32" viewBox="0 0 32 32"><path d="M22.688 14l5.313-5.313v14.625l-5.313-5.313v4.688c0 .75-.625 1.313-1.375 1.313h-16C4.563 24 4 23.437 4 22.687V9.312c0-.75.563-1.313 1.313-1.313h16c.75 0 1.375.563 1.375 1.313V14z"></path></svg>';
+
+                    const active = localStream.getVideoTracks()[0].enabled;
+                    localStream.getVideoTracks()[0].enabled =  !active;
+                    view.el.querySelector("#mute_video_jingle").innerHTML = !active ? enabled : disabled;
+                });
+
+                view.el.querySelector("#terminate_jingle").addEventListener("click", function(evt)
+                {
+                    console.debug("setupWebRTC - terminate call");
+                    terminateCall();
+                });
             }
+        }
+    }
+
+    function terminateCall()
+    {
+        if (callee) {
+            _converse.connection.jingle.terminate(callee);
+        } else {
+            onCallTerminated();
         }
     }
 
@@ -105,7 +181,7 @@
     {
         if (!error)
         {
-            setupWebRTC();
+            setupWebRTC('Outgoing');
 
             for (var i = 0; i < localStream.getAudioTracks().length; i++) {
                 console.debug('using audio device "' + localStream.getAudioTracks()[i].label + '"');
@@ -119,8 +195,6 @@
                 .c('propose', {xmlns: 'urn:xmpp:jingle-message:0', id: id})
                 .c('description', {xmlns: 'urn:xmpp:jingle:apps:rtp:1', media: 'video'}).up()
                 .c('description', {xmlns: 'urn:xmpp:jingle:apps:rtp:1', media: 'audio'}).up().up()
-                .c('request', {xmlns: 'urn:xmpp:receipts'}).up()
-                .c('store', {xmlns: 'urn:xmpp:hints'}).up()
 
             _converse.connection.send(propose);
         }
@@ -131,9 +205,12 @@
     {
         if (!error)
         {
-            setupWebRTC();
+            setupWebRTC('Incoming');
+            const accept = $msg({type: 'chat', to: Strophe.getBareJidFromJid(_converse.connection.jid)}).c('accept', {xmlns: 'urn:xmpp:jingle-message:0', id: caller.id});
+            _converse.connection.send(accept);
             const proceed = $msg({type: 'chat', to: caller.from}).c('proceed', {xmlns: 'urn:xmpp:jingle-message:0', id: caller.id});
             _converse.connection.send(proceed);
+            _converse.connection.send($pres({to: caller.from}));
 
         }
         else alert('unable to answer call, ' + jid + ' no mic or webcam available');
@@ -154,13 +231,18 @@
 
     function onCallActive(event, videoelem, sid) {
         console.debug('call active ' + sid);
+        callee = sid;
         //$(videoelem).appendTo('#largevideocontainer');
         _converse.connection.jingle.sessions[sid].getStats(1000);
     }
 
     function onCallTerminated(event, sid, reason) {
         console.debug('call terminated ' + sid + (reason ? (': ' + reason) : ''));
-        $('#largevideocontainer #largevideo_' + sid).remove();
+        if (localStream) localStream.getTracks().forEach(function (track) { track.stop(); });
+        $('#largevideocontainer #largevideo').remove();
+        document.getElementById('largevideocontainer').parentNode.parentNode.classList.add('hiddenx');
+        callee = null;
+        localStream = null;
     }
 
     function waitForRemoteVideo(selector, sid) {
@@ -177,13 +259,13 @@
 
     function onRemoteStreamAdded(event, data, sid) {
         console.debug('Remote stream for session ' + sid + ' added.');
-        //if ($('#largevideo_' + sid).length !== 0) {
+        //if ($('#largevideo').length !== 0) {
         //    console.debug('ignoring duplicate onRemoteStreamAdded...'); // FF 20
         //    return;
         //}
         // after remote stream has been added, wait for ice to become connected
         // old code for compat with FF22 beta
-        //var el = $("<video autoplay='autoplay'/>").attr('id', 'largevideo_' + sid);
+        //var el = $("<video autoplay='autoplay'/>").attr('id', 'largevideo');
         //RTC.attachMediaStream(el, data.stream);
         //waitForRemoteVideo(el, sid);
     }
@@ -196,10 +278,15 @@
         console.debug('ice state for', sid, sess.peerconnection.signalingState, sess.peerconnection.iceConnectionState, sess.remoteStream);
 
         if (sess.peerconnection.signalingState == 'stable' && sess.peerconnection.iceConnectionState == 'connected') {
-            var el = $("<video autoplay='autoplay'/>").attr('id', 'largevideo_' + sid);
-            $(document).trigger('callactive.jingle', [el, sid]);
-            RTC.attachMediaStream(el, sess.remoteStream);
-            $(el).appendTo('#largevideocontainer');
+            const view = padeapi.getSelectedChatBox();
+
+            if (view)
+            {
+                var el = $("<video style='vertical-align:bottom;min-width:100%;max-height:70%;' autoplay='autoplay'/>").attr('id', 'largevideo');
+                $(document).trigger('callactive.jingle', [el, sid]);
+                RTC.attachMediaStream(el, sess.remoteStream);
+                $(el).appendTo('#largevideocontainer');
+            }
         }
     }
 
@@ -275,23 +362,36 @@
             },
             onJingleMessage: function (msg) {
                 console.debug('setupJingle - onJingleMessage', msg);
+                const forwarded = msg.querySelector('forwarded');
+                if (forwarded) return true;
+
                 const propose = msg.querySelector('propose');
                 const proceed = msg.querySelector('proceed');
-                const from = msg.getAttribute('from')
+                const from = msg.getAttribute('from');
+                const caller = Strophe.getBareJidFromJid(from);
 
                 if (propose)
                 {
                     const id = propose.getAttribute('id');
-                    getUserMediaWithConstraints(['audio', 'video'], {id: id, from: from}, answerCall);
+
+                    padeapi.notifyText("Audio/Video Call", caller, caller, [{title: "Accept Call?", iconUrl: chrome.extension.getURL("check-solid.svg")}], function(notificationId, buttonIndex)
+                    {
+                        if (buttonIndex == 0)
+                        {
+                            _converse.api.chats.open(caller);
+                            getUserMediaWithConstraints(['audio', 'video'], {id: id, from: from}, answerCall);
+                        }
+
+                    }, caller);
                 }
                 else
 
                 if (proceed)
                 {
-                    const peer = msg.getAttribute('from');
-                    _converse.connection.send($pres({to: peer}));
-                    _converse.connection.jingle.initiate(peer, _converse.connection.jid);
+                    _converse.connection.jingle.initiate(from, _converse.connection.jid);
                 }
+
+                return true;
             },
 
             onJingle: function (iq) {
@@ -444,6 +544,9 @@
                     delete this.jid2session[this.sessions[sid].peerjid];
                     delete this.sessions[sid];
                 }
+
+                $(document).trigger('callterminated.jingle', [sid, 'gone']);
+
             },
             terminateByJid: function (jid) {
                 console.debug('setupJingle - terminateByJid', jid);
@@ -640,7 +743,7 @@
         if (!pranswer || pranswer.type != 'pranswer') {
             return;
         }
-        console.log('going from pranswer to answer');
+        console.debug('going from pranswer to answer');
         if (this.usetrickle) {
             // remove candidates already sent from session-accept
             var lines = SDPUtil.find_lines(pranswer.sdp, 'a=candidate:');
@@ -684,7 +787,7 @@
         }
         this.peerconnection.setLocalDescription(new RTCSessionDescription({type: 'answer', sdp: sdp}),
             function () {
-                //console.log('setLocalDescription success');
+                //console.debug('setLocalDescription success');
                 $(document).trigger('setLocalDescription.jingle', [self.sid]);
             },
             function (e) {
@@ -696,7 +799,7 @@
     JingleSession.prototype.terminate = function (reason) {
         this.state = 'ended';
         this.reason = reason;
-        this.peerconnection.close();
+        if (this.peerconnection) this.peerconnection.close();
         if (this.statsinterval !== null) {
             window.clearInterval(this.statsinterval);
             this.statsinterval = null;
@@ -726,12 +829,12 @@
 
             if(this.filter_candidates === null || jcand.type === this.filter_candidates) {
                 if (this.usetrickle) {
-                    console.log('sendIceCandidate using trickle');
+                    console.debug('sendIceCandidate using trickle');
                     if (this.usedrip) {
                         if (this.drip_container.length === 0) {
                             // start 20ms callout
                             window.setTimeout(function () {
-                                console.log('sending drip container');
+                                console.debug('sending drip container');
                                 if (self.drip_container.length === 0) return;
                                 self.sendIceCandidates(self.drip_container);
                                 self.drip_container = [];
@@ -741,15 +844,15 @@
                         this.drip_container.push(candidate);
                         return;
                     } else {
-                        console.log('sending single candidate');
+                        console.debug('sending single candidate');
                         self.sendIceCandidates([candidate]);
                     }
                 }
             }
         } else {
-            console.log('sendIceCandidate: last candidate...');
+            console.debug('sendIceCandidate: last candidate...');
             if (!this.usetrickle) {
-                console.log('should send full offer now...');
+                console.debug('should send full offer now...');
                 var init = $iq({to: this.peerjid,
                            type: 'set'})
                     .c('jingle', {xmlns: 'urn:xmpp:jingle:1',
@@ -764,10 +867,10 @@
                 }
                 this.localSDP = new SDP(this.peerconnection.localDescription.sdp);
                 this.localSDP.toJingle(init, this.initiator == this.me ? 'initiator' : 'responder');
-                console.log('try to send ack(offer)...');
+                console.debug('try to send ack(offer)...');
                 this.connection.sendIQ(init,
                     function () {
-                        console.log('Sent session initiate (ACK, offer)...');
+                        console.debug('Sent session initiate (ACK, offer)...');
                         var ack = {};
                         ack.source = 'offer';
                         $(document).trigger('ack.jingle', [self.sid, ack]);
@@ -785,18 +888,18 @@
                 10000);
             }
             this.lasticecandidate = true;
-            console.log('Have we encountered any srflx candidates? ' + this.hadstuncandidate);
-            console.log('Have we encountered any relay candidates? ' + this.hadturncandidate);
+            console.debug('Have we encountered any srflx candidates? ' + this.hadstuncandidate);
+            console.debug('Have we encountered any relay candidates? ' + this.hadturncandidate);
 
             if (!(this.hadstuncandidate || this.hadturncandidate) && this.peerconnection.signalingState != 'closed') {
-                console.log('no candidates found!');
+                console.debug('no candidates found!');
                 $(document).trigger('nostuncandidates.jingle', [this.sid]);
             }
         }
     };
 
     JingleSession.prototype.sendIceCandidates = function (candidates) {
-        console.log('sendIceCandidates', candidates);
+        console.debug('sendIceCandidates', candidates);
         var cand = $iq({to: this.peerjid, type: 'set'})
             .c('jingle', {xmlns: 'urn:xmpp:jingle:1',
                action: 'transport-info',
@@ -828,13 +931,13 @@
             }
         }
         // might merge last-candidate notification into this, but it is called alot later. See webrtc issue #2340
-        //console.log('was this the last candidate', this.lasticecandidate);
-        console.log('try to send ack(transportinfo)...');
+        //console.debug('was this the last candidate', this.lasticecandidate);
+        console.debug('try to send ack(transportinfo)...');
         this.connection.sendIQ(cand,
             function () {
                 var ack = {};
                 ack.source = 'transportinfo';
-                console.log('Sent session initiate (ACK, transportinfo)...');
+                console.debug('Sent session initiate (ACK, transportinfo)...');
                 $(document).trigger('ack.jingle', [this.sid, ack]);
             },
             function (stanza) {
@@ -850,7 +953,7 @@
 
 
     JingleSession.prototype.sendOffer = function () {
-        //console.log('sendOffer...');
+        //console.debug('sendOffer...');
         var self = this;
         this.peerconnection.createOffer(function (sdp) {
                 self.createdOffer(sdp);
@@ -863,7 +966,7 @@
     };
 
     JingleSession.prototype.createdOffer = function (sdp) {
-        //console.log('createdOffer', sdp);
+        //console.debug('createdOffer', sdp);
         var self = this;
         this.localSDP = new SDP(sdp.sdp);
         //this.localSDP.mangle();
@@ -903,7 +1006,7 @@
         this.peerconnection.setLocalDescription(sdp,
             function () {
                 $(document).trigger('setLocalDescription.jingle', [self.sid]);
-                //console.log('setLocalDescription success');
+                //console.debug('setLocalDescription success');
             },
             function (e) {
                 console.error('setLocalDescription failed', e);
@@ -921,11 +1024,11 @@
     };
 
     JingleSession.prototype.setRemoteDescription = function (elem, desctype) {
-        //console.log('setting remote description... ', desctype);
+        //console.debug('setting remote description... ', desctype);
         this.remoteSDP = new SDP('');
         this.remoteSDP.fromJingle(elem);
         if (this.peerconnection.remoteDescription !== null) {
-            console.log('setRemoteDescription when remote description is not null, should be pranswer', this.peerconnection.remoteDescription);
+            console.debug('setRemoteDescription when remote description is not null, should be pranswer', this.peerconnection.remoteDescription);
             if (this.peerconnection.remoteDescription.type == 'pranswer') {
                 var pranswer = new SDP(this.peerconnection.remoteDescription.sdp);
                 for (var i = 0; i < pranswer.media.length; i++) {
@@ -955,7 +1058,7 @@
 
         this.peerconnection.setRemoteDescription(remotedesc,
             function () {
-                //console.log('setRemoteDescription success');
+                //console.debug('setRemoteDescription success');
             },
             function (e) {
                 console.error('setRemoteDescription error', e);
@@ -970,7 +1073,7 @@
         }
 
        if (!this.peerconnection.remoteDescription && this.peerconnection.signalingState == 'have-local-offer') {
-            console.log('trickle ice candidate arriving before session accept...');
+            console.debug('trickle ice candidate arriving before session accept...');
             // create a PRANSWER for setRemoteDescription
             if (!this.remoteSDP) {
                 var cobbled = 'v=0\r\n' +
@@ -1001,7 +1104,7 @@
                             if (tmp.length) {
                                 self.remoteSDP.media[i] += 'a=fingerprint:' + tmp.attr('hash') + ' ' + tmp.text() + '\r\n';
                             } else {
-                                console.log('no dtls fingerprint (webrtc issue #1718?)');
+                                console.debug('no dtls fingerprint (webrtc issue #1718?)');
                                 self.remoteSDP.media[i] += 'a=crypto:1 AES_CM_128_HMAC_SHA1_80 inline:BAADBAADBAADBAADBAADBAADBAADBAADBAADBAAD\r\n';
                             }
                             break;
@@ -1019,19 +1122,19 @@
             }).length == this.remoteSDP.media.length;
 
             if (iscomplete) {
-                console.log('setting pranswer');
+                console.debug('setting pranswer');
                 try {
                     this.peerconnection.setRemoteDescription(new RTCSessionDescription({type: 'pranswer', sdp: this.remoteSDP.raw }),
                         function() {
                         },
                         function(e) {
-                            console.log('setRemoteDescription pranswer failed', e.toString());
+                            console.debug('setRemoteDescription pranswer failed', e.toString());
                         });
                 } catch (e) {
                     console.error('setting pranswer failed', e);
                 }
             } else {
-                //console.log('not yet setting pranswer');
+                //console.debug('not yet setting pranswer');
             }
        }
         // operate on each content element
@@ -1073,7 +1176,7 @@
     };
 
     JingleSession.prototype.sendAnswer = function (provisional) {
-        //console.log('createAnswer', provisional);
+        //console.debug('createAnswer', provisional);
         var self = this;
         this.peerconnection.createAnswer(
             function (sdp) {
@@ -1087,14 +1190,14 @@
     };
 
     JingleSession.prototype.createdAnswer = function (sdp, provisional) {
-        //console.log('createAnswer callback');
+        //console.debug('createAnswer callback');
         var self = this;
         this.localSDP = new SDP(sdp.sdp);
         //this.localSDP.mangle();
         this.usepranswer = provisional === true;
 
         if (this.startmuted) {
-            console.log('we got a request to start muted...');
+            console.debug('we got a request to start muted...');
             this.connection.jingle.localStream.getAudioTracks().forEach(function (track) {
                 track.enabled = false;
             });
@@ -1150,7 +1253,7 @@
         this.peerconnection.setLocalDescription(sdp,
             function () {
                 $(document).trigger('setLocalDescription.jingle', [self.sid]);
-                //console.log('setLocalDescription success');
+                //console.debug('setLocalDescription success');
             },
             function (e) {
                 console.error('setLocalDescription failed', e);
@@ -1207,14 +1310,14 @@
 
 
     JingleSession.prototype.addSource = function (elem) {
-        console.log('addssrc', new Date().getTime());
-        console.log('ice', this.peerconnection.iceConnectionState);
+        console.debug('addssrc', new Date().getTime());
+        console.debug('ice', this.peerconnection.iceConnectionState);
         var sdp = new SDP(this.peerconnection.remoteDescription.sdp);
 
         var self = this;
         $(elem).each(function (idx, content) {
             var name = $(content).attr('name');
-            console.log('SSRC NAME', name);
+            console.debug('SSRC NAME', name);
             var lines = '';
             tmp = $(content).find('>source[xmlns="urn:xmpp:jingle:apps:rtp:ssma:0"]');
             if(tmp.length === 0) {
@@ -1255,8 +1358,8 @@
     };
 
     JingleSession.prototype.removeSource = function (elem) {
-        console.log('removessrc', new Date().getTime());
-        console.log('ice', this.peerconnection.iceConnectionState);
+        console.debug('removessrc', new Date().getTime());
+        console.debug('ice', this.peerconnection.iceConnectionState);
         var sdp = new SDP(this.peerconnection.remoteDescription.sdp);
 
         var self = this;
@@ -1344,21 +1447,21 @@
 
                         self.peerconnection.setLocalDescription(modifiedAnswer,
                             function() {
-                                //console.log('modified setLocalDescription ok');
+                                //console.debug('modified setLocalDescription ok');
                                 $(document).trigger('setLocalDescription.jingle', [self.sid]);
                             },
                             function(error) {
-                                console.log('modified setLocalDescription failed');
+                                console.debug('modified setLocalDescription failed');
                             }
                         );
                     },
                     function(error) {
-                        console.log('modified answer failed');
+                        console.debug('modified answer failed');
                     }
                 );
             },
             function(error) {
-                console.log('modify failed');
+                console.debug('modify failed');
             }
         );
     };
@@ -1558,7 +1661,9 @@
                 }
                 for (j = 0; j < mline.fmt.length; j++) {
                     rtpmap = SDPUtil.find_line(this.media[i], 'a=rtpmap:' + mline.fmt[j]);
-                    elem.c('payload-type', SDPUtil.parse_rtpmap(rtpmap));
+                    const payload_type = SDPUtil.parse_rtpmap(rtpmap);
+
+                    elem.c('payload-type', payload_type);
                     // put any 'a=fmtp:' + mline.fmt[j] lines into <param name=foo value=bar/>
                     if (SDPUtil.find_line(this.media[i], 'a=fmtp:' + mline.fmt[j])) {
                         tmp = SDPUtil.parse_fmtp(SDPUtil.find_line(this.media[i], 'a=fmtp:' + mline.fmt[j]));
@@ -1569,6 +1674,7 @@
                     this.RtcpFbToJingle(i, elem, mline.fmt[j]); // XEP-0293 -- map a=rtcp-fb
 
                     elem.up();
+
                 }
                 if (SDPUtil.find_line(this.media[i], 'a=crypto:', this.session)) {
                     elem.c('encryption', {required: 1});
@@ -2037,7 +2143,7 @@
                     }
                     break;
                 default: // TODO
-                    console.log('parse_icecandidate not translating "' + elems[i] + '" = "' + elems[i + 1] + '"');
+                    console.debug('parse_icecandidate not translating "' + elems[i] + '" = "' + elems[i + 1] + '"');
                 }
             }
             candidate.network = '1';
@@ -2152,8 +2258,8 @@
             if (line.indexOf('candidate:') === 0) {
                 line = 'a=' + line;
             } else if (line.substring(0, 12) != 'a=candidate:') {
-                console.log('parseCandidate called with a line that is not a candidate line');
-                console.log(line);
+                console.debug('parseCandidate called with a line that is not a candidate line');
+                console.debug(line);
                 return null;
             }
             if (line.substring(line.length - 2) == '\r\n') // chomp it
@@ -2162,8 +2268,8 @@
                 elems = line.split(' '),
                 i;
             if (elems[6] != 'typ') {
-                console.log('did not find typ in the right place');
-                console.log(line);
+                console.debug('did not find typ in the right place');
+                console.debug(line);
                 return null;
             }
             candidate.foundation = elems[0].substring(12);
@@ -2191,7 +2297,7 @@
                     candidate.tcptype = elems[i + 1];
                     break;
                 default: // TODO
-                    console.log('not translating "' + elems[i] + '" = "' + elems[i + 1] + '"');
+                    console.debug('not translating "' + elems[i] + '" = "' + elems[i + 1] + '"');
                 }
             }
             candidate.network = '1';
@@ -2299,7 +2405,7 @@
                 self.peerconnection.getStats(function(stats) {
                     var results = stats.result();
                     for (var i = 0; i < results.length; ++i) {
-                        //console.log(results[i].type, results[i].id, results[i].names())
+                        //console.debug(results[i].type, results[i].id, results[i].names())
                         var now = new Date();
                         results[i].names().forEach(function (name) {
                             var id = results[i].id + '-' + name;
@@ -2462,7 +2568,7 @@
     function setupRTC() {
         var RTC = null;
         if (navigator.mozGetUserMedia && mozRTCPeerConnection) {
-            console.log('This appears to be Firefox');
+            console.debug('This appears to be Firefox');
             var version = navigator.userAgent.match(/Firefox/) ? parseInt(navigator.userAgent.match(/Firefox\/([0-9]+)\./)[1], 10) : 0;
             if (version >= 22) {
                 RTC = {
@@ -2479,7 +2585,7 @@
                 RTCIceCandidate = mozRTCIceCandidate;
             }
         } else if (navigator.webkitGetUserMedia) {
-            console.log('This appears to be Chrome');
+            console.debug('This appears to be Chrome');
             RTC = {
                 peerconnection: webkitRTCPeerConnection,
                 browser: 'chrome',
@@ -2493,7 +2599,7 @@
             };
         }
         if (RTC === null) {
-            try { console.log('Browser does not appear to be WebRTC-capable'); } catch (e) { }
+            try { console.debug('Browser does not appear to be WebRTC-capable'); } catch (e) { }
         }
         return RTC;
     }
@@ -2502,7 +2608,7 @@
         var constraints = {audio: false, video: false};
 
         if (localStream) {
-            localStream.stop();
+            localStream.getTracks().forEach(function (track) { track.stop(); });
             localStream = null;
         }
 
@@ -2584,7 +2690,7 @@
         try {
             RTC.getUserMedia(constraints,
                     function (stream) {
-                        console.log('onUserMediaSuccess');
+                        console.debug('onUserMediaSuccess');
                         localStream = stream;
                         _converse.connection.jingle.localStream = stream;
                         callback(null, jid);

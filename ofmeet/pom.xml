@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.igniterealtime.openfire.ofmeet</groupId>
         <artifactId>parent</artifactId>
-        <version>0.9.10-SNAPSHOT</version>
+        <version>0.9.11-SNAPSHOT</version>
     </parent>
 
     <artifactId>ofmeet</artifactId>
@@ -43,7 +43,7 @@
                         <goal>wget</goal>
                     </goals>
                     <configuration>
-                        <url>https://download.jitsi.org/jitsi-meet/src/jitsi-meet-1.0.4048.tar.bz2</url>
+                        <url>https://download.jitsi.org/jitsi-meet/src/jitsi-meet-1.0.4166.tar.bz2</url>
                         <unpack>true</unpack>
                         <outputDirectory>classes</outputDirectory>
                     </configuration>

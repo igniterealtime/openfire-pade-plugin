@@ -108,6 +108,7 @@
         final String defLocalDisplName = request.getParameter( "defLocalDisplName" );
 
         final boolean showPoweredBy = ParamUtils.getBooleanParameter( request, "showPoweredBy" );
+        final boolean enablePreJoinPage = ParamUtils.getBooleanParameter( request, "enablePreJoinPage" );
         final boolean conferenceRecording = ParamUtils.getBooleanParameter( request, "conferenceRecording" );
         final boolean conferenceTags = ParamUtils.getBooleanParameter( request, "conferenceTags" );
         final boolean enableCryptPad = ParamUtils.getBooleanParameter( request, "enableCryptPad" );        
@@ -182,6 +183,7 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.default.speaker.displayname", defDomSpkrDisplName );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.default.local.displayname", defLocalDisplName );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.show.poweredby", Boolean.toString( showPoweredBy ) );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.prejoin.page", Boolean.toString( enablePreJoinPage ) );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.conference.recording", Boolean.toString( conferenceRecording ) );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.conference.tags", Boolean.toString( conferenceTags ) );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.cryptpad", Boolean.toString( enableCryptPad ) ); 
@@ -327,6 +329,12 @@
                     <fmt:message key="ofmeet.show.poweredby.enabled" />
                 </td>
             </tr>
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="enablePreJoinPage" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.prejoin.page", false) ? "checked" : ""}>
+                    <fmt:message key="ofmeet.enable.prejoin.page" />
+                </td>
+            </tr>            
             <tr>
                 <td nowrap colspan="2">
                     <input type="checkbox" name="conferenceRecording" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.conference.recording", true) ? "checked" : ""}>

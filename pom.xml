@@ -18,7 +18,7 @@
 
     <groupId>org.igniterealtime.openfire.ofmeet</groupId>
     <artifactId>parent</artifactId>
-    <version>0.9.10-SNAPSHOT</version>
+    <version>0.9.11-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <organization>
@@ -30,7 +30,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <openfire.version>4.2.0</openfire.version>
         <videobridge.version>1.1-20200124.173127-125</videobridge.version>        
-        <jicofo.version>1.1-20200429.114233-132</jicofo.version>
+        <jicofo.version>1.1-20200529.210421-162</jicofo.version>
         <jigasi.version>1.1-20190806.132856-49</jigasi.version>    
         <jicoco.version>1.1-20190509.130302-15</jicoco.version>     
         <pade.url>https://igniterealtime.github.io/pade</pade.url>        

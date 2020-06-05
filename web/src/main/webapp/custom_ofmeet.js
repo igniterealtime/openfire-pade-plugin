@@ -159,6 +159,8 @@ var ofmeet = (function(of)
 
         if (!config.webinar)
         {
+            listenWebPushEvents();
+
             APP.conference.addConferenceListener(JitsiMeetJS.events.conference.CONFERENCE_JOINED, function()
             {
                 console.debug("ofmeet.js me joined");
@@ -2070,12 +2072,12 @@ var ofmeet = (function(of)
         window.WebPushLib.setVapidDetails('xmpp:' + APP.connection.xmpp.connection.domain, keys.publicKey, keys.privateKey);
         window.WebPushLib.selfSecret = secret;
 
-        listenForWebPush();
+        listenForWorkerEvents();
         createContactsButton();
         publishWebPush();
     }
 
-    function listenForWebPush()
+    function listenWebPushEvents()
     {
         const connection = APP.connection.xmpp.connection;
         const Strophe = APP.connection.xmpp.connection.Strophe;
@@ -2107,7 +2109,10 @@ var ofmeet = (function(of)
             return true;
 
         }, "urn:xmpp:push:0", "message");
+    }
 
+    function listenForWorkerEvents()
+    {
         navigator.serviceWorker.onmessage = function(event)
         {
             console.debug("Broadcasted from service worker : ", event.data);

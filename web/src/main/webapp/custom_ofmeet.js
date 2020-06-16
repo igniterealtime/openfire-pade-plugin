@@ -274,7 +274,18 @@ var ofmeet = (function(of)
                 }
             });
 
-            APP.conference.addConferenceListener(JitsiMeetJS.events.conference.MESSAGE_RECEIVED , function(id, text, ts)
+            APP.conference.addConferenceListener(JitsiMeetJS.events.conference.PRIVATE_MESSAGE_RECEIVED, function(id, text, ts)
+            {
+                var participant = APP.conference.getParticipantById(id);
+                var displayName = participant ? (participant._displayName || 'Anonymous-' + id) : (APP.conference.getLocalDisplayName() || "Me");
+
+                console.debug("ofmeet.js private message", id, text, ts, displayName);
+
+                const pretty_time = dayjs().format('MMM DD HH:mm:ss');
+                pdf_body.push([pretty_time, displayName, text]);
+            });
+
+            APP.conference.addConferenceListener(JitsiMeetJS.events.conference.MESSAGE_RECEIVED, function(id, text, ts)
             {
                 var participant = APP.conference.getParticipantById(id);
                 var displayName = participant ? (participant._displayName || 'Anonymous-' + id) : (APP.conference.getLocalDisplayName() || "Me");

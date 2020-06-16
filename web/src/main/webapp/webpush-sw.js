@@ -1,3 +1,41 @@
+// install trigger for sw - cache index.html
+
+self.addEventListener('install', function(event) {
+  var indexPage = new Request('index.html');
+  event.waitUntil(
+    fetch(indexPage).then(function(response) {
+      return caches.open('offline').then(function(cache) {
+        return cache.put(indexPage, response);
+      });
+  }));
+});
+
+// activate trigger
+
+self.addEventListener('activate', function (event) {
+    console.log('Activated', event);
+});
+
+
+// fetch trigger - serve from cache or fetch from server, cache the file if not previously cached
+
+self.addEventListener('fetch', function(event) {
+  if (event.request.method == "GET") event.respondWith(
+    fetch(event.request).then(function(response) {
+      return caches.open('offline').then(function(cache) {
+          try {
+            cache.put(event.request, response.clone());
+        } catch (e) {};
+        return response;
+      });
+    }).catch(function (error) {
+      caches.match(event.request).then(function(resp) {
+        return resp;
+      });
+    })
+  );
+});
+
 // push trigger
 
 self.addEventListener('push', function (event) {
@@ -7,6 +45,9 @@ self.addEventListener('push', function (event) {
    const options = {
         body: data.msgBody,
         icon: './icon.png',
+        requireInteraction: true,
+        persistent: true,
+        sticky: true,
         vibrate: [100, 50, 100],
         data: data,
         actions: [

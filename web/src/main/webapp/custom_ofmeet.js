@@ -383,6 +383,11 @@ var ofmeet = (function(of)
         APP.connection.xmpp.connection.addHandler(handleMucMessage, "urn:xmpp:json:0", "message");
         APP.connection.xmpp.connection.addHandler(handlePresence, null, "presence");
 
+        getServiceWorker(function(registration)
+        {
+            console.debug('Service worker registered', registration);
+        });
+
         setTimeout(postLoadSetup, 5000);
 
         console.log("ofmeet.js setup", APP.connection, captions);
@@ -2124,18 +2129,39 @@ var ofmeet = (function(of)
     //
     //-------------------------------------------------------
 
+    function getServiceWorker(callback)
+    {
+        if (swRegistration) callback(swRegistration);
+        else {
+            if ('serviceWorker' in navigator)
+            {
+                console.debug('Service Worker is supported');
+
+                navigator.serviceWorker.register('./webpush-sw.js').then(function(registration)
+                {
+                    swRegistration = registration;
+                    callback(registration);
+
+                }).catch(function(error) {
+                    console.error('Service Worker Error, cannot register service worker', error);
+                    callback();
+                });
+            } else {
+                console.warn('Service Worker is not supported');
+                callback();
+            }
+        }
+    }
+
     function setupPushNotification()
     {
-        if ('serviceWorker' in navigator && 'PushManager' in window)
+        if ('PushManager' in window)
         {
-            console.debug('Service Worker and Push is supported');
-
-            navigator.serviceWorker.register('./webpush-sw.js').then(function(registration)
+            getServiceWorker(function(registration)
             {
-                swRegistration = registration;
-                console.debug('Service Worker is registered', swRegistration);
+                console.debug('Push notification is supported');
 
-                swRegistration.pushManager.getSubscription().then(function(subscription)
+                registration.pushManager.getSubscription().then(function(subscription)
                 {
                     if (subscription && !localStorage["pade.vapid.keys"])
                     {
@@ -2162,9 +2188,6 @@ var ofmeet = (function(of)
                 }).catch(function(error) {
                     console.error('Error unsubscribing, no push messaging', error);
                 });
-
-            }).catch(function(error) {
-                console.error('Service Worker Error, no push messaging', error);
             });
         } else {
             console.warn('Push messaging is not supported');

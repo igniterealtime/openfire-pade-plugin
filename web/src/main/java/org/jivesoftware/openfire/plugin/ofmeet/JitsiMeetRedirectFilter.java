@@ -49,6 +49,7 @@ public class JitsiMeetRedirectFilter implements Filter
         excludedExtensions.add( "jpg" );
         excludedExtensions.add( "ico" );
         excludedExtensions.add( "css" );
+        excludedExtensions.add( "json" );
         excludedExtensions.add( "js" );
     }
 

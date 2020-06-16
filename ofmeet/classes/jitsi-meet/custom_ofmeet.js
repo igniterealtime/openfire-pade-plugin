@@ -18,6 +18,7 @@ var ofmeet = (function(of)
     IMAGES.contact = '<svg width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 2,0C 0.896,0,0,0.896,0,2l0,28 c0,1.104, 0.896,2, 2,2l 2,0 L 4,0 L 2,0 zM 26,0L 6,0 l0,32 l 20,0 c 1.104,0, 2-0.896, 2-2L 28,2 C 28,0.896, 27.104,0, 26,0z M 16.89,7.708 c 1.672,0, 3.026,1.356, 3.026,3.026c0,1.672-1.356,3.028-3.026,3.028c-1.672,0-3.028-1.356-3.028-3.028 C 13.862,9.062, 15.218,7.708, 16.89,7.708z M 12,21.614c0-3.668, 2.218-6.64, 4.952-6.64s 4.952,2.974, 4.952,6.64S 12,25.28, 12,21.614zM 30,2L 32,2L 32,8L 30,8zM 30,10L 32,10L 32,16L 30,16zM 30,18L 32,18L 32,24L 30,24z"></path></g></svg>';
     IMAGES.mic = '<svg style="fill:white;margin-top:4px" width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 14,25.808L 14,30 L 11,30 C 10.448,30, 10,30.448, 10,31C 10,31.552, 10.448,32, 11,32l 4.98,0 L 16.020,32 l 4.98,0 c 0.552,0, 1-0.448, 1-1c0-0.552-0.448-1-1-1L 18,30 l0-4.204 c 4.166-0.822, 8-4.194, 8-9.796L 26,13 C 26,12.448, 25.552,12, 25,12 S 24,12.448, 24,13L 24,16 c0,5.252-4.026,8-8,8c-3.854,0-8-2.504-8-8L 8,13 C 8,12.448, 7.552,12, 7,12S 6,12.448, 6,13L 6,16 C 6,21.68, 9.766,25.012, 14,25.808zM 16,20c 2.21,0, 4-1.79, 4-4L 20,4 c0-2.21-1.79-4-4-4S 12,1.79, 12,4l0,12 C 12,18.21, 13.79,20, 16,20z"></path></g></svg>';
     IMAGES.mail = '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 30,8L 2,8 C 0.896,8,0,8.896,0,10l0,3.358 l 16,6.4l 16-6.4L 32,10 C 32,8.896, 31.104,8, 30,8zM0,16.624L0,30 c0,1.104, 0.896,2, 2,2l 28,0 c 1.104,0, 2-0.896, 2-2L 32,16.624 l-16,6.4L0,16.624z"></path></g></svg>';
+    IMAGES.desktop = '<svg id="ofmeet-desktop" width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 30,2L 2,2 C 0.896,2,0,2.896,0,4l0,18 c0,1.104, 0.896,2, 2,2l 9.998,0 c-0.004,1.446-0.062,3.324-0.61,4L 10.984,28 C 10.44,28, 10,28.448, 10,29C 10,29.552, 10.44,30, 10.984,30l 10.030,0 C 21.56,30, 22,29.552, 22,29c0-0.552-0.44-1-0.984-1l-0.404,0 c-0.55-0.676-0.606-2.554-0.61-4L 30,24 c 1.104,0, 2-0.896, 2-2L 32,4 C 32,2.896, 31.104,2, 30,2z M 14,24l-0.002,0.004 C 13.998,24.002, 13.998,24.002, 14,24L 14,24z M 18.002,24.004L 18,24l 0.002,0 C 18.002,24.002, 18.002,24.002, 18.002,24.004z M 30,20L 2,20 L 2,4 l 28,0 L 30,20 z"></path></g></svg>';
 
     const SMILIES = [":)", ":(", ":D", ":+1:", ":P", ":wave:", ":blush:", ":slightly_smiling_face:", ":scream:", ":*", ":-1:", ":mag:", ":heart:", ":innocent:", ":angry:", ":angel:", ";(", ":clap:", ";)", ":beer:"];
     const nickColors = {}, padsList = [], captions = {msgs: []}, breakout = {rooms: [], duration: 60, roomCount: 10, wait: 10};
@@ -159,6 +160,8 @@ var ofmeet = (function(of)
 
         if (!config.webinar)
         {
+            listenWebPushEvents();
+
             APP.conference.addConferenceListener(JitsiMeetJS.events.conference.CONFERENCE_JOINED, function()
             {
                 console.debug("ofmeet.js me joined");
@@ -315,6 +318,7 @@ var ofmeet = (function(of)
                 {
                     createRecordButton();
                     createPhotoButton();
+                    createDesktopButton();
 
                     if (APP.conference.getMyUserId())
                     {
@@ -378,6 +382,11 @@ var ofmeet = (function(of)
 
         APP.connection.xmpp.connection.addHandler(handleMucMessage, "urn:xmpp:json:0", "message");
         APP.connection.xmpp.connection.addHandler(handlePresence, null, "presence");
+
+        getServiceWorker(function(registration)
+        {
+            console.debug('Service worker registered', registration);
+        });
 
         setTimeout(postLoadSetup, 5000);
 
@@ -588,14 +597,14 @@ var ofmeet = (function(of)
 
     function createRecordButton()
     {
-        const recordButton = addToolbarItem('ofmeet-record', '<div class="toolbox-icon "><div class="jitsi-icon "><svg id="ofmeet-record" style="fill: white;" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 1000 1000" enable-background="new 0 0 1000 1000" xml:space="preserve"><g><path d="M928.8,438.8L745,561.3c0-37.2-16.9-70.1-43.1-92.5c62.3-37.5,104.3-105.1,104.3-183.1c0-118.4-96-214.4-214.4-214.4c-118.4,0-214.4,96-214.4,214.4c0,60.1,24.9,114.2,64.7,153.1H329.8c29.3-32.5,47.7-75.2,47.7-122.5c0-101.5-82.3-183.8-183.8-183.8C92.3,132.5,10,214.8,10,316.3c0,55.4,25,104.4,63.8,138.1C35.9,475.2,10,515,10,561.3v245c0,67.6,54.9,122.5,122.5,122.5h490c67.6,0,122.5-54.9,122.5-122.5v-30.6l183.8,153.1c33.8,0,61.3-27.4,61.3-61.3V500C990,466.2,962.6,438.8,928.8,438.8z M71.3,316.3c0-67.7,54.9-122.5,122.5-122.5c67.6,0,122.5,54.8,122.5,122.5s-54.9,122.5-122.5,122.5C126.1,438.7,71.3,383.9,71.3,316.3z M683.8,806.3c0,33.8-27.4,61.3-61.3,61.3h-490c-33.8,0-61.3-27.4-61.3-61.3v-245c0-33.8,27.4-61.3,61.3-61.3h490c33.8,0,61.3,27.4,61.3,61.3V806.3z M591.9,439.1c-84.8,0-153.5-68.7-153.5-153.5c0-84.8,68.7-153.5,153.5-153.5c84.8,0,153.5,68.7,153.5,153.5C745.4,370.4,676.6,439.1,591.9,439.1z M928.8,545.9v281.2c0,1.6,0,2.2,0,2.2v38.1L745,714.4v-61.3c0-16.2,0-12.3,0-30.6L928.8,500C928.8,543,928.8,520.6,928.8,545.9z"/></g></svg></div></div>', "Record Conference");
+        const recordButton = addToolbarItem('ofmeet-record', '<div class="toolbox-icon "><div class="jitsi-icon "><svg id="ofmeet-record" style="fill: white;" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 1000 1000" enable-background="new 0 0 1000 1000" xml:space="preserve"><g><path d="M928.8,438.8L745,561.3c0-37.2-16.9-70.1-43.1-92.5c62.3-37.5,104.3-105.1,104.3-183.1c0-118.4-96-214.4-214.4-214.4c-118.4,0-214.4,96-214.4,214.4c0,60.1,24.9,114.2,64.7,153.1H329.8c29.3-32.5,47.7-75.2,47.7-122.5c0-101.5-82.3-183.8-183.8-183.8C92.3,132.5,10,214.8,10,316.3c0,55.4,25,104.4,63.8,138.1C35.9,475.2,10,515,10,561.3v245c0,67.6,54.9,122.5,122.5,122.5h490c67.6,0,122.5-54.9,122.5-122.5v-30.6l183.8,153.1c33.8,0,61.3-27.4,61.3-61.3V500C990,466.2,962.6,438.8,928.8,438.8z M71.3,316.3c0-67.7,54.9-122.5,122.5-122.5c67.6,0,122.5,54.8,122.5,122.5s-54.9,122.5-122.5,122.5C126.1,438.7,71.3,383.9,71.3,316.3z M683.8,806.3c0,33.8-27.4,61.3-61.3,61.3h-490c-33.8,0-61.3-27.4-61.3-61.3v-245c0-33.8,27.4-61.3,61.3-61.3h490c33.8,0,61.3,27.4,61.3,61.3V806.3z M591.9,439.1c-84.8,0-153.5-68.7-153.5-153.5c0-84.8,68.7-153.5,153.5-153.5c84.8,0,153.5,68.7,153.5,153.5C745.4,370.4,676.6,439.1,591.9,439.1z M928.8,545.9v281.2c0,1.6,0,2.2,0,2.2v38.1L745,714.4v-61.3c0-16.2,0-12.3,0-30.6L928.8,500C928.8,543,928.8,520.6,928.8,545.9z"/></g></svg></div></div>', "Record Meeting");
 
         if (recordButton) recordButton.addEventListener("click", function(evt)
         {
             evt.stopPropagation();
 
             if (!of.recording) {
-                startRecorder();
+                startMeetingRecorder();
             } else {
                 stopRecorder();
             }
@@ -606,6 +615,22 @@ var ofmeet = (function(of)
         if (leaveButton) leaveButton.addEventListener("click", function(evt)
         {
             if (of.recording) stopRecorder();
+        });
+    }
+
+    function createDesktopButton()
+    {
+        const desktopButton = addToolbarItem('ofmeet-desktop', '<div class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.desktop + '</div></div>', "Record Desktop App (Including Meeting Browser Tab)");
+
+        if (desktopButton) desktopButton.addEventListener("click", function(evt)
+        {
+            evt.stopPropagation();
+
+            if (!of.recording) {
+                startDesktopRecorder();
+            } else {
+                stopRecorder();
+            }
         });
     }
 
@@ -1064,8 +1089,8 @@ var ofmeet = (function(of)
     {
         console.debug("ofmeet.js stopRecorder");
 
-        const icon = document.getElementById("ofmeet-record");
-        icon.style.fill = "white";
+        document.getElementById("ofmeet-record").style.fill = "white";
+        document.getElementById("ofmeet-desktop").style.fill = "white";
         APP.UI.messageHandler.notify("Conference Recording Stopped", null, null, "");
 
         clockTrack.stop = (new Date()).getTime();
@@ -1224,9 +1249,9 @@ var ofmeet = (function(of)
         createAnchor(htmlFile, blob);
     }
 
-    function startRecorder()
+    function startMeetingRecorder()
     {
-        console.debug("ofmeet.js startRecorder");
+        console.debug("ofmeet.js startMeetingRecorder");
 
         const icon = document.getElementById("ofmeet-record");
         icon.style.fill = "red";
@@ -1249,7 +1274,7 @@ var ofmeet = (function(of)
             recorderStreams[id].addTrack(recordingVideoTrack[id].clone().getVideoTracks()[0]);
             recorderStreams[id].addTrack(recordingAudioTrack[id].clone().getAudioTracks()[0]);
 
-            console.debug("ofmeet.js startRecorder stream", id, recorderStreams[id], recorderStreams[id].getVideoTracks()[0].getSettings());
+            console.debug("ofmeet.js startMeetingRecorder stream", id, recorderStreams[id], recorderStreams[id].getVideoTracks()[0].getSettings());
 
             const dbname = 'ofmeet-db-' + id;
             dbnames.push(dbname);
@@ -1265,10 +1290,10 @@ var ofmeet = (function(of)
 
                     idbKeyval.set(key, e.data, customStore[id]).then(function()
                     {
-                        console.debug("ofmeet.js startRecorder - ondataavailable", id, key, e.data);
+                        console.debug("ofmeet.js startMeetingRecorder - ondataavailable", id, key, e.data);
 
                     }).catch(function(err) {
-                        console.error('ofmeet.js startRecorder - ondataavailable failed!', err)
+                        console.error('ofmeet.js startMeetingRecorder - ondataavailable failed!', err)
                     });
                 }
             }
@@ -1282,7 +1307,7 @@ var ofmeet = (function(of)
                     const duration = Date.now() - startTime;
                     const blob = new Blob(data, {type: 'video/webm'});
 
-                   console.debug("ofmeet.js startRecorder - onstop", id, filenames[id], duration, data, blob);
+                   console.debug("ofmeet.js startMeetingRecorder - onstop", id, filenames[id], duration, data, blob);
 
                     ysFixWebmDuration(blob, duration, function(fixedBlob) {
                         createAnchor(filenames[id], fixedBlob);
@@ -1300,6 +1325,112 @@ var ofmeet = (function(of)
         });
 
         of.recording = true;
+    }
+
+    function mergeAudioStreams(desktopStream, voiceStream)
+    {
+        const context = new AudioContext();
+        const destination = context.createMediaStreamDestination();
+        let hasDesktop = false;
+        let hasVoice = false;
+
+        if (desktopStream && desktopStream.getAudioTracks().length > 0) {
+          // If you don't want to share Audio from the desktop it should still work with just the voice.
+          const source1 = context.createMediaStreamSource(desktopStream);
+          const desktopGain = context.createGain();
+          desktopGain.gain.value = 0.7;
+          source1.connect(desktopGain).connect(destination);
+          hasDesktop = true;
+        }
+
+        if (voiceStream && voiceStream.getAudioTracks().length > 0) {
+          const source2 = context.createMediaStreamSource(voiceStream);
+          const voiceGain = context.createGain();
+          voiceGain.gain.value = 0.7;
+          source2.connect(voiceGain).connect(destination);
+          hasVoice = true;
+        }
+
+        return (hasDesktop || hasVoice) ? destination.stream.getAudioTracks() : [];
+    }
+
+    function startDesktopRecorder()
+    {
+        console.debug("ofmeet.js startDesktopRecorder");
+
+        navigator.mediaDevices.getDisplayMedia({video: true, audio: {autoGainControl: false, echoCancellation: false, googAutoGainControl: false, noiseSuppression: false}}).then(stream =>
+        {
+            const icon = document.getElementById("ofmeet-desktop");
+            icon.style.fill = "red";
+            APP.UI.messageHandler.notify("Conference Recording Started", null, null, "");
+
+            captions.msgs = [];
+            clockTrack.start = (new Date()).getTime();
+
+            const id = APP.conference.getMyUserId();
+            const tracks = [
+              ...stream.getVideoTracks(),
+              ...mergeAudioStreams(stream, recordingAudioTrack[id].clone())
+            ];
+
+            console.log('ofmeet.js startDesktopRecorder tracks', tracks);
+            recorderStreams[id] =  new MediaStream(tracks);
+            filenames[id] = getFilename("ofmeet-video-" + id, ".webm");
+
+            console.debug("ofmeet.js startDesktopRecorder stream", id, recorderStreams[id], recorderStreams[id].getVideoTracks()[0].getSettings());
+            const dbname = 'ofmeet-db-' + id;
+            dbnames.push(dbname);
+
+            customStore[id] = new idbKeyval.Store(dbname, dbname);
+            videoRecorder[id] = new MediaRecorder(recorderStreams[id], { mimeType: 'video/webm'});
+
+            videoRecorder[id].ondataavailable = function(e)
+            {
+                if (e.data.size > 0)
+                {
+                    const key = "video-chunk-" + (new Date()).getTime();
+
+                    idbKeyval.set(key, e.data, customStore[id]).then(function()
+                    {
+                        console.debug("ofmeet.js startDesktopRecorder - ondataavailable", id, key, e.data);
+
+                    }).catch(function(err) {
+                        console.error('ofmeet.js startDesktopRecorder - ondataavailable failed!', err)
+                    });
+                }
+            }
+
+            videoRecorder[id].onstop = function(e)
+            {
+                recorderStreams[id].getTracks().forEach(track => track.stop());
+                stream.getTracks().forEach(track => track.stop());
+
+                idbKeyval.keys(customStore[id]).then(function(data)
+                {
+                    const duration = Date.now() - startTime;
+                    const blob = new Blob(data, {type: 'video/webm'});
+
+                   console.debug("ofmeet.js startDesktopRecorder - onstop", id, filenames[id], duration, data, blob);
+
+                    ysFixWebmDuration(blob, duration, function(fixedBlob) {
+                        createAnchor(filenames[id], fixedBlob);
+                        idbKeyval.clear(customStore[id]);
+
+                        delete filenames[id];
+                        delete videoRecorder[id];
+                        delete recorderStreams[id];
+                        delete customStore[id];
+                    });
+                });
+            }
+            videoRecorder[id].start(1000);
+            const startTime = Date.now();
+            of.recording = true;
+
+        }, error => {
+            console.error("ofmeet.js startDesktopRecorder", error);
+            of.recording = false;
+        });
     }
 
     function recoverRecording(dbname)
@@ -1998,18 +2129,39 @@ var ofmeet = (function(of)
     //
     //-------------------------------------------------------
 
+    function getServiceWorker(callback)
+    {
+        if (swRegistration) callback(swRegistration);
+        else {
+            if ('serviceWorker' in navigator)
+            {
+                console.debug('Service Worker is supported');
+
+                navigator.serviceWorker.register('./webpush-sw.js').then(function(registration)
+                {
+                    swRegistration = registration;
+                    callback(registration);
+
+                }).catch(function(error) {
+                    console.error('Service Worker Error, cannot register service worker', error);
+                    callback();
+                });
+            } else {
+                console.warn('Service Worker is not supported');
+                callback();
+            }
+        }
+    }
+
     function setupPushNotification()
     {
-        if ('serviceWorker' in navigator && 'PushManager' in window)
+        if ('PushManager' in window)
         {
-            console.debug('Service Worker and Push is supported');
-
-            navigator.serviceWorker.register('./webpush-sw.js').then(function(registration)
+            getServiceWorker(function(registration)
             {
-                swRegistration = registration;
-                console.debug('Service Worker is registered', swRegistration);
+                console.debug('Push notification is supported');
 
-                swRegistration.pushManager.getSubscription().then(function(subscription)
+                registration.pushManager.getSubscription().then(function(subscription)
                 {
                     if (subscription && !localStorage["pade.vapid.keys"])
                     {
@@ -2036,9 +2188,6 @@ var ofmeet = (function(of)
                 }).catch(function(error) {
                     console.error('Error unsubscribing, no push messaging', error);
                 });
-
-            }).catch(function(error) {
-                console.error('Service Worker Error, no push messaging', error);
             });
         } else {
             console.warn('Push messaging is not supported');
@@ -2070,12 +2219,12 @@ var ofmeet = (function(of)
         window.WebPushLib.setVapidDetails('xmpp:' + APP.connection.xmpp.connection.domain, keys.publicKey, keys.privateKey);
         window.WebPushLib.selfSecret = secret;
 
-        listenForWebPush();
+        listenForWorkerEvents();
         createContactsButton();
         publishWebPush();
     }
 
-    function listenForWebPush()
+    function listenWebPushEvents()
     {
         const connection = APP.connection.xmpp.connection;
         const Strophe = APP.connection.xmpp.connection.Strophe;
@@ -2107,7 +2256,10 @@ var ofmeet = (function(of)
             return true;
 
         }, "urn:xmpp:push:0", "message");
+    }
 
+    function listenForWorkerEvents()
+    {
         navigator.serviceWorker.onmessage = function(event)
         {
             console.debug("Broadcasted from service worker : ", event.data);

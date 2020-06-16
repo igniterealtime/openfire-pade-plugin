@@ -1,7 +1,7 @@
 {
-    "short_name": "ofmeet",
+    "short_name": "Openfire Meetings",
     "name": "Openfire Meetings",
-    "description": "High quality, scalable video conferences using Jitsi",    
+    "description": "High quality, secured and scalable video conferences with Jitsi and Openfire",    
     "icons": [
         {
             "src": "image_192.png",

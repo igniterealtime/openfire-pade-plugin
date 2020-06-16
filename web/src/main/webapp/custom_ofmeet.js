@@ -21,7 +21,8 @@ var ofmeet = (function(of)
     IMAGES.desktop = '<svg id="ofmeet-desktop" width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 30,2L 2,2 C 0.896,2,0,2.896,0,4l0,18 c0,1.104, 0.896,2, 2,2l 9.998,0 c-0.004,1.446-0.062,3.324-0.61,4L 10.984,28 C 10.44,28, 10,28.448, 10,29C 10,29.552, 10.44,30, 10.984,30l 10.030,0 C 21.56,30, 22,29.552, 22,29c0-0.552-0.44-1-0.984-1l-0.404,0 c-0.55-0.676-0.606-2.554-0.61-4L 30,24 c 1.104,0, 2-0.896, 2-2L 32,4 C 32,2.896, 31.104,2, 30,2z M 14,24l-0.002,0.004 C 13.998,24.002, 13.998,24.002, 14,24L 14,24z M 18.002,24.004L 18,24l 0.002,0 C 18.002,24.002, 18.002,24.002, 18.002,24.004z M 30,20L 2,20 L 2,4 l 28,0 L 30,20 z"></path></g></svg>';
 
     const SMILIES = [":)", ":(", ":D", ":+1:", ":P", ":wave:", ":blush:", ":slightly_smiling_face:", ":scream:", ":*", ":-1:", ":mag:", ":heart:", ":innocent:", ":angry:", ":angel:", ";(", ":clap:", ";)", ":beer:"];
-    const nickColors = {}, padsList = [], captions = {msgs: []}, breakout = {rooms: [], duration: 60, roomCount: 10, wait: 10};
+    const nickColors = {}, padsList = [], captions = {msgs: []}, breakout = {rooms: [], duration: 60, roomCount: 10, wait: 10}, pdf_body = [];
+;
 
     let tagsModal = null, padsModal = null, breakoutModal = null, contactsModal = null;
     let padsModalOpened = false, contactsModalOpened = false, swRegistration = null, participants = {}, recordingAudioTrack = {}, recordingVideoTrack = {}, videoRecorder = {}, recorderStreams = {}, customStore = {}, filenames = {}, dbnames = [];
@@ -276,7 +277,7 @@ var ofmeet = (function(of)
             APP.conference.addConferenceListener(JitsiMeetJS.events.conference.MESSAGE_RECEIVED , function(id, text, ts)
             {
                 var participant = APP.conference.getParticipantById(id);
-                var displayName = participant ? (participant._displayName || 'Anonymous-' + id) : "Me";
+                var displayName = participant ? (participant._displayName || 'Anonymous-' + id) : (APP.conference.getLocalDisplayName() || "Me");
 
                 console.debug("ofmeet.js message", id, text, ts, displayName, participant, padsModalOpened);
 
@@ -301,6 +302,9 @@ var ofmeet = (function(of)
                         if (captions.ele) captions.ele.innerHTML = displayName + " : " + text;
                         captions.msgs.push({text: text, stamp: (new Date()).getTime()});
                     }
+
+                    const pretty_time = dayjs().format('MMM DD HH:mm:ss');
+                    pdf_body.push([pretty_time, displayName, text]);
                 }
 
                 if (breakout.started)
@@ -615,6 +619,30 @@ var ofmeet = (function(of)
         if (leaveButton) leaveButton.addEventListener("click", function(evt)
         {
             if (of.recording) stopRecorder();
+
+            if (pdf_body.length > 0)
+            {
+                const margins = {
+                  top: 70,
+                  bottom: 40,
+                  left: 30,
+                  width: 550
+                };
+                const pdf = new jsPDF('p','pt','a4');
+                //pdf.setFontSize(18);
+
+                pdf.autoTable({
+                    head: [['Date', 'Person', 'Message']],
+                    body: pdf_body,
+                    columnStyles: {
+                        0: {cellWidth: 100},
+                        1: {cellWidth: 100},
+                        2: {cellWidth: 300}
+                    }
+                })
+                const roomLabel = APP.conference.roomName + '-' + Math.random().toString(36).substr(2,9);
+                pdf.save(roomLabel + '.pdf');
+            }
         });
     }
 
@@ -2161,7 +2189,7 @@ var ofmeet = (function(of)
             {
                 console.debug('Push notification is supported');
 
-                registration.pushManager.getSubscription().then(function(subscription)
+                if (registration) registration.pushManager.getSubscription().then(function(subscription)
                 {
                     if (subscription && !localStorage["pade.vapid.keys"])
                     {

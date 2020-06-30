@@ -406,8 +406,28 @@ var ofmeet = (function(of)
         setTimeout(postLoadSetup, 5000);
 
         console.log("ofmeet.js setup", APP.connection, captions);
+
+        setTimeout(lostAudioWorkaround, 5000);
     }
 
+
+    //-------------------------------------------------------
+    //  WORKAROUND: prevent disruption of a muted audio connection by a short toggle
+    //-------------------------------------------------------
+    let lostAudioWorkaroundInterval = 300; // 5min
+    let audioTemporaryUnmuted = false;
+    function lostAudioWorkaround ()
+    {
+        if (APP.conference.isLocalAudioMuted() || audioTemporaryUnmuted)
+        {
+          APP.conference.toggleAudioMuted(false);
+          audioTemporaryUnmuted = !audioTemporaryUnmuted;
+          console.log("audio " + (audioTemporaryUnmuted ? "temporary un" : "re") + "muted");
+        }
+        setTimeout(lostAudioWorkaround, audioTemporaryUnmuted ? 1 : lostAudioWorkaroundInterval);
+    }
+
+    
     //-------------------------------------------------------
     //
     //  functions - vcard/avatar/bookmarks/occupants

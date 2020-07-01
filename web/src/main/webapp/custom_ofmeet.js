@@ -414,7 +414,7 @@ var ofmeet = (function(of)
     //-------------------------------------------------------
     //  WORKAROUND: prevent disruption of a muted audio connection by a short toggle
     //-------------------------------------------------------
-    let lostAudioWorkaroundInterval = 300; // 5min
+    let lostAudioWorkaroundInterval = 5*60*1000; // 5min
     let audioTemporaryUnmuted = false;
     function lostAudioWorkaround ()
     {

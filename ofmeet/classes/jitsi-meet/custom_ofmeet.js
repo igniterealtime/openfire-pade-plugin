@@ -22,13 +22,13 @@ var ofmeet = (function(of)
 
     const SMILIES = [":)", ":(", ":D", ":+1:", ":P", ":wave:", ":blush:", ":slightly_smiling_face:", ":scream:", ":*", ":-1:", ":mag:", ":heart:", ":innocent:", ":angry:", ":angel:", ";(", ":clap:", ";)", ":beer:"];
     const nickColors = {}, padsList = [], captions = {msgsDisabled: true, msgs: []}, breakout = {rooms: [], duration: 60, roomCount: 10, wait: 10}, pdf_body = [];
-;
+    const lostAudioWorkaroundInterval = 300000; // 5min
 
     let tagsModal = null, padsModal = null, breakoutModal = null, contactsModal = null;
     let padsModalOpened = false, contactsModalOpened = false, swRegistration = null, participants = {}, recordingAudioTrack = {}, recordingVideoTrack = {}, videoRecorder = {}, recorderStreams = {}, customStore = {}, filenames = {}, dbnames = [];
     let clockTrack = {start: 0, stop: 0, joins: 0, leaves: 0}, handsRaised = 0;
     let tags = {location: "", date: (new Date()).toISOString().split('T')[0], subject: "", host: "", activity: ""};
-
+    let audioTemporaryUnmuted = false;
     //-------------------------------------------------------
     //
     //  window events
@@ -406,7 +406,26 @@ var ofmeet = (function(of)
         setTimeout(postLoadSetup, 5000);
 
         console.log("ofmeet.js setup", APP.connection, captions);
+
+        setTimeout(lostAudioWorkaround, 5000);
     }
+
+
+    //-------------------------------------------------------
+    //  WORKAROUND: prevent disruption of a muted audio connection by a short toggle
+    //-------------------------------------------------------
+
+    function lostAudioWorkaround ()
+    {
+        if (APP.conference.isLocalAudioMuted() || audioTemporaryUnmuted)
+        {
+          APP.conference.toggleAudioMuted(false);
+          audioTemporaryUnmuted = !audioTemporaryUnmuted;
+          console.debug("audio " + (audioTemporaryUnmuted ? "temporary un" : "re") + "muted");
+        }
+        setTimeout(lostAudioWorkaround, audioTemporaryUnmuted ? 1000 : lostAudioWorkaroundInterval);
+    }
+
 
     //-------------------------------------------------------
     //

@@ -19,6 +19,7 @@ var ofmeet = (function(of)
     IMAGES.mic = '<svg style="fill:white;margin-top:4px" width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 14,25.808L 14,30 L 11,30 C 10.448,30, 10,30.448, 10,31C 10,31.552, 10.448,32, 11,32l 4.98,0 L 16.020,32 l 4.98,0 c 0.552,0, 1-0.448, 1-1c0-0.552-0.448-1-1-1L 18,30 l0-4.204 c 4.166-0.822, 8-4.194, 8-9.796L 26,13 C 26,12.448, 25.552,12, 25,12 S 24,12.448, 24,13L 24,16 c0,5.252-4.026,8-8,8c-3.854,0-8-2.504-8-8L 8,13 C 8,12.448, 7.552,12, 7,12S 6,12.448, 6,13L 6,16 C 6,21.68, 9.766,25.012, 14,25.808zM 16,20c 2.21,0, 4-1.79, 4-4L 20,4 c0-2.21-1.79-4-4-4S 12,1.79, 12,4l0,12 C 12,18.21, 13.79,20, 16,20z"></path></g></svg>';
     IMAGES.mail = '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 30,8L 2,8 C 0.896,8,0,8.896,0,10l0,3.358 l 16,6.4l 16-6.4L 32,10 C 32,8.896, 31.104,8, 30,8zM0,16.624L0,30 c0,1.104, 0.896,2, 2,2l 28,0 c 1.104,0, 2-0.896, 2-2L 32,16.624 l-16,6.4L0,16.624z"></path></g></svg>';
     IMAGES.desktop = '<svg id="ofmeet-desktop" width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 30,2L 2,2 C 0.896,2,0,2.896,0,4l0,18 c0,1.104, 0.896,2, 2,2l 9.998,0 c-0.004,1.446-0.062,3.324-0.61,4L 10.984,28 C 10.44,28, 10,28.448, 10,29C 10,29.552, 10.44,30, 10.984,30l 10.030,0 C 21.56,30, 22,29.552, 22,29c0-0.552-0.44-1-0.984-1l-0.404,0 c-0.55-0.676-0.606-2.554-0.61-4L 30,24 c 1.104,0, 2-0.896, 2-2L 32,4 C 32,2.896, 31.104,2, 30,2z M 14,24l-0.002,0.004 C 13.998,24.002, 13.998,24.002, 14,24L 14,24z M 18.002,24.004L 18,24l 0.002,0 C 18.002,24.002, 18.002,24.002, 18.002,24.004z M 30,20L 2,20 L 2,4 l 28,0 L 30,20 z"></path></g></svg>';
+    IMAGES.confetti = '<svg width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 30,8L 18.084,8 l0,6 L 32,14 L 32,10 C 32,8.896, 31.104,8, 30,8zM 2,8C 0.896,8,0,8.896,0,10l0,4 l 14,0 L 14,8 L 2,8 zM 2,16l0,14 c0,1.104, 0.896,2, 2,2l 10,0 L 14,16 L 2,16 zM 28,32c 1.104,0, 2-0.896, 2-2L 30,16 L 18.084,16 l0,16 L 28,32 zM 15.998,5.984l 0.006,0 C 16.002,5.988, 16,5.996, 16,6l 2.084,0 C 19.854,6, 22.36,6, 24,6c 2.762,0, 4-1.344, 4-3 S 26.762,0, 24,0c-2.586,0-4.622,1.164-6,2.514C 17.396,2.156, 16.698,1.938, 15.942,1.938c-0.724,0-1.394,0.204-1.982,0.536 C 12.584,1.14, 10.56,0, 8,0C 5.238,0, 4,1.344, 4,3S 5.238,6, 8,6c 1.666,0, 4.226,0, 6,0l 2,0 C 16,5.996, 15.998,5.988, 15.998,5.984z M 26,3 C 26,3.826, 24.912,4, 24,4L 19.458,4 C 19.442,3.972, 19.428,3.942, 19.412,3.916C 20.428,2.928, 21.968,2, 24,2C 24.912,2, 26,2.174, 26,3z M 6,3 C 6,2.174, 7.088,2, 8,2c 1.988,0, 3.496,0.89, 4.512,1.844C 12.48,3.894, 12.456,3.948, 12.426,4L 8,4 C 7.088,4, 6,3.826, 6,3z"></path></g></svg>';
 
     const SMILIES = [":)", ":(", ":D", ":+1:", ":P", ":wave:", ":blush:", ":slightly_smiling_face:", ":scream:", ":*", ":-1:", ":mag:", ":heart:", ":innocent:", ":angry:", ":angel:", ";(", ":clap:", ";)", ":beer:"];
     const nickColors = {}, padsList = [], captions = {msgsDisabled: true, msgs: []}, breakout = {rooms: [], duration: 60, roomCount: 10, wait: 10}, pdf_body = [];
@@ -1994,9 +1995,10 @@ var ofmeet = (function(of)
         return ele;
     }
 
-    function addToolbarItem (id, html, label)
+    function addToolbarItem (id, html, label, group)
     {
-        const placeHolder = document.querySelector('.button-group-left');
+        if (!group) group = '.button-group-left';
+        const placeHolder = document.querySelector(group);
         let tool = null;
 
         if (placeHolder)
@@ -2107,6 +2109,32 @@ var ofmeet = (function(of)
             dropZone.addEventListener('dragover', handleDragOver, false);
             dropZone.addEventListener('drop', handleDropFileSelect, false);
         }
+
+        setTimeout(postJoinSetup, 500);
+    }
+
+    function postJoinSetup()
+    {
+        if (!APP.conference || !APP.conference.isJoined())
+        {
+            setTimeout(postJoinSetup, 500);
+            return;
+        }
+
+        console.debug("postJoinSetup");
+
+        APP.conference.commands.addCommandListener("PARTY", function()
+        {
+            window.confetti({particleCount: 100, spread: 70, origin: {y: .6}})
+       });
+
+        const partyButton = addToolbarItem('ofmeet-party', '<div id="ofmeet-party" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.confetti + '</div></div>', "Celebrate with Confetti", ".button-group-right");
+
+        if (partyButton) partyButton.addEventListener("click", function(evt)
+        {
+            evt.stopPropagation();
+            APP.conference.commands.sendCommandOnce("PARTY", {value: !0})
+        });
     }
 
     function handleDragOver(evt)

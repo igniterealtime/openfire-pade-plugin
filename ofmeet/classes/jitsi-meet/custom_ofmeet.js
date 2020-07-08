@@ -13,7 +13,7 @@ var ofmeet = (function(of)
     IMAGES.slide = '<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="32" height="32.11199951171875" viewBox="0 0 32 32.11199951171875" enable-background="new 0 0 16 16" xml:space="preserve" fill="#000000"> <g><path d="M 9.030,16.5c 0.296,0, 0.592-0.132, 0.79-0.386l 4.404-5.67l 3.016,3.542c 0.192,0.222, 0.408,0.32, 0.766,0.352 C 18.296,14.336, 18.576,14.208, 18.766,13.98l 7-8.338c 0.356-0.422, 0.3-1.052-0.124-1.408c-0.422-0.358-1.052-0.298-1.408,0.124 l-6.24,7.432L 14.95,8.21C 14.752,7.982, 14.388,7.876, 14.166,7.86C 13.864,7.868, 13.582,8.008, 13.398,8.246L 8.24,14.886 C 7.9,15.322, 7.98,15.952, 8.416,16.29C 8.598,16.432, 8.814,16.5, 9.030,16.5zM 30.978,0L 28,0 L 6,0 L 3.022,0 C 2.458,0, 2,0.448, 2,1C 2,1.552, 2.458,2, 3.022,2L 4,2 l0,18 c0,1.104, 0.896,2, 2,2l 10,0 l0,3.122 L 10.328,30.26c-0.408,0.37-0.44,1.002-0.068,1.412c 0.374,0.408, 1.006,0.44, 1.412,0.068L 16,27.82l0,3.18 C 16,31.552, 16.448,32, 17,32 S 18,31.552, 18,31l0-3.18 l 4.328,3.92C 22.52,31.914, 22.76,32, 23,32c 0.272,0, 0.542-0.112, 0.74-0.328 c 0.372-0.41, 0.34-1.042-0.068-1.412L 18,25.122L 18,22 l 10,0 c 1.104,0, 2-0.896, 2-2L 30,2 l 0.978,0 C 31.542,2, 32,1.552, 32,1 C 32,0.448, 31.542,0, 30.978,0z M 28,20L 6,20 L 6,2 l 22,0 L 28,20 z"></path></g></svg></span>' ;
     IMAGES.poll = '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 13.774,26.028A2.060,2.060 1080 1 0 17.894,26.028A2.060,2.060 1080 1 0 13.774,26.028zM 19.464,18.252c 2.898-1.596, 4.37-3.91, 4.37-6.876c0-5.094-4.018-7.376-8-7.376c-3.878,0-8,2.818-8,8.042 c0,1.104, 0.894,2, 2,2s 2-0.896, 2-2c0-2.778, 2.074-4.042, 4-4.042c 1.494,0, 4,0.438, 4,3.376c0,1.042-0.274,2.258-2.298,3.374 C 16.16,15.504, 13.834,17.462, 13.834,20c0,1.104, 0.894,2, 2,2s 2-0.896, 2-2C 17.834,19.628, 18.624,18.714, 19.464,18.252z"></path></g></svg></span>';
     IMAGES.kanban = '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 31.966,3.896C 31.878,2.866, 31.046,2, 30,2L 2,2 C 0.954,2, 0.122,2.866, 0.034,3.896L0,3.896 l0,0.166 L0,8 l0,14.166 L0,24 l0,6 c0,1.104, 0.896,2, 2,2l 28,0 c 1.104,0, 2-0.896, 2-2L 32,8 L 32,4.062 L 32,3.896 L 31.966,3.896 z M 12,14L 12,8 l 8,0 l0,6 L 12,14 z M 20,16l0,6.166 L 12,22.166 L 12,16 L 20,16 z M 10,8l0,6 L 2,14 L 2,8 L 10,8 z M 2,16l 8,0 l0,6.166 L 2,22.166 L 2,16 z M 2,30l0-6 l 8,0 l0,6 L 2,30 z M 12,30l0-6 l 8,0 l0,6 L 12,30 z M 30,30l-8,0 l0-6 l 8,0 L 30,30 z M 30,22.166l-8,0 L 22,16 l 8,0 L 30,22.166 z M 30,14l-8,0 L 22,8 l 8,0 L 30,14 z"></path></g></svg></span>';
-    IMAGES.whiteboard = '<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="32" height="32" viewBox="0 0 32 32" enable-background="new 0 0 16 16" xml:space="preserve" fill="#000000"> <g><path d="M 30,20L 30,16 c0-1.104-0.896-2-2-2L 18,14 L 18,10 l 6,0 c 1.104,0, 2-0.896, 2-2L 26,6 c0-1.104-0.896-2-2-2L 10,4 C 8.896,4, 8,4.896, 8,6l0,2 c0,1.104, 0.896,2, 2,2l 6,0 l0,4 L 6,14 C 4.896,14, 4,14.896, 4,16l0,4 c-1.104,0-2,0.896-2,2l0,4 c0,1.104, 0.896,2, 2,2l 2,0 c 1.104,0, 2-0.896, 2-2l0-2 l0-2 c0-1.104-0.896-2-2-2L 6,16 l 10,0 l0,4 c-1.104,0-2,0.896-2,2l0,2 l0,2 c0,1.104, 0.896,2, 2,2l 2,0 c 1.104,0, 2-0.896, 2-2l0-2 l0-2 c0-1.104-0.896-2-2-2L 18,16 l 10,0 l0,4 c-1.104,0-2,0.896-2,2l0,2 l0,2 c0,1.104, 0.896,2, 2,2l 2,0 c 1.104,0, 2-0.896, 2-2l0-4 C 32,20.896, 31.104,20, 30,20z M 10,6l 14,0 l0,2 L 10,8 L 10,6 z M 6,24l0,2 L 4,26 l0-4 l 2,0 L 6,24 z M 18,26L 16,26 l0-4 l 2,0 L 18,26 z M 28,24l0-2 l 2,0 l0,4 l-2,0 L 28,24 z"></path></g></svg></span>';
+    IMAGES.whiteboard = '<svg width="24" height="24" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="32" height="32.11199951171875" viewBox="0 0 32 32.11199951171875" enable-background="new 0 0 16 16" xml:space="preserve" fill="#000000"> <g><path d="M 30,0L 4,0 C 2.896,0, 2,0.896, 2,2c0,1.104, 0.896,2, 2,2l0,16 c0,1.104, 0.896,2, 2,2l 10,0 l0,3.122 L 10.328,30.26 c-0.408,0.37-0.44,1.002-0.068,1.412c 0.374,0.408, 1.006,0.44, 1.412,0.068L 16,27.82l0,3.18 C 16,31.552, 16.448,32, 17,32S 18,31.552, 18,31 l0-3.18 l 4.328,3.92C 22.52,31.914, 22.76,32, 23,32c 0.272,0, 0.542-0.112, 0.74-0.328c 0.372-0.41, 0.34-1.042-0.068-1.412L 18,25.122L 18,22 l 10,0 c 1.104,0, 2-0.896, 2-2L 30,4 c 1.104,0, 2-0.896, 2-2C 32,0.896, 31.104,0, 30,0z M 25.694,7.72l-7,6.75 C 18.31,14.842, 17.702,14.844, 17.31,14.474L 14.22,11.536L 9.75,16.194C 9.554,16.396, 9.292,16.5, 9.030,16.5c-0.25,0-0.498-0.092-0.694-0.28 C 7.938,15.84, 7.926,15.208, 8.308,14.806l 5.158-5.376C 13.848,9.040, 14.48,9.024, 14.876,9.4l 3.12,2.964l 6.31-6.086 c 0.396-0.378, 1.030-0.376, 1.414,0.028C 26.104,6.704, 26.092,7.336, 25.694,7.72z"></path></g></svg>';
     IMAGES.person = '<svg width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 16,0C 7.164,0,0,7.164,0,16s 7.164,16, 16,16s 16-7.164, 16-16C 32,7.162, 24.836,0, 16,0z M 16.568,7.984 C 16.74,7.594, 16.972,7.25, 17.266,6.956c 0.296-0.296, 0.636-0.528, 1.028-0.7C 18.684,6.084, 19.11,6, 19.564,6 c 0.458,0, 0.88,0.084, 1.27,0.256c 0.39,0.17, 0.732,0.404, 1.026,0.7c 0.296,0.294, 0.53,0.638, 0.7,1.028 c 0.172,0.39, 0.258,0.812, 0.258,1.27c0,0.458-0.086,0.88-0.258,1.27c-0.17,0.39-0.404,0.732-0.7,1.028 c-0.296,0.294-0.636,0.528-1.026,0.7c-0.39,0.17-0.812,0.256-1.27,0.256c-0.456,0-0.88-0.086-1.27-0.256 c-0.39-0.172-0.732-0.404-1.028-0.7C 16.972,11.256, 16.74,10.914, 16.568,10.524C 16.396,10.134, 16.31,9.71, 16.31,9.254 C 16.31,8.796, 16.396,8.374, 16.568,7.984z M 11.502,7.468c 0.486-0.484, 1.070-0.726, 1.754-0.726c 0.704,0, 1.3,0.242, 1.784,0.726 C 15.526,7.954, 15.768,8.54, 15.768,9.226c0,0.704-0.244,1.298-0.73,1.784C 14.556,11.494, 13.96,11.736, 13.256,11.736 c-0.682,0-1.268-0.242-1.754-0.728c-0.486-0.486-0.73-1.080-0.73-1.784C 10.774,8.54, 11.016,7.954, 11.502,7.468z M 7.136,7.926 c 0.37-0.372, 0.822-0.558, 1.354-0.558c 0.534,0, 0.98,0.186, 1.342,0.558c 0.36,0.37, 0.54,0.812, 0.54,1.326 c0,0.534-0.182,0.984-0.54,1.356C 9.47,10.98, 9.024,11.166, 8.49,11.166c-0.532,0-0.984-0.186-1.354-0.556 C 6.764,10.238, 6.578,9.786, 6.578,9.254C 6.578,8.74, 6.764,8.296, 7.136,7.926z M 24,26L 15.21,26 l0-4 L 9.704,22 L 9.704,18 L 6.418,18 L 6.418,14.362 c0-0.646-0.016-1.194, 0.432-1.64c 0.446-0.446, 0.994-0.67, 1.64-0.67c 0.552,0, 1.030,0.166, 1.428,0.5 c 0.4,0.334, 0.664,0.746, 0.8,1.242c 0.322-0.38, 0.704-0.674, 1.14-0.886c 0.438-0.208, 0.904-0.314, 1.398-0.314 c 0.78,0, 1.46,0.234, 2.042,0.7c 0.58,0.466, 0.966,1.052, 1.156,1.754c 0.4-0.38, 0.864-0.686, 1.4-0.912 c 0.532-0.228, 1.104-0.342, 1.712-0.342c 0.61,0, 1.186,0.114, 1.728,0.342c 0.54,0.228, 1.012,0.542, 1.412,0.942 c 0.4,0.4, 0.718,0.87, 0.954,1.412C 23.898,17.030, 24,17.606, 24,18.216L 24,26 z"></path></g></svg>'
     IMAGES.contact = '<svg width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 2,0C 0.896,0,0,0.896,0,2l0,28 c0,1.104, 0.896,2, 2,2l 2,0 L 4,0 L 2,0 zM 26,0L 6,0 l0,32 l 20,0 c 1.104,0, 2-0.896, 2-2L 28,2 C 28,0.896, 27.104,0, 26,0z M 16.89,7.708 c 1.672,0, 3.026,1.356, 3.026,3.026c0,1.672-1.356,3.028-3.026,3.028c-1.672,0-3.028-1.356-3.028-3.028 C 13.862,9.062, 15.218,7.708, 16.89,7.708z M 12,21.614c0-3.668, 2.218-6.64, 4.952-6.64s 4.952,2.974, 4.952,6.64S 12,25.28, 12,21.614zM 30,2L 32,2L 32,8L 30,8zM 30,10L 32,10L 32,16L 30,16zM 30,18L 32,18L 32,24L 30,24z"></path></g></svg>';
     IMAGES.mic = '<svg style="fill:white;margin-top:4px" width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 14,25.808L 14,30 L 11,30 C 10.448,30, 10,30.448, 10,31C 10,31.552, 10.448,32, 11,32l 4.98,0 L 16.020,32 l 4.98,0 c 0.552,0, 1-0.448, 1-1c0-0.552-0.448-1-1-1L 18,30 l0-4.204 c 4.166-0.822, 8-4.194, 8-9.796L 26,13 C 26,12.448, 25.552,12, 25,12 S 24,12.448, 24,13L 24,16 c0,5.252-4.026,8-8,8c-3.854,0-8-2.504-8-8L 8,13 C 8,12.448, 7.552,12, 7,12S 6,12.448, 6,13L 6,16 C 6,21.68, 9.766,25.012, 14,25.808zM 16,20c 2.21,0, 4-1.79, 4-4L 20,4 c0-2.21-1.79-4-4-4S 12,1.79, 12,4l0,12 C 12,18.21, 13.79,20, 16,20z"></path></g></svg>';
@@ -358,11 +358,6 @@ var ofmeet = (function(of)
 
                 createTagsButton();
             }
-
-            if (interfaceConfig.OFMEET_ENABLE_CRYPTPAD)
-            {
-                createPadsButton();
-            }
         }
 
         if (APP.connection.xmpp.connection._stropheConn.pass || config.ofmeetWinSSOEnabled)
@@ -706,7 +701,7 @@ var ofmeet = (function(of)
 
     function createPadsButton()
     {
-        const padsButton = addToolbarItem('ofmeet-pads', '<div id="ofmeet-pads" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;"><img width="22" src="https://sandbox.cryptpad.info/customize/images/logo_white.png"/></div></div>', "Launch CryptPad Application");
+        const padsButton = addToolbarItem('ofmeet-pads', '<div id="ofmeet-pads" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;"><img width="22" src="https://sandbox.cryptpad.info/customize/images/logo_white.png"/></div></div>', "Launch CryptPad Application", ".button-group-right");
 
         if (padsButton) padsButton.addEventListener("click", function(evt)
         {
@@ -2123,18 +2118,43 @@ var ofmeet = (function(of)
 
         console.debug("postJoinSetup");
 
-        APP.conference.commands.addCommandListener("PARTY", function()
+        if (interfaceConfig.OFMEET_ENABLE_CRYPTPAD)
         {
-            window.confetti({particleCount: 100, spread: 70, origin: {y: .6}})
-       });
+            createPadsButton();
+        }
 
-        const partyButton = addToolbarItem('ofmeet-party', '<div id="ofmeet-party" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.confetti + '</div></div>', "Celebrate with Confetti", ".button-group-right");
-
-        if (partyButton) partyButton.addEventListener("click", function(evt)
+        if (interfaceConfig.OFMEET_ENABLE_WHITEBOARD && interfaceConfig.OFMEET_WHITEBOARD_URL && interfaceConfig.OFMEET_WHITEBOARD_URL != "")
         {
-            evt.stopPropagation();
-            APP.conference.commands.sendCommandOnce("PARTY", {value: !0})
-        });
+            APP.conference.commands.addCommandListener("WHITEBOARD", function()
+            {
+                const url = interfaceConfig.OFMEET_WHITEBOARD_URL.endsWith("/") ? interfaceConfig.OFMEET_WHITEBOARD_URL + APP.conference.roomName : interfaceConfig.OFMEET_WHITEBOARD_URL + "/" + APP.conference.roomName;
+                window.open(url, 'ofmeet-whiteboard');
+           });
+
+            const whiteboardButton = addToolbarItem('ofmeet-whiteboard', '<div id="ofmeet-whiteboard" class="toolbox-icon"><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.whiteboard + '</div></div>', "Share a whiteboard", ".button-group-right");
+
+            if (whiteboardButton) whiteboardButton.addEventListener("click", function(evt)
+            {
+                evt.stopPropagation();
+                APP.conference.commands.sendCommandOnce("WHITEBOARD", {value: !0})
+            });
+        }
+
+        if (interfaceConfig.OFMEET_ENABLE_CONFETTI)
+        {
+            APP.conference.commands.addCommandListener("CONFETTI", function()
+            {
+                window.confetti({particleCount: 100, spread: 70, origin: {y: .6}})
+           });
+
+            const confettiButton = addToolbarItem('ofmeet-confetti', '<div id="ofmeet-confetti" class="toolbox-icon"><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.confetti + '</div></div>', "Share some confetti", ".button-group-right");
+
+            if (confettiButton) confettiButton.addEventListener("click", function(evt)
+            {
+                evt.stopPropagation();
+                APP.conference.commands.sendCommandOnce("CONFETTI", {value: !0})
+            });
+        }
     }
 
     function handleDragOver(evt)

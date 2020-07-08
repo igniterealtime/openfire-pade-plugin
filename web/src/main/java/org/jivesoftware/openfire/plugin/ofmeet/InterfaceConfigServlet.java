@@ -86,6 +86,8 @@ public class InterfaceConfigServlet extends HttpServlet
             config.put( "OFMEET_TAG_CONFERENCE",                 JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.conference.tags",               true                ) );
             config.put( "OFMEET_ENABLE_BREAKOUT",                JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.breakout",               false               ) );
             config.put( "OFMEET_ENABLE_CRYPTPAD",                JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.cryptpad",               true                ) );
+            config.put( "OFMEET_ENABLE_WHITEBOARD",              JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.whiteboard",             true                ) );
+            config.put( "OFMEET_ENABLE_CONFETTI",                JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.confetti",               true                ) );
             config.put( "OFMEET_CACHE_PASSWORD",                 JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.cache.password",                true                ) );
             config.put( "OFMEET_ALLOW_UPLOADS",                  JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.allow.uploads",                 true                ) );
             config.put( "OFMEET_SHOW_CAPTIONS",                  JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.show.captions",                 false               ) );
@@ -96,6 +98,7 @@ public class InterfaceConfigServlet extends HttpServlet
             config.put( "OFMEET_WELCOME_PAGE_CONTENT",           JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.welcome.content",               ""                  ) );
             config.put( "OFMEET_WELCOME_PAGE_TOOLBARCONTENT",    JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.welcome.toolbarcontent",        ""                  ) );
             config.put( "OFMEET_CRYPTPAD_URL",                   JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.cryptpad.url", "https://cryptpad.fr"                ) );
+            config.put( "OFMEET_WHITEBOARD_URL",                 JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.whiteboard.url", "https://wbo.ophir.dev/boards/"    ) );
 
             config.put( "filmStripOnly",                         ofMeetConfig.getFilmstripOnly()      );
             config.put( "VERTICAL_FILMSTRIP",                    ofMeetConfig.getVerticalFilmstrip()  );

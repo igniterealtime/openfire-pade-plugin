@@ -43,7 +43,7 @@
                         <goal>wget</goal>
                     </goals>
                     <configuration>
-                        <url>https://download.jitsi.org/jitsi-meet/src/jitsi-meet-1.0.4166.tar.bz2</url>
+                        <url>https://download.jitsi.org/jitsi-meet/src/jitsi-meet-1.0.4265.tar.bz2</url>
                         <unpack>true</unpack>
                         <outputDirectory>classes</outputDirectory>
                     </configuration>
@@ -82,7 +82,7 @@
                     <dependency>
                         <groupId>org.igniterealtime.openfire.plugins</groupId>
                         <artifactId>openfire-plugin-assembly-descriptor</artifactId>
-                        <version>${openfire.version}</version>
+                        <version>4.2.0</version>
                     </dependency>
                 </dependencies>
                 <executions>
@@ -130,12 +130,12 @@
                     <dependency>
                         <groupId>org.igniterealtime.openfire</groupId>
                         <artifactId>xmppserver</artifactId>
-                        <version>${openfire.version}</version>
+                        <version>4.2.0</version>
                     </dependency>
                     <dependency>
                         <groupId>org.igniterealtime.openfire</groupId>
                         <artifactId>webadmintld</artifactId>
-                        <version>${openfire.version}</version>
+                        <version>4.2.0</version>
                     </dependency>
                 </dependencies>
             </plugin>
@@ -152,6 +152,13 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.igniterealtime.openfire.plugins</groupId>
+                        <artifactId>openfire-plugin-assembly-descriptor</artifactId>
+                        <version>${openfire.version}</version>
+                    </dependency>
+                </dependencies>                
                 <configuration>
                     <source>8</source>
                     <target>8</target>

@@ -92,11 +92,13 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
     private final JvbPluginWrapper jvbPluginWrapper;
     private final MeetingPlanner meetingPlanner;
+    private final LobbyMuc lobbyMuc;
 
     public OfMeetPlugin()
     {
         jvbPluginWrapper = new JvbPluginWrapper();
         meetingPlanner = new MeetingPlanner();
+        lobbyMuc = new LobbyMuc();
     }
 
     public String getName()
@@ -129,6 +131,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         try
         {
             meetingPlanner.initialize();
+            lobbyMuc.initialize();
         }
         catch ( Exception ex )
         {
@@ -188,6 +191,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         try
         {
             meetingPlanner.destroy();
+            lobbyMuc.destroy();
         }
         catch ( Exception ex )
         {

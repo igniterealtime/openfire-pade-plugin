@@ -167,13 +167,14 @@ public class LobbyMuc implements ServerIdentitiesProvider, ServerFeaturesProvide
                 final String roomName = packet.getTo().getNode();
                 Log.debug("lobbyroom creating room " + roomName);
 
-                MUCRoom room;
+                MUCRoom lobbyRoom, mucRoom;
                 try {
-                    room = lobbyService.getChatRoom(roomName, iq.getFrom());
-                    room.setPersistent(false);
-                    room.setPublicRoom(true);
-                    //room.setPassword(password);
-                    room.unlock(room.getRole());
+                    mucRoom = mucService.getChatRoom(roomName, iq.getFrom());
+                    lobbyRoom = lobbyService.getChatRoom(roomName, iq.getFrom());
+                    lobbyRoom.setPersistent(false);
+                    lobbyRoom.setPublicRoom(true);
+                    lobbyRoom.setPassword(mucRoom.getPassword());
+                    lobbyRoom.unlock(lobbyRoom.getRole());
                     notify_lobby_enabled(packet.getTo(), packet.getFrom(), true);
                 }
                 catch (Exception e) {
@@ -236,9 +237,9 @@ public class LobbyMuc implements ServerIdentitiesProvider, ServerFeaturesProvide
                             Element actor = childElement.element("item").element("actor");
                             JID room = new JID(presence.getFrom().getNode() + "@" + MAIN_MUC);
                             JID from = new JID(actor.attribute("jid").getStringValue());
-                            String nick = presence.getFrom().getResource(); //nickElement.getText();
-                            Log.debug("lobbyroom participant refused for " + room + " by " + nick);
-                            notify_lobby_access(room, from, nick, false);
+                            String invitee = presence.getFrom().toString();
+                            Log.debug("lobbyroom participant refused for " + room + " by " + from);
+                            notify_lobby_access(room, from, invitee, false);
 
                         } catch (Exception e) {
                             Log.error("loobyroom kick failure", e);

@@ -1,5 +1,7 @@
 package uk.ifsoft.openfire.plugins.pade;
 
+import org.jivesoftware.openfire.OfflineMessageStrategy;
+import org.jivesoftware.openfire.interceptor.InterceptorManager;
 import org.jivesoftware.openfire.http.HttpBindManager;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.container.Plugin;
@@ -45,6 +47,7 @@ import waffle.servlet.NegotiateSecurityFilter;
 import waffle.servlet.WaffleInfoServlet;
 import org.xmpp.packet.*;
 import org.dom4j.Element;
+import org.igniterealtime.openfire.plugins.pushnotification.PushInterceptor;
 
 
 public class PadePlugin implements Plugin, MUCEventListener
@@ -55,6 +58,7 @@ public class PadePlugin implements Plugin, MUCEventListener
     private WebAppContext contextPublic;
     private WebAppContext contextPrivate;
     private WebAppContext contextWinSSO;
+    private PushInterceptor interceptor;
 
     /**
      * Initializes the plugin.
@@ -66,6 +70,10 @@ public class PadePlugin implements Plugin, MUCEventListener
     public void initializePlugin( final PluginManager manager, final File pluginDirectory )
     {
         Log.info("start pade server");
+
+        interceptor = new PushInterceptor();
+        InterceptorManager.getInstance().addInterceptor( interceptor );
+        OfflineMessageStrategy.addListener( interceptor );
 
         contextRest = new ServletContextHandler(null, "/rest", ServletContextHandler.SESSIONS);
         contextRest.setClassLoader(this.getClass().getClassLoader());
@@ -165,6 +173,9 @@ public class PadePlugin implements Plugin, MUCEventListener
         {
             MUCEventDispatcher.removeListener(this);
         }
+
+        OfflineMessageStrategy.removeListener( interceptor );
+        InterceptorManager.getInstance().removeInterceptor( interceptor );
     }
 
     private static final SecurityHandler basicAuth(String realm) {
@@ -272,19 +283,35 @@ public class PadePlugin implements Plugin, MUCEventListener
                     {
                         MUCRoom room = mucService.getChatRoom(roomJID.getNode());
 
-                        for (JID jid : room.getOwners())
+                        if (room != null)
                         {
-                            notifyRoomSubscribers(jid, room, roomJID);
-                        }
+                            for (JID jid : room.getOwners())
+                            {
+                                Log.debug("notifyRoomSubscribers owners " + jid + " " + roomJID);
+                                notifyRoomSubscribers(jid, room, roomJID);
+                            }
 
-                        for (JID jid : room.getAdmins())
-                        {
-                            notifyRoomSubscribers(jid, room, roomJID);
-                        }
+                            for (JID jid : room.getAdmins())
+                            {
+                                Log.debug("notifyRoomSubscribers admins " + jid + " " + roomJID);
+                                notifyRoomSubscribers(jid, room, roomJID);
+                            }
 
-                        for (JID jid : room.getMembers())
-                        {
-                            notifyRoomSubscribers(jid, room, roomJID);
+                            for (JID jid : room.getMembers())
+                            {
+                                Log.debug("notifyRoomSubscribers members " + jid + " " + roomJID);
+                                notifyRoomSubscribers(jid, room, roomJID);
+                            }
+
+                            for (MUCRole role : room.getModerators())
+                            {
+                                Log.debug("notifyRoomSubscribers moderators " + role.getUserAddress() + " " + roomJID);
+                            }
+
+                            for (MUCRole role : room.getParticipants())
+                            {
+                                Log.debug("notifyRoomSubscribers participants " + role.getUserAddress() + " " + roomJID);
+                            }
                         }
 
                     }
@@ -307,8 +334,6 @@ public class PadePlugin implements Plugin, MUCEventListener
 
     private void notifyRoomSubscribers(JID subscriberJID, MUCRoom room, JID roomJID)
     {
-        Log.debug("notifyRoomSubscribers " + subscriberJID + " " + roomJID);
-
         try {
             if (GroupJID.isGroup(subscriberJID)) {
                 Group group = GroupManager.getInstance().getGroup(subscriberJID);
@@ -330,24 +355,24 @@ public class PadePlugin implements Plugin, MUCEventListener
         if (room.getAffiliation(subscriberJID) != MUCRole.Affiliation.none)
         {
             Log.debug("notifyRoomActivity checking " + subscriberJID + " " + roomJID);
-            boolean inRoom = true;
+            boolean inRoom = false;
 
             try {
-                List<MUCRole> roles = room.getOccupantsByBareJID(subscriberJID);
-
-                if (roles.size() > 1 && roles.get(0).getPresence().isAvailable() == false)
+                for (MUCRole role : room.getOccupants())
                 {
-                    inRoom = false;
+                    if (role.getUserAddress().asBareJID().toString().equals(subscriberJID.toString())) inRoom = true;
                 }
 
             } catch (Exception e) {
                 inRoom = false;
+                Log.error("notifyRoomActivity error", e);
             }
 
             Log.debug("notifyRoomActivity confirmed " + subscriberJID + " " + roomJID + " " + inRoom);
 
-            if (!inRoom)
+            if (!inRoom && XMPPServer.getInstance().getRoutingTable().getRoutes(subscriberJID, null).size() > 0)
             {
+                Log.debug("notifyRoomActivity notifying " + subscriberJID + " " + roomJID);
                 Message message = new Message();
                 message.setFrom(roomJID);
                 message.setTo(subscriberJID);

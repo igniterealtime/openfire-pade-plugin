@@ -160,7 +160,7 @@ public class PushInterceptor implements PacketInterceptor, OfflineMessageListene
      * @param publishOptions web push data stored.
      * @param body web push payload.
      */
-    private void webPush( final User user, final String body, JID jid, Message.Type msgtype )
+    public void webPush( final User user, final String body, JID jid, Message.Type msgtype )
     {
         try {
             for (String key : user.getProperties().keySet())

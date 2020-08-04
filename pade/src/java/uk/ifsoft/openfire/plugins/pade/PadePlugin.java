@@ -7,6 +7,8 @@ import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.container.Plugin;
 import org.jivesoftware.openfire.container.PluginManager;
 import org.jivesoftware.openfire.net.SASLAuthentication;
+import org.jivesoftware.openfire.user.User;
+import org.jivesoftware.openfire.user.UserNotFoundException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +50,6 @@ import waffle.servlet.WaffleInfoServlet;
 import org.xmpp.packet.*;
 import org.dom4j.Element;
 import org.igniterealtime.openfire.plugins.pushnotification.PushInterceptor;
-
 
 public class PadePlugin implements Plugin, MUCEventListener
 {
@@ -288,29 +289,29 @@ public class PadePlugin implements Plugin, MUCEventListener
                             for (JID jid : room.getOwners())
                             {
                                 Log.debug("notifyRoomSubscribers owners " + jid + " " + roomJID);
-                                notifyRoomSubscribers(jid, room, roomJID);
+                                notifyRoomSubscribers(jid, room, roomJID, message);
                             }
 
                             for (JID jid : room.getAdmins())
                             {
                                 Log.debug("notifyRoomSubscribers admins " + jid + " " + roomJID);
-                                notifyRoomSubscribers(jid, room, roomJID);
+                                notifyRoomSubscribers(jid, room, roomJID, message);
                             }
 
                             for (JID jid : room.getMembers())
                             {
                                 Log.debug("notifyRoomSubscribers members " + jid + " " + roomJID);
-                                notifyRoomSubscribers(jid, room, roomJID);
+                                notifyRoomSubscribers(jid, room, roomJID, message);
                             }
 
                             for (MUCRole role : room.getModerators())
                             {
-                                Log.debug("notifyRoomSubscribers moderators " + role.getUserAddress() + " " + roomJID);
+                                Log.debug("notifyRoomSubscribers moderators " + role.getUserAddress() + " " + roomJID, message);
                             }
 
                             for (MUCRole role : room.getParticipants())
                             {
-                                Log.debug("notifyRoomSubscribers participants " + role.getUserAddress() + " " + roomJID);
+                                Log.debug("notifyRoomSubscribers participants " + role.getUserAddress() + " " + roomJID, message);
                             }
                         }
 
@@ -332,17 +333,17 @@ public class PadePlugin implements Plugin, MUCEventListener
 
     }
 
-    private void notifyRoomSubscribers(JID subscriberJID, MUCRoom room, JID roomJID)
+    private void notifyRoomSubscribers(JID subscriberJID, MUCRoom room, JID roomJID, Message message)
     {
         try {
             if (GroupJID.isGroup(subscriberJID)) {
                 Group group = GroupManager.getInstance().getGroup(subscriberJID);
 
                 for (JID groupMemberJID : group.getAll()) {
-                    notifyRoomActivity(groupMemberJID, room, roomJID);
+                    notifyRoomActivity(groupMemberJID, room, roomJID, message);
                 }
             } else {
-                notifyRoomActivity(subscriberJID, room, roomJID);
+                notifyRoomActivity(subscriberJID, room, roomJID, message);
             }
 
         } catch (GroupNotFoundException gnfe) {
@@ -350,7 +351,7 @@ public class PadePlugin implements Plugin, MUCEventListener
         }
     }
 
-    private void notifyRoomActivity(JID subscriberJID, MUCRoom room, JID roomJID)
+    private void notifyRoomActivity(JID subscriberJID, MUCRoom room, JID roomJID, Message message)
     {
         if (room.getAffiliation(subscriberJID) != MUCRole.Affiliation.none)
         {
@@ -370,15 +371,43 @@ public class PadePlugin implements Plugin, MUCEventListener
 
             Log.debug("notifyRoomActivity confirmed " + subscriberJID + " " + roomJID + " " + inRoom);
 
-            if (!inRoom && XMPPServer.getInstance().getRoutingTable().getRoutes(subscriberJID, null).size() > 0)
+            if (!inRoom)
             {
-                Log.debug("notifyRoomActivity notifying " + subscriberJID + " " + roomJID);
-                Message message = new Message();
-                message.setFrom(roomJID);
-                message.setTo(subscriberJID);
-                Element rai = message.addChildElement("rai", "xmpp:prosody.im/protocol/rai");
-                rai.addElement("activity").setText(roomJID.toString());
-                XMPPServer.getInstance().getRoutingTable().routePacket(subscriberJID, message, true);
+                if (XMPPServer.getInstance().getRoutingTable().getRoutes(subscriberJID, null).size() > 0)
+                {
+                    Log.debug("notifyRoomActivity notifying " + subscriberJID + " " + roomJID);
+                    Message notification = new Message();
+                    notification.setFrom(roomJID);
+                    notification.setTo(subscriberJID);
+                    Element rai = notification.addChildElement("rai", "xmpp:prosody.im/protocol/rai");
+                    rai.addElement("activity").setText(roomJID.toString());
+                    XMPPServer.getInstance().getRoutingTable().routePacket(subscriberJID, notification, true);
+                }
+                else {
+                    // user is offline, send web push notification if user mentioned
+                    // <reference xmlns='urn:xmpp:reference:0' uri='xmpp:juliet@capulet.lit' begin='72' end='78' type='mention' />
+
+                    Element referenceElement = message.getChildElement("reference", "urn:xmpp:reference:0");
+
+                    if (referenceElement != null)
+                    {
+                        String uri = referenceElement.attribute("uri").getStringValue();
+
+                        if (uri.startsWith("xmpp:") && uri.substring(5).equals(subscriberJID.toString()))
+                        {
+                            try
+                            {
+                                User user = XMPPServer.getInstance().getUserManager().getUser(subscriberJID.getNode());
+                                interceptor.webPush(user, message.getBody(), roomJID, Message.Type.groupchat );
+                                Log.debug( "notifyRoomActivity - notifying mention of " + user.getName());
+                            }
+                            catch ( UserNotFoundException e )
+                            {
+                                Log.debug( "notifyRoomActivity - Not a recognized user.", e );
+                            }
+                        }
+                    }
+                }
             }
         }
     }

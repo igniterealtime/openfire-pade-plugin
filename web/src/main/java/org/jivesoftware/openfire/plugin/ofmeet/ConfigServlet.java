@@ -110,6 +110,8 @@ public class ConfigServlet extends HttpServlet
             String xirsysUrl = JiveGlobals.getProperty( "ofmeet.xirsys.url", null );
             boolean ofmeetWinSSOEnabled = JiveGlobals.getBooleanProperty( "ofmeet.winsso.enabled", false );
             boolean enablePreJoinPage = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.prejoin.page", false );
+            boolean enableStereo = JiveGlobals.getBooleanProperty( "ofmeet.stereo.enabled", false );
+
 
             if ( xirsysUrl != null )
             {
@@ -254,6 +256,18 @@ public class ConfigServlet extends HttpServlet
             // TODO: find out if both of the settings below are in use (seems silly).
             config.put( "adaptiveSimulcast", ofMeetConfig.getAdaptiveSimulcast() );
             config.put( "disableAdaptiveSimulcast", !ofMeetConfig.getAdaptiveSimulcast() );
+
+            if (enableStereo)
+            {
+                config.put( "disableAP", true );
+                config.put( "disableAEC", true );
+                config.put( "disableNS", true );
+                config.put( "disableAGC", true );
+                config.put( "disableHPF", true );
+                config.put( "enableLipSync", false );
+                config.put( "stereo", true );
+                config.put( "opusMaxAverageBitrate", 510000 );
+            }
 
             out.println( "var config = " + config.toString( 2 ) + ";" );
         }

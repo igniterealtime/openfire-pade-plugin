@@ -122,9 +122,11 @@
         final boolean adaptivelastn = ParamUtils.getBooleanParameter( request, "adaptivelastn" );
         final boolean simulcast = ParamUtils.getBooleanParameter( request, "simulcast" );
         final boolean adaptivesimulcast = ParamUtils.getBooleanParameter( request, "adaptivesimulcast" );
+        final boolean enableStereo = ParamUtils.getBooleanParameter( request, "enableStereo" );
 
         if ( errors.isEmpty() )
         {
+            JiveGlobals.setProperty( "ofmeet.stereo.enabled", Boolean.toString(enableStereo) );        
             JiveGlobals.setProperty( "ofmeet.winsso.enabled", Boolean.toString( securityenabled ) );
             JiveGlobals.setProperty( "ofmeet.conference.admin", Boolean.toString( conferenceadmin ) );            
             JiveGlobals.setProperty( "voicebridge.default.proxy.sipauthuser", authusername );
@@ -330,6 +332,12 @@
                     <fmt:message key="config.page.configuration.ofmeet.audioonly"/>
                 </td>
             </tr>
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="enableStereo" ${admin:getBooleanProperty( "ofmeet.stereo.enabled", false) ? "checked" : ""}>
+                    <fmt:message key="config.page.configuration.ofmeet.stereo.enabled"/>
+                </td>
+            </tr>            
         </table>
 
         <p style="margin-top: 2em"><fmt:message key="config.page.configuration.ofmeet.startaudiomuted.description"/></p>

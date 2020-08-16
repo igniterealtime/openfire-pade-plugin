@@ -20,6 +20,7 @@ var ofmeet = (function(of)
     IMAGES.mail = '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 30,8L 2,8 C 0.896,8,0,8.896,0,10l0,3.358 l 16,6.4l 16-6.4L 32,10 C 32,8.896, 31.104,8, 30,8zM0,16.624L0,30 c0,1.104, 0.896,2, 2,2l 28,0 c 1.104,0, 2-0.896, 2-2L 32,16.624 l-16,6.4L0,16.624z"></path></g></svg>';
     IMAGES.desktop = '<svg id="ofmeet-desktop" width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 30,2L 2,2 C 0.896,2,0,2.896,0,4l0,18 c0,1.104, 0.896,2, 2,2l 9.998,0 c-0.004,1.446-0.062,3.324-0.61,4L 10.984,28 C 10.44,28, 10,28.448, 10,29C 10,29.552, 10.44,30, 10.984,30l 10.030,0 C 21.56,30, 22,29.552, 22,29c0-0.552-0.44-1-0.984-1l-0.404,0 c-0.55-0.676-0.606-2.554-0.61-4L 30,24 c 1.104,0, 2-0.896, 2-2L 32,4 C 32,2.896, 31.104,2, 30,2z M 14,24l-0.002,0.004 C 13.998,24.002, 13.998,24.002, 14,24L 14,24z M 18.002,24.004L 18,24l 0.002,0 C 18.002,24.002, 18.002,24.002, 18.002,24.004z M 30,20L 2,20 L 2,4 l 28,0 L 30,20 z"></path></g></svg>';
     IMAGES.confetti = '<svg width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 30,8L 18.084,8 l0,6 L 32,14 L 32,10 C 32,8.896, 31.104,8, 30,8zM 2,8C 0.896,8,0,8.896,0,10l0,4 l 14,0 L 14,8 L 2,8 zM 2,16l0,14 c0,1.104, 0.896,2, 2,2l 10,0 L 14,16 L 2,16 zM 28,32c 1.104,0, 2-0.896, 2-2L 30,16 L 18.084,16 l0,16 L 28,32 zM 15.998,5.984l 0.006,0 C 16.002,5.988, 16,5.996, 16,6l 2.084,0 C 19.854,6, 22.36,6, 24,6c 2.762,0, 4-1.344, 4-3 S 26.762,0, 24,0c-2.586,0-4.622,1.164-6,2.514C 17.396,2.156, 16.698,1.938, 15.942,1.938c-0.724,0-1.394,0.204-1.982,0.536 C 12.584,1.14, 10.56,0, 8,0C 5.238,0, 4,1.344, 4,3S 5.238,6, 8,6c 1.666,0, 4.226,0, 6,0l 2,0 C 16,5.996, 15.998,5.988, 15.998,5.984z M 26,3 C 26,3.826, 24.912,4, 24,4L 19.458,4 C 19.442,3.972, 19.428,3.942, 19.412,3.916C 20.428,2.928, 21.968,2, 24,2C 24.912,2, 26,2.174, 26,3z M 6,3 C 6,2.174, 7.088,2, 8,2c 1.988,0, 3.496,0.89, 4.512,1.844C 12.48,3.894, 12.456,3.948, 12.426,4L 8,4 C 7.088,4, 6,3.826, 6,3z"></path></g></svg>';
+    IMAGES.picture = '<svg width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 17.228,11.688A2.782,2.782 1080 1 0 22.792,11.688A2.782,2.782 1080 1 0 17.228,11.688zM 26,28L 28,28L 28,26L 28,22L 28,16L 20,22L 10,14L 4,20L 4,22L 4,26L 4,28L 6,28 zM 30,4L 2,4 C 0.896,4,0,4.896,0,6l0,24 c0,1.104, 0.896,2, 2,2l 28,0 c 1.104,0, 2-0.896, 2-2L 32,6 C 32,4.896, 31.104,4, 30,4z M 30,30L 2,30 L 2,6 l 28,0 L 30,30 z"></path></g></svg>';
 
     const SMILIES = [":)", ":(", ":D", ":+1:", ":P", ":wave:", ":blush:", ":slightly_smiling_face:", ":scream:", ":*", ":-1:", ":mag:", ":heart:", ":innocent:", ":angry:", ":angel:", ";(", ":clap:", ";)", ":beer:"];
     const nickColors = {}, padsList = [], captions = {msgsDisabled: true, msgs: []}, breakout = {rooms: [], duration: 60, roomCount: 10, wait: 10}, pdf_body = [];
@@ -359,6 +360,15 @@ var ofmeet = (function(of)
                 createTagsButton();
             }
         }
+
+        if (window.localStorage["ofmeet.settings.avatar"])
+        {
+            const dataUri = JSON.parse(window.localStorage["ofmeet.settings.avatar"]);
+            console.log("ofmeet.js found avatar", dataUri);
+            APP.conference.changeLocalAvatarUrl(dataUri);
+        }
+
+        createAvatarButton();
 
         if (APP.connection.xmpp.connection._stropheConn.pass || config.ofmeetWinSSOEnabled)
         {
@@ -707,6 +717,17 @@ var ofmeet = (function(of)
         {
             evt.stopPropagation();
             doPads();
+        });
+    }
+
+    function createAvatarButton()
+    {
+        const avatarButton = addToolbarItem('ofmeet-avatar', '<div id="ofmeet-avatar" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.picture + '</div><input style="display:none;" id="ofmeet-upload-avatar" type="file" name="files[]"></div>', "Change personal avatar", ".button-group-right");
+
+        if (avatarButton) avatarButton.addEventListener("click", function(evt)
+        {
+            evt.stopPropagation();
+            doAvatar();
         });
     }
 
@@ -1999,7 +2020,13 @@ var ofmeet = (function(of)
         if (placeHolder)
         {
             tool = newElement('div', null, html, 'toolbox-button', label);
-            placeHolder.appendChild(tool);
+
+            if (group == '.button-group-right') {
+                const more = document.querySelector(".toolbox-button-wth-dialog");
+                placeHolder.insertBefore(tool, more);
+            } else {
+                placeHolder.appendChild(tool);
+            }
         }
         return tool;
     }
@@ -2154,6 +2181,48 @@ var ofmeet = (function(of)
                 evt.stopPropagation();
                 APP.conference.commands.sendCommandOnce("CONFETTI", {value: !0})
             });
+        }
+    }
+
+    function doAvatar()
+    {
+        const upload = document.getElementById("ofmeet-upload-avatar");
+
+        if (upload) upload.addEventListener('change', function(event)
+        {
+            uploadAvatar(event);
+        });
+        upload.click();
+    }
+
+    function uploadAvatar(event)
+    {
+        var files = event.target.files;
+
+        for (var i = 0, file; file = files[i]; i++)
+        {
+            if (file.name.endsWith(".png") || file.name.endsWith(".jpg"))
+            {
+                var reader = new FileReader();
+
+                reader.onload = function(event)
+                {
+                    dataUri = event.target.result;
+                    console.debug("uploadAvatar", dataUri);
+                    APP.conference.changeLocalAvatarUrl(dataUri);
+                    window.localStorage["ofmeet.settings.avatar"] = JSON.stringify(dataUri);
+                };
+
+                reader.onerror = function(event) {
+                    console.error("uploadAvatar - error", event);
+                    APP.UI.messageHandler.notify("image file error", null, null, "");
+                };
+
+                reader.readAsDataURL(file);
+
+            } else {
+                APP.UI.messageHandler.notify("image file must be a png or jpg file", null, null, "");
+            }
         }
     }
 

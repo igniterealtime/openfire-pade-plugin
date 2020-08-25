@@ -225,8 +225,7 @@ public class PluginImpl
                 "native libraries.", e );
         }
 
-        ComponentManager componentManager
-            = ComponentManagerFactory.getComponentManager();
+        ComponentManager componentManager = ComponentManagerFactory.getComponentManager();
         String subdomain = ComponentImpl.SUBDOMAIN;
 
         // The ComponentImpl implementation expects to be an External Component,
@@ -330,8 +329,7 @@ public class PluginImpl
 
         OSGi.setClassLoader( classLoader );
 
-        ComponentImpl component =
-            new ComponentImpl( hostname, port, domain, subdomain, secret );
+        ComponentImpl component = new ComponentImpl( hostname, port, domain, subdomain, secret );
 
         try
         {

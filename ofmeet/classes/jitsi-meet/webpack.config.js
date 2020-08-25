@@ -55,7 +55,7 @@ const config = {
             // as well.
 
             exclude: [
-                new RegExp(`${__dirname}/node_modules/(?!js-utils)`)
+                new RegExp(`${__dirname}/node_modules/(?!@jitsi/js-utils)`)
             ],
             loader: 'babel-loader',
             options: {
@@ -224,6 +224,12 @@ module.exports = [
             'analytics-ga': './react/features/analytics/handlers/GoogleAnalyticsHandler.js'
         },
         performance: getPerformanceHints(5 * 1024)
+    }),
+    Object.assign({}, config, {
+        entry: {
+            'close3': './static/close3.js'
+        },
+        performance: getPerformanceHints(128 * 1024)
     }),
 
     // Because both video-blur-effect and rnnoise-processor modules are loaded

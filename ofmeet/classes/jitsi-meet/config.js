@@ -37,6 +37,8 @@ var config = {
     clientNode: 'http://jitsi.org/jitsimeet',
 
     // The real JID of focus participant - can be overridden here
+    // Do not change username - FIXME: Make focus username configurable
+    // https://github.com/jitsi/jitsi-meet/issues/7376
     // focusUserJid: 'focus@auth.jitsi-meet.example.com',
 
 
@@ -111,10 +113,19 @@ var config = {
     // participants and to enable it back a reload is needed.
     // startSilent: false
 
+    // Sets the preferred target bitrate for the Opus audio codec by setting its
+    // 'maxaveragebitrate' parameter. Currently not available in p2p mode.
+    // Valid values are in the range 6000 to 510000
+    // opusMaxAverageBitrate: 20000,
+
     // Video
 
     // Sets the preferred resolution (height) for local video. Defaults to 720.
     // resolution: 720,
+
+    // How many participants while in the tile view mode, before the receiving video quality is reduced from HD to SD.
+    // Use -1 to disable.
+    // maxFullResolutionParticipants: 2
 
     // w3c spec-compliant video constraints to use for video capture. Currently
     // used by browsers that return true from lib-jitsi-meet's
@@ -204,6 +215,52 @@ var config = {
 
     // Default value for the channel "last N" attribute. -1 for unlimited.
     channelLastN: -1,
+
+    // Provides a way to use different "last N" values based on the number of participants in the conference.
+    // The keys in an Object represent number of participants and the values are "last N" to be used when number of
+    // participants gets to or above the number.
+    //
+    // For the given example mapping, "last N" will be set to 20 as long as there are at least 5, but less than
+    // 29 participants in the call and it will be lowered to 15 when the 30th participant joins. The 'channelLastN'
+    // will be used as default until the first threshold is reached.
+    //
+    // lastNLimits: {
+    //     5: 20,
+    //     30: 15,
+    //     50: 10,
+    //     70: 5,
+    //     90: 2
+    // },
+
+    // Specify the settings for video quality optimizations on the client.
+    // videoQuality: {
+    //
+    //    // Provides a way to configure the maximum bitrates that will be enforced on the simulcast streams for
+    //    // video tracks. The keys in the object represent the type of the stream (LD, SD or HD) and the values
+    //    // are the max.bitrates to be set on that particular type of stream. The actual send may vary based on
+    //    // the available bandwidth calculated by the browser, but it will be capped by the values specified here.
+    //    // This is currently not implemented on app based clients on mobile.
+    //    maxBitratesVideo: {
+    //        low: 200000,
+    //        standard: 500000,
+    //        high: 1500000
+    //    },
+    //
+    //    // The options can be used to override default thresholds of video thumbnail heights corresponding to
+    //    // the video quality levels used in the application. At the time of this writing the allowed levels are:
+    //    //     'low' - for the low quality level (180p at the time of this writing)
+    //    //     'standard' - for the medium quality level (360p)
+    //    //     'high' - for the high quality level (720p)
+    //    // The keys should be positive numbers which represent the minimal thumbnail height for the quality level.
+    //    //
+    //    // With the default config value below the application will use 'low' quality until the thumbnails are
+    //    // at least 360 pixels tall. If the thumbnail height reaches 720 pixels then the application will switch to
+    //    // the high quality.
+    //    minHeightForQualityLvl: {
+    //        360: 'standard,
+    //        720: 'high'
+    //    }
+    // },
 
     // // Options for the recording limit notification.
     // recordingLimit: {
@@ -310,7 +367,7 @@ var config = {
     // When 'true', it shows an intermediate page before joining, where the user can configure their devices.
     // prejoinPageEnabled: false,
 
-    // If true, shows the unsafe roon name warning label when a room name is
+    // If true, shows the unsafe room name warning label when a room name is
     // deemed unsafe (due to the simplicity in the name) and a password is not
     // set or the lobby is not enabled.
     // enableInsecureRoomNameWarning: false,
@@ -400,6 +457,21 @@ var config = {
 
         // The Amplitude APP Key:
         // amplitudeAPPKey: '<APP_KEY>'
+
+        // Configuration for the rtcstats server:
+        // By enabling rtcstats server every time a conference is joined the rtcstats
+        // module connects to the provided rtcstatsEndpoint and sends statistics regarding
+        // PeerConnection states along with getStats metrics polled at the specified
+        // interval.
+        // rtcstatsEnabled: true,
+
+        // In order to enable rtcstats one needs to provide a endpoint url.
+        // rtcstatsEndpoint: wss://rtcstats-server-pilot.jitsi.net/,
+
+        // The interval at which rtcstats will poll getStats, defaults to 1000ms.
+        // If the value is set to 0 getStats won't be polled and the rtcstats client
+        // will only send data related to RTCPeerConnection events.
+        // rtcstatsPolIInterval: 1000
 
         // Array of script URLs to load as lib-jitsi-meet "analytics handlers".
         // scriptURLs: [
@@ -508,7 +580,7 @@ var config = {
     /**
      External API url used to receive branding specific information.
      If there is no url set or there are missing fields, the defaults are applied.
-     None of the fieds are mandatory and the response must have the shape:
+     None of the fields are mandatory and the response must have the shape:
      {
          // The hex value for the colour used as background
          backgroundColor: '#fff',
@@ -553,6 +625,13 @@ var config = {
      requireDisplayName
      tokenAuthUrl
      */
+
+    /**
+     * This property can be used to alter the generated meeting invite links (in combination with a branding domain
+     * which is retrieved internally by jitsi meet) (e.g. https://meet.jit.si/someMeeting
+     * can become https://brandedDomain/roomAlias)
+     */
+    // brandingRoomAlias: null,
 
     // List of undocumented settings used in lib-jitsi-meet
     /**

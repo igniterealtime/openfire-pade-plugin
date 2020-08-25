@@ -20,10 +20,12 @@ import net.java.sip.communicator.util.ServiceUtils;
 import org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig;
 import org.jitsi.jicofo.FocusBundleActivator;
 import org.jitsi.jicofo.FocusManager;
+import org.jitsi.jicofo.JitsiMeetServices;
 import org.jitsi.jicofo.auth.AuthenticationAuthority;
 import org.jitsi.jicofo.osgi.JicofoBundleConfig;
 import org.jitsi.jicofo.reservation.ReservationSystem;
 import org.jitsi.jicofo.xmpp.FocusComponent;
+import org.jitsi.jicofo.bridge.BridgeSelector;
 import org.jitsi.meet.OSGi;
 import org.jitsi.meet.OSGiBundleConfig;
 import org.jivesoftware.openfire.XMPPServer;
@@ -31,6 +33,7 @@ import org.jivesoftware.openfire.container.PluginManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xmpp.component.ComponentManagerFactory;
+import org.jxmpp.jid.impl.*;
 
 /**
  * A wrapper object for the Jitsi Component Focus (jicofo) component.
@@ -102,6 +105,12 @@ public class JitsiJicofoWrapper
         Thread.sleep(2000 ); // Intended to prevent ConcurrentModificationExceptions while starting the component. See https://github.com/igniterealtime/ofmeet-openfire-plugin/issues/4
 
         ComponentManagerFactory.getComponentManager().addComponent(jicofoSubdomain, jicofoComponent);
+
+        // We are still using JVB version 1.x
+        // Add the sole jitsi-videobridge instance to BridgeSelector
+        JitsiMeetServices meetServices = getFocusManager().getJitsiMeetServices();
+        BridgeSelector bridgeSelector = meetServices.getBridgeSelector();
+        bridgeSelector.addJvbAddress(JidCreate.from("jitsi-videobridge." + XMPPServer.getInstance().getServerInfo().getXMPPDomain()));
 
         Log.trace( "Successfully initialized Jitsi Focus Component (jicofo).");
     }

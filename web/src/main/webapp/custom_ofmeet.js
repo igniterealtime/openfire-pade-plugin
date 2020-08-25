@@ -155,7 +155,7 @@ var ofmeet = (function(of)
 
     function setup()
     {
-        if (!APP.connection || !APP.conference)
+        if (!APP.connection || !APP.conference || !APP.conference.isJoined())
         {
             setTimeout(setup, 100);
             return;
@@ -164,11 +164,6 @@ var ofmeet = (function(of)
         if (!config.webinar)
         {
             listenWebPushEvents();
-
-            APP.conference.addConferenceListener(JitsiMeetJS.events.conference.CONFERENCE_JOINED, function()
-            {
-                console.debug("ofmeet.js me joined");
-            });
 
             APP.conference.addConferenceListener(JitsiMeetJS.events.conference.CONFERENCE_LEFT, function()
             {

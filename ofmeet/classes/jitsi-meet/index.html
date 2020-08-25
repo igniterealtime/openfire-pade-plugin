@@ -2,19 +2,31 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="content-type" content="text/html;charset=utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link id="favicon" rel="shortcut icon" href="icon.png" type="image/png" />
     <link rel="manifest" href="manifest_ofmeet.json" />
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
     <link rel="stylesheet" href="css/all.css">
     <link rel="stylesheet" href="tingle.css">
     <link rel="stylesheet" href="jkanban.css">
     <link rel="stylesheet" href="custom_ofmeet.css">
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!JitsiMeetJS.app) {
+                return;
+            }
 
+            JitsiMeetJS.app.renderEntryPoint({
+                Component: JitsiMeetJS.app.entryPoints.APP
+            })
+        })
+    </script>
     <script>
         // IE11 and earlier can be identified via their user agent and be
         // redirected to a page that is known to have no newer js syntax.
         if (window.navigator.userAgent.match(/(MSIE|Trident)/)) {
-            window.location.href = "static/recommendedBrowsers.html";
+            var roomName = encodeURIComponent(window.location.pathname);
+            window.location.href = "static/recommendedBrowsers.html" + "?room=" + roomName;
         }
 
         window.indexLoadedTime = window.performance.now();
@@ -30,7 +42,7 @@
             "logging_config.js",
             "lib-jitsi-meet.min.js",
             "app.bundle.min.js",
-            "all.css"
+            "all.css?v=4369"
         ];
         var loadErrHandler = function(e) {
             var target = e.target;

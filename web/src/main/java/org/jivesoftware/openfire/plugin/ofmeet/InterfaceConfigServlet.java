@@ -70,7 +70,7 @@ public class InterfaceConfigServlet extends HttpServlet
             config.put( "GENERATE_ROOMNAMES_ON_WELCOME_PAGE",    JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.random.roomnames",              true                ) );
             config.put( "DISPLAY_WELCOME_PAGE_CONTENT",          JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.content",           true                ) );
             config.put( "DISPLAY_WELCOME_PAGE_TOOLBAR_ADDITIONAL_CONTENT",JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.toolbarcontent",          false) );
-            config.put( "APP_NAME",                              JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.application.name",              "Openfire Meetings" ) );
+            config.put( "APP_NAME",                              JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.application.name",              "Pade Meetings"     ) );
             config.put( "LANG_DETECTION",                        JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.languagedetection",      false               ) );
             config.put( "INVITATION_POWERED_BY",                 JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.invitation.poweredby",          true                ) );
             config.put( "VIDEO_LAYOUT_FIT",                      JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.video.layout.fit",              "both"              ) );
@@ -93,7 +93,7 @@ public class InterfaceConfigServlet extends HttpServlet
             config.put( "OFMEET_SHOW_CAPTIONS",                  JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.show.captions",                 false               ) );
             config.put( "OFMEET_ENABLE_TRANSCRIPTION",           JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.transcription",          false               ) );
             config.put( "OFMEET_CONTACTS_MGR",                   JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.contacts.manager",              false               ) );
-            config.put( "OFMEET_WELCOME_PAGE_TITLE",             JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.welcomepage.title",             "Openfire Meetings" ) );
+            config.put( "OFMEET_WELCOME_PAGE_TITLE",             JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.welcomepage.title",             "Pade Meetings"     ) );
             config.put( "OFMEET_WELCOME_PAGE_DESCRIPTION",       JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.welcomepage.description",       ""                  ) );
             config.put( "OFMEET_WELCOME_PAGE_CONTENT",           JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.welcome.content",               ""                  ) );
             config.put( "OFMEET_WELCOME_PAGE_TOOLBARCONTENT",    JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.welcome.toolbarcontent",        ""                  ) );

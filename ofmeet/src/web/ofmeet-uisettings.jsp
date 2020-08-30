@@ -291,7 +291,7 @@
         <table cellpadding="3" cellspacing="0" border="0" width="100%">
             <tr>
                 <td width="200"><fmt:message key="ofmeet.application.name"/>:</td>
-                <td><input type="text" size="60" maxlength="100" name="applicationName" value="${admin:getProperty("org.jitsi.videobridge.ofmeet.application.name", "Openfire Meetings")}"></td>
+                <td><input type="text" size="60" maxlength="100" name="applicationName" value="${admin:getProperty("org.jitsi.videobridge.ofmeet.application.name", "Pade Meetings")}"></td>
             </tr>
             <tr>
                 <td width="200"><fmt:message key="ofmeet.active.speaker.avatarsize"/>:</td>
@@ -462,7 +462,7 @@
         <table cellpadding="3" cellspacing="0" border="0" width="100%">
             <tr>
                 <td width="200"><fmt:message key="ofmeet.welcomepage.title"/>:</td>
-                <td><textarea placeholder="<fmt:message key="ofmeet.welcomepage.title.placeholder"/>" cols="60" rows="5" name="welcomeTitle">${admin:getProperty( "org.jitsi.videobridge.ofmeet.welcomepage.title", "Openfire Meetings")}</textarea></td>
+                <td><textarea placeholder="<fmt:message key="ofmeet.welcomepage.title.placeholder"/>" cols="60" rows="5" name="welcomeTitle">${admin:getProperty( "org.jitsi.videobridge.ofmeet.welcomepage.title", "Pade Meetings")}</textarea></td>
             </tr>  
             <tr>
                 <td width="200"><fmt:message key="ofmeet.welcomepage.description"/>:</td>

@@ -313,7 +313,7 @@ public class MeetingPlanner implements Job
     {
         try {
             String fromAddress = "no_reply@" + JiveGlobals.getProperty("ofmeet.email.domain", XMPPServer.getInstance().getServerInfo().getXMPPDomain());
-            String fromName = JiveGlobals.getProperty("ofmeet.email.fromname", "Openfire Meetings");
+            String fromName = JiveGlobals.getProperty("ofmeet.email.fromname", "Pade Meetings");
 
             Log.debug( "sendEmail " + toAddress + " " + subject + "\n " + body + "\n " + htmlBody);
             EmailService.getInstance().sendMessage(toName, toAddress, fromName, fromAddress, subject, body, htmlBody);

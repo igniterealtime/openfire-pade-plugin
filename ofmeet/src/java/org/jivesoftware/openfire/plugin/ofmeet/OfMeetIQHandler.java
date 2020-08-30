@@ -36,7 +36,7 @@ public class OfMeetIQHandler extends IQHandler
 
     public OfMeetIQHandler( Videobridge videobridge )
     {
-        super("Openfire Meetings IQ Handler");
+        super("Pade Meetings IQ Handler");
         this.videobridge = videobridge;
     }
 
@@ -46,7 +46,7 @@ public class OfMeetIQHandler extends IQHandler
         IQ reply = IQ.createResultIQ(iq);
 
         try {
-            Log.info("Openfire Meetings handleIQ \n" + iq.toString());
+            Log.info("Pade Meetings handleIQ \n" + iq.toString());
             final Element element = iq.getChildElement();
 
             JSONObject requestJSON = new JSONObject( element.getText());
@@ -61,7 +61,7 @@ public class OfMeetIQHandler extends IQHandler
             return reply;
 
         } catch(Exception e) {
-            Log.error("Openfire Meetings handleIQ", e);
+            Log.error("Pade Meetings handleIQ", e);
             reply.setError(new PacketError(PacketError.Condition.internal_server_error, PacketError.Type.modify, e.toString()));
             return reply;
         }

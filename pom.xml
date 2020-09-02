@@ -180,12 +180,12 @@
             <url>https://github.com/jitsi/jitsi-maven-repository/raw/master/snapshots/</url>
         </repository>
         <repository>
-            <id>igniterealtime</id>
+            <id>igniterealtime1</id>
             <name>Ignite Realtime Repository</name>
             <url>https://igniterealtime.org/archiva/repository/maven/</url>
         </repository>        
         <repository>
-            <id>igniterealtime</id>
+            <id>igniterealtime2</id>
             <name>Ignite Realtime Repository (Snapshots)</name>
             <url>http://igniterealtime.org/repo/</url>
             <releases>
@@ -198,12 +198,12 @@
     </repositories>
     <pluginRepositories>
         <pluginRepository>
-            <id>igniterealtime</id>
+            <id>igniterealtime1</id>
             <name>Ignite Realtime Repository</name>
             <url>https://igniterealtime.org/archiva/repository/maven/</url>
         </pluginRepository>    
         <pluginRepository>
-            <id>igniterealtime</id>
+            <id>igniterealtime2</id>
             <name>Ignite Realtime Repository (Snapshots)</name>
             <url>http://igniterealtime.org/repo/</url>
             <releases>

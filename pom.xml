@@ -183,7 +183,18 @@
             <id>igniterealtime</id>
             <name>Ignite Realtime Repository</name>
             <url>https://igniterealtime.org/archiva/repository/maven/</url>
-        </repository>      
+        </repository>        
+        <repository>
+            <id>igniterealtime</id>
+            <name>Ignite Realtime Repository (Snapshots)</name>
+            <url>http://igniterealtime.org/repo/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>        
     </repositories>
     <pluginRepositories>
         <pluginRepository>
@@ -191,5 +202,16 @@
             <name>Ignite Realtime Repository</name>
             <url>https://igniterealtime.org/archiva/repository/maven/</url>
         </pluginRepository>    
+        <pluginRepository>
+            <id>igniterealtime</id>
+            <name>Ignite Realtime Repository (Snapshots)</name>
+            <url>http://igniterealtime.org/repo/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
     </pluginRepositories>
 </project>

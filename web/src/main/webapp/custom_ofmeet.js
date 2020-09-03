@@ -37,6 +37,11 @@ var ofmeet = (function(of)
     //
     //-------------------------------------------------------
 
+    function isElectron()
+    {
+      return navigator.userAgent.indexOf('Electron') >= 0;
+    }
+
     window.addEventListener("DOMContentLoaded", function()
     {
         console.debug("ofmeet.js load");
@@ -57,7 +62,7 @@ var ofmeet = (function(of)
                     })
                 })
             }
-            if (window.webkitSpeechRecognition) setupVoiceCommand()
+            if (window.webkitSpeechRecognition && !isElectron()) setupVoiceCommand()
         }
     });
 
@@ -344,13 +349,13 @@ var ofmeet = (function(of)
 
             if (interfaceConfig.OFMEET_TAG_CONFERENCE)
             {
-                if (interfaceConfig.OFMEET_ENABLE_TRANSCRIPTION && window.webkitSpeechRecognition)
+                if (interfaceConfig.OFMEET_ENABLE_TRANSCRIPTION && window.webkitSpeechRecognition && !isElectron())
                 {
                     setupSpeechRecognition();
                 }
 
                 captions.msgsDisabled = !interfaceConfig.OFMEET_SHOW_CAPTIONS;
-                captions.transcriptDisabled = !interfaceConfig.OFMEET_ENABLE_TRANSCRIPTION;
+                captions.transcriptDisabled = !interfaceConfig.OFMEET_ENABLE_TRANSCRIPTION || isElectron();
 
                 createTagsButton();
             }

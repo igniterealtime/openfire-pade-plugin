@@ -20,6 +20,7 @@ var padeapi = (function(api)
         userProfiles: {},
         fastpath: {},
         geoloc: {},
+        ohun: {},
         transferWise: {}
     }
 
@@ -274,11 +275,12 @@ var padeapi = (function(api)
 
     if (getSetting("showToolbarIcons", false))
     {
-        whitelistedPlugins = ["paderoot", "webmeet", "search", "directory", "invite", "vmsg", "payments"];
+        whitelistedPlugins = ["paderoot", "webmeet", "search", "directory", "invite", "vmsg", "payments", "ohun"];
         loadCSS("plugins/css/search.css");
         loadCSS("plugins/css/flatpickr.css");
 
         loadJS("plugins/libs/rss-library.js");
+        loadJS("plugins/libs/hark.js");
         loadJS("../js/jquery.js");
 
         loadJS("plugins/payments.js");
@@ -286,6 +288,7 @@ var padeapi = (function(api)
         loadJS("plugins/directory.js");
         loadJS("plugins/invite.js");
         loadJS("plugins/vmsg.js");
+        loadJS("plugins/ohun.js");
 
         loadJS("plugins/webmeet.js");
 
@@ -326,11 +329,6 @@ var padeapi = (function(api)
             loadJS("plugins/canned.js");
         }
 
-        if (getSetting("enableIrma", false))
-        {
-            whitelistedPlugins.push("irma");
-        }
-
         if (getSetting("enableAudioConfWidget", false))
         {
            whitelistedPlugins.push("audioconf");
@@ -365,8 +363,6 @@ var padeapi = (function(api)
         loadJS("plugins/libs/jspdf.plugin.autotable.js");
         loadJS("plugins/libs/tokenizer.js");
         loadJS("plugins/libs/js-summarize.js");
-        loadJS("../irma/vendors~jwt.js");
-        loadJS("../irma/irma.js");
     }
 
     function doConverse(server, username, password, anonUser)
@@ -555,7 +551,7 @@ var padeapi = (function(api)
                     document.title = chrome.i18n.getMessage('manifest_shortExtensionName') + " Converse | " + this._converse.VERSION_NAME;
 
                     _converse.api.settings.update({
-                        rai_muc_service: "conference." + _converse.domain,
+                        rai_muc_service: "conference." + getSetting("domain"),
                         rai_notification: true,
                         rai_notification_label: "Room Activity Indicator",
                         show_client_info: false
@@ -576,7 +572,7 @@ var padeapi = (function(api)
 
                             setInterval(function()
                             {
-                                console.debug("timeago render");
+                                //console.debug("timeago render");
                                 timeago.cancel();
                                 var locale = navigator.language.replace('-', '_');
                                 timeago.render(document.querySelectorAll('.chat-msg__time_span'), locale);
@@ -1583,8 +1579,20 @@ var padeapi = (function(api)
                 dataUri = api.createAvatar(display_name, null, null, null, null);
             }
 
-            msg_content.innerHTML = '<span id="pade-badge-' + id + '" class="pade-badge" data-badge="' + numUnread + '"><img class="avatar" src="' + dataUri + '" style="width: 22px; width: 22px; height: 100%; margin-right: 10px;"/></span><span title="' + newMessage + '" data-label="' + display_name + '" data-jid="' + jid + '" data-type="' + chatType + '" id="pade-active-' + id +'" class="pade-active-conv">' + display_name + '</span><a href="#" id="pade-active-conv-close-' + id +'" data-jid="' + jid + '" class="pade-active-conv-close fa fa-times"></a>';
+            // ohun status
+
+            msg_content.innerHTML = '<span id="pade-badge-' + id + '" class="pade-badge" data-badge="' + numUnread + '"><img class="avatar" src="' + dataUri + '" style="width: 22px; width: 22px; height: 100%; margin-right: 10px;"/></span><span title="' + newMessage + '" data-label="' + display_name + '" data-jid="' + jid + '" data-type="' + chatType + '" id="pade-active-' + id +'" class="pade-active-conv">' + display_name + '</span><a href="#" id="pade-active-conv-close-' + id +'" data-jid="' + jid + '" class="pade-active-conv-close fa fa-times"></a><a href="#" id="pade-active-conv-ohun-' + id +'" data-jid="' + jid + '" class="pade-active-conv-ohun fas fa-volume-up"></a>';
             activeDiv.appendChild(msg_content);
+
+            const item = document.getElementById('pade-active-conv-ohun-' + id);
+
+            if (item && paderoot.ohun[jid] && paderoot.ohun[jid].peer)
+            {
+                item.style.color =  "red";
+                item.style.visibility = "visible";
+            }
+
+            // handlers for mouse click and badge status
 
             const openButton = document.getElementById("pade-active-" + id);
             const openBadge = document.getElementById("pade-badge-" + id);
@@ -1632,7 +1640,12 @@ var padeapi = (function(api)
                     const jid = evt.target.getAttribute("data-jid");
                     const view = _inverse.chatboxviews.get(jid);
 
-                    if (view) view.close();
+                    if (view)
+                    {
+                        const ohun = _converse.pluggable.plugins["ohun"];
+                        if (ohun) ohun.closeKraken(view.model);
+                        view.close();
+                    }
 
                 }, false);
             }
@@ -2427,6 +2440,7 @@ var padeapi = (function(api)
 
     api.origins = {};
     api.geoloc = paderoot.geoloc;
+    api.ohun = paderoot.ohun;
 
     return api;
 

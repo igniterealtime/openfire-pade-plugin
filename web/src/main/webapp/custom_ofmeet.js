@@ -900,12 +900,15 @@ var ofmeet = (function(of)
         else {
             const largeVideo = document.querySelector("#largeVideo");
             const iframe = largeVideo.cloneNode(false);
-
             largeVideo.parentNode.appendChild(iframe);
             largeVideo.style.display = "none";
-            iframe.requestFullscreen();
 
+            iframe.requestFullscreen();
             iframe.outerHTML = '<iframe src=' + url + ' id="ofmeet-content" style="width: 90%; height: 92%; border: 0;padding-left: 0px; padding-top: 0px;">'
+
+            const largeVideoElementsContainer = document.querySelector("#largeVideoElementsContainer");
+            largeVideoElementsContainer.style.visibility = "initial";
+            largeVideoElementsContainer.style.opacity = "1";
 
             const cryptpad = document.querySelector('#ofmeet-content');
 

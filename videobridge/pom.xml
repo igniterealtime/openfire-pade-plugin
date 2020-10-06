@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.igniterealtime.openfire.ofmeet</groupId>
         <artifactId>parent</artifactId>
-        <version>1.0.1-SNAPSHOT</version>
+        <version>1.0.1</version>
     </parent>
 
     <artifactId>videobridge</artifactId>
@@ -69,7 +69,7 @@
                     <dependency>
                         <groupId>org.igniterealtime.openfire</groupId>
                         <artifactId>webadmintld</artifactId>
-                        <version>4.2.0-SNAPSHOT</version>
+                        <version>4.2.0</version>
                     </dependency>
                 </dependencies>
             </plugin>            

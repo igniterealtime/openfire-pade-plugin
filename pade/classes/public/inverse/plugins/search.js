@@ -136,7 +136,23 @@
 
                     if (cloudData.length > 0)
                     {
-                        this.el.querySelector("#pade-search-results").innerHTML = "";
+                        const searchResults = this.el.querySelector("#pade-search-results");
+                        searchResults.innerHTML = "";
+                        searchResults.style.cursor = "pointer";
+
+                        searchResults.addEventListener("click", function(evt)
+                        {
+                            searchResults.requestFullscreen();
+                            searchResults.innerHTML = "";
+
+                            makeWordCloud({
+                                width: screen.availWidth - 50,
+                                height: screen.availHeight - 50,
+                                font: "Helvetica",
+                                container: {element: this.el, selector: "#pade-search-results"},
+                                words: processData(cloudData)
+                            });
+                        });
 
                         makeWordCloud({
                             width: 700,

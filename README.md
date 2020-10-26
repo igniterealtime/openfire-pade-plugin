@@ -15,7 +15,7 @@ First, there are few things you need to know. These include:
 
 * ofmeet and offocus plugins do not work properly with Firefox. It works best with Chromium based apps like Chrome, Edge, Electron and Opera. 
 
-* ofmeet and offocus plugins will not work out of the box if your Openfire server is configured to use LDAP 34. You would need to create the Jitsi focus bot user and give it owner/admin permmissions to the MUC service manually.
+* ofmeet and offocus plugins will not work out of the box if your Openfire server is configured to use LDAP 34. You would need to create the Jitsi focus bot user and give it owner/admin permissions to the MUC service manually.
 
 * ofmeet and offocus plugins have minimal network requirements and works out of the box internally on a local area network (LAN) or with a hosted Openfire server on the internet. If your Openfire server is placed behind a NAT and firewall and you want to allow external internet access, then you require some network expertise to configure it. You would need to open a few UDP/TCP ports and provide both the public and private IP addresses of your openfire server.
 

@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.igniterealtime.openfire.ofmeet</groupId>
         <artifactId>parent</artifactId>
-        <version>1.0.1</version>
+        <version>${pade.version}</version>
     </parent>
 
     <artifactId>web</artifactId>

@@ -258,12 +258,13 @@ public class MeetController {
         {
             String room = username + "-" + System.currentTimeMillis();
             String domain = XMPPServer.getInstance().getServerInfo().getXMPPDomain();
+            String mucDomain = JiveGlobals.getProperty( "ofmeet.main.muc", "conference" + "." + domain);
 
             try {
                 JID jid1 = new JID(username + "@" + domain);
                 JID jid2 = new JID(jid);
 
-                String confJid = room + "@conference." + domain;
+                String confJid = room + "@" + mucDomain;
 
                 Message message1 = new Message();
                 message1.setFrom(jid1);

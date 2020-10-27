@@ -73,6 +73,7 @@ public class ConfigServlet extends HttpServlet
             final OFMeetConfig ofMeetConfig = new OFMeetConfig();
 
             final String xmppDomain = XMPPServer.getInstance().getServerInfo().getXMPPDomain();
+            final String mucDomain = JiveGlobals.getProperty( "ofmeet.main.muc", "conference" + "." + xmppDomain);
 
             final JSONArray conferences = new JSONArray();
 
@@ -130,7 +131,7 @@ public class ConfigServlet extends HttpServlet
 
             final Map<String, String> hosts = new HashMap<>();
             hosts.put( "domain", xmppDomain );
-            hosts.put( "muc", "conference." + xmppDomain );
+            hosts.put( "muc", mucDomain );
             hosts.put( "bridge", "jitsi-videobridge." + xmppDomain );
             hosts.put( "focus", "focus." + xmppDomain );
             config.put( "hosts", hosts );

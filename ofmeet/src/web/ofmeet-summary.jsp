@@ -1,6 +1,6 @@
 <%--
-  -	$Revision$
-  -	$Date$
+  - $Revision$
+  - $Date$
   -
   - Copyright (C) 2004-2008 Jive Software. All rights reserved.
   -
@@ -17,7 +17,8 @@
   - limitations under the License.
 --%>
 
-<%@ page import="org.jivesoftware.openfire.XMPPServer,
+<%@ page import="org.jivesoftware.openfire.XMPPServer, 
+                 org.jivesoftware.util.JiveGlobals,
                  org.jivesoftware.openfire.plugin.ofmeet.OfMeetPlugin"
     errorPage="error.jsp"
 %>
@@ -29,8 +30,7 @@
 <% webManager.init(request, response, session, application, out ); %>
 
 <%
-    final String mucDomain = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatServices().iterator().next().getServiceDomain();
-
+    final String mucDomain = JiveGlobals.getProperty( "ofmeet.main.muc", "conference" + "." + XMPPServer.getInstance().getServerInfo().getXMPPDomain());    
     final OfMeetPlugin container = (OfMeetPlugin) XMPPServer.getInstance().getPluginManager().getPlugin("ofmeet");
 
     pageContext.setAttribute( "ofmeet", container );

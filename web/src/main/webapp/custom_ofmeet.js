@@ -14,13 +14,14 @@ var ofmeet = (function(of)
     IMAGES.poll = '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 13.774,26.028A2.060,2.060 1080 1 0 17.894,26.028A2.060,2.060 1080 1 0 13.774,26.028zM 19.464,18.252c 2.898-1.596, 4.37-3.91, 4.37-6.876c0-5.094-4.018-7.376-8-7.376c-3.878,0-8,2.818-8,8.042 c0,1.104, 0.894,2, 2,2s 2-0.896, 2-2c0-2.778, 2.074-4.042, 4-4.042c 1.494,0, 4,0.438, 4,3.376c0,1.042-0.274,2.258-2.298,3.374 C 16.16,15.504, 13.834,17.462, 13.834,20c0,1.104, 0.894,2, 2,2s 2-0.896, 2-2C 17.834,19.628, 18.624,18.714, 19.464,18.252z"></path></g></svg></span>';
     IMAGES.kanban = '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 31.966,3.896C 31.878,2.866, 31.046,2, 30,2L 2,2 C 0.954,2, 0.122,2.866, 0.034,3.896L0,3.896 l0,0.166 L0,8 l0,14.166 L0,24 l0,6 c0,1.104, 0.896,2, 2,2l 28,0 c 1.104,0, 2-0.896, 2-2L 32,8 L 32,4.062 L 32,3.896 L 31.966,3.896 z M 12,14L 12,8 l 8,0 l0,6 L 12,14 z M 20,16l0,6.166 L 12,22.166 L 12,16 L 20,16 z M 10,8l0,6 L 2,14 L 2,8 L 10,8 z M 2,16l 8,0 l0,6.166 L 2,22.166 L 2,16 z M 2,30l0-6 l 8,0 l0,6 L 2,30 z M 12,30l0-6 l 8,0 l0,6 L 12,30 z M 30,30l-8,0 l0-6 l 8,0 L 30,30 z M 30,22.166l-8,0 L 22,16 l 8,0 L 30,22.166 z M 30,14l-8,0 L 22,8 l 8,0 L 30,14 z"></path></g></svg></span>';
     IMAGES.whiteboard = '<svg width="24" height="24" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="32" height="32.11199951171875" viewBox="0 0 32 32.11199951171875" enable-background="new 0 0 16 16" xml:space="preserve" fill="#000000"> <g><path d="M 30,0L 4,0 C 2.896,0, 2,0.896, 2,2c0,1.104, 0.896,2, 2,2l0,16 c0,1.104, 0.896,2, 2,2l 10,0 l0,3.122 L 10.328,30.26 c-0.408,0.37-0.44,1.002-0.068,1.412c 0.374,0.408, 1.006,0.44, 1.412,0.068L 16,27.82l0,3.18 C 16,31.552, 16.448,32, 17,32S 18,31.552, 18,31 l0-3.18 l 4.328,3.92C 22.52,31.914, 22.76,32, 23,32c 0.272,0, 0.542-0.112, 0.74-0.328c 0.372-0.41, 0.34-1.042-0.068-1.412L 18,25.122L 18,22 l 10,0 c 1.104,0, 2-0.896, 2-2L 30,4 c 1.104,0, 2-0.896, 2-2C 32,0.896, 31.104,0, 30,0z M 25.694,7.72l-7,6.75 C 18.31,14.842, 17.702,14.844, 17.31,14.474L 14.22,11.536L 9.75,16.194C 9.554,16.396, 9.292,16.5, 9.030,16.5c-0.25,0-0.498-0.092-0.694-0.28 C 7.938,15.84, 7.926,15.208, 8.308,14.806l 5.158-5.376C 13.848,9.040, 14.48,9.024, 14.876,9.4l 3.12,2.964l 6.31-6.086 c 0.396-0.378, 1.030-0.376, 1.414,0.028C 26.104,6.704, 26.092,7.336, 25.694,7.72z"></path></g></svg>';
-    IMAGES.person = '<svg width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 16,0C 7.164,0,0,7.164,0,16s 7.164,16, 16,16s 16-7.164, 16-16C 32,7.162, 24.836,0, 16,0z M 16.568,7.984 C 16.74,7.594, 16.972,7.25, 17.266,6.956c 0.296-0.296, 0.636-0.528, 1.028-0.7C 18.684,6.084, 19.11,6, 19.564,6 c 0.458,0, 0.88,0.084, 1.27,0.256c 0.39,0.17, 0.732,0.404, 1.026,0.7c 0.296,0.294, 0.53,0.638, 0.7,1.028 c 0.172,0.39, 0.258,0.812, 0.258,1.27c0,0.458-0.086,0.88-0.258,1.27c-0.17,0.39-0.404,0.732-0.7,1.028 c-0.296,0.294-0.636,0.528-1.026,0.7c-0.39,0.17-0.812,0.256-1.27,0.256c-0.456,0-0.88-0.086-1.27-0.256 c-0.39-0.172-0.732-0.404-1.028-0.7C 16.972,11.256, 16.74,10.914, 16.568,10.524C 16.396,10.134, 16.31,9.71, 16.31,9.254 C 16.31,8.796, 16.396,8.374, 16.568,7.984z M 11.502,7.468c 0.486-0.484, 1.070-0.726, 1.754-0.726c 0.704,0, 1.3,0.242, 1.784,0.726 C 15.526,7.954, 15.768,8.54, 15.768,9.226c0,0.704-0.244,1.298-0.73,1.784C 14.556,11.494, 13.96,11.736, 13.256,11.736 c-0.682,0-1.268-0.242-1.754-0.728c-0.486-0.486-0.73-1.080-0.73-1.784C 10.774,8.54, 11.016,7.954, 11.502,7.468z M 7.136,7.926 c 0.37-0.372, 0.822-0.558, 1.354-0.558c 0.534,0, 0.98,0.186, 1.342,0.558c 0.36,0.37, 0.54,0.812, 0.54,1.326 c0,0.534-0.182,0.984-0.54,1.356C 9.47,10.98, 9.024,11.166, 8.49,11.166c-0.532,0-0.984-0.186-1.354-0.556 C 6.764,10.238, 6.578,9.786, 6.578,9.254C 6.578,8.74, 6.764,8.296, 7.136,7.926z M 24,26L 15.21,26 l0-4 L 9.704,22 L 9.704,18 L 6.418,18 L 6.418,14.362 c0-0.646-0.016-1.194, 0.432-1.64c 0.446-0.446, 0.994-0.67, 1.64-0.67c 0.552,0, 1.030,0.166, 1.428,0.5 c 0.4,0.334, 0.664,0.746, 0.8,1.242c 0.322-0.38, 0.704-0.674, 1.14-0.886c 0.438-0.208, 0.904-0.314, 1.398-0.314 c 0.78,0, 1.46,0.234, 2.042,0.7c 0.58,0.466, 0.966,1.052, 1.156,1.754c 0.4-0.38, 0.864-0.686, 1.4-0.912 c 0.532-0.228, 1.104-0.342, 1.712-0.342c 0.61,0, 1.186,0.114, 1.728,0.342c 0.54,0.228, 1.012,0.542, 1.412,0.942 c 0.4,0.4, 0.718,0.87, 0.954,1.412C 23.898,17.030, 24,17.606, 24,18.216L 24,26 z"></path></g></svg>'
-    IMAGES.contact = '<svg width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 2,0C 0.896,0,0,0.896,0,2l0,28 c0,1.104, 0.896,2, 2,2l 2,0 L 4,0 L 2,0 zM 26,0L 6,0 l0,32 l 20,0 c 1.104,0, 2-0.896, 2-2L 28,2 C 28,0.896, 27.104,0, 26,0z M 16.89,7.708 c 1.672,0, 3.026,1.356, 3.026,3.026c0,1.672-1.356,3.028-3.026,3.028c-1.672,0-3.028-1.356-3.028-3.028 C 13.862,9.062, 15.218,7.708, 16.89,7.708z M 12,21.614c0-3.668, 2.218-6.64, 4.952-6.64s 4.952,2.974, 4.952,6.64S 12,25.28, 12,21.614zM 30,2L 32,2L 32,8L 30,8zM 30,10L 32,10L 32,16L 30,16zM 30,18L 32,18L 32,24L 30,24z"></path></g></svg>';
-    IMAGES.mic = '<svg style="fill:white;margin-top:4px" width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 14,25.808L 14,30 L 11,30 C 10.448,30, 10,30.448, 10,31C 10,31.552, 10.448,32, 11,32l 4.98,0 L 16.020,32 l 4.98,0 c 0.552,0, 1-0.448, 1-1c0-0.552-0.448-1-1-1L 18,30 l0-4.204 c 4.166-0.822, 8-4.194, 8-9.796L 26,13 C 26,12.448, 25.552,12, 25,12 S 24,12.448, 24,13L 24,16 c0,5.252-4.026,8-8,8c-3.854,0-8-2.504-8-8L 8,13 C 8,12.448, 7.552,12, 7,12S 6,12.448, 6,13L 6,16 C 6,21.68, 9.766,25.012, 14,25.808zM 16,20c 2.21,0, 4-1.79, 4-4L 20,4 c0-2.21-1.79-4-4-4S 12,1.79, 12,4l0,12 C 12,18.21, 13.79,20, 16,20z"></path></g></svg>';
-    IMAGES.mail = '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 30,8L 2,8 C 0.896,8,0,8.896,0,10l0,3.358 l 16,6.4l 16-6.4L 32,10 C 32,8.896, 31.104,8, 30,8zM0,16.624L0,30 c0,1.104, 0.896,2, 2,2l 28,0 c 1.104,0, 2-0.896, 2-2L 32,16.624 l-16,6.4L0,16.624z"></path></g></svg>';
-    IMAGES.desktop = '<svg id="ofmeet-desktop" width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 30,2L 2,2 C 0.896,2,0,2.896,0,4l0,18 c0,1.104, 0.896,2, 2,2l 9.998,0 c-0.004,1.446-0.062,3.324-0.61,4L 10.984,28 C 10.44,28, 10,28.448, 10,29C 10,29.552, 10.44,30, 10.984,30l 10.030,0 C 21.56,30, 22,29.552, 22,29c0-0.552-0.44-1-0.984-1l-0.404,0 c-0.55-0.676-0.606-2.554-0.61-4L 30,24 c 1.104,0, 2-0.896, 2-2L 32,4 C 32,2.896, 31.104,2, 30,2z M 14,24l-0.002,0.004 C 13.998,24.002, 13.998,24.002, 14,24L 14,24z M 18.002,24.004L 18,24l 0.002,0 C 18.002,24.002, 18.002,24.002, 18.002,24.004z M 30,20L 2,20 L 2,4 l 28,0 L 30,20 z"></path></g></svg>';
+    IMAGES.person   = '<svg width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 16,0C 7.164,0,0,7.164,0,16s 7.164,16, 16,16s 16-7.164, 16-16C 32,7.162, 24.836,0, 16,0z M 16.568,7.984 C 16.74,7.594, 16.972,7.25, 17.266,6.956c 0.296-0.296, 0.636-0.528, 1.028-0.7C 18.684,6.084, 19.11,6, 19.564,6 c 0.458,0, 0.88,0.084, 1.27,0.256c 0.39,0.17, 0.732,0.404, 1.026,0.7c 0.296,0.294, 0.53,0.638, 0.7,1.028 c 0.172,0.39, 0.258,0.812, 0.258,1.27c0,0.458-0.086,0.88-0.258,1.27c-0.17,0.39-0.404,0.732-0.7,1.028 c-0.296,0.294-0.636,0.528-1.026,0.7c-0.39,0.17-0.812,0.256-1.27,0.256c-0.456,0-0.88-0.086-1.27-0.256 c-0.39-0.172-0.732-0.404-1.028-0.7C 16.972,11.256, 16.74,10.914, 16.568,10.524C 16.396,10.134, 16.31,9.71, 16.31,9.254 C 16.31,8.796, 16.396,8.374, 16.568,7.984z M 11.502,7.468c 0.486-0.484, 1.070-0.726, 1.754-0.726c 0.704,0, 1.3,0.242, 1.784,0.726 C 15.526,7.954, 15.768,8.54, 15.768,9.226c0,0.704-0.244,1.298-0.73,1.784C 14.556,11.494, 13.96,11.736, 13.256,11.736 c-0.682,0-1.268-0.242-1.754-0.728c-0.486-0.486-0.73-1.080-0.73-1.784C 10.774,8.54, 11.016,7.954, 11.502,7.468z M 7.136,7.926 c 0.37-0.372, 0.822-0.558, 1.354-0.558c 0.534,0, 0.98,0.186, 1.342,0.558c 0.36,0.37, 0.54,0.812, 0.54,1.326 c0,0.534-0.182,0.984-0.54,1.356C 9.47,10.98, 9.024,11.166, 8.49,11.166c-0.532,0-0.984-0.186-1.354-0.556 C 6.764,10.238, 6.578,9.786, 6.578,9.254C 6.578,8.74, 6.764,8.296, 7.136,7.926z M 24,26L 15.21,26 l0-4 L 9.704,22 L 9.704,18 L 6.418,18 L 6.418,14.362 c0-0.646-0.016-1.194, 0.432-1.64c 0.446-0.446, 0.994-0.67, 1.64-0.67c 0.552,0, 1.030,0.166, 1.428,0.5 c 0.4,0.334, 0.664,0.746, 0.8,1.242c 0.322-0.38, 0.704-0.674, 1.14-0.886c 0.438-0.208, 0.904-0.314, 1.398-0.314 c 0.78,0, 1.46,0.234, 2.042,0.7c 0.58,0.466, 0.966,1.052, 1.156,1.754c 0.4-0.38, 0.864-0.686, 1.4-0.912 c 0.532-0.228, 1.104-0.342, 1.712-0.342c 0.61,0, 1.186,0.114, 1.728,0.342c 0.54,0.228, 1.012,0.542, 1.412,0.942 c 0.4,0.4, 0.718,0.87, 0.954,1.412C 23.898,17.030, 24,17.606, 24,18.216L 24,26 z"></path></g></svg>'
+    IMAGES.contact  = '<svg width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 2,0C 0.896,0,0,0.896,0,2l0,28 c0,1.104, 0.896,2, 2,2l 2,0 L 4,0 L 2,0 zM 26,0L 6,0 l0,32 l 20,0 c 1.104,0, 2-0.896, 2-2L 28,2 C 28,0.896, 27.104,0, 26,0z M 16.89,7.708 c 1.672,0, 3.026,1.356, 3.026,3.026c0,1.672-1.356,3.028-3.026,3.028c-1.672,0-3.028-1.356-3.028-3.028 C 13.862,9.062, 15.218,7.708, 16.89,7.708z M 12,21.614c0-3.668, 2.218-6.64, 4.952-6.64s 4.952,2.974, 4.952,6.64S 12,25.28, 12,21.614zM 30,2L 32,2L 32,8L 30,8zM 30,10L 32,10L 32,16L 30,16zM 30,18L 32,18L 32,24L 30,24z"></path></g></svg>';
+    IMAGES.mic      = '<svg style="fill:white;margin-top:4px" width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 14,25.808L 14,30 L 11,30 C 10.448,30, 10,30.448, 10,31C 10,31.552, 10.448,32, 11,32l 4.98,0 L 16.020,32 l 4.98,0 c 0.552,0, 1-0.448, 1-1c0-0.552-0.448-1-1-1L 18,30 l0-4.204 c 4.166-0.822, 8-4.194, 8-9.796L 26,13 C 26,12.448, 25.552,12, 25,12 S 24,12.448, 24,13L 24,16 c0,5.252-4.026,8-8,8c-3.854,0-8-2.504-8-8L 8,13 C 8,12.448, 7.552,12, 7,12S 6,12.448, 6,13L 6,16 C 6,21.68, 9.766,25.012, 14,25.808zM 16,20c 2.21,0, 4-1.79, 4-4L 20,4 c0-2.21-1.79-4-4-4S 12,1.79, 12,4l0,12 C 12,18.21, 13.79,20, 16,20z"></path></g></svg>';
+    IMAGES.mail     = '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 30,8L 2,8 C 0.896,8,0,8.896,0,10l0,3.358 l 16,6.4l 16-6.4L 32,10 C 32,8.896, 31.104,8, 30,8zM0,16.624L0,30 c0,1.104, 0.896,2, 2,2l 28,0 c 1.104,0, 2-0.896, 2-2L 32,16.624 l-16,6.4L0,16.624z"></path></g></svg>';
+    IMAGES.desktop  = '<svg id="ofmeet-desktop" width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 30,2L 2,2 C 0.896,2,0,2.896,0,4l0,18 c0,1.104, 0.896,2, 2,2l 9.998,0 c-0.004,1.446-0.062,3.324-0.61,4L 10.984,28 C 10.44,28, 10,28.448, 10,29C 10,29.552, 10.44,30, 10.984,30l 10.030,0 C 21.56,30, 22,29.552, 22,29c0-0.552-0.44-1-0.984-1l-0.404,0 c-0.55-0.676-0.606-2.554-0.61-4L 30,24 c 1.104,0, 2-0.896, 2-2L 32,4 C 32,2.896, 31.104,2, 30,2z M 14,24l-0.002,0.004 C 13.998,24.002, 13.998,24.002, 14,24L 14,24z M 18.002,24.004L 18,24l 0.002,0 C 18.002,24.002, 18.002,24.002, 18.002,24.004z M 30,20L 2,20 L 2,4 l 28,0 L 30,20 z"></path></g></svg>';
     IMAGES.confetti = '<svg width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 30,8L 18.084,8 l0,6 L 32,14 L 32,10 C 32,8.896, 31.104,8, 30,8zM 2,8C 0.896,8,0,8.896,0,10l0,4 l 14,0 L 14,8 L 2,8 zM 2,16l0,14 c0,1.104, 0.896,2, 2,2l 10,0 L 14,16 L 2,16 zM 28,32c 1.104,0, 2-0.896, 2-2L 30,16 L 18.084,16 l0,16 L 28,32 zM 15.998,5.984l 0.006,0 C 16.002,5.988, 16,5.996, 16,6l 2.084,0 C 19.854,6, 22.36,6, 24,6c 2.762,0, 4-1.344, 4-3 S 26.762,0, 24,0c-2.586,0-4.622,1.164-6,2.514C 17.396,2.156, 16.698,1.938, 15.942,1.938c-0.724,0-1.394,0.204-1.982,0.536 C 12.584,1.14, 10.56,0, 8,0C 5.238,0, 4,1.344, 4,3S 5.238,6, 8,6c 1.666,0, 4.226,0, 6,0l 2,0 C 16,5.996, 15.998,5.988, 15.998,5.984z M 26,3 C 26,3.826, 24.912,4, 24,4L 19.458,4 C 19.442,3.972, 19.428,3.942, 19.412,3.916C 20.428,2.928, 21.968,2, 24,2C 24.912,2, 26,2.174, 26,3z M 6,3 C 6,2.174, 7.088,2, 8,2c 1.988,0, 3.496,0.89, 4.512,1.844C 12.48,3.894, 12.456,3.948, 12.426,4L 8,4 C 7.088,4, 6,3.826, 6,3z"></path></g></svg>';
-    IMAGES.picture = '<svg width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 17.228,11.688A2.782,2.782 1080 1 0 22.792,11.688A2.782,2.782 1080 1 0 17.228,11.688zM 26,28L 28,28L 28,26L 28,22L 28,16L 20,22L 10,14L 4,20L 4,22L 4,26L 4,28L 6,28 zM 30,4L 2,4 C 0.896,4,0,4.896,0,6l0,24 c0,1.104, 0.896,2, 2,2l 28,0 c 1.104,0, 2-0.896, 2-2L 32,6 C 32,4.896, 31.104,4, 30,4z M 30,30L 2,30 L 2,6 l 28,0 L 30,30 z"></path></g></svg>';
+    IMAGES.picture  = '<svg width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 17.228,11.688A2.782,2.782 1080 1 0 22.792,11.688A2.782,2.782 1080 1 0 17.228,11.688zM 26,28L 28,28L 28,26L 28,22L 28,16L 20,22L 10,14L 4,20L 4,22L 4,26L 4,28L 6,28 zM 30,4L 2,4 C 0.896,4,0,4.896,0,6l0,24 c0,1.104, 0.896,2, 2,2l 28,0 c 1.104,0, 2-0.896, 2-2L 32,6 C 32,4.896, 31.104,4, 30,4z M 30,30L 2,30 L 2,6 l 28,0 L 30,30 z"></path></g></svg>';
+    IMAGES.cursor   = '<svg width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 26.56,21.272c 0.214-0.366, 0.176-0.826-0.098-1.15L 9.828,0.356C 9.556,0.034, 9.112-0.084, 8.72,0.060 C 8.326,0.204, 8.062,0.58, 8.062,1l0,26.094 c0,0.432, 0.276,0.814, 0.686,0.95c 0.102,0.034, 0.208,0.050, 0.314,0.050 c 0.31,0, 0.61-0.144, 0.802-0.404l 4.472-6.024l 3.102,8.874c 0.398,1.136, 1.642,1.736, 2.778,1.338s 1.736-1.642, 1.338-2.778 l-3.044-8.706l 6.996,1.354C 25.928,21.83, 26.346,21.636, 26.56,21.272z"></path></g></svg>';
 
     const SMILIES = [":)", ":(", ":D", ":+1:", ":P", ":wave:", ":blush:", ":slightly_smiling_face:", ":scream:", ":*", ":-1:", ":mag:", ":heart:", ":innocent:", ":angry:", ":angel:", ";(", ":clap:", ";)", ":beer:"];
     const nickColors = {}, padsList = [], captions = {msgsDisabled: true, msgs: []}, breakout = {rooms: [], duration: 60, roomCount: 10, wait: 10}, pdf_body = [];
@@ -30,7 +31,7 @@ var ofmeet = (function(of)
     let padsModalOpened = false, contactsModalOpened = false, swRegistration = null, participants = {}, recordingAudioTrack = {}, recordingVideoTrack = {}, videoRecorder = {}, recorderStreams = {}, customStore = {}, filenames = {}, dbnames = [];
     let clockTrack = {start: 0, stop: 0, joins: 0, leaves: 0}, handsRaised = 0;
     let tags = {location: "", date: (new Date()).toISOString().split('T')[0], subject: "", host: "", activity: ""};
-    let audioTemporaryUnmuted = false;
+    let audioTemporaryUnmuted = false, cursorShared = false;
     //-------------------------------------------------------
     //
     //  window events
@@ -1577,7 +1578,7 @@ var ofmeet = (function(of)
 
     function handlePresence(presence)
     {
-        console.debug("handlePresence", presence);
+        //console.debug("handlePresence", presence);
         const Strophe = APP.connection.xmpp.connection.Strophe;
         const id = Strophe.getResourceFromJid(presence.getAttribute("from"));
         const raisedHand = presence.querySelector("jitsi_participant_raisedHand");
@@ -2148,42 +2149,79 @@ var ofmeet = (function(of)
 
         console.debug("postJoinSetup");
 
-        if (interfaceConfig.OFMEET_ENABLE_CRYPTPAD)
+        if (interfaceConfig.OFMEET_ENABLE_CRYPTPAD || interfaceConfig.OFMEET_ENABLE_WHITEBOARD || interfaceConfig.OFMEET_ENABLE_CONFETTI)
         {
-            createPadsButton();
-        }
-
-        if (interfaceConfig.OFMEET_ENABLE_WHITEBOARD && interfaceConfig.OFMEET_WHITEBOARD_URL && interfaceConfig.OFMEET_WHITEBOARD_URL != "")
-        {
-            APP.conference.commands.addCommandListener("WHITEBOARD", function()
+            APP.conference.commands.addCommandListener("CURSOR", function(event)
             {
-                const url = interfaceConfig.OFMEET_WHITEBOARD_URL.endsWith("/") ? interfaceConfig.OFMEET_WHITEBOARD_URL + APP.conference.roomName : interfaceConfig.OFMEET_WHITEBOARD_URL + "/" + APP.conference.roomName;
-                window.open(url, 'ofmeet-whiteboard');
+                //console.log("CURSOR remote event", event);
+                window.top.postMessage({ action: 'ofmeet.action.share', json: JSON.parse(event.value)}, '*');
            });
 
-            const whiteboardButton = addToolbarItem('ofmeet-whiteboard', '<div id="ofmeet-whiteboard" class="toolbox-icon"><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.whiteboard + '</div></div>', "Share a whiteboard", ".button-group-right");
+            const cursorButton = addToolbarItem('ofmeet-cursor', '<div id="ofmeet-cursor" class="toolbox-icon"><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.cursor + '</div></div>', "Share cursor/mouse pointer", ".button-group-right");
 
-            if (whiteboardButton) whiteboardButton.addEventListener("click", function(evt)
+            if (cursorButton) cursorButton.addEventListener("click", function(evt)
             {
                 evt.stopPropagation();
-                APP.conference.commands.sendCommandOnce("WHITEBOARD", {value: !0})
+
+                if (!cursorShared) {
+                    handleCursorEvent({data: {event: 'ofmeet.event.url.message', action: 'setup', from: APP.conference.getLocalDisplayName()}});
+                    window.addEventListener('message', handleCursorEvent);
+                } else {
+                    handleCursorEvent({data: {event: 'ofmeet.event.url.message', action: 'destroy', from: APP.conference.getLocalDisplayName()}});
+                    window.removeEventListener('message', handleCursorEvent);
+                }
+                cursorShared = !cursorShared;
             });
+
+            if (interfaceConfig.OFMEET_ENABLE_CRYPTPAD)
+            {
+                createPadsButton();
+            }
+
+            if (interfaceConfig.OFMEET_ENABLE_WHITEBOARD && interfaceConfig.OFMEET_WHITEBOARD_URL && interfaceConfig.OFMEET_WHITEBOARD_URL != "")
+            {
+                APP.conference.commands.addCommandListener("WHITEBOARD", function()
+                {
+                    const url = interfaceConfig.OFMEET_WHITEBOARD_URL.endsWith("/") ? interfaceConfig.OFMEET_WHITEBOARD_URL + APP.conference.roomName : interfaceConfig.OFMEET_WHITEBOARD_URL + "/" + APP.conference.roomName;
+                    window.open(url, 'ofmeet-whiteboard');
+               });
+
+                const whiteboardButton = addToolbarItem('ofmeet-whiteboard', '<div id="ofmeet-whiteboard" class="toolbox-icon"><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.whiteboard + '</div></div>', "Share a whiteboard", ".button-group-right");
+
+                if (whiteboardButton) whiteboardButton.addEventListener("click", function(evt)
+                {
+                    evt.stopPropagation();
+                    APP.conference.commands.sendCommandOnce("WHITEBOARD", {value: !0})
+                });
+            }
+
+            if (interfaceConfig.OFMEET_ENABLE_CONFETTI)
+            {
+                APP.conference.commands.addCommandListener("CONFETTI", function()
+                {
+                    window.confetti({particleCount: 100, spread: 70, origin: {y: .6}})
+               });
+
+                const confettiButton = addToolbarItem('ofmeet-confetti', '<div id="ofmeet-confetti" class="toolbox-icon"><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.confetti + '</div></div>', "Share some confetti", ".button-group-right");
+
+                if (confettiButton) confettiButton.addEventListener("click", function(evt)
+                {
+                    evt.stopPropagation();
+                    APP.conference.commands.sendCommandOnce("CONFETTI", {value: !0})
+                });
+            }
         }
+    }
 
-        if (interfaceConfig.OFMEET_ENABLE_CONFETTI)
+    function handleCursorEvent(event)
+    {
+        //console.log("handleCursorEvent", event.data);
+
+        if (event.data.event == 'ofmeet.event.url.message')
         {
-            APP.conference.commands.addCommandListener("CONFETTI", function()
-            {
-                window.confetti({particleCount: 100, spread: 70, origin: {y: .6}})
-           });
-
-            const confettiButton = addToolbarItem('ofmeet-confetti', '<div id="ofmeet-confetti" class="toolbox-icon"><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.confetti + '</div></div>', "Share some confetti", ".button-group-right");
-
-            if (confettiButton) confettiButton.addEventListener("click", function(evt)
-            {
-                evt.stopPropagation();
-                APP.conference.commands.sendCommandOnce("CONFETTI", {value: !0})
-            });
+            event.data.from = APP.conference.getLocalDisplayName();
+            const value = JSON.stringify(event.data);
+            APP.conference.commands.sendCommandOnce("CURSOR", {value: value});
         }
     }
 

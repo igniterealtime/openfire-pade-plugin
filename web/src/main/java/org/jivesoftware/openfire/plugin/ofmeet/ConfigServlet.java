@@ -87,7 +87,7 @@ public class ConfigServlet extends HttpServlet
             String defaultLanguage = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.default.language", null );
             boolean useNicks = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.usenicks", false );
             boolean webinar = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.webinar", false );
-            boolean websockets = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.websockets", false );
+            boolean websockets = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.websockets", true );
             boolean useIPv6 = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.useipv6", false );
             boolean useStunTurn = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.use.stunturn", false );
             boolean recordVideo = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.media.record", false );
@@ -165,7 +165,6 @@ public class ConfigServlet extends HttpServlet
             config.put( "enableWelcomePage", enableWelcomePage );
             config.put( "enableRtpStats", enableRtpStats );
             config.put( "enableLipSync", ofMeetConfig.getLipSync() );
-            config.put( "openSctp", openSctp );
 
             if ( recordingKey == null || recordingKey.isEmpty() )
             {
@@ -247,6 +246,8 @@ public class ConfigServlet extends HttpServlet
             {
                 config.put( "websocket", new URI( "https".equals(request.getScheme()) ? "wss" : "ws", null, request.getServerName(), request.getServerPort(), "/ws/", null, null) );
             }
+            config.put( "openBridgeChannel", openSctp ? "datachannel" : "websocket" );
+            config.put( "openSctp", openSctp );
             config.put( "channelLastN", ofMeetConfig.getChannelLastN() );
             config.put( "adaptiveLastN", ofMeetConfig.getAdaptiveLastN() );
             config.put( "disableSimulcast", !ofMeetConfig.getSimulcast() );

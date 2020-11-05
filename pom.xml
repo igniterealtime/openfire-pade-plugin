@@ -18,10 +18,12 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <pade.version>1.0.2</pade.version>        
+        <pade.version>1.0.3</pade.version>        
         <openfire.version>4.5.1</openfire.version>
-        <videobridge.version>1.1-20200124.173127-125</videobridge.version>        
-        <jicofo.version>1.1-20200903.193811-189</jicofo.version>
+        <videobridge.version>1.1-20201020.183027-125</videobridge.version>            
+        <!--videobridge.version>1.1-20200124.173127-125</videobridge.version-->        
+        <!--jicofo.version>1.1-20200824.181412-186</jicofo.version-->  
+        <jicofo.version>1.1-20200903.193811-189</jicofo.version>        
         <jigasi.version>1.1-20190806.132856-49</jigasi.version>    
         <jicoco.version>1.1-20190509.130302-15</jicoco.version>     
         <pade.url>https://igniterealtime.github.io/pade</pade.url>        
@@ -40,6 +42,7 @@
     <modules>        
         <module>web</module>
         <module>config</module>
+        <module>jitsi-videobridge</module>            
         <module>videobridge</module>            
         <module>ofmeet</module>        
         <module>offocus</module>        

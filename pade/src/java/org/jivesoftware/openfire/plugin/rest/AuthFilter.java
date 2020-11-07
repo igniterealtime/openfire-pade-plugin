@@ -19,6 +19,8 @@ import org.jivesoftware.util.*;
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerRequestFilter;
 
+import org.igniterealtime.openfire.plugins.pushnotification.PushInterceptor;
+
 /**
  * The Class AuthFilter.
  */
@@ -39,6 +41,13 @@ public class AuthFilter implements ContainerRequestFilter {
 
         if (auth == null) {
             throw new WebApplicationException(Status.UNAUTHORIZED);
+        }
+
+        // let replies through
+
+        if (PushInterceptor.tokens.containsKey(auth))
+        {
+            return containerRequest;
         }
 
         String[] usernameAndPassword = BasicAuth.decode(auth);

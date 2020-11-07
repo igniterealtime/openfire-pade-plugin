@@ -289,19 +289,19 @@ public class PadePlugin implements Plugin, MUCEventListener
                             for (JID jid : room.getOwners())
                             {
                                 Log.debug("notifyRoomSubscribers owners " + jid + " " + roomJID);
-                                notifyRoomSubscribers(jid, room, roomJID, message);
+                                notifyRoomSubscribers(jid, room, roomJID, message, nickname, userJid);
                             }
 
                             for (JID jid : room.getAdmins())
                             {
                                 Log.debug("notifyRoomSubscribers admins " + jid + " " + roomJID);
-                                notifyRoomSubscribers(jid, room, roomJID, message);
+                                notifyRoomSubscribers(jid, room, roomJID, message, nickname, userJid);
                             }
 
                             for (JID jid : room.getMembers())
                             {
                                 Log.debug("notifyRoomSubscribers members " + jid + " " + roomJID);
-                                notifyRoomSubscribers(jid, room, roomJID, message);
+                                notifyRoomSubscribers(jid, room, roomJID, message, nickname, userJid);
                             }
 
                             for (MUCRole role : room.getModerators())
@@ -333,17 +333,17 @@ public class PadePlugin implements Plugin, MUCEventListener
 
     }
 
-    private void notifyRoomSubscribers(JID subscriberJID, MUCRoom room, JID roomJID, Message message)
+    private void notifyRoomSubscribers(JID subscriberJID, MUCRoom room, JID roomJID, Message message, String nickname, String senderJid)
     {
         try {
             if (GroupJID.isGroup(subscriberJID)) {
                 Group group = GroupManager.getInstance().getGroup(subscriberJID);
 
                 for (JID groupMemberJID : group.getAll()) {
-                    notifyRoomActivity(groupMemberJID, room, roomJID, message);
+                    notifyRoomActivity(groupMemberJID, room, roomJID, message, nickname, senderJid);
                 }
             } else {
-                notifyRoomActivity(subscriberJID, room, roomJID, message);
+                notifyRoomActivity(subscriberJID, room, roomJID, message, nickname, senderJid);
             }
 
         } catch (GroupNotFoundException gnfe) {
@@ -351,9 +351,9 @@ public class PadePlugin implements Plugin, MUCEventListener
         }
     }
 
-    private void notifyRoomActivity(JID subscriberJID, MUCRoom room, JID roomJID, Message message)
+    private void notifyRoomActivity(JID subscriberJID, MUCRoom room, JID roomJID, Message message, String nickname, String senderJid)
     {
-        if (room.getAffiliation(subscriberJID) != MUCRole.Affiliation.none)
+        if (room.getAffiliation(subscriberJID) != MUCRole.Affiliation.none && !senderJid.equals(subscriberJID.toBareJID()))
         {
             Log.debug("notifyRoomActivity checking " + subscriberJID + " " + roomJID);
             boolean inRoom = false;
@@ -388,6 +388,7 @@ public class PadePlugin implements Plugin, MUCEventListener
                     // <reference xmlns='urn:xmpp:reference:0' uri='xmpp:juliet@capulet.lit' begin='72' end='78' type='mention' />
 
                     Element referenceElement = message.getChildElement("reference", "urn:xmpp:reference:0");
+                    boolean mentioned = message.getBody().indexOf(subscriberJID.getNode()) > -1;
 
                     if (referenceElement != null)
                     {
@@ -395,16 +396,21 @@ public class PadePlugin implements Plugin, MUCEventListener
 
                         if (uri.startsWith("xmpp:") && uri.substring(5).equals(subscriberJID.toString()))
                         {
-                            try
-                            {
-                                User user = XMPPServer.getInstance().getUserManager().getUser(subscriberJID.getNode());
-                                interceptor.webPush(user, message.getBody(), roomJID, Message.Type.groupchat );
-                                Log.debug( "notifyRoomActivity - notifying mention of " + user.getName());
-                            }
-                            catch ( UserNotFoundException e )
-                            {
-                                Log.debug( "notifyRoomActivity - Not a recognized user.", e );
-                            }
+                            mentioned = true;
+                        }
+                    }
+
+                    if (mentioned)
+                    {
+                        try
+                        {
+                            User user = XMPPServer.getInstance().getUserManager().getUser(subscriberJID.getNode());
+                            interceptor.webPush(user, message.getBody(), roomJID, Message.Type.groupchat, nickname );
+                            Log.debug( "notifyRoomActivity - notifying mention of " + user.getName());
+                        }
+                        catch ( UserNotFoundException e )
+                        {
+                            Log.debug( "notifyRoomActivity - Not a recognized user.", e );
                         }
                     }
                 }

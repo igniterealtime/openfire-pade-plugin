@@ -35,16 +35,19 @@ import org.xmpp.packet.Packet;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.xml.bind.DatatypeConverter;
 
 import com.google.gson.Gson;
 import org.apache.http.HttpResponse;
 import nl.martijndwars.webpush.*;
 import org.jivesoftware.util.*;
+import com.j256.twofactorauth.TimeBasedOneTimePasswordUtil;
 
 public class PushInterceptor implements PacketInterceptor, OfflineMessageListener
 {
     private static final Logger Log = LoggerFactory.getLogger( PushInterceptor.class );
+    public static final ConcurrentHashMap<String, String> tokens = new ConcurrentHashMap<>();
 
     /**
      * Invokes the interceptor on the specified packet. The interceptor can either modify
@@ -95,7 +98,7 @@ public class PushInterceptor implements PacketInterceptor, OfflineMessageListene
         final User user;
         try
         {
-            user = XMPPServer.getInstance().getUserManager().getUser( ((ClientSession) session).getUsername() );
+            user = XMPPServer.getInstance().getUserManager().getUser( packet.getTo().getNode() );
         }
         catch ( UserNotFoundException e )
         {
@@ -114,7 +117,7 @@ public class PushInterceptor implements PacketInterceptor, OfflineMessageListene
             return; // dont notify if user is online and available. let client handle that
         }
 
-        webPush(user, body, jid, msgtype);
+        webPush(user, body, jid, msgtype, null);
     }
     /**
      * Notification message indicating that a message was not stored offline but bounced
@@ -160,7 +163,7 @@ public class PushInterceptor implements PacketInterceptor, OfflineMessageListene
      * @param publishOptions web push data stored.
      * @param body web push payload.
      */
-    public void webPush( final User user, final String body, JID jid, Message.Type msgtype )
+    public void webPush( final User user, final String body, JID jid, Message.Type msgtype, String nickname )
     {
         try {
             for (String key : user.getProperties().keySet())
@@ -180,8 +183,17 @@ public class PushInterceptor implements PacketInterceptor, OfflineMessageListene
                             .setPrivateKey(privateKey)
                             .setSubject("mailto:admin@" + XMPPServer.getInstance().getServerInfo().getXMPPDomain());
 
+                        String username = user.getUsername();
+                        String token = tokens.get(username);
+
+                        if (token == null)
+                        {
+                            token = TimeBasedOneTimePasswordUtil.generateBase32Secret();
+                            tokens.put(token, username);
+                        }
+
                         Subscription subscription = new Gson().fromJson(user.getProperties().get(key), Subscription.class);
-                        Stanza stanza = new Stanza(msgtype == Message.Type.chat ? "chat" : "groupchat", jid.asBareJID().toString(), body);
+                        Stanza stanza = new Stanza(msgtype == Message.Type.chat ? "chat" : "groupchat", jid.asBareJID().toString(), body, nickname, token);
                         Notification notification = new Notification(subscription, (new Gson().toJson(stanza)).toString());
                         HttpResponse response = pushService.send(notification);
                         int statusCode = response.getStatusLine().getStatusCode();

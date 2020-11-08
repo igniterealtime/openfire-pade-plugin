@@ -374,7 +374,7 @@ public class MeetService {
         {
             if (PushInterceptor.tokens.containsKey(token))
             {
-                return PushInterceptor.tokens.get(token);
+                return PushInterceptor.tokens.remove(token);    // claim token
 
             } else {
                 String[] usernameAndPassword = BasicAuth.decode(token);

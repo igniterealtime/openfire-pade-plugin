@@ -19,6 +19,7 @@ import org.dom4j.Element;
 import org.dom4j.QName;
 import org.jivesoftware.openfire.OfflineMessageListener;
 import org.jivesoftware.openfire.XMPPServer;
+import org.jivesoftware.openfire.vcard.VCardManager;
 import org.jivesoftware.openfire.interceptor.PacketInterceptor;
 import org.jivesoftware.openfire.interceptor.PacketRejectedException;
 import org.jivesoftware.openfire.session.ClientSession;
@@ -166,34 +167,50 @@ public class PushInterceptor implements PacketInterceptor, OfflineMessageListene
     public void webPush( final User user, final String body, JID jid, Message.Type msgtype, String nickname )
     {
         try {
-            for (String key : user.getProperties().keySet())
+            String publicKey = user.getProperties().get("vapid.public.key");
+            String privateKey = user.getProperties().get("vapid.private.key");
+
+            if (publicKey == null) publicKey = JiveGlobals.getProperty("vapid.public.key", null);
+            if (privateKey == null) privateKey = JiveGlobals.getProperty("vapid.private.key", null);
+
+            if (publicKey != null && privateKey != null)
             {
-                if (key.startsWith("webpush.subscribe."))
+                PushService pushService = new PushService()
+                    .setPublicKey(publicKey)
+                    .setPrivateKey(privateKey)
+                    .setSubject("mailto:admin@" + XMPPServer.getInstance().getServerInfo().getXMPPDomain());
+
+                String username = user.getUsername();
+                String token = tokens.get(username);
+
+                if (token == null)
                 {
-                    String publicKey = user.getProperties().get("vapid.public.key");
-                    String privateKey = user.getProperties().get("vapid.private.key");
+                    token = TimeBasedOneTimePasswordUtil.generateBase32Secret();
+                    tokens.put(token, username);
+                }
 
-                    if (publicKey == null) publicKey = JiveGlobals.getProperty("vapid.public.key", null);
-                    if (privateKey == null) privateKey = JiveGlobals.getProperty("vapid.private.key", null);
+                String avatar = null;
+                try {
+                    Element vCard = VCardManager.getProvider().loadVCard(jid.getNode());
+                    Element ldapPhotoElem = vCard.element("PHOTO");
 
-                    if (publicKey != null && privateKey != null)
-                    {
-                        PushService pushService = new PushService()
-                            .setPublicKey(publicKey)
-                            .setPrivateKey(privateKey)
-                            .setSubject("mailto:admin@" + XMPPServer.getInstance().getServerInfo().getXMPPDomain());
+                    if (ldapPhotoElem != null) {
+                        Element ldapBinvalElem  = ldapPhotoElem.element("BINVAL");
+                        Element ldapTypeElem    = ldapPhotoElem.element("TYPE");
 
-                        String username = user.getUsername();
-                        String token = tokens.get(username);
-
-                        if (token == null)
-                        {
-                            token = TimeBasedOneTimePasswordUtil.generateBase32Secret();
-                            tokens.put(token, username);
+                        if (ldapTypeElem != null && ldapBinvalElem != null) {
+                            avatar = "data:" + ldapTypeElem.getTextTrim() + ";base64," + ldapBinvalElem.getTextTrim();
                         }
+                    }
+                } catch (Exception e) {}
 
+
+                for (String key : user.getProperties().keySet())
+                {
+                    if (key.startsWith("webpush.subscribe."))
+                    {
                         Subscription subscription = new Gson().fromJson(user.getProperties().get(key), Subscription.class);
-                        Stanza stanza = new Stanza(msgtype == Message.Type.chat ? "chat" : "groupchat", jid.asBareJID().toString(), body, nickname, token);
+                        Stanza stanza = new Stanza(msgtype == Message.Type.chat ? "chat" : "groupchat", jid.asBareJID().toString(), body, nickname, token, avatar);
                         Notification notification = new Notification(subscription, (new Gson().toJson(stanza)).toString());
                         HttpResponse response = pushService.send(notification);
                         int statusCode = response.getStatusLine().getStatusCode();

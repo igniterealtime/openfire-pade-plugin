@@ -190,9 +190,13 @@ public class PushInterceptor implements PacketInterceptor, OfflineMessageListene
                 }
 
                 String avatar = null;
+                String fullname = jid.asBareJID().toString();
                 try {
                     Element vCard = VCardManager.getProvider().loadVCard(jid.getNode());
                     Element ldapPhotoElem = vCard.element("PHOTO");
+                    Element ldapFNElem = vCard.element("FN");
+
+                    if (ldapFNElem != null) fullname = ldapFNElem.getTextTrim();
 
                     if (ldapPhotoElem != null) {
                         Element ldapBinvalElem  = ldapPhotoElem.element("BINVAL");
@@ -210,7 +214,7 @@ public class PushInterceptor implements PacketInterceptor, OfflineMessageListene
                     if (key.startsWith("webpush.subscribe."))
                     {
                         Subscription subscription = new Gson().fromJson(user.getProperties().get(key), Subscription.class);
-                        Stanza stanza = new Stanza(msgtype == Message.Type.chat ? "chat" : "groupchat", jid.asBareJID().toString(), body, nickname, token, avatar);
+                        Stanza stanza = new Stanza(msgtype == Message.Type.chat ? "chat" : "groupchat", jid.asBareJID().toString(), body, nickname, token, avatar, fullname);
                         Notification notification = new Notification(subscription, (new Gson().toJson(stanza)).toString());
                         HttpResponse response = pushService.send(notification);
                         int statusCode = response.getStatusLine().getStatusCode();

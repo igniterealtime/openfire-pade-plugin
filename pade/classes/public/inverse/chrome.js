@@ -253,7 +253,7 @@ if (!window.chrome || !window.chrome.extension)
             },
 
             setBadgeText: function(data) {
-              console.debug("setBadgeText", data);
+              //console.debug("setBadgeText", data);
 
               var favicon = parent.document.getElementById('favicon');
               var faviconSize = 16;
@@ -268,8 +268,6 @@ if (!window.chrome || !window.chrome.extension)
               var img = document.createElement('img');
 
               img.onload = () => {
-                  console.debug("setBadgeText onload", favicon.href);
-
                   // Draw Original Favicon as Background
                   context.drawImage(img, 0, 0, faviconSize, faviconSize);
 

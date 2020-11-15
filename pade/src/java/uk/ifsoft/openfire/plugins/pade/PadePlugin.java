@@ -59,6 +59,7 @@ public class PadePlugin implements Plugin, MUCEventListener
     private WebAppContext contextPublic;
     private WebAppContext contextPrivate;
     private WebAppContext contextWinSSO;
+    private WebAppContext contextWellKnown;
     private PushInterceptor interceptor;
 
     /**
@@ -80,6 +81,15 @@ public class PadePlugin implements Plugin, MUCEventListener
         contextRest.setClassLoader(this.getClass().getClassLoader());
         contextRest.addServlet(new ServletHolder(new JerseyWrapper()), "/api/*");
         HttpBindManager.getInstance().addJettyHandler(contextRest);
+
+        contextWellKnown = new WebAppContext(null, pluginDirectory.getPath() + "/classes/well-known", "/.well-known");
+        contextWellKnown.setClassLoader(this.getClass().getClassLoader());
+        final List<ContainerInitializer> initializersWellKnown = new ArrayList<>();
+        initializersWellKnown.add(new ContainerInitializer(new JettyJasperInitializer(), null));
+        contextWellKnown.setAttribute("org.eclipse.jetty.containerInitializers", initializersWellKnown);
+        contextWellKnown.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
+        contextWellKnown.setWelcomeFiles(new String[]{"index.jsp"});
+        HttpBindManager.getInstance().addJettyHandler(contextWellKnown);
 
         contextPrivate = new WebAppContext(null, pluginDirectory.getPath() + "/classes/private", "/dashboard");
         contextPrivate.setClassLoader(this.getClass().getClassLoader());
@@ -105,7 +115,6 @@ public class PadePlugin implements Plugin, MUCEventListener
 
         contextWinSSO = new WebAppContext(null, pluginDirectory.getPath() + "/classes/win-sso", "/sso");
         contextWinSSO.setClassLoader(this.getClass().getClassLoader());
-
         final List<ContainerInitializer> initializers7 = new ArrayList<>();
         initializers7.add(new ContainerInitializer(new JettyJasperInitializer(), null));
         contextWinSSO.setAttribute("org.eclipse.jetty.containerInitializers", initializers7);
@@ -168,6 +177,7 @@ public class PadePlugin implements Plugin, MUCEventListener
         HttpBindManager.getInstance().removeJettyHandler(contextPublic);
         HttpBindManager.getInstance().removeJettyHandler(contextPrivate);
 
+        if (contextWellKnown != null) HttpBindManager.getInstance().removeJettyHandler(contextWellKnown);
         if (contextWinSSO != null) HttpBindManager.getInstance().removeJettyHandler(contextWinSSO);
 
         if ( JiveGlobals.getBooleanProperty( "pade.mucevent.dispatcher.enabled", true))
@@ -202,21 +212,20 @@ public class PadePlugin implements Plugin, MUCEventListener
 
     private void checkRecordingsFolder()
     {
-        String ofmeetHome = JiveGlobals.getHomeDirectory() + File.separator + "resources" + File.separator + "spank" + File.separator + "ofmeet-cdn";
+        String resourcesHome = JiveGlobals.getHomeDirectory() + File.separator + "resources" + File.separator + "spank";
 
         try
         {
-            File ofmeetFolderPath = new File(ofmeetHome);
+            File ofmeetHome = new File(resourcesHome + File.separator + "ofmeet-cdn");
 
-            if(!ofmeetFolderPath.exists())
+            if(!ofmeetHome.exists())
             {
-                ofmeetFolderPath.mkdirs();
+                ofmeetHome.mkdirs();
 
+                List<String> lines = Arrays.asList("Move on, nothing here....");
+                Path file = Paths.get(ofmeetHome + File.separator + "index.html");
+                Files.write(file, lines, Charset.forName("UTF-8"));
             }
-
-            List<String> lines = Arrays.asList("Move on, nothing here....");
-            Path file = Paths.get(ofmeetHome + File.separator + "index.html");
-            Files.write(file, lines, Charset.forName("UTF-8"));
 
             File recordingsHome = new File(ofmeetHome + File.separator + "recordings");
 
@@ -224,11 +233,25 @@ public class PadePlugin implements Plugin, MUCEventListener
             {
                 recordingsHome.mkdirs();
 
+                List<String> lines = Arrays.asList("Move on, nothing here....");
+                Path file = Paths.get(recordingsHome + File.separator + "index.html");
+                Files.write(file, lines, Charset.forName("UTF-8"));
             }
 
-            lines = Arrays.asList("Move on, nothing here....");
-            file = Paths.get(recordingsHome + File.separator + "index.html");
+            // create .well-known/host-meta
+
+            File wellknownFolder = new File(resourcesHome + File.separator + ".well-known");
+
+            if(!wellknownFolder.exists())
+            {
+                wellknownFolder.mkdirs();
+            }
+
+            String server = XMPPServer.getInstance().getServerInfo().getHostname() + ":" + JiveGlobals.getProperty("httpbind.port.secure", "7443");
+            List<String> lines = Arrays.asList("<XRD xmlns=\"http://docs.oasis-open.org/ns/xri/xrd-1.0\">", "<Link rel=\"urn:xmpp:alt-connections:xbosh\" href=\"https://" + server + "/http-bind/\"/>", "<Link rel=\"urn:xmpp:alt-connections:websocket\" href=\"wss://" + server + "/ws/\"/>", "</XRD>");
+            Path file = Paths.get(wellknownFolder + File.separator + "host-meta");
             Files.write(file, lines, Charset.forName("UTF-8"));
+
         }
         catch (Exception e)
         {

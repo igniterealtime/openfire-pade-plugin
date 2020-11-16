@@ -323,48 +323,4 @@ public class ConfigServlet extends HttpServlet
 
         return result.toString();
     }
-
-    /**
-     * Generates an URL on which client / BOSH connections are expected.
-     *
-     * This method will verify if the websocket plugin is available. If it is, the websocket endpoint is returned. When
-     * websocket is not available, the http-bind endpoint is returned.
-     *
-     * Since Openfire version 4.2.0 (OF-1339) the websocket functionality that was previously provided by a plugin, was
-     * merged with the core Openfire code. After version 4.2.1, there is no need to check for the presence of the
-     * plugin.
-     *
-     * The request that is made to this servlet is used to determine if the client prefers secure/encrypted connections
-     * (https, wss) over plain ones (http, ws), and to determine what the server address and port is.
-     *
-     * @param request the request to this servlet.
-     * @return An URI (never null).
-     * @throws URISyntaxException When an URI could not be constructed.
-     */
-    public static URI getMostPreferredConnectionURL( HttpServletRequest request ) throws URISyntaxException
-    {
-        Log.debug( "[{}] Generating BOSH URL based on {}", request.getRemoteAddr(), request.getRequestURL() );
-        final String preferredMechanism = JiveGlobals.getProperty( "ofmeet.connection.mechanism.preferred" );
-        final boolean webSocketInCore = !new Version(4, 2, 0, null, -1 ).isNewerThan( XMPPServer.getInstance().getServerInfo().getVersion() );
-        if ( !"http-bind".equalsIgnoreCase( preferredMechanism ) && (webSocketInCore || XMPPServer.getInstance().getPluginManager().getPlugin( "websocket" ) != null ) )
-        {
-            Log.debug( "[{}] Websocket functionality is available. Returning a websocket address.", request.getRemoteAddr() );
-            final String websocketScheme;
-            if ( request.getScheme().endsWith( "s" ) )
-            {
-                websocketScheme = "wss";
-            }
-            else
-            {
-                websocketScheme = "ws";
-            }
-
-            return new URI( websocketScheme, null, request.getServerName(), request.getServerPort(), "/ws/", null, null);
-        }
-        else
-        {
-            Log.debug( "[{}] No Websocket functionality available. Returning an HTTP-BIND address.", request.getRemoteAddr() );
-            return new URI( request.getScheme(), null, request.getServerName(), request.getServerPort(), "/http-bind/", null, null);
-        }
-    }
 }

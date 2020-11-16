@@ -226,7 +226,7 @@
             </tr>
             <tr>
                 <td nowrap colspan="2">
-                    <input type="checkbox" name="websockets" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.websockets", false) ? "checked" : ""}>
+                    <input type="checkbox" name="websockets" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.websockets", true) ? "checked" : ""}>
                     <fmt:message key="config.page.configuration.ofmeet.websockets.enabled" />
                 </td>
             </tr>            

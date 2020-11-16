@@ -44,9 +44,9 @@
         <module>config</module>
         <module>jitsi-videobridge</module>            
         <module>videobridge</module>            
-        <!--module>ofmeet</module>        
+        <module>ofmeet</module>        
         <module>offocus</module>        
-        <module>ofgasi</module-->           
+        <module>ofgasi</module>           
         <module>pade</module>        
     </modules>
 

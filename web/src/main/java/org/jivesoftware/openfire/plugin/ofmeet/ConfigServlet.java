@@ -96,7 +96,6 @@ public class ConfigServlet extends HttpServlet
             boolean useBundle = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.use.bundle", true );
             boolean enableWelcomePage = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.welcomePage", true );
             boolean enableRtpStats = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.rtp.stats", true );
-            boolean openSctp = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.open.sctp", true );
             String desktopSharingChromeExtensionId = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.chrome.extension.id", null );
             String desktopSharingFirefoxExtensionId = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.firefox.extension.id", null );
             boolean desktopSharingChromeEnabled = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.desktop.sharing.chrome.enabled", true );
@@ -246,8 +245,7 @@ public class ConfigServlet extends HttpServlet
             {
                 config.put( "websocket", new URI( "https".equals(request.getScheme()) ? "wss" : "ws", null, request.getServerName(), request.getServerPort(), "/ws/", null, null) );
             }
-            config.put( "openBridgeChannel", openSctp ? "datachannel" : "websocket" );
-            config.put( "openSctp", openSctp );
+            config.put( "openBridgeChannel", "websocket" );
             config.put( "channelLastN", ofMeetConfig.getChannelLastN() );
             config.put( "adaptiveLastN", ofMeetConfig.getAdaptiveLastN() );
             config.put( "disableSimulcast", !ofMeetConfig.getSimulcast() );

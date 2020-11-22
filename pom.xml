@@ -37,7 +37,7 @@
         <module>config</module>        
         <module>ofmeet</module>        
         <module>offocus</module>                 
-        <!--module>pade</module-->        
+        <module>pade</module>        
     </modules>
 
     <licenses>

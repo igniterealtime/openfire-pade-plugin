@@ -402,6 +402,36 @@ public class OFMeetConfig
         JiveGlobals.deleteProperty( "ofmeet.lipSync.enabled" );
     }
 
+    public void setJvbName (String name )
+    {
+        JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.jvb.user.name", name );
+    }
+
+    public String getJvbName()
+    {
+        return JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.jvb.user.name", "jvb" );
+    }
+
+    public void resetJvbName()
+    {
+        JiveGlobals.deleteProperty( "org.jitsi.videobridge.ofmeet.jvb.user.name" );
+    }
+
+    public void setJvbPassword( String password )
+    {
+        JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.jvb.user.password", password );
+    }
+
+    public String getJvbPassword()
+    {
+        return JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.jvb.user.password" );
+    }
+
+    public void resetJvbPassword()
+    {
+        JiveGlobals.deleteProperty( "org.jitsi.videobridge.ofmeet.jvb.user.password" );
+    }
+
     public void setFocusPassword( String password )
     {
         JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.focus.user.password", password );

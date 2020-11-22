@@ -62,7 +62,7 @@ public class FocusPlugin implements Plugin
                 boolean running = true;
                 while ( running )
                 {
-                    if ( pluginManager.getPlugin( "ofmeet" ) != null && isAcceptingClientConnections() )
+                    if ( isAcceptingClientConnections() )
                     {
                         try
                         {

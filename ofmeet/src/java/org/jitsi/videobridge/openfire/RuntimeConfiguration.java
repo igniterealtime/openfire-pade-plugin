@@ -93,7 +93,7 @@ public class RuntimeConfiguration
     /**
      * The default setting for _disabling_ the TCP connectivity.
      */
-    public static final boolean DISABLE_TCP_HARVESTER_DEFAULT_VALUE = false; // should be equal to the default behavior as implemented in org.jitsi.videobridge.IceUdpTransportManager
+    public static final boolean DISABLE_TCP_HARVESTER_DEFAULT_VALUE = true; // should be equal to the default behavior as implemented in org.jitsi.videobridge.IceUdpTransportManager
 
     /**
      * The default value for SslTcp wrapping.
@@ -372,7 +372,7 @@ public class RuntimeConfiguration
      */
     public static Integer getTcpPort()
     {
-        final int value = JiveGlobals.getIntProperty(TCP_HARVESTER_PORT, -1 );
+        final int value = JiveGlobals.getIntProperty(TCP_HARVESTER_PORT, 4443 );
 
         if ( value == -1 )
         {
@@ -393,7 +393,7 @@ public class RuntimeConfiguration
      */
     public static Integer getTcpMappedPort()
     {
-        final int value = JiveGlobals.getIntProperty(TCP_HARVESTER_MAPPED_PORT, -1 );
+        final int value = JiveGlobals.getIntProperty(TCP_HARVESTER_MAPPED_PORT, 4443 );
 
         if ( value == -1 )
         {

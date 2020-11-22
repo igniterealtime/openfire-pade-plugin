@@ -18,7 +18,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>      
-        <openfire.version>4.5.1</openfire.version>        
+        <openfire.version>4.5.3</openfire.version>        
         <pade.url>https://igniterealtime.github.io/pade</pade.url>        
     </properties>
 
@@ -37,7 +37,7 @@
         <module>config</module>        
         <module>ofmeet</module>        
         <module>offocus</module>                 
-        <module>pade</module>        
+        <!--module>pade</module-->        
     </modules>
 
     <licenses>

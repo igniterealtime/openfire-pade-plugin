@@ -16,6 +16,8 @@
 
 package org.jivesoftware.openfire.plugin.ofmeet;
 
+import org.jivesoftware.openfire.component.ExternalComponentManager;
+import org.jivesoftware.openfire.component.ExternalComponentConfiguration;
 import org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.spi.*;
@@ -24,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import de.mxro.process.*;
 import org.jivesoftware.util.JiveGlobals;
+import org.jivesoftware.util.StringUtils;
 
 import java.io.*;
 import org.jitsi.util.OSUtils;
@@ -42,20 +45,41 @@ public class JitsiJicofoWrapper implements ProcessListener
     {
         Log.info( "Initializing Jitsi Focus Component (jicofo)...");
 
+        final String jicofoSubdomain = "focus";
         final ConnectionType connectionType = ConnectionType.COMPONENT;
         final ConnectionManagerImpl manager = (ConnectionManagerImpl) XMPPServer.getInstance().getConnectionManager();
         final ConnectionConfiguration plaintextConfiguration  = manager.getListener( connectionType, false ).generateConnectionConfiguration();
 
+        String defaultSecret = ExternalComponentManager.getDefaultSecret();
+
+        if ( defaultSecret == null || defaultSecret.trim().isEmpty() )
+        {
+            defaultSecret = StringUtils.randomString(40);
+            ExternalComponentManager.setDefaultSecret( defaultSecret );
+        }
+        else {
+            final ExternalComponentConfiguration configuration = new ExternalComponentConfiguration( jicofoSubdomain, false, ExternalComponentConfiguration.Permission.allowed, defaultSecret );
+
+            try
+            {
+                ExternalComponentManager.allowAccess( configuration );
+                Log.info( "allowed external component access", "configuration = " + configuration );
+            }
+            catch ( Exception e )
+            {
+                Log.error("not allowed external component access", e);
+            }
+        }
+
         final OFMeetConfig config = new OFMeetConfig();
         final String port = String.valueOf(plaintextConfiguration.getPort());
-        final String jicofoSubdomain = "focus";
         final String MAIN_MUC = JiveGlobals.getProperty( "ofmeet.main.muc", "conference." + XMPPServer.getInstance().getServerInfo().getXMPPDomain());
 
         final String parameters =
             " --host=" + XMPPServer.getInstance().getServerInfo().getHostname() +
             " --port=" + port +
             " --domain=" + XMPPServer.getInstance().getServerInfo().getXMPPDomain() +
-            " --secret=" + config.getFocusPassword() +
+            " --secret=" + defaultSecret +
             " --user_domain=" + XMPPServer.getInstance().getServerInfo().getXMPPDomain() +
             " --user_name=" + jicofoSubdomain +
             " --user_password=" + config.getFocusPassword();
@@ -65,26 +89,23 @@ public class JitsiJicofoWrapper implements ProcessListener
         Properties props = new Properties();
 
         props.load(new FileInputStream(props_file));
-        props.setProperty("org.jitsi.jicofo.BRIDGE_MUC", "admin@" + MAIN_MUC);
+        props.setProperty("org.jitsi.jicofo.BRIDGE_MUC", "ofmeet@" + MAIN_MUC);
         props.setProperty( "net.java.sip.communicator.service.gui.ALWAYS_TRUST_MODE_ENABLED", "true");;
         props.setProperty( "org.jitsi.jicofo.PING_INTERVAL", "-1" );
         props.setProperty( "org.jitsi.jicofo.SERVICE_REDISCOVERY_INTERVAL", "-1" );
         props.store(new FileOutputStream(props_file), "Properties");
 
-        String jicofoExePath = jicofoHomePath + File.separator + "offocus";
+        String javaHome = System.getProperty("java.home");
+        String javaExec = javaHome + File.separator + "bin" + File.separator + "java";
 
-        if(OSUtils.IS_LINUX64)
+        if (OSUtils.IS_WINDOWS64)
         {
-            jicofoExePath = jicofoExePath + ".sh";
-        }
-        else if(OSUtils.IS_WINDOWS64)
-        {
-            jicofoExePath = jicofoExePath + ".bat";
+            javaExec = javaExec + ".exe";
         }
 
-         jicofoThread = Spawn.startProcess(jicofoExePath + parameters, new File(jicofoHomePath), this);
+        jicofoThread = Spawn.startProcess(javaExec + " -Dnet.java.sip.communicator.SC_HOME_DIR_LOCATION=. -Dnet.java.sip.communicator.SC_HOME_DIR_NAME=. -Djava.util.logging.config.file=./logging.properties -Djdk.tls.ephemeralDHKeySize=2048 -cp ./jicofo.jar;./jicofo-1.1-SNAPSHOT-jar-with-dependencies.jar org.jitsi.jicofo.Main" + parameters, new File(jicofoHomePath), this);
 
-        Log.info( "Successfully initialized Jitsi Focus Component (jicofo)."  + jicofoExePath + parameters);
+        Log.info( "Successfully initialized Jitsi Focus Component (jicofo)."  + javaExec + parameters);
     }
 
     public synchronized void destroy() throws Exception

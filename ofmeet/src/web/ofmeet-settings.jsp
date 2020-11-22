@@ -109,6 +109,8 @@
         final boolean allowdirectsip = ParamUtils.getBooleanParameter( request, "allowdirectsip" );
 
         final String focuspassword = request.getParameter( "focuspassword" );
+        final String jvbname = request.getParameter( "jvbname" );
+        final String jvbpassword = request.getParameter( "jvbpassword" );        
         final String hqVoice = request.getParameter( "hqVoice" );
 
         int channelLastN = -1;
@@ -155,7 +157,8 @@
             ofmeetConfig.setSimulcast( simulcast );
             ofmeetConfig.setAdaptiveSimulcast( adaptivesimulcast );
             ofmeetConfig.setFocusPassword( focuspassword );
-            
+            ofmeetConfig.setJvbPassword( jvbpassword );
+            ofmeetConfig.setJvbName( jvbname );            
             ofmeetConfig.setP2pEnabled( p2pEnabled );
             ofmeetConfig.setP2pPreferH264( p2pPreferH264 );
             ofmeetConfig.setP2pDisableH264( p2pDisableH264 );
@@ -368,6 +371,14 @@
                 <td align="left" width="200"><fmt:message key="config.page.configuration.focus.password"/>:</td>
                 <td><input type="password" size="20" maxlength="100" name="focuspassword" value="${ofmeetConfig.focusPassword}"></td>
             </tr>
+            <tr>
+                <td align="left" width="200"><fmt:message key="config.page.configuration.jvb.name"/>:</td>
+                <td><input type="text" size="20" maxlength="100" name="jvbname" value="${ofmeetConfig.jvbName}"></td>
+            </tr>
+            <tr>
+                <td align="left" width="200"><fmt:message key="config.page.configuration.jvb.password"/>:</td>
+                <td><input type="password" size="20" maxlength="100" name="jvbpassword" value="${ofmeetConfig.jvbPassword}"></td>
+            </tr>            
             <tr>
                 <td nowrap colspan="2">
                     <input type="checkbox" name="securityenabled" ${admin:getBooleanProperty( "ofmeet.winsso.enabled", false) ? "checked" : ""}>

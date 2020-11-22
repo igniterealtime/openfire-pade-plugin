@@ -17,9 +17,6 @@
 package org.jivesoftware.openfire.plugin.ofmeet;
 
 import org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig;
-import org.jitsi.jicofo.FocusManager;
-import org.jitsi.jicofo.auth.AuthenticationAuthority;
-import org.jitsi.jicofo.reservation.ReservationSystem;
 import org.jivesoftware.openfire.ConnectionManager;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.container.Plugin;
@@ -72,7 +69,7 @@ public class FocusPlugin implements Plugin
                             Thread.sleep( 20000 );
 
                             Log.info( "starting jitsiJicofoWrapper");
-                            jitsiJicofoWrapper.initialize();
+                            jitsiJicofoWrapper.initialize(file);
                             return;
                         }
                         catch ( Exception e )
@@ -179,20 +176,5 @@ public class FocusPlugin implements Plugin
         {
             Log.error( "An exception occurred while trying to destroy the Jitsi Jicofo wrapper.", ex );
         }
-    }
-
-    public ReservationSystem getReservationService()
-    {
-        return this.jitsiJicofoWrapper.getReservationService();
-    }
-
-    public FocusManager getFocusManager()
-    {
-        return this.jitsiJicofoWrapper.getFocusManager();
-    }
-
-    public AuthenticationAuthority getAuthenticationAuthority()
-    {
-        return this.jitsiJicofoWrapper.getAuthenticationAuthority();
     }
 }

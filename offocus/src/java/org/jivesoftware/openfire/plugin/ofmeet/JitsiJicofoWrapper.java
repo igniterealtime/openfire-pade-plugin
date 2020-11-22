@@ -16,148 +16,106 @@
 
 package org.jivesoftware.openfire.plugin.ofmeet;
 
-import net.java.sip.communicator.util.ServiceUtils;
 import org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig;
-import org.jitsi.jicofo.FocusBundleActivator;
-import org.jitsi.jicofo.FocusManager;
-import org.jitsi.jicofo.JitsiMeetServices;
-import org.jitsi.jicofo.auth.AuthenticationAuthority;
-import org.jitsi.jicofo.osgi.JicofoBundleConfig;
-import org.jitsi.jicofo.reservation.ReservationSystem;
-import org.jitsi.jicofo.xmpp.FocusComponent;
-import org.jitsi.jicofo.bridge.BridgeSelector;
-import org.jitsi.meet.OSGi;
-import org.jitsi.meet.OSGiBundleConfig;
 import org.jivesoftware.openfire.XMPPServer;
-import org.jivesoftware.openfire.container.PluginManager;
+import org.jivesoftware.openfire.spi.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xmpp.component.ComponentManagerFactory;
-import org.jxmpp.jid.impl.*;
+
+import de.mxro.process.*;
+import org.jivesoftware.util.JiveGlobals;
+
+import java.io.*;
+import org.jitsi.util.OSUtils;
+import java.util.Properties;
 
 /**
  * A wrapper object for the Jitsi Component Focus (jicofo) component.
  *
- * This wrapper can be used to instantiate/initialize and tearing down an instance of the wrapped component. An instance
- * of this class is re-usable.
- *
- * @author Guus der Kinderen, guus.der.kinderen@gmail.com
  */
-public class JitsiJicofoWrapper
+public class JitsiJicofoWrapper implements ProcessListener
 {
     private static final Logger Log = LoggerFactory.getLogger( JitsiJicofoWrapper.class );
+    private XProcess jicofoThread = null;
 
-    private String jicofoSubdomain = "focus";
-
-    private FocusComponent jicofoComponent;
-
-    /**
-     * Initialize the wrapped component.
-     *
-     * @throws Exception On any problem.
-     */
-    public synchronized void initialize() throws Exception
+    public synchronized void initialize( File pluginDirectory) throws Exception
     {
-        Log.debug( "Initializing Jitsi Focus Component (jicofo)...");
+        Log.info( "Initializing Jitsi Focus Component (jicofo)...");
+
+        final ConnectionType connectionType = ConnectionType.COMPONENT;
+        final ConnectionManagerImpl manager = (ConnectionManagerImpl) XMPPServer.getInstance().getConnectionManager();
+        final ConnectionConfiguration plaintextConfiguration  = manager.getListener( connectionType, false ).generateConnectionConfiguration();
 
         final OFMeetConfig config = new OFMeetConfig();
-        if ( jicofoComponent != null )
+        final String port = String.valueOf(plaintextConfiguration.getPort());
+        final String jicofoSubdomain = "focus";
+        final String MAIN_MUC = JiveGlobals.getProperty( "ofmeet.main.muc", "conference." + XMPPServer.getInstance().getServerInfo().getXMPPDomain());
+
+        final String parameters =
+            " --host=" + XMPPServer.getInstance().getServerInfo().getHostname() +
+            " --port=" + port +
+            " --domain=" + XMPPServer.getInstance().getServerInfo().getXMPPDomain() +
+            " --secret=" + config.getFocusPassword() +
+            " --user_domain=" + XMPPServer.getInstance().getServerInfo().getXMPPDomain() +
+            " --user_name=" + jicofoSubdomain +
+            " --user_password=" + config.getFocusPassword();
+
+        String jicofoHomePath = pluginDirectory.getAbsolutePath() + File.separator + "classes" + File.separator + "jicofo";
+        File props_file = new File(jicofoHomePath + File.separator + "sip-communicator.properties");
+        Properties props = new Properties();
+
+        props.load(new FileInputStream(props_file));
+        props.setProperty("org.jitsi.jicofo.BRIDGE_MUC", "admin@" + MAIN_MUC);
+        props.setProperty( "net.java.sip.communicator.service.gui.ALWAYS_TRUST_MODE_ENABLED", "true");;
+        props.setProperty( "org.jitsi.jicofo.PING_INTERVAL", "-1" );
+        props.setProperty( "org.jitsi.jicofo.SERVICE_REDISCOVERY_INTERVAL", "-1" );
+        props.store(new FileOutputStream(props_file), "Properties");
+
+        String jicofoExePath = jicofoHomePath + File.separator + "offocus";
+
+        if(OSUtils.IS_LINUX64)
         {
-            Log.warn( "Another Jitsi Focus Component (jicofo) appears to have been initialized earlier! Unexpected behavior might be the result of this new initialization!" );
+            jicofoExePath = jicofoExePath + ".sh";
+        }
+        else if(OSUtils.IS_WINDOWS64)
+        {
+            jicofoExePath = jicofoExePath + ".bat";
         }
 
-        System.setProperty( FocusManager.HOSTNAME_PNAME, XMPPServer.getInstance().getServerInfo().getHostname() );
-        System.setProperty( FocusManager.XMPP_DOMAIN_PNAME, XMPPServer.getInstance().getServerInfo().getXMPPDomain() );
-        System.setProperty( FocusManager.FOCUS_USER_DOMAIN_PNAME, XMPPServer.getInstance().getServerInfo().getXMPPDomain() );
-        if ( config.getFocusPassword() == null )
-        {
-            Log.warn( "No password is configured for the 'focus'. This is likely going to cause problems in webRTC meetings." );
-        }
-        else
-        {
-            System.setProperty( FocusManager.FOCUS_USER_NAME_PNAME, "focus" );
-            System.setProperty( FocusManager.FOCUS_USER_PASSWORD_PNAME, config.getFocusPassword() );
-        }
+         jicofoThread = Spawn.startProcess(jicofoExePath + parameters, new File(jicofoHomePath), this);
 
-        // Jicofo should trust any certificates (as it is communicating with the local Openfire instance only, which we can safely define as 'trusted').
-        System.setProperty( "net.java.sip.communicator.service.gui.ALWAYS_TRUST_MODE_ENABLED", Boolean.toString( true ) );
-        System.setProperty( FocusManager.ALWAYS_TRUST_PNAME, Boolean.toString( true ) );
-
-        // Disable health check. Our JVB is not an external component, so there's no need to check for its connectivity.
-        // Also, the health check appears to cumulatively use and not release resources!
-        System.setProperty( "org.jitsi.jicofo.PING_INTERVAL", "-1" );
-
-        // Disable JVB rediscovery. We are running with one hard-coded videobridge, there's no need for dynamic detection of others.
-        System.setProperty( "org.jitsi.jicofo.SERVICE_REDISCOVERY_INTERVAL", "-1" ); // Aught to use a reference to ComponentsDiscovery.REDISCOVERY_INTERVAL_PNAME, but that constant is private.
-
-        // Typically, the focus user is a system user (our plugin provisions the user), but if that fails, anonymous authentication will be used.
-        final boolean focusAnonymous = config.getFocusPassword() == null;
-
-        // Start the OSGi bundle for Jicofo.
-        final OSGiBundleConfig jicofoConfig = new JicofoBundleConfig();
-        OSGi.setBundleConfig(jicofoConfig);
-        OSGi.setClassLoader( XMPPServer.getInstance().getPluginManager().getPluginClassloader( XMPPServer.getInstance().getPluginManager().getPlugin( "offocus" ) ) );
-
-        jicofoComponent = new FocusComponent( XMPPServer.getInstance().getServerInfo().getHostname(), 0, XMPPServer.getInstance().getServerInfo().getXMPPDomain(), jicofoSubdomain, null, focusAnonymous, XMPPServer.getInstance().createJID( "focus", null ).toBareJID() );
-
-        Thread.sleep(2000 ); // Intended to prevent ConcurrentModificationExceptions while starting the component. See https://github.com/igniterealtime/ofmeet-openfire-plugin/issues/4
-        jicofoComponent.init(); // Note that this is a Jicoco special, not Component#initialize!
-        Thread.sleep(2000 ); // Intended to prevent ConcurrentModificationExceptions while starting the component. See https://github.com/igniterealtime/ofmeet-openfire-plugin/issues/4
-
-        ComponentManagerFactory.getComponentManager().addComponent(jicofoSubdomain, jicofoComponent);
-
-        // We are still using JVB version 1.x
-        // Add the sole jitsi-videobridge instance to BridgeSelector
-        JitsiMeetServices meetServices = getFocusManager().getJitsiMeetServices();
-        BridgeSelector bridgeSelector = meetServices.getBridgeSelector();
-        bridgeSelector.addJvbAddress(JidCreate.from("jitsi-videobridge." + XMPPServer.getInstance().getServerInfo().getXMPPDomain()));
-
-        Log.trace( "Successfully initialized Jitsi Focus Component (jicofo).");
+        Log.info( "Successfully initialized Jitsi Focus Component (jicofo)."  + jicofoExePath + parameters);
     }
 
-    /**
-     * Destroying the wrapped component. After this call, the wrapped component can be re-initialized.
-     *
-     * @throws Exception On any problem.
-     */
     public synchronized void destroy() throws Exception
     {
         Log.debug( "Destroying Jitsi Focus Component..." );
 
-        if ( jicofoComponent == null)
-        {
-            Log.warn( "Unable to destroy the Jitsi Focus Component, as none appears to be running!" );
-        }
-        else
-        {
-            ComponentManagerFactory.getComponentManager().removeComponent(jicofoSubdomain);
-            jicofoSubdomain = null;
-
-            jicofoComponent.dispose();
-            jicofoComponent = null;
-
-        }
-
-        Log.trace( "Successfully destroyed Jitsi Focus Component.   " );
+        if (jicofoThread != null) jicofoThread.destory();
     }
 
-    public FocusComponent getFocusComponent()
+    public void onOutputLine(final String line)
     {
-        return jicofoComponent;
+        Log.info("onOutputLine " + line);
     }
 
-    public ReservationSystem getReservationService()
+    public void onProcessQuit(int code)
     {
-        return ServiceUtils.getService(FocusBundleActivator.bundleContext, ReservationSystem.class);
+        Log.info("onProcessQuit " + code);
     }
 
-    public FocusManager getFocusManager()
-    {
-        return ServiceUtils.getService(FocusBundleActivator.bundleContext, FocusManager.class);
+    public void onOutputClosed() {
+        Log.error("onOutputClosed");
     }
 
-    public AuthenticationAuthority getAuthenticationAuthority()
+    public void onErrorLine(final String line)
     {
-        return ServiceUtils.getService( FocusBundleActivator.bundleContext, AuthenticationAuthority.class);
+        Log.info(line);
     }
+
+    public void onError(final Throwable t)
+    {
+        Log.error("Thread error", t);
+    }
+
 }

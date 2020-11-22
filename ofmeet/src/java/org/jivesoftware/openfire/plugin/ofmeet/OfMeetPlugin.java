@@ -31,10 +31,6 @@ import org.apache.tomcat.SimpleInstanceManager;
 
 import org.ice4j.ice.harvest.MappingCandidateHarvesters;
 import org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig;
-import org.jitsi.impl.neomedia.transform.srtp.SRTPCryptoContext;
-import org.jitsi.videobridge.Videobridge;
-import org.jitsi.videobridge.Conference;
-import org.jitsi.videobridge.Content;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.cluster.ClusterEventListener;
 import org.jivesoftware.openfire.cluster.ClusterManager;
@@ -157,7 +153,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
             Log.info("OfMeet Plugin - Initialize IQ handler ");
 
-            ofmeetIQHandler = new OfMeetIQHandler( getVideobridge() );
+            ofmeetIQHandler = new OfMeetIQHandler();
             XMPPServer.getInstance().getIQRouter().addHandler(ofmeetIQHandler);
 
             if ( JiveGlobals.getBooleanProperty( "ofmeet.bookmarks.auto-enable", true ) )
@@ -316,12 +312,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         System.setProperty( "net.java.sip.communicator.service.media.DISABLE_AUDIO_SUPPORT", "true" );
         System.setProperty( "net.java.sip.communicator.service.media.DISABLE_VIDEO_SUPPORT", "true" );
 
-
-        if ( JiveGlobals.getProperty( SRTPCryptoContext.CHECK_REPLAY_PNAME ) != null )
-        {
-            System.setProperty( SRTPCryptoContext.CHECK_REPLAY_PNAME, JiveGlobals.getProperty( SRTPCryptoContext.CHECK_REPLAY_PNAME ) );
-        }
-
         // Set up the NAT harvester, but only when needed.
         final InetAddress natPublic = new OFMeetConfig().getPublicNATAddress();
         if ( natPublic == null )
@@ -346,7 +336,8 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         final List<String> stunMappingHarversterAddresses = new OFMeetConfig().getStunMappingHarversterAddresses();
         if ( stunMappingHarversterAddresses == null || stunMappingHarversterAddresses.isEmpty() )
         {
-            System.clearProperty( MappingCandidateHarvesters.STUN_MAPPING_HARVESTER_ADDRESSES_PNAME );
+            // TODO
+            //System.clearProperty( MappingCandidateHarvesters.STUN_MAPPING_HARVESTER_ADDRESSES_PNAME );
         }
         else
         {
@@ -357,11 +348,9 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
                 sb.append( address );
                 sb.append( "," );
             }
-            System.setProperty( MappingCandidateHarvesters.STUN_MAPPING_HARVESTER_ADDRESSES_PNAME, sb.substring( 0, sb.length() - 1 ) );
+            // TODO
+            //System.setProperty( MappingCandidateHarvesters.STUN_MAPPING_HARVESTER_ADDRESSES_PNAME, sb.substring( 0, sb.length() - 1 ) );
         }
-
-        // allow videobridge access without focus
-        System.setProperty( Videobridge.DEFAULT_OPTIONS_PROPERTY_NAME, "2" );
     }
 
     private void checkDownloadFolder(File pluginDirectory)
@@ -458,38 +447,9 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         }
     }
 
-    public Videobridge getVideobridge()
-    {
-        return this.jvbPluginWrapper.getVideobridge();
-    }
-
     public void setRecording(String roomName, String path)
     {
-        Videobridge videobridge = getVideobridge();
 
-        if (path == null)
-        {
-            path = JiveGlobals.getHomeDirectory() + File.separator + "resources" + File.separator + "spank" + File.separator + "ofmeet-cdn"  + File.separator + "download";
-        }
-
-        for (Conference conference : videobridge.getConferences())
-        {
-            String room = conference.getName().toString();
-
-            if (room != null && !"".equals(room) && roomName.equals(room))
-            {
-                for (Content content : conference.getContents())
-                {
-                    if (content != null && !content.isExpired() && !content.isRecording() && !"data".equals(content.getMediaType().toString()))
-                    {
-                        Log.info("set videobridge recording " + roomName + " " + content.getMediaType().toString() + " " + path);
-                        content.setRecording(true, path);
-                        break;
-                    }
-                }
-                break;
-            }
-        }
     }
 
     //-------------------------------------------------------

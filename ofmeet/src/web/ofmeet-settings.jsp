@@ -13,7 +13,6 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   --%>
-<%@ page import="org.jitsi.impl.neomedia.transform.srtp.SRTPCryptoContext" %>
 <%@ page import="org.jivesoftware.openfire.XMPPServer" %>
 <%@ page import="org.jivesoftware.openfire.plugin.ofmeet.OfMeetPlugin" %>
 <%@ page import="java.util.Map" %>

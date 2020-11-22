@@ -1,8 +1,6 @@
 package org.jivesoftware.openfire.plugin.ofmeet;
 
 import org.dom4j.Element;
-import org.jitsi.videobridge.Videobridge;
-import org.jitsi.videobridge.Conference;
 import org.jivesoftware.openfire.IQHandlerInfo;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.group.Group;
@@ -14,7 +12,6 @@ import org.jivesoftware.openfire.user.UserManager;
 import org.jivesoftware.openfire.user.UserNotFoundException;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.jxmpp.jid.parts.Localpart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xmpp.packet.IQ;
@@ -32,12 +29,9 @@ public class OfMeetIQHandler extends IQHandler
 {
     private final static Logger Log = LoggerFactory.getLogger( OfMeetIQHandler.class );
 
-    private final Videobridge videobridge;
-
-    public OfMeetIQHandler( Videobridge videobridge )
+    public OfMeetIQHandler( )
     {
         super("Pade Meetings IQ Handler");
-        this.videobridge = videobridge;
     }
 
     @Override
@@ -80,24 +74,6 @@ public class OfMeetIQHandler extends IQHandler
         try {
             String roomName = requestJSON.getString("room");
 
-            for (Conference conference : videobridge.getConferences())
-            {
-                Localpart room = conference.getName();
-
-                if (room != null && room.equals( Localpart.from(roomName) ))
-                {
-                    JSONObject userJSON = new JSONObject();
-                    userJSON.put("room", roomName);
-                    userJSON.put("id", conference.getID());
-                    userJSON.put("lastActivityTime", String.valueOf(conference.getLastActivityTime()));
-                    userJSON.put("focus", conference.getFocus());
-                    userJSON.put("expired", conference.isExpired() ? "yes" : "no");
-
-                    childElement.setText(userJSON.toString());
-
-                    break;
-                }
-            }
 
         } catch (Exception e1) {
             reply.setError(new PacketError(PacketError.Condition.not_allowed, PacketError.Type.modify, requestJSON.toString() + " " + e1));

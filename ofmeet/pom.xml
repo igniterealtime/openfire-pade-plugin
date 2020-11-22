@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.igniterealtime.openfire.ofmeet</groupId>
         <artifactId>parent</artifactId>
-        <version>${pade.version}</version>
+        <version>1.1.0</version>
     </parent>
 
     <artifactId>ofmeet</artifactId>
@@ -43,7 +43,7 @@
                         <goal>wget</goal>
                     </goals>
                     <configuration>
-                        <url>https://download.jitsi.org/jitsi-meet/src/jitsi-meet-1.0.4383.tar.bz2</url>
+                        <url>https://download.jitsi.org/jitsi-meet/src/jitsi-meet-1.0.4551.tar.bz2</url>
                         <unpack>true</unpack>
                         <outputDirectory>classes</outputDirectory>
                     </configuration>
@@ -175,25 +175,7 @@
         <dependency>
             <groupId>org.igniterealtime.openfire.ofmeet</groupId>
             <artifactId>config</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.igniterealtime.openfire.ofmeet</groupId>
-            <artifactId>videobridge</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.bouncycastle</groupId>
-                    <artifactId>bcprov-jdk15on</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.bouncycastle</groupId>
-                    <artifactId>bcpkix-jdk15on</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.bouncycastle</groupId>
-                    <artifactId>bcpg-jdk15on</artifactId>
-                </exclusion>
-            </exclusions>            
-        </dependency>        
+        </dependency>      
         <dependency>
             <groupId>org.igniterealtime.openfire</groupId>
             <artifactId>xmppserver</artifactId>
@@ -221,7 +203,13 @@
             <artifactId>xpp3</artifactId>
             <version>1.1.4c</version>
         </dependency>
-        
+
+        <dependency>
+            <groupId>org.jitsi</groupId>
+            <artifactId>ice4j</artifactId>
+            <version>2.0.0-20190607.184546-36</version>
+        </dependency>
+            
     </dependencies>
 
 </project>

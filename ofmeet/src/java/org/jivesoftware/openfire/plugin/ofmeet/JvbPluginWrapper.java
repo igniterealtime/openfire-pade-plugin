@@ -1,16 +1,23 @@
 package org.jivesoftware.openfire.plugin.ofmeet;
 
-import org.jivesoftware.openfire.container.PluginClassLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.jitsi.videobridge.Videobridge;
-import org.jitsi.videobridge.openfire.PluginImpl;
+import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.container.Plugin;
 import org.jivesoftware.openfire.container.PluginManager;
+import org.jitsi.videobridge.openfire.PluginImpl;
 
-import java.io.File;
-import java.lang.reflect.Field;
-import java.util.Map;
+import de.mxro.process.*;
+import org.jivesoftware.util.JiveGlobals;
+import java.nio.file.*;
+import java.nio.charset.Charset;
+import java.io.*;
+import java.util.*;
+import org.jitsi.util.OSUtils;
+import java.util.Properties;
+
+import de.mxro.process.*;
+import org.jivesoftware.util.JiveGlobals;
 
 /**
  * A wrapper object for the Jitsi Videobridge Openfire plugin.
@@ -20,11 +27,11 @@ import java.util.Map;
  *
  * @author Guus der Kinderen, guus.der.kinderen@gmail.com
  */
-public class JvbPluginWrapper
+public class JvbPluginWrapper implements ProcessListener
 {
     private static final Logger Log = LoggerFactory.getLogger(JvbPluginWrapper.class);
-
     private PluginImpl jitsiPlugin;
+    private XProcess jvbThread = null;
 
     /**
      * Initialize the wrapped component.
@@ -35,38 +42,89 @@ public class JvbPluginWrapper
     {
         Log.debug( "Initializing Jitsi Videobridge..." );
 
-        if ( jitsiPlugin != null )
-        {
-            Log.warn( "Another Jitsi Videobridge appears to have been initialized earlier! Unexpected behavior might be the result of this new initialization!" );
-        }
-
-        // Disable health check. Our JVB is not an external component, so there's no need to check for its connectivity.
-        //System.setProperty( "org.jitsi.videobridge.PING_INTERVAL", "-1" );
-
         jitsiPlugin = new PluginImpl();
         jitsiPlugin.initializePlugin( manager, pluginDirectory );
-/*
-        // Override the classloader used by the wrapped plugin with the classloader of ofmeet plugin.
-        // TODO Find a way that does not depend on reflection.
-        final Field field = manager.getClass().getDeclaredField( "classloaders" );
-        final boolean wasAccessible = field.isAccessible();
-        field.setAccessible( true );
+
+        final String jvbHomePath = pluginDirectory.getAbsolutePath() + File.separator + "classes" + File.separator + "jvb";
+        final String domain = XMPPServer.getInstance().getServerInfo().getXMPPDomain();
+        final String hostname = XMPPServer.getInstance().getServerInfo().getHostname();
+        final String main_muc = JiveGlobals.getProperty( "ofmeet.main.muc", "conference." + domain);
+
+
+        List<String> lines = Arrays.asList(
+            "videobridge {",
+            "    stats {",
+            "        # Enable broadcasting stats/presence in a MUC",
+            "        enabled = true",
+            "        transports = [",
+            "            { type = \"muc\" }",
+            "        ]",
+            "    }",
+            "",
+            "    http-servers {",
+            "      public {",
+            "          port = 6060",
+            "      }",
+            "    }",
+            "    websockets {",
+            "      enabled = true",
+            "      domain = \"" + domain + "\"",
+            "      tls = true",
+            "    }",
+            "",
+            "    apis {",
+            "        xmpp-client {",
+            "               configs {",
+            "                # Connect to the first XMPP server",
+            "                shard {",
+            "                    hostname= \"" + hostname + "\"",
+            "                    domain = \"" + domain + "\"",
+            "                    username = \"admin\"",
+            "                    password = \"admin\"",
+            "                    muc_jids = \"admin@" + main_muc + "\"",
+            "                    muc_nickname = \"Administrator\"",
+            "                    disable_certificate_verification = true",
+            "                }",
+            "               }",
+            "        }",
+            "    }",
+            "",
+            "    ice {",
+            "        tcp {",
+            "            enabled = true",
+            "            port = \"4443\"",
+            "            mapped-port = \"4443\"",
+            "        }",
+            "        udp {",
+            "            port = \"10000\"",
+            "            local-address = 192.168.1.1",
+            "            public-address = 90.248.44.212",
+            "        }",
+            "    }",
+            "}"
+        );
+
         try
         {
-            final Map<Plugin, PluginClassLoader> classloaders = (Map<Plugin, PluginClassLoader>) field.get( manager );
-            classloaders.put( jitsiPlugin, manager.getPluginClassloader( manager.getPlugin( "ofmeet" ) ) );
-
-            jitsiPlugin.initializePlugin( manager, pluginDirectory );
-
-            // The reference to the classloader is no longer needed in the plugin manager. Better clean up immediately.
-            // (ordinary, we'd do this in the 'destroy' method of this class, but there doesn't seem a need to wait).
-            classloaders.remove( jitsiPlugin );
+            Path file = Paths.get(jvbHomePath + File.separator + "application.conf");
+            Files.write(file, lines, Charset.forName("UTF-8"));
+        } catch (Exception e) {
+            Log.error("createConfigFile error", e);
         }
-        finally
+
+        String jvbExePath = jvbHomePath + File.separator + "ofmeet";
+
+        if(OSUtils.IS_LINUX64)
         {
-            field.setAccessible( wasAccessible );
+            jvbExePath = jvbExePath + ".sh";
         }
-*/
+        else if(OSUtils.IS_WINDOWS64)
+        {
+            jvbExePath = jvbExePath + ".bat";
+        }
+
+         jvbThread = Spawn.startProcess(jvbExePath + " --apis=none", new File(jvbHomePath), this);
+
         Log.trace( "Successfully initialized Jitsi Videobridge." );
     }
 
@@ -77,19 +135,33 @@ public class JvbPluginWrapper
      */
     public synchronized void destroy() throws Exception
     {
-        Log.debug( "Destroying Jitsi Videobridge..." );
+        if (jvbThread != null) jvbThread.destory();
+        if (jitsiPlugin != null ) jitsiPlugin.destroyPlugin();
 
-        if ( jitsiPlugin == null )
-        {
-            Log.warn( "Unable to destroy the Jitsi Videobridge, as none appears to be running!" );
-        }
-
-        jitsiPlugin.destroyPlugin();
-        jitsiPlugin = null;
         Log.trace( "Successfully destroyed Jitsi Videobridge." );
     }
 
-    public Videobridge getVideobridge() {
-        return jitsiPlugin.getComponent().getVideobridge();
+    public void onOutputLine(final String line)
+    {
+        Log.info("onOutputLine " + line);
+    }
+
+    public void onProcessQuit(int code)
+    {
+        Log.info("onProcessQuit " + code);
+    }
+
+    public void onOutputClosed() {
+        Log.error("onOutputClosed");
+    }
+
+    public void onErrorLine(final String line)
+    {
+        Log.info(line);
+    }
+
+    public void onError(final Throwable t)
+    {
+        Log.error("Thread error", t);
     }
 }

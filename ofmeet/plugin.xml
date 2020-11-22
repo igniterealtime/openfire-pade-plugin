@@ -26,13 +26,12 @@
     <minServerVersion>4.1.5</minServerVersion>
     <minJavaVersion>1.8</minJavaVersion>
     <adminconsole>
-        <tab id="tab-ofmeet" name="${plugin.title}" url="ofmeet-summary.jsp" description="${plugin.description}">
+        <tab id="tab-ofmeet" name="${plugin.title}" url="ofmeet-settings.jsp" description="${plugin.description}">
             <sidebar id="siderbar-ofmeet" name="${plugin.title}">
-                <item id="ofmeet-summary" name="${config.page.summary.title}" description="${config.page.summary.description}" url="ofmeet-summary.jsp"/>
                 <item id="ofmeet-settings" name="${config.page.settings.title}" description="${config.page.settings.description}" url="ofmeet-settings.jsp"/>
                 <item id="ofmeet-uisettings" name="${config.page.uisettings.title}" description="${config.page.uisettings.description}" url="ofmeet-uisettings.jsp"/>
                 <item id="jitsi-videobridge-settings" name="${plugin.sidebar.networking.title}" description="${plugin.sidebar.networking.title.description}" url="jitsi-videobridge.jsp"/> <!-- From a dependency. To work, must be manually added to WEB-INF/web.xml -->
-                <item id="ofmeet-sipsettings" name="${plugin.sidebar.sipsettings.title}" description="${plugin.sidebar.sipsettings.description}" url="ofmeet-sipsettings.jsp"/>                
+                <!--item id="ofmeet-sipsettings" name="${plugin.sidebar.sipsettings.title}" description="${plugin.sidebar.sipsettings.description}" url="ofmeet-sipsettings.jsp"/-->                
                 <item id="ofmeet-planner" name="${config.page.planner.title}" description="${config.page.planner.description}" url="ofmeet-planner.jsp"/>
             </sidebar>
         </tab>

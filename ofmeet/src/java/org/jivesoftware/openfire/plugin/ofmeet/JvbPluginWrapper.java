@@ -64,7 +64,7 @@ public class JvbPluginWrapper implements ProcessListener
         final OFMeetConfig config = new OFMeetConfig();
         ensureJvbUser(config);
 
-        final String jvbHomePath = pluginDirectory.getAbsolutePath() + File.separator + "classes" + File.separator + "jvb";
+        final String jvbHomePath = pluginDirectory.getPath() + File.separator + "classes" + File.separator + "jvb";
         final String domain = XMPPServer.getInstance().getServerInfo().getXMPPDomain();
         final String hostname = XMPPServer.getInstance().getServerInfo().getHostname();
         final String main_muc = JiveGlobals.getProperty( "ofmeet.main.muc", "conference." + domain);
@@ -140,9 +140,11 @@ public class JvbPluginWrapper implements ProcessListener
             javaExec = javaExec + ".exe";
         }
 
-         jvbThread = Spawn.startProcess(javaExec + " -Dconfig.file=./application.conf -Dnet.java.sip.communicator.SC_HOME_DIR_LOCATION=. -Dnet.java.sip.communicator.SC_HOME_DIR_NAME=. -Djava.util.logging.config.file=./logging.properties -Djdk.tls.ephemeralDHKeySize=2048 -cp ./jitsi-videobridge.jar;./jitsi-videobridge-2.1-SNAPSHOT-jar-with-dependencies.jar org.jitsi.videobridge.MainKt  --apis=rest", new File(jvbHomePath), this);
+         makeFileExecutable(javaExec);
+         String cmdLine = javaExec + " -Dconfig.file=./application.conf -Dnet.java.sip.communicator.SC_HOME_DIR_LOCATION=. -Dnet.java.sip.communicator.SC_HOME_DIR_NAME=. -Djava.util.logging.config.file=./logging.properties -Djdk.tls.ephemeralDHKeySize=2048 -cp " + jvbHomePath + "/jitsi-videobridge.jar;" + jvbHomePath + "/jitsi-videobridge-2.1-SNAPSHOT-jar-with-dependencies.jar org.jitsi.videobridge.MainKt  --apis=rest";
+         jvbThread = Spawn.startProcess(cmdLine, new File(jvbHomePath), this);
 
-        Log.trace( "Successfully initialized Jitsi Videobridge." + javaExec );
+        Log.info( "Successfully initialized Jitsi Videobridge.\n" + cmdLine );
     }
 
     public String getIpAddress()
@@ -188,12 +190,13 @@ public class JvbPluginWrapper implements ProcessListener
 
     public synchronized void destroy() throws Exception
     {
-        Log.info(getConferenceStats().toString());
+        //Log.info(getConferenceStats().toString());
+        Log.debug( "Destroying jvb process." );
 
         if (jvbThread != null) jvbThread.destory();
         if (jitsiPlugin != null ) jitsiPlugin.destroyPlugin();
 
-        Log.trace( "Successfully destroyed Jitsi Videobridge." );
+        Log.debug( "Successfully destroyed jvb process." );
     }
 
     public void onOutputLine(final String line)
@@ -245,5 +248,12 @@ public class JvbPluginWrapper implements ProcessListener
                 Log.error( "Unable to provision a 'jvb' user.", e );
             }
         }
+    }
+    private void makeFileExecutable(String path)
+    {
+        File file = new File(path);
+        file.setReadable(true, true);
+        file.setWritable(true, true);
+        file.setExecutable(true, true);
     }
 }

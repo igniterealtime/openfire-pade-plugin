@@ -174,7 +174,7 @@ public class Engine {
                 } catch (final IOException e) {
                     listener.onError(e);
                 }
-                process.destroyForcibly();
+                //process.destroyForcibly();
             }
         };
 

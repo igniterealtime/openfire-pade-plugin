@@ -174,10 +174,7 @@ public class Engine {
                 } catch (final IOException e) {
                     listener.onError(e);
                 }
-                //process.descendants().forEach(ph -> {
-                //    ph.destroy();
-                //});
-                process.destroyForcibly();
+                //process.destroyForcibly();
             }
         };
 

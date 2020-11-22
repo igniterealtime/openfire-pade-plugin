@@ -84,7 +84,7 @@ public class JitsiJicofoWrapper implements ProcessListener
             " --user_name=" + jicofoSubdomain +
             " --user_password=" + config.getFocusPassword();
 
-        String jicofoHomePath = pluginDirectory.getAbsolutePath() + File.separator + "classes" + File.separator + "jicofo";
+        String jicofoHomePath = pluginDirectory.getPath() + File.separator + "classes" + File.separator + "jicofo";
         File props_file = new File(jicofoHomePath + File.separator + "sip-communicator.properties");
         Properties props = new Properties();
 
@@ -102,17 +102,20 @@ public class JitsiJicofoWrapper implements ProcessListener
         {
             javaExec = javaExec + ".exe";
         }
+        makeFileExecutable(javaExec);
+        String cmdLine = javaExec + " -Dnet.java.sip.communicator.SC_HOME_DIR_LOCATION=. -Dnet.java.sip.communicator.SC_HOME_DIR_NAME=. -Djava.util.logging.config.file=./logging.properties -Djdk.tls.ephemeralDHKeySize=2048 -cp " + jicofoHomePath + "/jicofo.jar;" + jicofoHomePath + "/jicofo-1.1-SNAPSHOT-jar-with-dependencies.jar org.jitsi.jicofo.Main" + parameters;
+        jicofoThread = Spawn.startProcess(cmdLine, new File(jicofoHomePath), this);
 
-        jicofoThread = Spawn.startProcess(javaExec + " -Dnet.java.sip.communicator.SC_HOME_DIR_LOCATION=. -Dnet.java.sip.communicator.SC_HOME_DIR_NAME=. -Djava.util.logging.config.file=./logging.properties -Djdk.tls.ephemeralDHKeySize=2048 -cp ./jicofo.jar;./jicofo-1.1-SNAPSHOT-jar-with-dependencies.jar org.jitsi.jicofo.Main" + parameters, new File(jicofoHomePath), this);
-
-        Log.info( "Successfully initialized Jitsi Focus Component (jicofo)."  + javaExec + parameters);
+        Log.info( "Successfully initialized Jitsi Focus Component (jicofo).\n"  + cmdLine);
     }
 
     public synchronized void destroy() throws Exception
     {
-        Log.debug( "Destroying Jitsi Focus Component..." );
+        Log.debug( "Destroying Jitsi Focus process..." );
 
         if (jicofoThread != null) jicofoThread.destory();
+
+        Log.debug( "Destroyed Jitsi Focus process..." );
     }
 
     public void onOutputLine(final String line)
@@ -139,4 +142,11 @@ public class JitsiJicofoWrapper implements ProcessListener
         Log.error("Thread error", t);
     }
 
+    private void makeFileExecutable(String path)
+    {
+        File file = new File(path);
+        file.setReadable(true, true);
+        file.setWritable(true, true);
+        file.setExecutable(true, true);
+    }
 }

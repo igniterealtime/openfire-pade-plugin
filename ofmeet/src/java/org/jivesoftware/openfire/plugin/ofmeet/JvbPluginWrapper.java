@@ -124,10 +124,10 @@ public class JvbPluginWrapper implements ProcessListener
             "}"
         );
 
+        Path configFile = Paths.get(jvbHomePath + File.separator + "application.conf");
         try
         {
-            Path file = Paths.get(jvbHomePath + File.separator + "application.conf");
-            Files.write(file, lines, Charset.forName("UTF-8"));
+            Files.write(configFile, lines, Charset.forName("UTF-8"));
         } catch (Exception e) {
             Log.error("createConfigFile error", e);
         }
@@ -141,7 +141,7 @@ public class JvbPluginWrapper implements ProcessListener
         }
 
          makeFileExecutable(javaExec);
-         String cmdLine = javaExec + " -Dconfig.file=./application.conf -Dnet.java.sip.communicator.SC_HOME_DIR_LOCATION=. -Dnet.java.sip.communicator.SC_HOME_DIR_NAME=. -Djava.util.logging.config.file=./logging.properties -Djdk.tls.ephemeralDHKeySize=2048 -cp " + jvbHomePath + "/jitsi-videobridge.jar;" + jvbHomePath + "/jitsi-videobridge-2.1-SNAPSHOT-jar-with-dependencies.jar org.jitsi.videobridge.MainKt  --apis=rest";
+         String cmdLine = javaExec + " -Dconfig.file=" + configFile + " -Dnet.java.sip.communicator.SC_HOME_DIR_LOCATION=. -Dnet.java.sip.communicator.SC_HOME_DIR_NAME=. -Djava.util.logging.config.file=./logging.properties -Djdk.tls.ephemeralDHKeySize=2048 -cp " + jvbHomePath + "/jitsi-videobridge.jar" + File.pathSeparator + jvbHomePath + "/jitsi-videobridge-2.1-SNAPSHOT-jar-with-dependencies.jar org.jitsi.videobridge.MainKt  --apis=rest";
          jvbThread = Spawn.startProcess(cmdLine, new File(jvbHomePath), this);
 
         Log.info( "Successfully initialized Jitsi Videobridge.\n" + cmdLine );

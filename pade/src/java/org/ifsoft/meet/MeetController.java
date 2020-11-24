@@ -312,7 +312,7 @@ public class MeetController {
             //message.setTo(jid2);
             message.setType(Message.Type.groupchat);
             message.setBody("> " + json.getString("msgNick") + " : " + json.getString("msgBody") + "\n\n" + json.getString("reply"));
-            room.send(message);
+            room.send(message, room.getRole());
 
         } catch (Exception e) {
             Log.error("postGroupChatMessage", e);

@@ -85,12 +85,12 @@ public class JitsiJicofoWrapper implements ProcessListener
             " --user_password=" + config.getFocusPassword();
 
         String jicofoHomePath = pluginDirectory.getPath() + File.separator + "classes" + File.separator + "jicofo";
-        File props_file = new File(jicofoHomePath + File.separator + "sip-communicator.properties");
+        File props_file = new File(jicofoHomePath + File.separator + "config" + File.separator + "sip-communicator.properties");
         Properties props = new Properties();
 
         props.load(new FileInputStream(props_file));
         props.setProperty("org.jitsi.jicofo.BRIDGE_MUC", "ofmeet@" + MAIN_MUC);
-        props.setProperty( "net.java.sip.communicator.service.gui.ALWAYS_TRUST_MODE_ENABLED", "true");;
+        props.setProperty( "org.jitsi.jicofo.ALWAYS_TRUST_MODE_ENABLED", "true" );
         props.setProperty( "org.jitsi.jicofo.PING_INTERVAL", "-1" );
         props.setProperty( "org.jitsi.jicofo.SERVICE_REDISCOVERY_INTERVAL", "-1" );
         props.store(new FileOutputStream(props_file), "Properties");
@@ -102,8 +102,8 @@ public class JitsiJicofoWrapper implements ProcessListener
         {
             javaExec = javaExec + ".exe";
         }
-        makeFileExecutable(javaExec);
-        String cmdLine = javaExec + " -Dnet.java.sip.communicator.SC_HOME_DIR_LOCATION=. -Dnet.java.sip.communicator.SC_HOME_DIR_NAME=. -Djava.util.logging.config.file=./logging.properties -Djdk.tls.ephemeralDHKeySize=2048 -cp " + jicofoHomePath + "/jicofo.jar" + File.pathSeparator + jicofoHomePath + "/jicofo-1.1-SNAPSHOT-jar-with-dependencies.jar org.jitsi.jicofo.Main" + parameters;
+
+        String cmdLine = javaExec + " -Dnet.java.sip.communicator.SC_HOME_DIR_LOCATION=" + jicofoHomePath + " -Dnet.java.sip.communicator.SC_HOME_DIR_NAME=config -Djava.util.logging.config.file=./logging.properties -Djdk.tls.ephemeralDHKeySize=2048 -cp " + jicofoHomePath + "/jicofo.jar" + File.pathSeparator + jicofoHomePath + "/jicofo-1.1-SNAPSHOT-jar-with-dependencies.jar org.jitsi.jicofo.Main" + parameters;
         jicofoThread = Spawn.startProcess(cmdLine, new File(jicofoHomePath), this);
 
         Log.info( "Successfully initialized Jitsi Focus Component (jicofo).\n"  + cmdLine);
@@ -140,13 +140,5 @@ public class JitsiJicofoWrapper implements ProcessListener
     public void onError(final Throwable t)
     {
         Log.error("Thread error", t);
-    }
-
-    private void makeFileExecutable(String path)
-    {
-        File file = new File(path);
-        file.setReadable(true, true);
-        file.setWritable(true, true);
-        file.setExecutable(true, true);
     }
 }

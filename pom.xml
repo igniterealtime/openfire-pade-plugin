@@ -18,7 +18,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>      
-        <openfire.version>4.5.3</openfire.version>        
+        <openfire.version>4.6.0</openfire.version>        
         <pade.url>https://igniterealtime.github.io/pade</pade.url>        
     </properties>
 

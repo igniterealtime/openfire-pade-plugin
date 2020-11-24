@@ -29,7 +29,7 @@
 
     Map<String, String> errors = new HashMap<>();
     boolean singlePortEnabled, minmaxPortEnabled, tcpEnabled, sslTcpEnabled;
-    String stunPort, singlePort, minPort, maxPort, tcpPort, mappedTcpPort;
+    String stunPort, singlePort, minPort, maxPort, tcpPort, mappedTcpPort, plainPort, securePort;
 
     if (reset)
     {
@@ -189,6 +189,36 @@
                 errors.put( "maxPort", "Invalid port value" );
             }
         }
+        
+        plainPort = request.getParameter("plainPort");
+        if (plainPort != null) {
+            plainPort = plainPort.trim();
+            try {
+                int port = Integer.valueOf(plainPort);
+                if( port >= 1 && port <= 65535 ) {
+                    JiveGlobals.setProperty( PluginImpl.PLAIN_PORT_NUMBER_PROPERTY_NAME, plainPort );
+                } else {
+                    throw new NumberFormatException( "out of range port" );
+                }
+            } catch (Exception e) {
+                errors.put( "plainPort", "Invalid port value" );
+            }
+        }
+
+        securePort = request.getParameter("securePort");
+        if (securePort != null) {
+            securePort = securePort.trim();
+            try {
+                int port = Integer.valueOf( securePort );
+                if ( port >= 1 && port <= 65535 ) {
+                    JiveGlobals.setProperty( PluginImpl.SECURE_PORT_NUMBER_PROPERTY_NAME, securePort );
+                } else {
+                    throw new NumberFormatException( "out of range port" );
+                }
+            } catch (Exception e) {
+                errors.put( "securePort", "Invalid port value" );
+            }
+        }        
 
         tcpEnabled = Boolean.parseBoolean( request.getParameter( "tcpEnabled" ) );
         JiveGlobals.setProperty( PluginImpl.TCP_ENABLED_PROPERTY_NAME, Boolean.toString( tcpEnabled ));
@@ -245,6 +275,8 @@
         minmaxPortEnabled = RuntimeConfiguration.isMinMaxPortEnabled();
         minPort = Integer.toString( RuntimeConfiguration.getMinPort() );
         maxPort = Integer.toString( RuntimeConfiguration.getMaxPort() );
+        plainPort = Integer.toString( RuntimeConfiguration.getPlainPort() );
+        securePort = Integer.toString( RuntimeConfiguration.getSecurePort() );        
         tcpPort = RuntimeConfiguration.getTcpPort() == null ? null : RuntimeConfiguration.getTcpPort().toString();
         mappedTcpPort = RuntimeConfiguration.getTcpMappedPort() == null ? null : RuntimeConfiguration.getTcpMappedPort().toString();
         tcpEnabled = RuntimeConfiguration.isTcpEnabled();
@@ -430,6 +462,41 @@
         </table>
     </div>
 
+    <div class="jive-contentBoxHeader">
+        <fmt:message key="config.page.configuration.websockets.title"/>
+    </div>
+    <div class="jive-contentBox">
+        <p>
+            <fmt:message key="config.page.configuration.websockets.info"/>
+        </p>
+        <table>
+            <tbody>
+            <tr>
+                <td width="10%" style="padding-left: 3em; padding-top: 1em;" nowrap colspan="2">
+                    <label for="plainPort"><fmt:message key="config.page.configuration.websockets.plainport"/>:</label>
+                </td>
+                <td>
+                    <input name="plainPort" id="plainPort" type="number" min="1" max="65535" value="<%=plainPort%>"/> <fmt:message key="config.page.configuration.tcp"/>
+                    <%  if (errors.get("plainPort") != null) { %>
+                    <span class="jive-error-text"><fmt:message key="config.page.configuration.error.valid_port" /></span>
+                    <%  } %>
+                </td>
+            </tr>
+            <tr>
+                <td width="10%" style="padding-left: 3em;" nowrap colspan="2">
+                    <label for="securePort"><fmt:message key="config.page.configuration.websockets.secureport"/>:</label>
+                </td>
+                <td>
+                    <input name="securePort" id="securePort" type="number" min="1" max="65535" value="<%=securePort%>"/> <fmt:message key="config.page.configuration.tcp"/>
+                    <%  if (errors.get("securePort") != null) { %>
+                    <span class="jive-error-text"><fmt:message key="config.page.configuration.error.valid_port" /></span>
+                    <%  } %>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    
     <div class="jive-contentBoxHeader">
         <fmt:message key="config.page.configuration.addresses.title"/>
     </div>

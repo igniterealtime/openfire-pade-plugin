@@ -90,6 +90,9 @@ public class RuntimeConfiguration
      */
     public static final int MAX_PORT_DEFAULT_VALUE = 20000;
 
+    public static final int PLAIN_PORT_DEFAULT_VALUE = 8080;
+    public static final int SECURE_PORT_DEFAULT_VALUE = 8443;
+
     /**
      * The default setting for _disabling_ the TCP connectivity.
      */
@@ -162,6 +165,20 @@ public class RuntimeConfiguration
      * that was configured when this plugin got initialized, which is what is stored in this field.
      */
     private static final int MAX_PORT_AT_STARTUP = RuntimeConfiguration.getMaxPort();
+
+    /**
+     * Changes to port number configuration require a restart of the plugin to take effect.
+     * The websocket plain port number value that is currently in use is equal to the port number
+     * that was configured when this plugin got initialized, which is what is stored in this field.
+     */
+    private static final int PLAIN_PORT_AT_STARTUP = RuntimeConfiguration.getPlainPort();
+
+    /**
+     * Changes to port number configuration require a restart of the plugin to take effect.
+     * The websockets secure port number value that is currently in use is equal to the port number
+     * that was configured when this plugin got initialized, which is what is stored in this field.
+     */
+    private static final int SECURE_PORT_AT_STARTUP = RuntimeConfiguration.getSecurePort();
 
     /**
      * Changes to TCP harvester availability require a restart of the plugin to take effect.
@@ -343,6 +360,16 @@ public class RuntimeConfiguration
     public static int getMinPort()
     {
         return JiveGlobals.getIntProperty(PluginImpl.MIN_PORT_NUMBER_PROPERTY_NAME, MIN_PORT_DEFAULT_VALUE );
+    }
+
+    public static int getPlainPort()
+    {
+        return JiveGlobals.getIntProperty(PluginImpl.PLAIN_PORT_NUMBER_PROPERTY_NAME, PLAIN_PORT_DEFAULT_VALUE );
+    }
+
+    public static int getSecurePort()
+    {
+        return JiveGlobals.getIntProperty(PluginImpl.SECURE_PORT_NUMBER_PROPERTY_NAME, SECURE_PORT_DEFAULT_VALUE );
     }
 
     /**
@@ -532,6 +559,8 @@ public class RuntimeConfiguration
         || WAS_MINMAX_PORT_ENABLED_AT_STARTUP != RuntimeConfiguration.isMinMaxPortEnabled()
         || MAX_PORT_AT_STARTUP != RuntimeConfiguration.getMaxPort()
         || MIN_PORT_AT_STARTUP != RuntimeConfiguration.getMinPort()
+        || PLAIN_PORT_AT_STARTUP != RuntimeConfiguration.getPlainPort()
+        || SECURE_PORT_AT_STARTUP != RuntimeConfiguration.getSecurePort()
         || WAS_TCP_PORT_ENABLED_AT_STARTUP != RuntimeConfiguration.isTcpEnabled()
         || ( TCP_PORT_AT_STARTUP == null && RuntimeConfiguration.getTcpPort() != null) || ( TCP_PORT_AT_STARTUP != null && !TCP_PORT_AT_STARTUP.equals( RuntimeConfiguration.getTcpPort() ) )
         || ( TCP_MAPPED_PORT_AT_STARTUP == null && RuntimeConfiguration.getTcpMappedPort() != null) || ( TCP_MAPPED_PORT_AT_STARTUP != null && !TCP_MAPPED_PORT_AT_STARTUP.equals( RuntimeConfiguration.getTcpMappedPort() ) )

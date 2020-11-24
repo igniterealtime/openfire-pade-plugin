@@ -104,9 +104,10 @@ public class JvbPluginWrapper implements ProcessListener
             "    }",
             "",
             "   http-servers {",
-            "       public {",
+            "       private {",
             "           port = " + plain_port,
-            "           host = " + ipAddress,
+            "       }",
+            "       public {",
             "           need-client-auth = false",
             "           tls-port = " + secure_port,
             "           key-store-path = \"" + keystore + "\"",
@@ -173,7 +174,8 @@ public class JvbPluginWrapper implements ProcessListener
         String cmdLine = javaExec + " -Dconfig.file=" + configFile + " -Dnet.java.sip.communicator.SC_HOME_DIR_LOCATION=" + jvbHomePath + " -Dnet.java.sip.communicator.SC_HOME_DIR_NAME=config -Djava.util.logging.config.file=./logging.properties -Djdk.tls.ephemeralDHKeySize=2048 -cp " + jvbHomePath + "/jitsi-videobridge.jar" + File.pathSeparator + jvbHomePath + "/jitsi-videobridge-2.1-SNAPSHOT-jar-with-dependencies.jar org.jitsi.videobridge.MainKt  --apis=rest";
         jvbThread = Spawn.startProcess(cmdLine, new File(jvbHomePath), this);
 
-        Log.info( "Successfully initialized Jitsi Videobridge.\n" + cmdLine + "\n" + String.join("\n", lines));
+        Log.info( "Successfully initialized Jitsi Videobridge.\n" + cmdLine);
+        Log.debug( "JVB config.\n" + cmdLine + "\n" + String.join("\n", lines));
     }
 
     private void writeProperties( File props_file )
@@ -198,10 +200,10 @@ public class JvbPluginWrapper implements ProcessListener
             writeProperty(props, PluginImpl.TCP_PORT_PROPERTY_NAME );
             writeProperty(props, PluginImpl.TCP_SSLTCP_ENABLED_PROPERTY_NAME );
 
-            Log.info("sip-communicator.properties");
+            Log.debug("sip-communicator.properties");
 
             for (Object key: props.keySet()) {
-                Log.info(key + ": " + props.getProperty(key.toString()));
+                Log.debug(key + ": " + props.getProperty(key.toString()));
             }
 
             props.store(new FileOutputStream(props_file), "Properties");
@@ -319,16 +321,13 @@ public class JvbPluginWrapper implements ProcessListener
         return ourIpAddress;
     }
 
-    public JSONObject getConferenceStats()
+    public String getConferenceStats()
     {
-        Log.info( "getConferenceStats" );
-
         String server = getIpAddress();
 
         try {
             HttpClient client = new DefaultHttpClient();
-            HttpGet get = new HttpGet("http://" + server + ":8080/colibri/stats");
-            get.setHeader("Content-Type", "application/json");
+            HttpGet get = new HttpGet("http://localhost:8080/colibri/stats");
             HttpResponse response2 = client.execute(get);
             BufferedReader rd = new BufferedReader(new InputStreamReader(response2.getEntity().getContent()));
 
@@ -338,17 +337,18 @@ public class JvbPluginWrapper implements ProcessListener
             while ((line = rd.readLine()) != null) {
                 json = json + line;
             }
-            return new JSONObject(json).getJSONObject("data");
+            Log.debug( "getConferenceStats\n" + json );
+            return json;
 
         } catch (Exception e) {
-            return new JSONObject("{\"data\": {\"current_timestamp\":0, \"total_conference_seconds\":0, \"total_participants\":0, \"total_failed_conferencestotal_failed_conferences\":0, \"total_conferences_created\":0, \"total_conferences_completed\":0, \"conferences\":0, \"participants\":0, \"largest_conference\":0, \"p2p_conferences\":0}}");
+            Log.error("getConferenceStats " + server, e);
+            return "{\"current_timestamp\":0, \"total_conference_seconds\":0, \"total_participants\":0, \"total_failed_conferences\":0, \"total_conferences_created\":0, \"total_conferences_completed\":0, \"conferences\":0, \"participants\":0, \"largest_conference\":0, \"p2p_conferences\":0}";
         }
 
     }
 
     public synchronized void destroy() throws Exception
     {
-        //Log.info(getConferenceStats().toString());
         Log.debug( "Destroying jvb process." );
 
         if (jvbThread != null) jvbThread.destory();

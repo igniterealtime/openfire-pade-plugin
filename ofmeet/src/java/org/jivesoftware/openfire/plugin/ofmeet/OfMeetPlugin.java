@@ -114,6 +114,11 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         return "ofmeet";
     }
 
+    public String getConferenceStats()
+    {
+        return jvbPluginWrapper.getConferenceStats();
+    }
+
     public String getDescription()
     {
         return "OfMeet Plugin";
@@ -245,7 +250,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         Log.info("Initializing websocket proxy http://" + ipaddr + ":" + jvbPort);
 
         jvbWsContext = new ServletContextHandler(null, "/colibri-ws", ServletContextHandler.SESSIONS);
-        jvbWsContext = new WebAppContext(null, pluginDirectory.getPath() + "/classes/jitsi-meet", "/colibri-ws" );
+        jvbWsContext = new WebAppContext(null, pluginDirectory.getPath() + "/classes/colibri-ws", "/colibri-ws" );
 
         try {
             WebSocketUpgradeFilter wsfilter = WebSocketUpgradeFilter.configureContext(jvbWsContext);

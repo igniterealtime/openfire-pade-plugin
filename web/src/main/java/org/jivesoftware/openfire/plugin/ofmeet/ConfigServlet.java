@@ -160,10 +160,13 @@ public class ConfigServlet extends HttpServlet
             config.put( "useIPv6", useIPv6 );
             config.put( "useNicks", useNicks );
             config.put( "useRtcpMux", useRtcpMux );
-            config.put( "useBundle", useBundle );
+            //config.put( "useBundle", useBundle );
             config.put( "enableWelcomePage", enableWelcomePage );
             config.put( "enableRtpStats", enableRtpStats );
             config.put( "enableLipSync", ofMeetConfig.getLipSync() );
+
+            config.put( "enableRemb", true );
+            config.put( "enableTcc", true );
 
             if ( recordingKey == null || recordingKey.isEmpty() )
             {

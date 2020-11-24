@@ -280,7 +280,7 @@ public class PluginImpl
             );
 */
             if ( JiveGlobals.getProperty( TCP_ENABLED_PROPERTY_NAME ) != null ) {
-                System.setProperty(TCP_ENABLED_PROPERTY_NAME,  String.valueOf(!JiveGlobals.getBooleanProperty( TCP_ENABLED_PROPERTY_NAME) ));
+                System.setProperty(TCP_ENABLED_PROPERTY_NAME,  String.valueOf(JiveGlobals.getBooleanProperty( TCP_ENABLED_PROPERTY_NAME) ));
             } else {
                 System.clearProperty(TCP_ENABLED_PROPERTY_NAME);
             }

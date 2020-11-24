@@ -181,7 +181,6 @@
             <artifactId>xmppserver</artifactId>
             <scope>provided</scope>
         </dependency>
-
         <dependency>
             <groupId>com.microsoft.azure</groupId>
             <artifactId>adal4j</artifactId>

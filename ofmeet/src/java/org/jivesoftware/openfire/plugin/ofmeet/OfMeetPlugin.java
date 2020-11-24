@@ -24,7 +24,15 @@ import org.eclipse.jetty.webapp.WebAppContext;
 import org.eclipse.jetty.apache.jsp.JettyJasperInitializer;
 import org.eclipse.jetty.plus.annotation.ContainerInitializer;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
+import org.eclipse.jetty.servlets.*;
 import org.eclipse.jetty.servlet.*;
+import org.eclipse.jetty.websocket.servlet.*;
+import org.eclipse.jetty.websocket.server.*;
+import org.eclipse.jetty.websocket.server.pathmap.ServletPathSpec;
+
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.tomcat.InstanceManager;
 import org.apache.tomcat.SimpleInstanceManager;
@@ -54,6 +62,7 @@ import java.io.FilenameFilter;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -63,6 +72,8 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import org.ifsoft.websockets.*;
 
 /**
  * Bundles various Jitsi components into one, standalone Openfire plugin.
@@ -84,6 +95,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
     private OfMeetIQHandler ofmeetIQHandler;
     private WebAppContext publicWebApp;
+    private ServletContextHandler jvbWsContext = null;
     private BookmarkInterceptor bookmarkInterceptor;
 
     private final JvbPluginWrapper jvbPluginWrapper;
@@ -227,6 +239,26 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     {
         Log.info( "Initializing public web application" );
 
+        String ipaddr = jvbPluginWrapper.getIpAddress();
+        String jvbPort = JiveGlobals.getProperty( "ofmeet.websockets.plainport", "8080");
+
+        Log.info("Initializing websocket proxy http://" + ipaddr + ":" + jvbPort);
+
+        jvbWsContext = new ServletContextHandler(null, "/colibri-ws", ServletContextHandler.SESSIONS);
+        jvbWsContext = new WebAppContext(null, pluginDirectory.getPath() + "/classes/jitsi-meet", "/colibri-ws" );
+
+        try {
+            WebSocketUpgradeFilter wsfilter = WebSocketUpgradeFilter.configureContext(jvbWsContext);
+            wsfilter.getFactory().getPolicy().setIdleTimeout(60 * 60 * 1000);
+            wsfilter.getFactory().getPolicy().setMaxTextMessageSize(64000000);
+            wsfilter.addMapping(new ServletPathSpec("/*"), new JvbSocketCreator());
+
+        } catch (Exception e) {
+            Log.error("loadPublicWebApp", e);
+        }
+
+        HttpBindManager.getInstance().addJettyHandler(jvbWsContext);
+
         publicWebApp = new WebAppContext(null, pluginDirectory.getPath() + "/classes/jitsi-meet",  new OFMeetConfig().getWebappContextPath());
         publicWebApp.setClassLoader(this.getClass().getClassLoader());
 
@@ -238,7 +270,47 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         HttpBindManager.getInstance().addJettyHandler( publicWebApp );
 
         Log.debug( "Initialized public web application", publicWebApp.toString() );
+
+
+
+        Log.debug( "Initialized public web application", publicWebApp.toString() );
     }
+
+
+    public static class JvbSocketCreator implements WebSocketCreator
+    {
+        @Override public Object createWebSocket(ServletUpgradeRequest req, ServletUpgradeResponse resp)
+        {
+            String ipaddr = getIpAddress();
+            String jvbPort = JiveGlobals.getProperty( "ofmeet.websockets.plainport", "8080");
+
+            HttpServletRequest request = req.getHttpServletRequest();
+            String path = request.getRequestURI();
+            String query = request.getQueryString();
+            String protocol = null;
+
+            for (String subprotocol : req.getSubProtocols())
+            {
+                Log.info("WSocketCreator found protocol " + subprotocol);
+                protocol = subprotocol;
+            }
+
+            if (query != null) path += "?" + query;
+
+            Log.info("JvbSocketCreator " + path + " " + query);
+
+            String url = "ws://" + ipaddr + ":" + jvbPort + path;
+
+            ProxyWebSocket socket = null;
+            ProxyConnection proxyConnection = new ProxyConnection(URI.create(url), protocol, 10000);
+
+            socket = new ProxyWebSocket();
+            socket.setProxyConnection(proxyConnection);
+            if (protocol != null) resp.setAcceptedSubProtocol(protocol);
+            return socket;
+        }
+    }
+
 
     public void unloadPublicWebApp() throws Exception
     {
@@ -248,6 +320,12 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
             {
                 HttpBindManager.getInstance().removeJettyHandler( publicWebApp );
                 publicWebApp.destroy();
+
+                if (jvbWsContext != null)
+                {
+                    HttpBindManager.getInstance().removeJettyHandler(jvbWsContext);
+                    jvbWsContext.destroy();
+                }
             }
             finally
             {
@@ -387,6 +465,20 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         {
             Log.error("checkDownloadFolder", e);
         }
+    }
+
+    public static String getIpAddress()
+    {
+        String ourHostname = XMPPServer.getInstance().getServerInfo().getHostname();
+        String ourIpAddress = "127.0.0.1";
+
+        try {
+            ourIpAddress = InetAddress.getByName(ourHostname).getHostAddress();
+        } catch (Exception e) {
+
+        }
+
+        return ourIpAddress;
     }
 
     //-------------------------------------------------------

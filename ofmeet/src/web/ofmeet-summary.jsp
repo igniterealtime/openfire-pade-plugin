@@ -118,7 +118,7 @@
 
         for ( final MUCRole occupant : chatRoom.getOccupants() ) {
             JID jid = occupant.getUserAddress();
-            String nick = jid.getResource();
+            String nick = jid.getNode();
             
             if (!nick.startsWith("focus"))
             {

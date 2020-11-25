@@ -84,8 +84,8 @@ public class JitsiJicofoWrapper implements ProcessListener
             " --user_name=" + jicofoSubdomain +
             " --user_password=" + config.getFocusPassword();
 
-        String jicofoHomePath = pluginDirectory.getPath() + File.separator + "classes" + File.separator + "jicofo";
-        File props_file = new File(jicofoHomePath + File.separator + "config" + File.separator + "sip-communicator.properties");
+        final String jicofoHomePath = pluginDirectory.getPath() + File.separator + "classes" + File.separator + "jicofo";
+        final File props_file = new File(jicofoHomePath + File.separator + "config" + File.separator + "sip-communicator.properties");
         Properties props = new Properties();
 
         props.load(new FileInputStream(props_file));
@@ -95,7 +95,7 @@ public class JitsiJicofoWrapper implements ProcessListener
         props.setProperty( "org.jitsi.jicofo.SERVICE_REDISCOVERY_INTERVAL", "-1" );
         props.store(new FileOutputStream(props_file), "Properties");
 
-        String javaHome = System.getProperty("java.home");
+        final String javaHome = System.getProperty("java.home");
         String javaExec = javaHome + File.separator + "bin" + File.separator + "java";
 
         if (OSUtils.IS_WINDOWS64)
@@ -103,7 +103,8 @@ public class JitsiJicofoWrapper implements ProcessListener
             javaExec = javaExec + ".exe";
         }
 
-        String cmdLine = javaExec + " -Dnet.java.sip.communicator.SC_HOME_DIR_LOCATION=" + jicofoHomePath + " -Dnet.java.sip.communicator.SC_HOME_DIR_NAME=config -Djava.util.logging.config.file=./logging.properties -Djdk.tls.ephemeralDHKeySize=2048 -cp " + jicofoHomePath + "/jicofo.jar" + File.pathSeparator + jicofoHomePath + "/jicofo-1.1-SNAPSHOT-jar-with-dependencies.jar org.jitsi.jicofo.Main" + parameters;
+        final String customOptions = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.focus.jvm.customOptions", "");
+        final String cmdLine = javaExec + " " + customOptions + " -Dnet.java.sip.communicator.SC_HOME_DIR_LOCATION=" + jicofoHomePath + " -Dnet.java.sip.communicator.SC_HOME_DIR_NAME=config -Djava.util.logging.config.file=./logging.properties -Djdk.tls.ephemeralDHKeySize=2048 -cp " + jicofoHomePath + "/jicofo.jar" + File.pathSeparator + jicofoHomePath + "/jicofo-1.1-SNAPSHOT-jar-with-dependencies.jar org.jitsi.jicofo.Main" + parameters;
         jicofoThread = Spawn.startProcess(cmdLine, new File(jicofoHomePath), this);
 
         Log.info( "Successfully initialized Jitsi Focus Component (jicofo).\n"  + cmdLine);

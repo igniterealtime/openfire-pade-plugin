@@ -93,7 +93,7 @@ public class JitsiJicofoWrapper implements ProcessListener
         props.setProperty( "org.jitsi.jicofo.ALWAYS_TRUST_MODE_ENABLED", "true" );
         props.setProperty( "org.jitsi.jicofo.PING_INTERVAL", "-1" );
         props.setProperty( "org.jitsi.jicofo.SERVICE_REDISCOVERY_INTERVAL", "-1" );
-        props.store(new FileOutputStream(props_file), "Properties");
+        props.store(new FileOutputStream(props_file), "Jitsi Colibri Focus");
 
         final String javaHome = System.getProperty("java.home");
         String javaExec = javaHome + File.separator + "bin" + File.separator + "java";

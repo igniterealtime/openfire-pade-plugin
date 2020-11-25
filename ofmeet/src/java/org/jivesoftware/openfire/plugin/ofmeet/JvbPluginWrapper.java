@@ -208,7 +208,7 @@ public class JvbPluginWrapper implements ProcessListener
                 Log.debug(key + ": " + props.getProperty(key.toString()));
             }
 
-            props.store(new FileOutputStream(props_file), "Properties");
+            props.store(new FileOutputStream(props_file), "Jisti Video Bridge");
         } catch (Exception e) {
             Log.error("writeProperties", e);
         }

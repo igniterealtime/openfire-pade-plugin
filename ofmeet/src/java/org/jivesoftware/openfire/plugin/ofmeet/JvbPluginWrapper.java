@@ -73,6 +73,7 @@ public class JvbPluginWrapper implements ProcessListener
         final String username =  config.getJvbName();
         final String password = config.getJvbPassword();
         final String ipAddress = getIpAddress();
+
         final String plain_port = JiveGlobals.getProperty( "ofmeet.websockets.plainport", "8080");
         final String secure_port = JiveGlobals.getProperty( "ofmeet.websockets.secureport", "8443");
         final String public_port = JiveGlobals.getProperty( "httpbind.port.secure", "7443");
@@ -84,7 +85,7 @@ public class JvbPluginWrapper implements ProcessListener
         if (local_ip == null || local_ip.isEmpty()) local_ip = ipAddress;
         if (public_ip == null || public_ip.isEmpty()) public_ip = ipAddress;
 
-        if(OSUtils.IS_WINDOWS64)
+        if(OSUtils.IS_WINDOWS)
         {
             keystore = keystore.replace("\\", "/");
         }

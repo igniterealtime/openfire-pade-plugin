@@ -35,7 +35,8 @@
     
     if (json != null)
     {
-        summary = new JSONObject(json);
+        JSONObject jsonObj = new JSONObject(json);
+        if (jsonObj != null && jsonObj.has("current_timestamp")) summary = jsonObj;
     }
 
     String current_timestamp = summary.getString("current_timestamp");

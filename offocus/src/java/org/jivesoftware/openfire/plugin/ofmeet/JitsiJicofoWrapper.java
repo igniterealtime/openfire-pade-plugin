@@ -96,14 +96,16 @@ public class JitsiJicofoWrapper implements ProcessListener
         props.store(new FileOutputStream(props_file), "Jitsi Colibri Focus");
 
         final String javaHome = System.getProperty("java.home");
+        String defaultOptions = "-Xmx3072m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp";
         String javaExec = javaHome + File.separator + "bin" + File.separator + "java";
 
         if (OSUtils.IS_WINDOWS64)
         {
             javaExec = javaExec + ".exe";
+            defaultOptions = "";
         }
 
-        final String customOptions = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.focus.jvm.customOptions", "-Xmx3072m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp");
+        final String customOptions = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.focus.jvm.customOptions", defaultOptions);
         final String cmdLine = javaExec + " " + customOptions + " -Dnet.java.sip.communicator.SC_HOME_DIR_LOCATION=" + jicofoHomePath + " -Dnet.java.sip.communicator.SC_HOME_DIR_NAME=config -Djava.util.logging.config.file=./logging.properties -Djdk.tls.ephemeralDHKeySize=2048 -cp " + jicofoHomePath + "/jicofo.jar" + File.pathSeparator + jicofoHomePath + "/jicofo-1.1-SNAPSHOT-jar-with-dependencies.jar org.jitsi.jicofo.Main" + parameters;
         jicofoThread = Spawn.startProcess(cmdLine, new File(jicofoHomePath), this);
 

@@ -161,18 +161,21 @@ public class JvbPluginWrapper implements ProcessListener
             Log.error("createConfigFile error", e);
         }
 
+        String defaultOptions = "-Xmx3072m -XX:+UseConcMarkSweepGC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp";
         final String javaHome = System.getProperty("java.home");
         String javaExec = javaHome + File.separator + "bin" + File.separator + "java";
 
         if(OSUtils.IS_WINDOWS64)
         {
             javaExec = javaExec + ".exe";
+            defaultOptions = "";
         }
 
         final File props_file = new File(jvbHomePath + File.separator + "config" + File.separator + "sip-communicator.properties");
         writeProperties(props_file);
 
-        final String customOptions = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.jvb.jvm.customOptions", "-Xmx3072m -XX:+UseConcMarkSweepGC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp");
+
+        final String customOptions = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.jvb.jvm.customOptions", defaultOptions);
         final String cmdLine = javaExec + " " + customOptions + " -Dconfig.file=" + configFile + " -Dnet.java.sip.communicator.SC_HOME_DIR_LOCATION=" + jvbHomePath + " -Dnet.java.sip.communicator.SC_HOME_DIR_NAME=config -Djava.util.logging.config.file=./logging.properties -Djdk.tls.ephemeralDHKeySize=2048 -cp " + jvbHomePath + "/jitsi-videobridge.jar" + File.pathSeparator + jvbHomePath + "/jitsi-videobridge-2.1-SNAPSHOT-jar-with-dependencies.jar org.jitsi.videobridge.MainKt  --apis=rest";
         jvbThread = Spawn.startProcess(cmdLine, new File(jvbHomePath), this);
 

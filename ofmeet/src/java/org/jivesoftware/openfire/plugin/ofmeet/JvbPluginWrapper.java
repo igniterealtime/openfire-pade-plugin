@@ -165,7 +165,7 @@ public class JvbPluginWrapper implements ProcessListener
         final String javaHome = System.getProperty("java.home");
         String javaExec = javaHome + File.separator + "bin" + File.separator + "java";
 
-        if(OSUtils.IS_WINDOWS64)
+        if(OSUtils.IS_WINDOWS)
         {
             javaExec = javaExec + ".exe";
             defaultOptions = "";

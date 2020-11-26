@@ -99,7 +99,7 @@ public class JitsiJicofoWrapper implements ProcessListener
         String defaultOptions = "-Xmx3072m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp";
         String javaExec = javaHome + File.separator + "bin" + File.separator + "java";
 
-        if (OSUtils.IS_WINDOWS64)
+        if (OSUtils.IS_WINDOWS)
         {
             javaExec = javaExec + ".exe";
             defaultOptions = "";

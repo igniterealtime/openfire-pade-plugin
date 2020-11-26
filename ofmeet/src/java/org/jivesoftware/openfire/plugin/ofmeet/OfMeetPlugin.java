@@ -304,7 +304,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
             Log.info("JvbSocketCreator " + path + " " + query);
 
-            String url = "ws://" + ipaddr + ":" + jvbPort + path;
+            String url = "ws://localhost:" + jvbPort + path;
 
             ProxyWebSocket socket = null;
             ProxyConnection proxyConnection = new ProxyConnection(URI.create(url), protocol, 10000);

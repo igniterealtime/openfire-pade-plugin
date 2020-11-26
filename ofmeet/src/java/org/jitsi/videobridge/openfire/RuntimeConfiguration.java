@@ -331,7 +331,7 @@ public class RuntimeConfiguration
      */
     public static boolean isMinMaxPortEnabled()
     {
-        return StackProperties.getBoolean( StackProperties.USE_DYNAMIC_HOST_HARVESTER,true );
+        return StackProperties.getBoolean( StackProperties.USE_DYNAMIC_HOST_HARVESTER, false );
     }
 
     /**

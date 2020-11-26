@@ -29,7 +29,7 @@
 <% 
     final OfMeetPlugin container = (OfMeetPlugin) XMPPServer.getInstance().getPluginManager().getPlugin( "ofmeet" );
     
-    JSONObject summary = new JSONObject("{\"current_timestamp\":\"\", \"total_conference_seconds\":0, \"total_participants\":0, \"total_failed_conferences\":0, \"total_conferences_created\":0, \"total_conferences_completed\":0, \"conferences\":0, \"participants\":0, \"largest_conference\":0, \"p2p_conferences\":0}");        
+    JSONObject summary = new JSONObject("{\"current_timestamp\":\"Initialising...\", \"total_conference_seconds\":0, \"total_participants\":0, \"total_failed_conferences\":0, \"total_conferences_created\":0, \"total_conferences_completed\":0, \"conferences\":0, \"participants\":0, \"largest_conference\":0, \"p2p_conferences\":0}");        
 
     String json = container.getConferenceStats();
     
@@ -39,66 +39,71 @@
         if (jsonObj != null && jsonObj.has("current_timestamp")) summary = jsonObj;
     }
 
-    String current_timestamp = summary.getString("current_timestamp");
-    int total_conference_seconds = summary.getInt("total_conference_seconds");      
-    int total_participants = summary.getInt("total_participants");
-    int total_failed_conferences = summary.getInt("total_failed_conferences");          
-    int total_conferences_created = summary.getInt("total_conferences_created"); 
-    int total_conferences_completed = summary.getInt("total_conferences_completed");     
-    int conferences = summary.getInt("conferences");      
-    int participants = summary.getInt("participants");
-    int largest_conference = summary.getInt("largest_conference");          
-    int p2p_conferences = summary.getInt("p2p_conferences");     
+    try {
+        String current_timestamp = summary.getString("current_timestamp");
+        int total_conference_seconds = summary.getInt("total_conference_seconds");      
+        int total_participants = summary.getInt("total_participants");
+        int total_failed_conferences = summary.getInt("total_failed_conferences");          
+        int total_conferences_created = summary.getInt("total_conferences_created"); 
+        int total_conferences_completed = summary.getInt("total_conferences_completed");     
+        int conferences = summary.getInt("conferences");      
+        int participants = summary.getInt("participants");
+        int largest_conference = summary.getInt("largest_conference");          
+        int p2p_conferences = summary.getInt("p2p_conferences");     
 
-%>
-    <div class="jive-table">
-    <table cellpadding="0" cellspacing="0" border="0" width="100%">
-    <thead>
-        <tr>
-            <th nowrap><fmt:message key="ofmeet.summary.current_timestamp" /></th>   
-            <th nowrap><fmt:message key="ofmeet.summary.total_conference_seconds" /></th>
-            <th nowrap><fmt:message key="ofmeet.summary.total_participants" /></th>
-            <th nowrap><fmt:message key="ofmeet.summary.total_failed_conferences" /></th>           
-            <th nowrap><fmt:message key="ofmeet.summary.total_conferences_created" /></th>    
-            <th nowrap><fmt:message key="ofmeet.summary.total_conferences_completed" /></th>   
-            <th nowrap><fmt:message key="ofmeet.summary.conferences" /></th>
-            <th nowrap><fmt:message key="ofmeet.summary.participants" /></th>
-            <th nowrap><fmt:message key="ofmeet.summary.largest_conference" /></th>           
-            <th nowrap><fmt:message key="ofmeet.summary.p2p_conferences" /></th>              
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td nowrap><%= current_timestamp %></th>   
-            <td nowrap><%= total_conference_seconds %></th>
-            <td nowrap><%= total_participants %></th>
-            <td nowrap><%= total_failed_conferences %></th>           
-            <td nowrap><%= total_conferences_created %></th>     
-            <td nowrap><%= total_conferences_completed %></th>   
-            <td nowrap><%= conferences %></th>
-            <td nowrap><%= participants %></th>
-            <td nowrap><%= largest_conference %></th>           
-            <td nowrap><%= p2p_conferences %></th>              
-        </tr>
-    </tbody>
-    </table>
-    </div>
-    <br/>
-    
-    <p>&nbsp;</p>
+    %>
+        <div class="jive-table">
+        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+        <thead>
+            <tr>
+                <th nowrap><fmt:message key="ofmeet.summary.current_timestamp" /></th>   
+                <th nowrap><fmt:message key="ofmeet.summary.total_conference_seconds" /></th>
+                <th nowrap><fmt:message key="ofmeet.summary.total_participants" /></th>
+                <th nowrap><fmt:message key="ofmeet.summary.total_failed_conferences" /></th>           
+                <th nowrap><fmt:message key="ofmeet.summary.total_conferences_created" /></th>    
+                <th nowrap><fmt:message key="ofmeet.summary.total_conferences_completed" /></th>   
+                <th nowrap><fmt:message key="ofmeet.summary.conferences" /></th>
+                <th nowrap><fmt:message key="ofmeet.summary.participants" /></th>
+                <th nowrap><fmt:message key="ofmeet.summary.largest_conference" /></th>           
+                <th nowrap><fmt:message key="ofmeet.summary.p2p_conferences" /></th>              
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td nowrap><%= current_timestamp %></th>   
+                <td nowrap><%= total_conference_seconds %></th>
+                <td nowrap><%= total_participants %></th>
+                <td nowrap><%= total_failed_conferences %></th>           
+                <td nowrap><%= total_conferences_created %></th>     
+                <td nowrap><%= total_conferences_completed %></th>   
+                <td nowrap><%= conferences %></th>
+                <td nowrap><%= participants %></th>
+                <td nowrap><%= largest_conference %></th>           
+                <td nowrap><%= p2p_conferences %></th>              
+            </tr>
+        </tbody>
+        </table>
+        </div>
+        <br/>
 
-    <div class="jive-table">
-    <table cellpadding="0" cellspacing="0" border="0" width="100%">
-    <thead>
-        <tr>
-            <th>&nbsp;</th>
-            <th nowrap><fmt:message key="ofmeet.summary.conference" /></th>
-            <th nowrap><fmt:message key="ofmeet.summary.participants" /></th>                    
-            <th nowrap><fmt:message key="ofmeet.summary.focus" /></th>               
-        </tr>
-    </thead>
-    <tbody>  
+        <p>&nbsp;</p>
+
+        <div class="jive-table">
+        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+        <thead>
+            <tr>
+                <th>&nbsp;</th>
+                <th nowrap><fmt:message key="ofmeet.summary.conference" /></th>
+                <th nowrap><fmt:message key="ofmeet.summary.participants" /></th>                    
+                <th nowrap><fmt:message key="ofmeet.summary.focus" /></th>               
+            </tr>
+        </thead>
+        <tbody>  
 <% 
+    } catch (Exception e) {
+        // no summary
+    }
+    
     if (confCount == 0) {
 %>
     <tr>

@@ -221,7 +221,7 @@
         }        
 
         tcpEnabled = Boolean.parseBoolean( request.getParameter( "tcpEnabled" ) );
-        JiveGlobals.setProperty( PluginImpl.TCP_ENABLED_PROPERTY_NAME, Boolean.toString( tcpEnabled ));
+        JiveGlobals.setProperty( RuntimeConfiguration.DISABLE_TCP_HARVESTER, Boolean.toString( !tcpEnabled ));
 
         tcpPort = request.getParameter( "tcpPort" );
         if ( tcpPort == null || tcpPort.trim().isEmpty() ) {
@@ -461,41 +461,6 @@
             </tbody>
         </table>
     </div>
-
-    <div class="jive-contentBoxHeader">
-        <fmt:message key="config.page.configuration.websockets.title"/>
-    </div>
-    <div class="jive-contentBox">
-        <p>
-            <fmt:message key="config.page.configuration.websockets.info"/>
-        </p>
-        <table>
-            <tbody>
-            <tr>
-                <td width="10%" style="padding-left: 3em; padding-top: 1em;" nowrap colspan="2">
-                    <label for="plainPort"><fmt:message key="config.page.configuration.websockets.plainport"/>:</label>
-                </td>
-                <td>
-                    <input name="plainPort" id="plainPort" type="number" min="1" max="65535" value="<%=plainPort%>"/> <fmt:message key="config.page.configuration.tcp"/>
-                    <%  if (errors.get("plainPort") != null) { %>
-                    <span class="jive-error-text"><fmt:message key="config.page.configuration.error.valid_port" /></span>
-                    <%  } %>
-                </td>
-            </tr>
-            <tr>
-                <td width="10%" style="padding-left: 3em;" nowrap colspan="2">
-                    <label for="securePort"><fmt:message key="config.page.configuration.websockets.secureport"/>:</label>
-                </td>
-                <td>
-                    <input name="securePort" id="securePort" type="number" min="1" max="65535" value="<%=securePort%>"/> <fmt:message key="config.page.configuration.tcp"/>
-                    <%  if (errors.get("securePort") != null) { %>
-                    <span class="jive-error-text"><fmt:message key="config.page.configuration.error.valid_port" /></span>
-                    <%  } %>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
     
     <div class="jive-contentBoxHeader">
         <fmt:message key="config.page.configuration.addresses.title"/>
@@ -562,6 +527,42 @@
         </table>
     </div>
 
+
+    <div class="jive-contentBoxHeader">
+        <fmt:message key="config.page.configuration.websockets.title"/>
+    </div>
+    <div class="jive-contentBox">
+        <p>
+            <fmt:message key="config.page.configuration.websockets.info"/>
+        </p>
+        <table>
+            <tbody>
+            <tr>
+                <td width="10%" style="padding-left: 3em; padding-top: 1em;" nowrap colspan="2">
+                    <label for="plainPort"><fmt:message key="config.page.configuration.websockets.plainport"/>:</label>
+                </td>
+                <td>
+                    <input name="plainPort" id="plainPort" type="number" min="1" max="65535" value="<%=plainPort%>"/> <fmt:message key="config.page.configuration.tcp"/>
+                    <%  if (errors.get("plainPort") != null) { %>
+                    <span class="jive-error-text"><fmt:message key="config.page.configuration.error.valid_port" /></span>
+                    <%  } %>
+                </td>
+            </tr>
+            <tr>
+                <td width="10%" style="padding-left: 3em;" nowrap colspan="2">
+                    <label for="securePort"><fmt:message key="config.page.configuration.websockets.secureport"/>:</label>
+                </td>
+                <td>
+                    <input name="securePort" id="securePort" type="number" min="1" max="65535" value="<%=securePort%>"/> <fmt:message key="config.page.configuration.tcp"/>
+                    <%  if (errors.get("securePort") != null) { %>
+                    <span class="jive-error-text"><fmt:message key="config.page.configuration.error.valid_port" /></span>
+                    <%  } %>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    
     <div class="jive-contentBoxHeader">
         <fmt:message key="config.page.configuration.address-mapping.title"/>
     </div>
@@ -705,7 +706,7 @@
             <tbody>
             <tr>
                 <td width="1%" nowrap>
-                    <input type="radio" name="minmaxPortEnabled" value="false" id="minmaxPortDisabled" <%= (!minmaxPortEnabled ? "checked" : "") %>>
+                    <input type="radio" name="minmaxPortEnabled" value="false" id="minmaxPortDisabled" <%= (!minmaxPortEnabled ? "checked" : "") %> disabled >
                     <label class="jive-label" for="minmaxPortDisabled"><fmt:message key="config.page.configuration.minmax.port.disabled" /></label>
                 </td>
                 <td width="99%" colspan="2">
@@ -714,7 +715,7 @@
             </tr>
             <tr>
                 <td width="1%" nowrap>
-                    <input type="radio" name="minmaxPortEnabled" value="true" id="minmaxPortEnabled" <%= (minmaxPortEnabled ? "checked" : "") %>>
+                    <input type="radio" name="minmaxPortEnabled" value="true" id="minmaxPortEnabled" <%= (minmaxPortEnabled ? "checked" : "") %> disabled >
                     <label class="jive-label" for="minmaxPortEnabled"><fmt:message key="config.page.configuration.minmax.port.enabled" /></label>
                 </td>
                 <td width="99%" colspan="2">
@@ -726,7 +727,7 @@
                     <label for="minPort"><fmt:message key="config.page.configuration.min.port"/>:</label>
                 </td>
                 <td>
-                    <input name="minPort" id="minPort" type="number" min="1" max="65535" value="<%=minPort%>"/> <fmt:message key="config.page.configuration.udp"/>
+                    <input name="minPort" id="minPort" type="number" min="1" max="65535" value="<%=minPort%>" disabled /> <fmt:message key="config.page.configuration.udp"/>
                     <%  if (errors.get("minPort") != null) { %>
                     <span class="jive-error-text"><fmt:message key="config.page.configuration.error.valid_port" /></span>
                     <%  } %>
@@ -737,7 +738,7 @@
                     <label for="maxPort"><fmt:message key="config.page.configuration.max.port"/>:</label>
                 </td>
                 <td>
-                    <input name="maxPort" id="maxPort" type="number" min="1" max="65535" value="<%=maxPort%>"/> <fmt:message key="config.page.configuration.udp"/>
+                    <input name="maxPort" id="maxPort" type="number" min="1" max="65535" value="<%=maxPort%>" disabled /> <fmt:message key="config.page.configuration.udp"/>
                     <%  if (errors.get("maxPort") != null) { %>
                     <span class="jive-error-text"><fmt:message key="config.page.configuration.error.valid_port" /></span>
                     <%  } %>

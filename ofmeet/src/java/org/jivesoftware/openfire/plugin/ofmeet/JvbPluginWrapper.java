@@ -200,6 +200,9 @@ public class JvbPluginWrapper implements ProcessListener
             writeProperty(props, PluginImpl.MANUAL_HARVESTER_PUBLIC_PROPERTY_NAME);
             writeProperty(props, PluginImpl.SINGLE_PORT_ENABLED_PROPERTY_NAME );
             writeProperty(props, PluginImpl.SINGLE_PORT_NUMBER_PROPERTY_NAME );
+            writeProperty(props, PluginImpl.MINMAX_PORT_ENABLED_PROPERTY_NAME );
+            writeProperty(props, PluginImpl.MAX_PORT_NUMBER_PROPERTY_NAME );
+            writeProperty(props, PluginImpl.MIN_PORT_NUMBER_PROPERTY_NAME );
             writeProperty(props, PluginImpl.TCP_ENABLED_PROPERTY_NAME );
             writeProperty(props, PluginImpl.TCP_MAPPED_PORT_PROPERTY_NAME );
             writeProperty(props, PluginImpl.TCP_PORT_PROPERTY_NAME );
@@ -292,6 +295,20 @@ public class JvbPluginWrapper implements ProcessListener
                 );
                 break;
 
+            case PluginImpl.MINMAX_PORT_ENABLED_PROPERTY_NAME:
+                props.setProperty( "org.ice4j.ice.harvest.USE_DYNAMIC_HOST_HARVESTER", Boolean.toString( JiveGlobals.getBooleanProperty( PluginImpl.MINMAX_PORT_ENABLED_PROPERTY_NAME, true ) ) );
+                break;
+
+            case PluginImpl.MAX_PORT_NUMBER_PROPERTY_NAME:
+                if (value == null || value.isEmpty()) break;
+                props.setProperty("net.java.sip.communicator.service.media.MAX_PORT_NUMBER", value);
+                break;
+
+            case PluginImpl.MIN_PORT_NUMBER_PROPERTY_NAME:
+                if (value == null || value.isEmpty()) break;
+                props.setProperty("net.java.sip.communicator.service.media.MIN_PORT_NUMBER", value);
+                break;
+
             case PluginImpl.TCP_ENABLED_PROPERTY_NAME:
                 props.setProperty("org.jitsi.videobridge.DISABLE_TCP_HARVESTER", String.valueOf(!RuntimeConfiguration.isTcpEnabled()) );
                 break;
@@ -347,7 +364,7 @@ public class JvbPluginWrapper implements ProcessListener
 
         } catch (Exception e) {
             Log.error("getConferenceStats " + server, e);
-            return "{\"current_timestamp\":0, \"total_conference_seconds\":0, \"total_participants\":0, \"total_failed_conferences\":0, \"total_conferences_created\":0, \"total_conferences_completed\":0, \"conferences\":0, \"participants\":0, \"largest_conference\":0, \"p2p_conferences\":0}";
+            return "{\"current_timestamp\":\"Initialising...\", \"total_conference_seconds\":0, \"total_participants\":0, \"total_failed_conferences\":0, \"total_conferences_created\":0, \"total_conferences_completed\":0, \"conferences\":0, \"participants\":0, \"largest_conference\":0, \"p2p_conferences\":0}";
         }
 
     }

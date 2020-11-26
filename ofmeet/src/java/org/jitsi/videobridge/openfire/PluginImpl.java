@@ -225,23 +225,23 @@ public class PluginImpl
         {
             switch ( JiveGlobals.getProperty( AWS_HARVESTER_CONFIG_PROPERTY_NAME ) ) {
                 case "disabled":
-                    //System.setProperty( MappingCandidateHarvesters.DISABLE_AWS_HARVESTER_PNAME, "true" );
-                    //System.clearProperty( MappingCandidateHarvesters.FORCE_AWS_HARVESTER_PNAME );
+                    System.setProperty( "org.ice4j.ice.harvest.DISABLE_AWS_HARVESTER", "true" );
+                    System.clearProperty( "org.ice4j.ice.harvest.FORCE_AWS_HARVESTER" );
                     break;
                 case "forced":
-                    //System.setProperty( MappingCandidateHarvesters.DISABLE_AWS_HARVESTER_PNAME, "false" );
-                    //System.setProperty( MappingCandidateHarvesters.FORCE_AWS_HARVESTER_PNAME, "true" );
+                    System.setProperty( "org.ice4j.ice.harvest.DISABLE_AWS_HARVESTER", "false" );
+                    System.setProperty( "org.ice4j.ice.harvest.FORCE_AWS_HARVESTER", "true" );
                     break;
                 default:
-                    //System.clearProperty( MappingCandidateHarvesters.DISABLE_AWS_HARVESTER_PNAME );
-                    //System.clearProperty( MappingCandidateHarvesters.FORCE_AWS_HARVESTER_PNAME );
+                    System.clearProperty( "org.ice4j.ice.harvest.DISABLE_AWS_HARVESTER" );
+                    System.clearProperty( "org.ice4j.ice.harvest.FORCE_AWS_HARVESTER" );
                     break;
             }
         }
         else
         {
-            //System.clearProperty( MappingCandidateHarvesters.DISABLE_AWS_HARVESTER_PNAME );
-            //System.clearProperty( MappingCandidateHarvesters.FORCE_AWS_HARVESTER_PNAME );
+            System.clearProperty( "org.ice4j.ice.harvest.DISABLE_AWS_HARVESTER" );
+            System.clearProperty( "org.ice4j.ice.harvest.FORCE_AWS_HARVESTER" );
         }
 
         if ( JiveGlobals.getProperty( MANUAL_HARVESTER_LOCAL_PROPERTY_NAME ) != null ) {
@@ -361,16 +361,16 @@ public class PluginImpl
             case AWS_HARVESTER_CONFIG_PROPERTY_NAME:
                 switch ( (String) params.get( "value" ) ) {
                     case "disabled":
-                        //System.setProperty( MappingCandidateHarvesters.DISABLE_AWS_HARVESTER_PNAME, "true" );
-                        //System.clearProperty( MappingCandidateHarvesters.FORCE_AWS_HARVESTER_PNAME );
+                        System.setProperty( "org.ice4j.ice.harvest.DISABLE_AWS_HARVESTER", "true" );
+                        System.clearProperty( "org.ice4j.ice.harvest.FORCE_AWS_HARVESTER" );
                         break;
                     case "forced":
-                        //System.setProperty( MappingCandidateHarvesters.DISABLE_AWS_HARVESTER_PNAME, "false" );
-                        //System.setProperty( MappingCandidateHarvesters.FORCE_AWS_HARVESTER_PNAME, "true" );
+                        System.setProperty( "org.ice4j.ice.harvest.DISABLE_AWS_HARVESTER", "false" );
+                        System.setProperty( "org.ice4j.ice.harvest.FORCE_AWS_HARVESTER", "true" );
                         break;
                     default:
-                        //System.clearProperty( MappingCandidateHarvesters.DISABLE_AWS_HARVESTER_PNAME );
-                        //System.clearProperty( MappingCandidateHarvesters.FORCE_AWS_HARVESTER_PNAME );
+                        System.clearProperty( "org.ice4j.ice.harvest.DISABLE_AWS_HARVESTER" );
+                        System.clearProperty( "org.ice4j.ice.harvest.FORCE_AWS_HARVESTER" );
                         break;
                 }
                 break;
@@ -493,8 +493,8 @@ public class PluginImpl
                 break;
 
             case AWS_HARVESTER_CONFIG_PROPERTY_NAME:
-                //System.clearProperty( MappingCandidateHarvesters.DISABLE_AWS_HARVESTER_PNAME );
-                //System.clearProperty( MappingCandidateHarvesters.FORCE_AWS_HARVESTER_PNAME );
+                System.clearProperty( "org.ice4j.ice.harvest.DISABLE_AWS_HARVESTER" );
+                System.clearProperty( "org.ice4j.ice.harvest.FORCE_AWS_HARVESTER" );
                 break;
 
             case STUN_HARVESTER_ADDRESS_PROPERTY_NAME:

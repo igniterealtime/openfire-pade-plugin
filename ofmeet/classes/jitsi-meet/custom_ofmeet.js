@@ -107,7 +107,7 @@ var ofmeet = (function(of)
 
         if (enter_room_button)
         {
-            const button = newElement('div', "speak_room_button", IMAGES.mic, 'welcome-page-button', "Speak Meeting Room Name");
+            const button = newElement('div', "speak_room_button", IMAGES.mic, 'speaker-room-button', "Speak Meeting Room Name");
 
             button.addEventListener("click", function(evt)
             {

@@ -16,6 +16,16 @@
   animation-iteration-count: infinite;
 }
 
+.speaker-room-button {
+    border: 0;
+    font-size: 14px;
+    background: #0074e0;
+    border-radius: 3px;
+    color: #fff;
+    cursor: pointer;
+    padding: 16px 20px;
+}
+
 /* >>> */
 
 

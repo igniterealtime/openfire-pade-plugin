@@ -56,3 +56,7 @@ if (config.webinar)
 
     interfaceConfig.FILM_STRIP_MAX_HEIGHT = 1;
 }
+
+//config.googleApiApplicationClientID = "39065779381-bbhnkrgibtf4p0j9ne5vsq7bm49t1tlf.apps.googleusercontent.com",
+//config.microsoftApiApplicationClientID = "00000000-0000-0000-0000-000040240063",
+//config.enableCalendarIntegration = true,

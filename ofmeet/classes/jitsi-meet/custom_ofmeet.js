@@ -175,15 +175,18 @@ var ofmeet = (function(of)
             {
                 console.debug("ofmeet.js me left");
 
-                if (of.recording) stopRecorder();
-
-                const ids = Object.getOwnPropertyNames(recordingVideoTrack);
-
-                ids.forEach(function(id)
+                if (interfaceConfig.OFMEET_RECORD_CONFERENCE)
                 {
-                    delete recordingAudioTrack[id];
-                    delete recordingVideoTrack[id];
-                });
+                    if (of.recording) stopRecorder();
+
+                    const ids = Object.getOwnPropertyNames(recordingVideoTrack);
+
+                    ids.forEach(function(id)
+                    {
+                        delete recordingAudioTrack[id];
+                        delete recordingVideoTrack[id];
+                    });
+                }
             });
 
             APP.conference.addConferenceListener(JitsiMeetJS.events.conference.TRACK_REMOVED, function(track)
@@ -228,8 +231,11 @@ var ofmeet = (function(of)
                 const id = track.getParticipantId();
                 console.debug("ofmeet.js track added", id, track.getType());
 
-                if (track.getType() == "audio") recordingAudioTrack[id] = track.stream;
-                if (track.getType() == "video") recordingVideoTrack[id] = track.stream;
+                if (interfaceConfig.OFMEET_RECORD_CONFERENCE)
+                {
+                    if (track.getType() == "audio") recordingAudioTrack[id] = track.stream;
+                    if (track.getType() == "video") recordingVideoTrack[id] = track.stream;
+                }
 
                 if (APP.conference.getMyUserId() == id  && !config.webinar)
                 {
@@ -247,15 +253,18 @@ var ofmeet = (function(of)
                 const id = track.getParticipantId();
                 console.debug("ofmeet.js track muted", id, track.getType(), track.isMuted());
 
-                if (track.getType() == "audio") recordingAudioTrack[id].getAudioTracks()[0].enabled = !track.isMuted();
-                if (track.getType() == "video") recordingVideoTrack[id].getVideoTracks()[0].enabled = !track.isMuted();
-
-                const recordingStream = recorderStreams[id];
-
-                if (recordingStream) // recording active
+                if (interfaceConfig.OFMEET_RECORD_CONFERENCE)
                 {
-                    if (track.getType() == "audio") recordingStream.getAudioTracks()[0].enabled = !track.isMuted();
-                    if (track.getType() == "video") recordingStream.getVideoTracks()[0].enabled = !track.isMuted();
+                    if (track.getType() == "audio") recordingAudioTrack[id].getAudioTracks()[0].enabled = !track.isMuted();
+                    if (track.getType() == "video") recordingVideoTrack[id].getVideoTracks()[0].enabled = !track.isMuted();
+
+                    const recordingStream = recorderStreams[id];
+
+                    if (recordingStream) // recording active
+                    {
+                        if (track.getType() == "audio") recordingStream.getAudioTracks()[0].enabled = !track.isMuted();
+                        if (track.getType() == "video") recordingStream.getVideoTracks()[0].enabled = !track.isMuted();
+                    }
                 }
 
                 if (APP.conference.getMyUserId() == id)
@@ -329,11 +338,11 @@ var ofmeet = (function(of)
 
             navigator.mediaDevices.getUserMedia({audio: true, video: true}).then(function(stream)
             {
-                recordingVideoTrack[APP.conference.getMyUserId()] = stream;
-                recordingAudioTrack[APP.conference.getMyUserId()] = stream;
-
                 if (interfaceConfig.OFMEET_RECORD_CONFERENCE)
                 {
+                    recordingVideoTrack[APP.conference.getMyUserId()] = stream;
+                    recordingAudioTrack[APP.conference.getMyUserId()] = stream;
+
                     createRecordButton();
                     createPhotoButton();
                     createDesktopButton();

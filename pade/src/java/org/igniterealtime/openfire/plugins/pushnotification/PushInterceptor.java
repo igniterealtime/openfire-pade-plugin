@@ -49,6 +49,7 @@ public class PushInterceptor implements PacketInterceptor, OfflineMessageListene
 {
     private static final Logger Log = LoggerFactory.getLogger( PushInterceptor.class );
     public static final ConcurrentHashMap<String, String> tokens = new ConcurrentHashMap<>();
+    public static final ConcurrentHashMap<String, String> notifications = new ConcurrentHashMap<>();
 
     /**
      * Invokes the interceptor on the specified packet. The interceptor can either modify
@@ -113,12 +114,18 @@ public class PushInterceptor implements PacketInterceptor, OfflineMessageListene
 
     private void tryPushNotification( User user, String body, JID jid, Message.Type msgtype )
     {
+        String username = user.getUsername();
+
         if (XMPPServer.getInstance().getPresenceManager().isAvailable( user ))
         {
+            notifications.remove(username); // reset notification indicator
             return; // dont notify if user is online and available. let client handle that
         }
 
-        webPush(user, body, jid, msgtype, null);
+        if (!notifications.containsKey(username))   // notify once until user goes offline again
+        {
+            webPush(user, body, jid, msgtype, null);
+        }
     }
     /**
      * Notification message indicating that a message was not stored offline but bounced
@@ -208,6 +215,7 @@ public class PushInterceptor implements PacketInterceptor, OfflineMessageListene
                     }
                 } catch (Exception e) {}
 
+                boolean notified = false;
 
                 for (String key : user.getProperties().keySet())
                 {
@@ -218,9 +226,15 @@ public class PushInterceptor implements PacketInterceptor, OfflineMessageListene
                         Notification notification = new Notification(subscription, (new Gson().toJson(stanza)).toString());
                         HttpResponse response = pushService.send(notification);
                         int statusCode = response.getStatusLine().getStatusCode();
+                        notified = true;
 
                         Log.debug( "For user '{}', Web push notification response '{}'", user.toString(), response.getStatusLine().getStatusCode() );
                     }
+                }
+
+                if (notified)
+                {
+                    notifications.put(username, token);
                 }
             }
         } catch (Exception e) {

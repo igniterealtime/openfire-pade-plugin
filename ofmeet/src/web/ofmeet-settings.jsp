@@ -102,6 +102,24 @@
         } catch (NumberFormatException ex ) {
             errors.put( "videoConstraintsMaxHeight", "Cannot parse value as integer value." );
         }
+        final String lowMaxBitratesVideo = request.getParameter( "lowMaxBitratesVideo" );
+        try {
+            Integer.parseInt( lowMaxBitratesVideo );
+        } catch (NumberFormatException ex ) {
+            errors.put( "lowMaxBitratesVideo", "Cannot parse value as integer value." );
+        }    
+        final String standardMaxBitratesVideo = request.getParameter( "standardMaxBitratesVideo" );
+        try {
+            Integer.parseInt( standardMaxBitratesVideo );
+        } catch (NumberFormatException ex ) {
+            errors.put( "standardMaxBitratesVideo", "Cannot parse value as integer value." );
+        } 
+        final String highMaxBitratesVideo = request.getParameter( "highMaxBitratesVideo" );
+        try {
+            Integer.parseInt( highMaxBitratesVideo );
+        } catch (NumberFormatException ex ) {
+            errors.put( "highMaxBitratesVideo", "Cannot parse value as integer value." );
+        }         
 
         final String clientusername = request.getParameter( "clientusername" );
         final String clientpassword = request.getParameter( "clientpassword" );
@@ -143,7 +161,11 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.sip.enabled", enableSip );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.allow.direct.sip", Boolean.toString( allowdirectsip ) );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.sip.hq.voice", hqVoice );
-
+            
+            JiveGlobals.setProperty( "org.jitsi.videobridge.low.max.bitrates.video", lowMaxBitratesVideo );            
+            JiveGlobals.setProperty( "org.jitsi.videobridge.high.max.bitrates.video", highMaxBitratesVideo );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.standard.max.bitrates.video", standardMaxBitratesVideo );
+            
             ofmeetConfig.setDisableRtx( disableRtx );
             ofmeetConfig.setStartAudioOnly( startaudioonly );
             ofmeetConfig.setStartAudioMuted( startaudiomuted == null || startaudiomuted.isEmpty() ? null : Integer.parseInt( startaudiomuted ));
@@ -325,6 +347,36 @@
                 </td>
             </tr>
         </table>
+               
+        <p style="margin-top: 2em">
+            <fmt:message key="config.page.configuration.ofmeet.bitrates.description"/>
+        </p>
+        <table>
+            <tr>
+                <td nowrap>
+                    <label class="jive-label" for="lowMaxBitratesVideo"><fmt:message key="config.page.configuration.ofmeet.bitrates.low.max.bitrates.video"/></label>
+                </td>
+                <td>
+                    <input type="text" name="lowMaxBitratesVideo" id="lowMaxBitratesVideo" value="${admin:getProperty( "org.jitsi.videobridge.low.max.bitrates.video", "200000")}">
+                </td>
+            </tr>
+            <tr>
+                <td nowrap>
+                    <label class="jive-label" for="highMaxBitratesVideo"><fmt:message key="config.page.configuration.ofmeet.bitrates.high.max.bitrates.video"/></label>
+                </td>
+                <td>
+                    <input type="text" name="highMaxBitratesVideo" id="highMaxBitratesVideo" value="${admin:getProperty( "org.jitsi.videobridge.high.max.bitrates.video", "1500000")}">
+                </td>
+            </tr>       
+            <tr>
+                <td nowrap>
+                    <label class="jive-label" for="standardMaxBitratesVideo"><fmt:message key="config.page.configuration.ofmeet.bitrates.standard.max.bitrates.video"/></label>
+                </td>
+                <td>
+                    <input type="text" name="standardMaxBitratesVideo" id="standardMaxBitratesVideo" value="${admin:getProperty( "org.jitsi.videobridge.standard.max.bitrates.video", "500000")}">
+                </td>
+            </tr>                
+        </table>        
 
         <p style="margin-top: 2em"><fmt:message key="config.page.configuration.ofmeet.audioonly.description"/></p>
         <table cellpadding="3" cellspacing="0" border="0" width="100%">

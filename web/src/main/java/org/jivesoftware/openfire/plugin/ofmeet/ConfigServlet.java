@@ -112,6 +112,9 @@ public class ConfigServlet extends HttpServlet
             boolean enablePreJoinPage = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.prejoin.page", false );
             boolean enableStereo = JiveGlobals.getBooleanProperty( "ofmeet.stereo.enabled", false );
 
+            int lowMaxBitratesVideo = JiveGlobals.getIntProperty( "org.jitsi.videobridge.low.max.bitrates.video", 200000 );
+            int standardMaxBitratesVideo = JiveGlobals.getIntProperty( "org.jitsi.videobridge.standard.max.bitrates.video", 500000 );
+            int highMaxBitratesVideo = JiveGlobals.getIntProperty( "org.jitsi.videobridge.high.max.bitrates.video", 1500000 );
 
             if ( xirsysUrl != null )
             {
@@ -205,8 +208,17 @@ public class ConfigServlet extends HttpServlet
             config.put( "minHDHeight", minHDHeight );
             config.put( "hiddenDomain", "recorder." + xmppDomain );
             config.put( "startBitrate", startBitrate );
+
+            final JSONObject videoQuality = new JSONObject();
+            final JSONObject maxBitratesVideo = new JSONObject();
+            maxBitratesVideo.put( "low", lowMaxBitratesVideo );
+            maxBitratesVideo.put( "standard", standardMaxBitratesVideo );
+            maxBitratesVideo.put( "high", highMaxBitratesVideo );
+            videoQuality.put( "maxBitratesVideo", maxBitratesVideo );
+            config.put( "videoQuality", videoQuality );
+
             config.put( "recordingType", "colibri" );
-            config.put( "disableAudioLevels", true );   // reduces CPU. see https://community.jitsi.org/t/host-a-meeting-with-500-people-ideas/34672/3
+            config.put( "disableAudioLevels", false );
             config.put( "stereo", false );
             config.put( "requireDisplayName", true );
             config.put( "startAudioOnly", ofMeetConfig.getStartAudioOnly() );
@@ -271,6 +283,9 @@ public class ConfigServlet extends HttpServlet
                 config.put( "stereo", true );
                 config.put( "opusMaxAverageBitrate", 510000 );
             }
+
+            config.put( "enableNoisyMicDetection", true );
+            config.put( "enableNoAudioDetection", true );
 
             out.println( "var config = " + config.toString( 2 ) + ";" );
         }

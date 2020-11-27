@@ -572,7 +572,7 @@
             <tr><td colspan="3">&nbsp;</td></tr>
             <tr>
                 <td colspan="3" nowrap>
-                    <input type="checkbox" name="brandShowWatermark" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.brand.show.watermark", false) ? "checked" : ""}>
+                    <input type="checkbox" name="brandShowWatermark" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.brand.show.watermark", false) ? "checked" : ""} disabled>
                     <fmt:message key="ofmeet.brand.show.watermark.enabled" />
                 </td>
             </tr>
@@ -582,7 +582,7 @@
                     <fmt:message key="ofmeet.watermark.logo.url"/>:
                 </td>
                 <td>
-                    <input type="text" size="60" maxlength="100" name="brandWatermarkLogoUrl" value="${ofmeetConfig.brandWatermarkLogoUrl}">
+                    <input type="text" size="60" maxlength="100" name="brandWatermarkLogoUrl" value="${ofmeetConfig.brandWatermarkLogoUrl}" disabled>
                 </td>
             </tr>
             <tr>
@@ -591,7 +591,7 @@
                     <fmt:message key="ofmeet.watermark.link"/>:
                 </td>
                 <td>
-                    <input type="text" size="60" maxlength="100" name="brandWatermarkLink" value="${admin:getProperty("org.jitsi.videobridge.ofmeet.brand.watermark.link", "")}">
+                    <input type="text" size="60" maxlength="100" name="brandWatermarkLink" value="${admin:getProperty("org.jitsi.videobridge.ofmeet.brand.watermark.link", "")}" disabled>
                 </td>
             </tr>
         </table>

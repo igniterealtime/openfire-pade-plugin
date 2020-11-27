@@ -54,6 +54,9 @@ public class InterfaceConfigServlet extends HttpServlet
 
             config.put( "SETTINGS_SECTIONS",                     new JSONArray( JiveGlobals.getListProperty( "org.jitsi.videobridge.ofmeet.settings.sections",    Arrays.asList( "language", "devices", "moderator", "profile", "calendar") ) ) );
 
+            config.put( "DEFAULT_LOGO_URL",                      JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.watermark.logo",                  ""                 ) );
+            config.put( "DEFAULT_WELCOME_PAGE_LOGO_URL",         JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.watermark.logo",                  ""                 ) );
+
             config.put( "CANVAS_EXTRA",                          JiveGlobals.getIntProperty(     "org.jitsi.videobridge.ofmeet.canvas.extra",                  104                 ) );
             config.put( "CANVAS_RADIUS",                         JiveGlobals.getIntProperty(     "org.jitsi.videobridge.ofmeet.canvas.radius",                 0                   ) );
             config.put( "SHADOW_COLOR",                          JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.shadow.color",                  "#ffffff"           ) );

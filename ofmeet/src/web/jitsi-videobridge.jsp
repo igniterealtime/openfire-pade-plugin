@@ -29,7 +29,7 @@
 
     Map<String, String> errors = new HashMap<>();
     boolean singlePortEnabled, minmaxPortEnabled, tcpEnabled, sslTcpEnabled;
-    String stunPort, singlePort, minPort, maxPort, tcpPort, mappedTcpPort, plainPort, securePort;
+    String stunPort, singlePort, minPort, maxPort, tcpPort, mappedTcpPort, plainPort, securePort, publicPort;
 
     if (reset)
     {
@@ -218,6 +218,21 @@
             } catch (Exception e) {
                 errors.put( "securePort", "Invalid port value" );
             }
+        } 
+        
+        publicPort = request.getParameter("publicPort");
+        if (publicPort != null) {
+            publicPort = publicPort.trim();
+            try {
+                int port = Integer.valueOf( publicPort );
+                if ( port >= 1 && port <= 65535 ) {
+                    JiveGlobals.setProperty( PluginImpl.PUBLIC_PORT_NUMBER_PROPERTY_NAME, publicPort );
+                } else {
+                    throw new NumberFormatException( "out of range port" );
+                }
+            } catch (Exception e) {
+                errors.put( "publicPort", "Invalid port value" );
+            }
         }        
 
         tcpEnabled = Boolean.parseBoolean( request.getParameter( "tcpEnabled" ) );
@@ -277,6 +292,7 @@
         maxPort = Integer.toString( RuntimeConfiguration.getMaxPort() );
         plainPort = Integer.toString( RuntimeConfiguration.getPlainPort() );
         securePort = Integer.toString( RuntimeConfiguration.getSecurePort() );        
+        publicPort = Integer.toString( RuntimeConfiguration.getPublicPort() );          
         tcpPort = RuntimeConfiguration.getTcpPort() == null ? null : RuntimeConfiguration.getTcpPort().toString();
         mappedTcpPort = RuntimeConfiguration.getTcpMappedPort() == null ? null : RuntimeConfiguration.getTcpMappedPort().toString();
         tcpEnabled = RuntimeConfiguration.isTcpEnabled();
@@ -559,6 +575,17 @@
                     <%  } %>
                 </td>
             </tr>
+            <tr>
+                <td width="10%" style="padding-left: 3em;" nowrap colspan="2">
+                    <label for="publicPort"><fmt:message key="config.page.configuration.websockets.publicport"/>:</label>
+                </td>
+                <td>
+                    <input name="publicPort" id="publicPort" type="number" min="1" max="65535" value="<%=publicPort%>"/> <fmt:message key="config.page.configuration.tcp"/>
+                    <%  if (errors.get("publicPort") != null) { %>
+                    <span class="jive-error-text"><fmt:message key="config.page.configuration.error.valid_port" /></span>
+                    <%  } %>
+                </td>
+            </tr>            
             </tbody>
         </table>
     </div>

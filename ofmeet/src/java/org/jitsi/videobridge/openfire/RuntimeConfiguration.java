@@ -92,6 +92,7 @@ public class RuntimeConfiguration
 
     public static final int PLAIN_PORT_DEFAULT_VALUE = 8080;
     public static final int SECURE_PORT_DEFAULT_VALUE = 8443;
+    public static final int PUBLIC_PORT_DEFAULT_VALUE = JiveGlobals.getIntProperty( "httpbind.port.secure", 7443);
 
     /**
      * The default setting for _disabling_ the TCP connectivity.
@@ -179,6 +180,13 @@ public class RuntimeConfiguration
      * that was configured when this plugin got initialized, which is what is stored in this field.
      */
     private static final int SECURE_PORT_AT_STARTUP = RuntimeConfiguration.getSecurePort();
+
+    /**
+     * Changes to port number configuration require a restart of the plugin to take effect.
+     * The websockets secure port number value that is currently in use is equal to the port number
+     * that was configured when this plugin got initialized, which is what is stored in this field.
+     */
+    private static final int PUBLIC_PORT_AT_STARTUP = RuntimeConfiguration.getPublicPort();
 
     /**
      * Changes to TCP harvester availability require a restart of the plugin to take effect.
@@ -372,6 +380,10 @@ public class RuntimeConfiguration
         return JiveGlobals.getIntProperty(PluginImpl.SECURE_PORT_NUMBER_PROPERTY_NAME, SECURE_PORT_DEFAULT_VALUE );
     }
 
+    public static int getPublicPort()
+    {
+        return JiveGlobals.getIntProperty(PluginImpl.PUBLIC_PORT_NUMBER_PROPERTY_NAME, PUBLIC_PORT_DEFAULT_VALUE );
+    }
     /**
      * Jitsi Videobridge can accept and route RTP traffic over TCP. If enabled, TCP addresses will automatically be
      * returned as ICE candidates via COLIBRI. Typically, the point of using TCP instead of UDP is to simulate HTTP

@@ -117,7 +117,7 @@ public class JvbPluginWrapper implements ProcessListener
             "   }",
             "    websockets {",
             "      enabled = true",
-            "      domain = \"" + JiveGlobals.getProperty( "ofmeet.websockets.domain", domain) + ":" + public_port + "\"",
+            "      domain = \"" + JiveGlobals.getProperty( "ofmeet.websockets.domain", domain) + ":" + JiveGlobals.getProperty( "ofmeet.websockets.publicport", public_port) + "\"",
             "      tls = true",
             "    }",
             "",

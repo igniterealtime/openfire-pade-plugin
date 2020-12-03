@@ -698,8 +698,14 @@ public class OFMeetConfig
     public final StringProperty jigasiSipServerAddress = new StringProperty( "ofmeet.jigasi.sip.server-address", null );
     public StringProperty getJigasiSipServerAddress() { return jigasiSipServerAddress; }
 
-    public final StringProperty jigasiSipDomainBase = new StringProperty( "ofmeet.jigasi.sip.domain-base", null );
-    public StringProperty getJigasiSipDomainBase() { return jigasiSipDomainBase; }
+    public final StringProperty jigasiSipTransport = new StringProperty( "ofmeet.jigasi.sip.transport", "UDP" );
+    public StringProperty getJigasiSipTransport() { return jigasiSipTransport; }
+
+    public final StringProperty jigasiProxyServer = new StringProperty( "ofmeet.jigasi.proxy.server", null );
+    public StringProperty getJigasiProxyServer() { return jigasiProxyServer; }
+
+    public final StringProperty jigasiProxyPort = new StringProperty( "ofmeet.jigasi.proxy.port", "5060" );
+    public StringProperty getJigasiProxyPort() { return jigasiProxyPort; }
 
     public final StringProperty jigasiXmppUserId = new StringProperty( "ofmeet.jigasi.xmpp.user-id", "jigasi" );
     public StringProperty getJigasiXmppUserId() { return jigasiXmppUserId; }

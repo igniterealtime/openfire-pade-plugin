@@ -37,8 +37,8 @@
         <module>config</module>      
         <module>ofgasi</module>           
         <module>ofmeet</module>        
-        <!--module>offocus</module>                        
-        <module>pade</module-->        
+        <module>offocus</module>                        
+        <module>pade</module>        
     </modules>
 
     <licenses>

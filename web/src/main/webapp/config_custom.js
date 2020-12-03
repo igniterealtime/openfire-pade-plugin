@@ -60,3 +60,17 @@ if (config.webinar)
 //config.googleApiApplicationClientID = "39065779381-bbhnkrgibtf4p0j9ne5vsq7bm49t1tlf.apps.googleusercontent.com",
 //config.microsoftApiApplicationClientID = "00000000-0000-0000-0000-000040240063",
 //config.enableCalendarIntegration = true,
+//config.dialInNumbersUrl = './phoneNumberList.json';
+//config.dialInConfCodeUrl = './conferenceMapper.json';
+//config.dialOutCodesUrl = './countrycodes.json';
+//config.dialOutAuthUrl = './authorizephone.json';
+//config.peopleSearchUrl = './directorySearch.json';
+//config.inviteServiceUrl = './conferenceInvite.json';
+//config.inviteServiceCallFlowsUrl = './conferenceinvitecallflows.json';
+
+config.dialInNumbersUrl = 'https://web-cdn.jitsi.net/beta/phoneNumberList.json';
+config.dialInConfCodeUrl = 'https://api.jitsi.net/conferenceMapper';
+//config.dialOutCodesUrl = 'https://api.jitsi.net/countrycodes';
+//config.dialOutAuthUrl = 'https://api.jitsi.net/authorizephone';
+
+config.hosts.call_control = "callcontrol.desktop-545pc5b";

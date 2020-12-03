@@ -90,9 +90,17 @@ public class JitsiJicofoWrapper implements ProcessListener
 
         props.load(new FileInputStream(props_file));
         props.setProperty("org.jitsi.jicofo.BRIDGE_MUC", "ofmeet@" + MAIN_MUC);
+        props.setProperty("org.jitsi.jicofo.jigasi.BREWERY", "ofgasi@" + MAIN_MUC);
         props.setProperty( "org.jitsi.jicofo.ALWAYS_TRUST_MODE_ENABLED", "true" );
         props.setProperty( "org.jitsi.jicofo.PING_INTERVAL", "-1" );
-        props.setProperty( "org.jitsi.jicofo.SERVICE_REDISCOVERY_INTERVAL", "-1" );
+        props.setProperty( "org.jitsi.jicofo.SERVICE_REDISCOVERY_INTERVAL", "60000" );
+
+        Log.debug("sip-communicator.properties");
+
+        for (Object key: props.keySet()) {
+            Log.debug(key + ": " + props.getProperty(key.toString()));
+        }
+
         props.store(new FileOutputStream(props_file), "Jitsi Colibri Focus");
 
         final String javaHome = System.getProperty("java.home");

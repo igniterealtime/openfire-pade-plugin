@@ -172,7 +172,7 @@ public class JvbPluginWrapper implements ProcessListener
         }
 
         final File props_file = new File(jvbHomePath + File.separator + "config" + File.separator + "sip-communicator.properties");
-        writeProperties(props_file);
+        writeProperties(props_file, local_ip, public_ip);
 
 
         final String customOptions = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.jvb.jvm.customOptions", defaultOptions);
@@ -183,7 +183,7 @@ public class JvbPluginWrapper implements ProcessListener
         Log.debug( "JVB config.\n" + String.join("\n", lines));
     }
 
-    private void writeProperties( File props_file )
+    private void writeProperties( File props_file, String local_ip, String public_ip )
     {
         try {
             Properties props = new Properties();
@@ -207,6 +207,11 @@ public class JvbPluginWrapper implements ProcessListener
             writeProperty(props, PluginImpl.TCP_MAPPED_PORT_PROPERTY_NAME );
             writeProperty(props, PluginImpl.TCP_PORT_PROPERTY_NAME );
             writeProperty(props, PluginImpl.TCP_SSLTCP_ENABLED_PROPERTY_NAME );
+
+            props.setProperty( "org.jitsi.videobridge.octo.BIND_ADDRESS", local_ip);
+            props.setProperty( "org.jitsi.videobridge.octo.PUBLIC_ADDRESS", public_ip);
+            props.setProperty( "org.jitsi.videobridge.octo.BIND_PORT", JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.octo.port", "4096"));
+            props.setProperty( "org.jitsi.videobridge.REGION", "region1");
 
             Log.debug("sip-communicator.properties");
 

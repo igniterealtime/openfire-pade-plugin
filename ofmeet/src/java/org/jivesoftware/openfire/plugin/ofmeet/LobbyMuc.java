@@ -106,13 +106,14 @@ public class LobbyMuc implements ServerIdentitiesProvider, ServerFeaturesProvide
         jsonMsg.put("event", NOTIFY_LOBBY_ENABLED);
         jsonMsg.put("value", value);
         broadcast_json_msg(to, from, jsonMsg);
-        notify_configuration_change(from, to.toBareJID());
+        if (value) notify_configuration_change(from, to.toBareJID());
    }
 
     private void notify_lobby_access(JID room, JID from, String to, boolean granted)
     {
         JSONObject jsonMsg = new JSONObject();
         jsonMsg.put("value", to);
+        jsonMsg.put("name", to);
 
         if (granted) {
             jsonMsg.put("event", NOTIFY_LOBBY_ACCESS_GRANTED);
@@ -162,24 +163,30 @@ public class LobbyMuc implements ServerIdentitiesProvider, ServerFeaturesProvide
 
             String namespace = childElement.getNamespaceURI();
 
-            if ("http://jabber.org/protocol/muc#owner".equals(namespace) && isMembersOnly(childElement))
+            if ("http://jabber.org/protocol/muc#owner".equals(namespace))
             {
-                final String roomName = packet.getTo().getNode();
-                Log.debug("lobbyroom creating room " + roomName);
+                if (isMembersOnly(childElement))
+                {
+                    final String roomName = packet.getTo().getNode();
+                    Log.debug("lobbyroom creating room " + roomName);
 
-                MUCRoom lobbyRoom, mucRoom;
-                try {
-                    mucRoom = mucService.getChatRoom(roomName, iq.getFrom());
-                    lobbyRoom = lobbyService.getChatRoom(roomName, iq.getFrom());
-                    lobbyRoom.setPersistent(false);
-                    lobbyRoom.setPublicRoom(true);
-                    lobbyRoom.setPassword(mucRoom.getPassword());
-                    lobbyRoom.unlock(lobbyRoom.getRole());
-                    notify_lobby_enabled(packet.getTo(), packet.getFrom(), true);
+                    MUCRoom lobbyRoom, mucRoom;
+                    try {
+                        mucRoom = mucService.getChatRoom(roomName, iq.getFrom());
+                        lobbyRoom = lobbyService.getChatRoom(roomName, iq.getFrom());
+                        lobbyRoom.setPersistent(false);
+                        lobbyRoom.setPublicRoom(true);
+                        lobbyRoom.setPassword(mucRoom.getPassword());
+                        lobbyRoom.unlock(lobbyRoom.getRole());
+                        notify_lobby_enabled(packet.getTo(), packet.getFrom(), true);
+                    }
+                    catch (Exception e) {
+                        Log.error("Cannot create MUC room", e);
+                        return;
+                    }
                 }
-                catch (Exception e) {
-                    Log.error("Cannot create MUC room", e);
-                    return;
+                else {
+                    notify_lobby_enabled(packet.getTo(), packet.getFrom(), false);
                 }
             }
             else

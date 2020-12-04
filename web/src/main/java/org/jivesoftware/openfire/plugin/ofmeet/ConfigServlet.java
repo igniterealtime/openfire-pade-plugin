@@ -219,7 +219,6 @@ public class ConfigServlet extends HttpServlet
 
             config.put( "recordingType", "colibri" );
             config.put( "disableAudioLevels", false );
-            config.put( "stereo", false );
             config.put( "requireDisplayName", true );
             config.put( "startAudioOnly", ofMeetConfig.getStartAudioOnly() );
             if ( ofMeetConfig.getStartAudioMuted() != null )
@@ -272,6 +271,7 @@ public class ConfigServlet extends HttpServlet
             config.put( "adaptiveSimulcast", ofMeetConfig.getAdaptiveSimulcast() );
             config.put( "disableAdaptiveSimulcast", !ofMeetConfig.getAdaptiveSimulcast() );
 
+            config.put( "stereo", enableStereo );
             if (enableStereo)
             {
                 config.put( "disableAP", true );
@@ -280,9 +280,8 @@ public class ConfigServlet extends HttpServlet
                 config.put( "disableAGC", true );
                 config.put( "disableHPF", true );
                 config.put( "enableLipSync", false );
-                config.put( "stereo", true );
                 config.put( "opusMaxAverageBitrate", 510000 );
-            }
+            } 
 
             config.put( "enableNoisyMicDetection", true );
             config.put( "enableNoAudioDetection", true );

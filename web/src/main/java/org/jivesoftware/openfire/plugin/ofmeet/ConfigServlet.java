@@ -135,7 +135,7 @@ public class ConfigServlet extends HttpServlet
             hosts.put( "domain", xmppDomain );
             hosts.put( "muc", mucDomain );
             //hosts.put( "bridge", "jitsi-videobridge." + xmppDomain );
-            hosts.put( "focus", "focus." + xmppDomain );
+            //hosts.put( "focus", "focus." + xmppDomain );
             config.put( "hosts", hosts );
 
             final Map<String, Object> p2p = new HashMap<>();

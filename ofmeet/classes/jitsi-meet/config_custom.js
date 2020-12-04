@@ -72,5 +72,4 @@ config.dialInNumbersUrl = 'https://web-cdn.jitsi.net/beta/phoneNumberList.json';
 config.dialInConfCodeUrl = 'https://api.jitsi.net/conferenceMapper';
 //config.dialOutCodesUrl = 'https://api.jitsi.net/countrycodes';
 //config.dialOutAuthUrl = 'https://api.jitsi.net/authorizephone';
-
-config.hosts.call_control = "callcontrol.desktop-545pc5b";
+//config.hosts.call_control = "callcontrol.desktop-545pc5b";

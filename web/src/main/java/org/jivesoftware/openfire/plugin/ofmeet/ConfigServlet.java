@@ -231,6 +231,7 @@ public class ConfigServlet extends HttpServlet
                 config.put( "startVideoMuted", ofMeetConfig.getStartVideoMuted() );
             }
 
+
             // 'resolution' is used in some cases (chrome <61), newer versions use 'constraints'.
             config.put( "resolution", ofMeetConfig.getResolution() );
             final JSONObject constraints = new JSONObject();
@@ -244,7 +245,7 @@ public class ConfigServlet extends HttpServlet
             videoConstraints.put( "height", height );
             constraints.put( "video", videoConstraints );
             config.put( "constraints", constraints );
-
+            config.put( "maxFullResolutionParticipants", -1),
             config.put( "useRoomAsSharedDocumentName", false );
             config.put( "logStats", logStats );
             config.put( "ofmeetWinSSOEnabled", ofmeetWinSSOEnabled );

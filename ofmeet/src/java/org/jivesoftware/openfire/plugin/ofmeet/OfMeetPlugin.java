@@ -242,14 +242,8 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
     protected void loadPublicWebApp() throws Exception
     {
-        Log.info( "Initializing public web application" );
+        Log.info( "Initializing public web application for /colibri-ws web socket" );
 
-        String ipaddr = jvbPluginWrapper.getIpAddress();
-        String jvbPort = JiveGlobals.getProperty( "ofmeet.websockets.plainport", "8080");
-
-        Log.info("Initializing websocket proxy http://" + ipaddr + ":" + jvbPort);
-
-        jvbWsContext = new ServletContextHandler(null, "/colibri-ws", ServletContextHandler.SESSIONS);
         jvbWsContext = new WebAppContext(null, pluginDirectory.getPath() + "/classes/colibri-ws", "/colibri-ws" );
 
         try {

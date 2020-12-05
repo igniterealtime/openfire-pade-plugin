@@ -378,7 +378,7 @@
             </tr>                
         </table>        
 
-        <p style="margin-top: 2em"><fmt:message key="config.page.configuration.ofmeet.audioonly.description"/></p>
+        <p style="margin-top: 2em"><fmt:message key="config.page.configuration.ofmeet.audiooptions.description"/></p>
         <table cellpadding="3" cellspacing="0" border="0" width="100%">
             <tr>
                 <td nowrap colspan="2">

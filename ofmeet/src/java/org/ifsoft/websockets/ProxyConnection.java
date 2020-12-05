@@ -73,24 +73,13 @@ public class ProxyConnection
             client.connect(proxySocket, uri, request);
 
             Log.debug("Connecting to : " + uri);
+            connected = true;
         }
         catch (Exception e)
         {
-            Log.error("ProxyConnection", e);
+            Log.error("ProxyConnection " + e.getMessage());
+            connected = false;
         }
-        finally
-        {
-            try
-            {
-                //client.stop();
-            }
-            catch (Exception e1)
-            {
-                Log.error("ProxyConnection", e1);
-            }
-        }
-
-        connected = true;
     }
 
     public void setSocket( ProxyWebSocket socket ) {
@@ -201,7 +190,7 @@ public class ProxyConnection
 
         @OnWebSocketError public void onError(Throwable t)
         {
-            Log.error("Error: "  + t.getMessage(), t);
+            Log.error("Error: "  + t.getMessage());
         }
 
         @OnWebSocketClose public void onClose(int statusCode, String reason)

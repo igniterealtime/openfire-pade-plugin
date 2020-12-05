@@ -128,16 +128,19 @@ public class PluginImpl
     public static final String MIN_PORT_NUMBER_PROPERTY_NAME = "org.jitsi.videobridge.media.MIN_PORT_NUMBER";
 
     /**
-     * The name of the Openfire property that contains the maximum UDP port number that we'd
-     * like our RTP managers to bind upon when dynamically allocating ports for media streams.
+     * The name of the Openfire property that contains the JVB port used for plain text websockets
      */
     public static final String PLAIN_PORT_NUMBER_PROPERTY_NAME = "ofmeet.websockets.plainport";
 
     /**
-     * The name of the Openfire property that contains the maximum UDP port number that we'd
-     * like our RTP managers to bind upon when dynamically allocating ports for media streams.
+     * The name of the Openfire property that contains the JVB port used for secure websockets
      */
     public static final String SECURE_PORT_NUMBER_PROPERTY_NAME = "ofmeet.websockets.secureport";
+
+    /**
+     * The name of the Openfire property that contains the JVB port advertised as the public websockets
+     */
+    public static final String PUBLIC_PORT_NUMBER_PROPERTY_NAME = "ofmeet.websockets.publicport";
 
     /**
      * The name of the Openfire property that contains the TCP port number (if any).

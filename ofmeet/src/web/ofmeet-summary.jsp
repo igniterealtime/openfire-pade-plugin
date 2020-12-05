@@ -136,7 +136,7 @@
             }
         }  
         
-        if (!chatRoom.getJID().getNode().equals("ofmeet") && focus != null)
+        if (!chatRoom.getJID().getNode().equals("ofmeet") && !chatRoom.getJID().getNode().equals("ofgasi") && focus != null)
         {
             i++;            
 %>

@@ -31,40 +31,46 @@
 <%
     boolean update = request.getParameter("update") != null;
 
-	final Cookie csrfCookie = CookieUtils.getCookie( request, "csrf" );
-	final String csrfParam = ParamUtils.getParameter( request, "csrf" );
+    final Cookie csrfCookie = CookieUtils.getCookie( request, "csrf" );
+    final String csrfParam = ParamUtils.getParameter( request, "csrf" );
 
-	// Get handle on the plugin
-	final OfMeetPlugin container = (OfMeetPlugin) XMPPServer.getInstance().getPluginManager().getPlugin("ofmeet");
+    // Get handle on the plugin
+    final OfMeetPlugin container = (OfMeetPlugin) XMPPServer.getInstance().getPluginManager().getPlugin("ofmeet");
 
-	final Map<String, String> errors = new HashMap<>();
+    final Map<String, String> errors = new HashMap<>();
 
     if ( update )
-	{
-		if ( csrfCookie == null || csrfParam == null || !csrfCookie.getValue().equals( csrfParam ) )
-		{
-			errors.put( "csrf", "CSRF Failure!" );
-		}
+    {
+        if ( csrfCookie == null || csrfParam == null || !csrfCookie.getValue().equals( csrfParam ) )
+        {
+            errors.put( "csrf", "CSRF Failure!" );
+        }
 
         final String jigasiSipServerAddress = request.getParameter( "jigasiSipServerAddress" );
-        final String jigasiSipDomainBase = request.getParameter( "jigasiSipDomainBase" );
+        final String jigasiSipTransport = request.getParameter( "jigasiSipTransport" );
         final String jigasiSipPassword = request.getParameter( "jigasiSipPassword" );
+        final String jigasiProxyServer = request.getParameter( "jigasiProxyServer" );     
+        final String jigasiProxyPort = request.getParameter( "jigasiProxyPort" );          
         final String jigasiSipUserId = request.getParameter( "jigasiSipUserId" );
         final String jigasiXmppPassword = request.getParameter( "jigasiXmppPassword" );
         final String jigasiXmppUserId = request.getParameter( "jigasiXmppUserId" );
 
         if ( errors.isEmpty() )
-		{
-		    ofmeetConfig.jigasiSipServerAddress.set( jigasiSipServerAddress );
-		    ofmeetConfig.jigasiSipDomainBase.set( jigasiSipDomainBase );
-		    ofmeetConfig.jigasiSipPassword.set( jigasiSipPassword );
-		    ofmeetConfig.jigasiSipUserId.set( jigasiSipUserId );
+        {
+            ofmeetConfig.jigasiSipServerAddress.set( jigasiSipServerAddress );
+            ofmeetConfig.jigasiSipTransport.set( jigasiSipTransport );
+            ofmeetConfig.jigasiProxyServer.set( jigasiProxyServer );            
+            ofmeetConfig.jigasiProxyPort.set( jigasiProxyPort );              
+            ofmeetConfig.jigasiSipPassword.set( jigasiSipPassword );
+            ofmeetConfig.jigasiSipUserId.set( jigasiSipUserId );
             ofmeetConfig.jigasiXmppPassword.set( jigasiXmppPassword );
             ofmeetConfig.jigasiXmppUserId.set( jigasiXmppUserId );
 
-		    // Only reload everything if something changed.
-		    if ( ofmeetConfig.jigasiSipServerAddress.wasChanged()
-              || ofmeetConfig.jigasiSipDomainBase.wasChanged()
+            // Only reload everything if something changed.
+            if ( ofmeetConfig.jigasiSipServerAddress.wasChanged()
+              || ofmeetConfig.jigasiSipTransport.wasChanged()
+              || ofmeetConfig.jigasiProxyServer.wasChanged()     
+              || ofmeetConfig.jigasiProxyPort.wasChanged()                
               || ofmeetConfig.jigasiSipPassword.wasChanged()
               || ofmeetConfig.jigasiSipUserId.wasChanged()
               || ofmeetConfig.jigasiXmppUserId.wasChanged()
@@ -74,11 +80,11 @@
             }
             response.sendRedirect( "ofmeet-sipsettings.jsp?settingsSaved=true" );
             return;
-		}
-	}
+        }
+    }
 
-	// Check if the XMPP account can be used to log in.
-	boolean xmppAccountVerified = true;
+    // Check if the XMPP account can be used to log in.
+    boolean xmppAccountVerified = true;
     try
     {
         AuthFactory.getAuthProvider().authenticate( ofmeetConfig.getJigasiXmppUserId().get(), ofmeetConfig.getJigasiXmppPassword().get() );
@@ -89,40 +95,40 @@
     }
 
     final String csrf = StringUtils.randomString( 15 );
-	CookieUtils.setCookie( request, response, "csrf", csrf, -1 );
+    CookieUtils.setCookie( request, response, "csrf", csrf, -1 );
 
-	pageContext.setAttribute( "csrf", csrf );
-	pageContext.setAttribute( "errors", errors );
-	pageContext.setAttribute( "userProviderReadOnly", UserManager.getUserProvider().isReadOnly() );
-	pageContext.setAttribute( "allowAnonymousClientAuth", JiveGlobals.getBooleanProperty( "xmpp.auth.anonymous" ) );
-	pageContext.setAttribute( "xmppAccountVerified", xmppAccountVerified );
+    pageContext.setAttribute( "csrf", csrf );
+    pageContext.setAttribute( "errors", errors );
+    pageContext.setAttribute( "userProviderReadOnly", UserManager.getUserProvider().isReadOnly() );
+    pageContext.setAttribute( "allowAnonymousClientAuth", JiveGlobals.getBooleanProperty( "xmpp.auth.anonymous" ) );
+    pageContext.setAttribute( "xmppAccountVerified", xmppAccountVerified );
 %>
 <html>
 <head>
-	<title><fmt:message key="sipsettings.title" /></title>
-	<meta name="pageID" content="ofmeet-sipsettings"/>
+    <title><fmt:message key="sipsettings.title" /></title>
+    <meta name="pageID" content="ofmeet-sipsettings"/>
 </head>
 <body>
 
 <c:choose>
-	<c:when test="${not empty param.settingsSaved and empty errors}">
-		<admin:infoBox type="success"><fmt:message key="config.page.configuration.save.success" /></admin:infoBox>
-	</c:when>
-	<c:otherwise>
-		<c:forEach var="err" items="${errors}">
-			<admin:infobox type="error">
-				<c:choose>
-					<c:when test="${err.key eq 'csrf'}"><fmt:message key="global.csrf.failed"/></c:when>
-					<c:otherwise>
-						<c:if test="${not empty err.value}">
-							<c:out value="${err.value}"/>
-						</c:if>
-						(<c:out value="${err.key}"/>)
-					</c:otherwise>
-				</c:choose>
-			</admin:infobox>
-		</c:forEach>
-	</c:otherwise>
+    <c:when test="${not empty param.settingsSaved and empty errors}">
+        <admin:infoBox type="success"><fmt:message key="config.page.configuration.save.success" /></admin:infoBox>
+    </c:when>
+    <c:otherwise>
+        <c:forEach var="err" items="${errors}">
+            <admin:infobox type="error">
+                <c:choose>
+                    <c:when test="${err.key eq 'csrf'}"><fmt:message key="global.csrf.failed"/></c:when>
+                    <c:otherwise>
+                        <c:if test="${not empty err.value}">
+                            <c:out value="${err.value}"/>
+                        </c:if>
+                        (<c:out value="${err.key}"/>)
+                    </c:otherwise>
+                </c:choose>
+            </admin:infobox>
+        </c:forEach>
+    </c:otherwise>
 </c:choose>
 
 <p><fmt:message key="sipsettings.introduction" /></p>
@@ -148,9 +154,17 @@
                 <td><input type="text" size="60" maxlength="100" name="jigasiSipServerAddress" id="jigasiSipServerAddress" value="${ofmeetConfig.jigasiSipServerAddress.get() == null ? '' : ofmeetConfig.jigasiSipServerAddress.get()}"></td>
             </tr>
             <tr>
-                <td width="200"><label for="jigasiSipDomainBase"><fmt:message key="sipsettings.sip.account.domain-base"/>:</label></td>
-                <td><input type="text" size="60" maxlength="100" name="jigasiSipDomainBase" id="jigasiSipDomainBase" value="${ofmeetConfig.jigasiSipDomainBase.get() == null ? '' : ofmeetConfig.jigasiSipDomainBase.get()}"></td>
+                <td width="200"><label for="jigasiSipTransport"><fmt:message key="sipsettings.sip.account.sip.transport"/>:</label></td>
+                <td><input type="text" size="60" maxlength="100" name="jigasiSipTransport" id="jigasiSipTransport" value="${ofmeetConfig.jigasiSipTransport.get() == null ? '' : ofmeetConfig.jigasiSipTransport.get()}"></td>
             </tr>
+            <tr>
+                <td width="200"><label for="jigasiProxyServer"><fmt:message key="sipsettings.sip.account.proxy.server"/>:</label></td>
+                <td><input type="text" size="60" maxlength="100" name="jigasiProxyServer" id="jigasiProxyServer" value="${ofmeetConfig.jigasiProxyServer.get() == null ? '' : ofmeetConfig.jigasiProxyServer.get()}"></td>
+            </tr>  
+            <tr>
+                <td width="200"><label for="jigasiProxyPort"><fmt:message key="sipsettings.sip.account.proxy.port"/>:</label></td>
+                <td><input type="text" size="60" maxlength="100" name="jigasiProxyPort" id="jigasiProxyPort" value="${ofmeetConfig.jigasiProxyPort.get() == null ? '' : ofmeetConfig.jigasiProxyPort.get()}"></td>
+            </tr>                
         </table>
     </admin:contentBox>
 

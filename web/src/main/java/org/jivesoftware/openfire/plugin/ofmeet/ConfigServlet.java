@@ -111,6 +111,7 @@ public class ConfigServlet extends HttpServlet
             boolean ofmeetWinSSOEnabled = JiveGlobals.getBooleanProperty( "ofmeet.winsso.enabled", false );
             boolean enablePreJoinPage = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.prejoin.page", false );
             boolean enableStereo = JiveGlobals.getBooleanProperty( "ofmeet.stereo.enabled", false );
+            boolean enableAudioLevels = JiveGlobals.getBooleanProperty( "ofmeet.audioLevels.enabled", false );
 
             int lowMaxBitratesVideo = JiveGlobals.getIntProperty( "org.jitsi.videobridge.low.max.bitrates.video", 200000 );
             int standardMaxBitratesVideo = JiveGlobals.getIntProperty( "org.jitsi.videobridge.standard.max.bitrates.video", 500000 );
@@ -218,7 +219,8 @@ public class ConfigServlet extends HttpServlet
             config.put( "videoQuality", videoQuality );
 
             config.put( "recordingType", "colibri" );
-            config.put( "disableAudioLevels", false );
+            config.put( "disableAudioLevels", ! enableAudioLevels );
+            config.put( "stereo", false );
             config.put( "requireDisplayName", true );
             config.put( "startAudioOnly", ofMeetConfig.getStartAudioOnly() );
             if ( ofMeetConfig.getStartAudioMuted() != null )
@@ -272,7 +274,6 @@ public class ConfigServlet extends HttpServlet
             config.put( "adaptiveSimulcast", ofMeetConfig.getAdaptiveSimulcast() );
             config.put( "disableAdaptiveSimulcast", !ofMeetConfig.getAdaptiveSimulcast() );
 
-            config.put( "stereo", enableStereo );
             if (enableStereo)
             {
                 config.put( "disableAP", true );
@@ -281,8 +282,9 @@ public class ConfigServlet extends HttpServlet
                 config.put( "disableAGC", true );
                 config.put( "disableHPF", true );
                 config.put( "enableLipSync", false );
+                config.put( "stereo", true );
                 config.put( "opusMaxAverageBitrate", 510000 );
-            } 
+            }
 
             config.put( "enableNoisyMicDetection", true );
             config.put( "enableNoAudioDetection", true );

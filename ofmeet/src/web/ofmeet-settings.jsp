@@ -79,6 +79,12 @@
         final boolean webinar = ParamUtils.getBooleanParameter( request, "webinar" );        
         final boolean useIPv6 = ParamUtils.getBooleanParameter( request, "useipv6" );
         final boolean useNicks = ParamUtils.getBooleanParameter( request, "usenicks" );
+
+        final String maxFullResolutionParticipants = request.getParameter( "maxFullResolutionParticipants" );        
+        final boolean enableLayerSuspension = ParamUtils.getBooleanParameter( request, "enableLayerSuspension" );
+        final boolean capScreenshareBitrate = ParamUtils.getBooleanParameter( request, "capScreenshareBitrate" );    
+        
+        
         final String videoConstraintsIdealAspectRatio = request.getParameter( "videoConstraintsIdealAspectRatio" );
         if(!videoConstraintsIdealAspectRatio.matches("[0-9: .,/]+"))
         {

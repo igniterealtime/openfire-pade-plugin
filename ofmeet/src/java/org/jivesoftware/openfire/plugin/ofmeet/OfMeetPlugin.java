@@ -244,7 +244,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     {
         Log.info( "Initializing public web application for /colibri-ws web socket" );
 
-        jvbWsContext = new WebAppContext(null, pluginDirectory.getPath() + "/classes/colibri-ws", "/colibri-ws" );
+        jvbWsContext = new ServletContextHandler(null, "/colibri-ws", ServletContextHandler.SESSIONS);
 
         try {
             WebSocketUpgradeFilter wsfilter = WebSocketUpgradeFilter.configureContext(jvbWsContext);
@@ -267,10 +267,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         publicWebApp.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
 
         HttpBindManager.getInstance().addJettyHandler( publicWebApp );
-
-        Log.debug( "Initialized public web application", publicWebApp.toString() );
-
-
 
         Log.debug( "Initialized public web application", publicWebApp.toString() );
     }

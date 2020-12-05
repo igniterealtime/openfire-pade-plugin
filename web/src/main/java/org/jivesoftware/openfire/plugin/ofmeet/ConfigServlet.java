@@ -113,6 +113,12 @@ public class ConfigServlet extends HttpServlet
             boolean enableStereo = JiveGlobals.getBooleanProperty( "ofmeet.stereo.enabled", false );
             boolean enableAudioLevels = JiveGlobals.getBooleanProperty( "ofmeet.audioLevels.enabled", false );
 
+            boolean enableLayerSuspension = JiveGlobals.getBooleanProperty( "ofmeet.layer.suspension.enabled",  true);
+
+            int video_width_ideal =  JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.constraints.video.width.ideal", ofMeetConfig.getVideoConstraintsIdealHeight() * 16/9);
+            int video_width_max = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.constraints.video.width.max", ofMeetConfig.getVideoConstraintsMaxHeight() * 16/9);
+            int video_width_min = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.constraints.video.width.min", ofMeetConfig.getVideoConstraintsMinHeight() * 16/9);
+
             int lowMaxBitratesVideo = JiveGlobals.getIntProperty( "org.jitsi.videobridge.low.max.bitrates.video", 200000 );
             int standardMaxBitratesVideo = JiveGlobals.getIntProperty( "org.jitsi.videobridge.standard.max.bitrates.video", 500000 );
             int highMaxBitratesVideo = JiveGlobals.getIntProperty( "org.jitsi.videobridge.high.max.bitrates.video", 1500000 );
@@ -136,7 +142,7 @@ public class ConfigServlet extends HttpServlet
             hosts.put( "domain", xmppDomain );
             hosts.put( "muc", mucDomain );
             //hosts.put( "bridge", "jitsi-videobridge." + xmppDomain );
-            //hosts.put( "focus", "focus." + xmppDomain );
+            hosts.put( "focus", "focus." + xmppDomain );
             config.put( "hosts", hosts );
 
             final Map<String, Object> p2p = new HashMap<>();
@@ -216,6 +222,12 @@ public class ConfigServlet extends HttpServlet
             maxBitratesVideo.put( "standard", standardMaxBitratesVideo );
             maxBitratesVideo.put( "high", highMaxBitratesVideo );
             videoQuality.put( "maxBitratesVideo", maxBitratesVideo );
+
+            final JSONObject minHeightForQualityLvl = new JSONObject();
+            minHeightForQualityLvl.put( "180", "high" );
+            minHeightForQualityLvl.put( "360", "high" );
+            minHeightForQualityLvl.put( "720", "high" );
+            videoQuality.put( "minHeightForQualityLvl", minHeightForQualityLvl );
             config.put( "videoQuality", videoQuality );
 
             config.put( "recordingType", "colibri" );
@@ -223,6 +235,7 @@ public class ConfigServlet extends HttpServlet
             config.put( "stereo", false );
             config.put( "requireDisplayName", true );
             config.put( "startAudioOnly", ofMeetConfig.getStartAudioOnly() );
+
             if ( ofMeetConfig.getStartAudioMuted() != null )
             {
                 config.put( "startAudioMuted", ofMeetConfig.getStartAudioMuted() );
@@ -237,21 +250,36 @@ public class ConfigServlet extends HttpServlet
             config.put( "resolution", ofMeetConfig.getResolution() );
             final JSONObject constraints = new JSONObject();
             final JSONObject videoConstraints = new JSONObject();
-
             videoConstraints.put( "aspectRatio", (JSONString) ofMeetConfig::getVideoConstraintsIdealAspectRatio ); // This cast causes the JSON-quoting of strings to be skipped (the ratio here is a simple function, not text)
             final Map<String, Object> height = new HashMap<>();
             height.put( "ideal", ofMeetConfig.getVideoConstraintsIdealHeight() );
             height.put( "max", ofMeetConfig.getVideoConstraintsMaxHeight() );
             height.put( "min", ofMeetConfig.getVideoConstraintsMinHeight() );
             videoConstraints.put( "height", height );
+            final Map<String, Object> width = new HashMap<>();
+            width.put( "ideal", video_width_ideal );
+            width.put( "max", video_width_max );
+            width.put( "min", video_width_min );
+
+            videoConstraints.put( "width", width );
             constraints.put( "video", videoConstraints );
             config.put( "constraints", constraints );
-            config.put( "maxFullResolutionParticipants", -1),
+            config.put( "enableLayerSuspension", enableLayerSuspension );
+
+            final JSONObject testing = new JSONObject();
+            final JSONObject octo = new JSONObject();
+            octo.put( "probability", 0 );
+            testing.put( "octo", octo);
+            testing.put( "capScreenshareBitrate", 1 );
+            config.put( "testing", testing );
+
+            config.put( "maxFullResolutionParticipants", -1);
             config.put( "useRoomAsSharedDocumentName", false );
             config.put( "logStats", logStats );
             config.put( "ofmeetWinSSOEnabled", ofmeetWinSSOEnabled );
 
             config.put( "conferences", conferences );
+
             if ( globalConferenceId != null && !globalConferenceId.isEmpty() )
             {
                 config.put( "globalConferenceId", globalConferenceId );

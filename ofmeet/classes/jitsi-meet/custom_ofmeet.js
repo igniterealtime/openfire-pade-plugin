@@ -2161,14 +2161,6 @@ var ofmeet = (function(of)
     {
         // fake the interaction
         APP.conference.commands.sendCommandOnce("_____NOTHING", {value: !0});
-
-        
-        setTimeout(function () {  //get the breakout icon on UI in 1 second
-            if (interfaceConfig.OFMEET_ENABLE_BREAKOUT && APP.conference._room.isModerator())
-            {
-                breakoutRooms();
-            }
-        }, 1000);
         
         
         if (!APP.conference || !APP.conference.isJoined())

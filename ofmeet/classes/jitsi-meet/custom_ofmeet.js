@@ -2121,7 +2121,10 @@ var ofmeet = (function(of)
 
     function postLoadSetup()
     {
-        lostAudioWorkaround(); // fake the interaction
+        // fake the interaction
+        APP.conference.toggleAudioMuted(true);
+        APP.conference.toggleAudioMuted(false);
+        
         var dropZone = document.getElementById("videospace");
 
         console.debug("postLoadSetup", dropZone);
@@ -2151,7 +2154,10 @@ var ofmeet = (function(of)
 
     function postJoinSetup()
     {
-        lostAudioWorkaround(); // fake the interaction
+        // fake the interaction
+        APP.conference.toggleAudioMuted(true);
+        APP.conference.toggleAudioMuted(false);
+        
         setTimeout(function () {  //get the breakout icon on UI in 1 second
             if (interfaceConfig.OFMEET_ENABLE_BREAKOUT && APP.conference._room.isModerator())
             {

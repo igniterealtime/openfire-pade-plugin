@@ -383,7 +383,7 @@
             <tr>
                 <td nowrap colspan="2">
                     <input type="checkbox" name="startaudioonly" ${ofmeetConfig.startAudioOnly ? "checked" : ""}>
-                    <fmt:message key="config.page.configuration.ofmeet.audioonly"/>
+                    <fmt:message key="config.page.configuration.ofmeet.startaudioonly"/>
                 </td>
             </tr>
             <tr>

@@ -573,9 +573,9 @@ var ofmeet = (function(of)
     {
         console.debug("createAvatar", width, height, font);
 
-        if (!width) width = 32;
-        if (!height) height = 32;
-        if (!font) font = "16px Arial";
+        if (!width) width = 128;
+        if (!height) height = 128;
+        if (!font) font = "64px Arial";
 
         const canvas = document.createElement('canvas');
         canvas.style.display = 'none';
@@ -610,9 +610,9 @@ var ofmeet = (function(of)
                 if (lastInitial) {
                     // if any comma is in the nickname, treat it to have the lastname in front, i.e. compose reversed
                     const initials = nickname.indexOf(",") == -1 ? firstInitial + lastInitial : lastInitial + firstInitial;
-                    context.fillText(initials.toUpperCase(), 3, 23);
+                    context.fillText(initials.toUpperCase(), 20, 88);
                 } else {
-                    context.fillText(firstInitial.toUpperCase(), 10, 23);
+                    context.fillText(firstInitial.toUpperCase(), 44, 88);
                 }
             }
         }

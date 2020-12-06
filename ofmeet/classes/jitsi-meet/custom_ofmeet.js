@@ -2208,7 +2208,22 @@ var ofmeet = (function(of)
             {
                 APP.conference.commands.addCommandListener("CONFETTI", function()
                 {
-                    window.confetti({particleCount: 100, spread: 70, origin: {y: .6}})
+                    var options = {particleCount: 100, spread: 70, origin: {y: .6}};
+                    const today = new Date();
+                    if ( today.getMonth() == 11 )
+                    {
+                        options = Object.assign({shapes: [
+                            "text:\u2744", "text:\u2744", "text:\u2744", "text:\u2744", "text:\u2744", "text:\u2744", "text:\u2744", // snow flake
+                            "text:"+String.fromCodePoint(0x1F381), // :gift:
+                            "text:"+String.fromCodePoint(0x1F384), // :christmas_tree:
+                            "text:"+String.fromCodePoint(0x1F385), // :santa:
+                            "text:"+String.fromCodePoint(0x1F31F), // :star2:
+                            "text:"+String.fromCodePoint(0x1F56F), // :candle:
+                            "text:"+String.fromCodePoint(0x1F98C), // :deer:
+                            "text:"+String.fromCodePoint(0x1F514)  // :bell:
+                        ]});
+                    }
+                    window.confetti(options);                   
                });
 
                 const confettiButton = addToolbarItem('ofmeet-confetti', '<div id="ofmeet-confetti" class="toolbox-icon"><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.confetti + '</div></div>', "Share some confetti", ".button-group-right");

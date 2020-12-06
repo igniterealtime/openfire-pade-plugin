@@ -2213,7 +2213,7 @@ var ofmeet = (function(of)
                     if ( today.getMonth() == 11 )
                     {
                         options = Object.assign({shapes: [
-                            "text:\u2744", // snow flake
+                            "text:\u2744", "text:\u2744", "text:\u2744", "text:\u2744", "text:\u2744", "text:\u2744", "text:\u2744", // snow flake
                             "text:"+String.fromCodePoint(0x1F381), // :gift:
                             "text:"+String.fromCodePoint(0x1F384), // :christmas_tree:
                             "text:"+String.fromCodePoint(0x1F385), // :santa:

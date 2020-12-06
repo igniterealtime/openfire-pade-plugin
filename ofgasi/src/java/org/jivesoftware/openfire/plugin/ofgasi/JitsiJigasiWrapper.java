@@ -44,6 +44,7 @@ public class JitsiJigasiWrapper implements ProcessListener
     public synchronized void initialize( File pluginDirectory) throws Exception
     {
         Log.info( "Initializing Jitsi Sip Gateway Component (jigasi)...");
+        System.setProperty("ofmeet.jigasi.started", "false");
 
         final OFMeetConfig config = new OFMeetConfig();
         final String IPADDR = getIpAddress();
@@ -56,7 +57,7 @@ public class JitsiJigasiWrapper implements ProcessListener
 
         props.load(new FileInputStream(props_file));
 
-        props.setProperty("org.jitsi.jigasi.DEFAULT_JVB_ROOM_NAME", "siptest@" + MAIN_MUC);
+        props.setProperty("org.jitsi.jigasi.DEFAULT_JVB_ROOM_NAME", JiveGlobals.getProperty("ofmeet.jigasi.xmpp.room-name", "siptest") + "@" + MAIN_MUC);
         props.setProperty("org.jitsi.jigasi.MUC_SERVICE_ADDRESS", MAIN_MUC);
         props.setProperty("org.jitsi.jigasi.ALLOWED_JID", "ofgasi@" + MAIN_MUC);
         props.setProperty("org.jitsi.jigasi.BREWERY_ENABLED", "true");
@@ -214,6 +215,7 @@ public class JitsiJigasiWrapper implements ProcessListener
     public void onProcessQuit(int code)
     {
         Log.info("onProcessQuit " + code);
+        System.setProperty("ofmeet.jigasi.started", "false");
     }
 
     public void onOutputClosed() {
@@ -223,6 +225,7 @@ public class JitsiJigasiWrapper implements ProcessListener
     public void onErrorLine(final String line)
     {
         Log.info(line);
+        if (line.contains("newState=RegistrationState=Registered")) System.setProperty("ofmeet.jigasi.started", "true");
     }
 
     public void onError(final Throwable t)

@@ -44,6 +44,7 @@ public class JitsiJicofoWrapper implements ProcessListener
     public synchronized void initialize( File pluginDirectory) throws Exception
     {
         Log.info( "Initializing Jitsi Focus Component (jicofo)...");
+        System.setProperty("ofmeet.jicofo.started", "false");
 
         final String jicofoSubdomain = "focus";
         final ConnectionType connectionType = ConnectionType.COMPONENT;
@@ -93,7 +94,7 @@ public class JitsiJicofoWrapper implements ProcessListener
         props.setProperty("org.jitsi.jicofo.jigasi.BREWERY", "ofgasi@" + MAIN_MUC);
         props.setProperty( "org.jitsi.jicofo.ALWAYS_TRUST_MODE_ENABLED", "true" );
         props.setProperty( "org.jitsi.jicofo.PING_INTERVAL", "-1" );
-        props.setProperty( "org.jitsi.jicofo.SERVICE_REDISCOVERY_INTERVAL", "60000" );        
+        props.setProperty( "org.jitsi.jicofo.SERVICE_REDISCOVERY_INTERVAL", "60000" );
         props.setProperty( "org.jitsi.jicofo.DISABLE_AUTO_OWNER", Boolean.toString( !JiveGlobals.getBooleanProperty( "ofmeet.conference.auto-moderator", true ) ) );
 
         Log.debug("sip-communicator.properties");
@@ -101,7 +102,7 @@ public class JitsiJicofoWrapper implements ProcessListener
         for (Object key: props.keySet()) {
             Log.debug(key + ": " + props.getProperty(key.toString()));
         }
-        
+
         props.store(new FileOutputStream(props_file), "Jitsi Colibri Focus");
 
         final String javaHome = System.getProperty("java.home");
@@ -138,6 +139,7 @@ public class JitsiJicofoWrapper implements ProcessListener
     public void onProcessQuit(int code)
     {
         Log.info("onProcessQuit " + code);
+        System.setProperty("ofmeet.jicofo.started", "false");
     }
 
     public void onOutputClosed() {
@@ -147,6 +149,7 @@ public class JitsiJicofoWrapper implements ProcessListener
     public void onErrorLine(final String line)
     {
         Log.info(line);
+        if (line.contains("Added new videobridge:")) System.setProperty("ofmeet.jicofo.started", "true");
     }
 
     public void onError(final Throwable t)

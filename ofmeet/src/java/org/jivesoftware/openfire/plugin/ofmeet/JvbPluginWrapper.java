@@ -58,6 +58,7 @@ public class JvbPluginWrapper implements ProcessListener
     public synchronized void initialize(final PluginManager manager, final File pluginDirectory) throws Exception
     {
         Log.debug( "Initializing Jitsi Videobridge..." );
+        System.setProperty("ofmeet.jvb.started", "false");
         JvbPluginWrapper self = this;
 
         jitsiPlugin = new PluginImpl();
@@ -161,7 +162,7 @@ public class JvbPluginWrapper implements ProcessListener
             Log.error("createConfigFile error", e);
         }
 
-        String defaultOptions = "-Xmx3072m -XX:+UseConcMarkSweepGC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp";
+        String defaultOptions = "-Xmx3072m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp";
         final String javaHome = System.getProperty("java.home");
         String javaExec = javaHome + File.separator + "bin" + File.separator + "java";
 
@@ -392,6 +393,7 @@ public class JvbPluginWrapper implements ProcessListener
     public void onProcessQuit(int code)
     {
         Log.info("onProcessQuit " + code);
+        System.setProperty("ofmeet.jvb.started", "false");
     }
 
     public void onOutputClosed() {
@@ -401,6 +403,7 @@ public class JvbPluginWrapper implements ProcessListener
     public void onErrorLine(final String line)
     {
         Log.info(line);
+        if (line.contains("Server.doStart: Started")) System.setProperty("ofmeet.jvb.started", "true");
     }
 
     public void onError(final Throwable t)

@@ -41,6 +41,11 @@
 
     try {
         String current_timestamp = summary.getString("current_timestamp");
+
+        String jvb = System.getProperty("ofmeet.jvb.started");
+        String jicofo = System.getProperty("ofmeet.jicofo.started");
+        String jigasi = System.getProperty("ofmeet.jigasi.started");
+        
         int total_conference_seconds = summary.getInt("total_conference_seconds");      
         int total_participants = summary.getInt("total_participants");
         int total_failed_conferences = summary.getInt("total_failed_conferences");          
@@ -49,7 +54,7 @@
         int conferences = summary.getInt("conferences");      
         int participants = summary.getInt("participants");
         int largest_conference = summary.getInt("largest_conference");          
-        int p2p_conferences = summary.getInt("p2p_conferences");     
+        int p2p_conferences = summary.getInt("p2p_conferences");        
 
     %>
         <div class="jive-table">
@@ -57,6 +62,9 @@
         <thead>
             <tr>
                 <th nowrap><fmt:message key="ofmeet.summary.current_timestamp" /></th>   
+                <th nowrap><fmt:message key="ofmeet.summary.jvb" /></th>                   
+                <th nowrap><fmt:message key="ofmeet.summary.jicofo" /></th>                 
+                <th nowrap><fmt:message key="ofmeet.summary.jigasi" /></th>                 
                 <th nowrap><fmt:message key="ofmeet.summary.total_conference_seconds" /></th>
                 <th nowrap><fmt:message key="ofmeet.summary.total_participants" /></th>
                 <th nowrap><fmt:message key="ofmeet.summary.total_failed_conferences" /></th>           
@@ -71,6 +79,9 @@
         <tbody>
             <tr>
                 <td nowrap><%= current_timestamp %></th>   
+                <td nowrap><img src="<%= jvb != null && jvb.equals("true") ? "images/success-16x16.gif" : "images/error-16x16.gif" %>"/></th>                   
+                <td nowrap><img src="<%= jicofo != null && jicofo.equals("true")  ? "images/success-16x16.gif" : "images/error-16x16.gif" %>"/></th>  
+                <td nowrap><img src="<%= jigasi != null && jigasi.equals("true")  ? "images/success-16x16.gif" : "images/error-16x16.gif" %>"/></th>                  
                 <td nowrap><%= total_conference_seconds %></th>
                 <td nowrap><%= total_participants %></th>
                 <td nowrap><%= total_failed_conferences %></th>           

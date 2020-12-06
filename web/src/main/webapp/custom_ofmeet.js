@@ -439,7 +439,7 @@ var ofmeet = (function(of)
           audioTemporaryUnmuted = !audioTemporaryUnmuted;
           console.debug("audio " + (audioTemporaryUnmuted ? "temporary un" : "re") + "muted");
         }
-        setTimeout(lostAudioWorkaround, audioTemporaryUnmuted ? 1 : lostAudioWorkaroundInterval);
+        setTimeout(lostAudioWorkaround, audioTemporaryUnmuted ? 1000 : lostAudioWorkaroundInterval);
     }
 
 
@@ -573,9 +573,9 @@ var ofmeet = (function(of)
     {
         console.debug("createAvatar", width, height, font);
 
-        if (!width) width = 32;
-        if (!height) height = 32;
-        if (!font) font = "16px Arial";
+        if (!width) width = 128;
+        if (!height) height = 128;
+        if (!font) font = "64px Arial";
 
         const canvas = document.createElement('canvas');
         canvas.style.display = 'none';
@@ -610,9 +610,9 @@ var ofmeet = (function(of)
                 if (lastInitial) {
                     // if any comma is in the nickname, treat it to have the lastname in front, i.e. compose reversed
                     const initials = nickname.indexOf(",") == -1 ? firstInitial + lastInitial : lastInitial + firstInitial;
-                    context.fillText(initials.toUpperCase(), 3, 23);
+                    context.fillText(initials.toUpperCase(), 20, 88);
                 } else {
-                    context.fillText(firstInitial.toUpperCase(), 10, 23);
+                    context.fillText(firstInitial.toUpperCase(), 44, 88);
                 }
             }
         }
@@ -2131,11 +2131,6 @@ var ofmeet = (function(of)
             return;
         }
 
-        if (interfaceConfig.OFMEET_ENABLE_BREAKOUT && APP.conference._room.isModerator())
-        {
-            breakoutRooms();
-        }
-
         if (interfaceConfig.OFMEET_CONTACTS_MGR) setupPushNotification();
 
         if (interfaceConfig.OFMEET_ALLOW_UPLOADS)
@@ -2157,6 +2152,23 @@ var ofmeet = (function(of)
         }
 
         console.debug("postJoinSetup");
+
+        // fake the interaction
+        APP.conference.commands.addCommandListener("___FAKE_INTERACTION", function()
+        {
+            if (interfaceConfig.OFMEET_ENABLE_BREAKOUT && APP.conference._room.isModerator())
+            {
+                breakoutRooms();
+            }
+       });
+
+        if (interfaceConfig.OFMEET_ENABLE_BREAKOUT && APP.conference._room.isModerator())
+        {
+            breakoutRooms();
+        }
+        else {
+            APP.conference.commands.sendCommandOnce("___FAKE_INTERACTION", {value: !0});
+        }
 
         if (interfaceConfig.OFMEET_ENABLE_CRYPTPAD || interfaceConfig.OFMEET_ENABLE_WHITEBOARD || interfaceConfig.OFMEET_ENABLE_CONFETTI)
         {
@@ -2208,7 +2220,22 @@ var ofmeet = (function(of)
             {
                 APP.conference.commands.addCommandListener("CONFETTI", function()
                 {
-                    window.confetti({particleCount: 100, spread: 70, origin: {y: .6}})
+                    var options = {particleCount: 100, spread: 70, origin: {y: .6}};
+                    const today = new Date();
+                    if ( today.getMonth() == 11 )
+                    {
+                        options = Object.assign({shapes: [
+                            "text:\u2744", "text:\u2744", "text:\u2744", "text:\u2744", "text:\u2744", "text:\u2744", "text:\u2744", // snow flake
+                            "text:"+String.fromCodePoint(0x1F381), // :gift:
+                            "text:"+String.fromCodePoint(0x1F384), // :christmas_tree:
+                            "text:"+String.fromCodePoint(0x1F385), // :santa:
+                            "text:"+String.fromCodePoint(0x1F31F), // :star2:
+                            "text:"+String.fromCodePoint(0x1F56F), // :candle:
+                            "text:"+String.fromCodePoint(0x1F98C), // :deer:
+                            "text:"+String.fromCodePoint(0x1F514)  // :bell:
+                        ]});
+                    }
+                    window.confetti(options);
                });
 
                 const confettiButton = addToolbarItem('ofmeet-confetti', '<div id="ofmeet-confetti" class="toolbox-icon"><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.confetti + '</div></div>', "Share some confetti", ".button-group-right");

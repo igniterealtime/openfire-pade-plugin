@@ -2122,7 +2122,7 @@ var ofmeet = (function(of)
     function postLoadSetup()
     {
         // fake the interaction
-        APP.conference.commands.addCommandListener("_____NOTHING", function()
+        APP.conference.commands.addCommandListener("___FAKE_INTERACTION", function()
         {
             if (interfaceConfig.OFMEET_ENABLE_BREAKOUT && APP.conference._room.isModerator())
             {
@@ -2160,7 +2160,7 @@ var ofmeet = (function(of)
     function postJoinSetup()
     {
         // fake the interaction
-        APP.conference.commands.sendCommandOnce("_____NOTHING", {value: !0});
+        APP.conference.commands.sendCommandOnce("___FAKE_INTERACTION", {value: !0});
         
         
         if (!APP.conference || !APP.conference.isJoined())

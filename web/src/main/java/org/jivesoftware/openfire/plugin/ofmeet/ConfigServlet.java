@@ -113,8 +113,6 @@ public class ConfigServlet extends HttpServlet
             boolean enableStereo = JiveGlobals.getBooleanProperty( "ofmeet.stereo.enabled", false );
             boolean enableAudioLevels = JiveGlobals.getBooleanProperty( "ofmeet.audioLevels.enabled", false );
 
-            boolean enableLayerSuspension = JiveGlobals.getBooleanProperty( "ofmeet.layer.suspension.enabled",  true);
-
             int video_width_ideal =  JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.constraints.video.width.ideal", ofMeetConfig.getVideoConstraintsIdealHeight() * 16/9);
             int video_width_max = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.constraints.video.width.max", ofMeetConfig.getVideoConstraintsMaxHeight() * 16/9);
             int video_width_min = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.constraints.video.width.min", ofMeetConfig.getVideoConstraintsMinHeight() * 16/9);
@@ -122,6 +120,12 @@ public class ConfigServlet extends HttpServlet
             int lowMaxBitratesVideo = JiveGlobals.getIntProperty( "org.jitsi.videobridge.low.max.bitrates.video", 200000 );
             int standardMaxBitratesVideo = JiveGlobals.getIntProperty( "org.jitsi.videobridge.standard.max.bitrates.video", 500000 );
             int highMaxBitratesVideo = JiveGlobals.getIntProperty( "org.jitsi.videobridge.high.max.bitrates.video", 1500000 );
+
+            boolean capScreenshareBitrate = JiveGlobals.getBooleanProperty( "ofmeet.cap.screenshare.bitrate", true);
+            boolean enableLayerSuspension = JiveGlobals.getBooleanProperty( "ofmeet.enable.layer.suspension", true);
+            String minHeightForQualityLvlLow = JiveGlobals.getProperty( "ofmeet.min.height.for.quality.level.low", "180" );
+            String minHeightForQualityLvlStd = JiveGlobals.getProperty( "ofmeet.min.height.for.quality.level.std", "360" );
+            String minHeightForQualityLvlHigh = JiveGlobals.getProperty( "ofmeet.min.height.for.quality.level.high", "720" );
 
             if ( xirsysUrl != null )
             {
@@ -224,9 +228,9 @@ public class ConfigServlet extends HttpServlet
             videoQuality.put( "maxBitratesVideo", maxBitratesVideo );
 
             final JSONObject minHeightForQualityLvl = new JSONObject();
-            minHeightForQualityLvl.put( "180", "high" );
-            minHeightForQualityLvl.put( "360", "high" );
-            minHeightForQualityLvl.put( "720", "high" );
+            minHeightForQualityLvl.put( minHeightForQualityLvlLow, "low" );
+            minHeightForQualityLvl.put( minHeightForQualityLvlStd, "standard" );
+            minHeightForQualityLvl.put( minHeightForQualityLvlHigh, "high" );
             videoQuality.put( "minHeightForQualityLvl", minHeightForQualityLvl );
             config.put( "videoQuality", videoQuality );
 
@@ -270,7 +274,7 @@ public class ConfigServlet extends HttpServlet
             final JSONObject octo = new JSONObject();
             octo.put( "probability", 0 );
             testing.put( "octo", octo);
-            testing.put( "capScreenshareBitrate", 1 );
+            testing.put( "capScreenshareBitrate", capScreenshareBitrate ? 1 : 0 );
             config.put( "testing", testing );
 
             config.put( "maxFullResolutionParticipants", -1);

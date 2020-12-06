@@ -710,6 +710,9 @@ public class OFMeetConfig
     public final StringProperty jigasiXmppUserId = new StringProperty( "ofmeet.jigasi.xmpp.user-id", "jigasi" );
     public StringProperty getJigasiXmppUserId() { return jigasiXmppUserId; }
 
+    public final StringProperty jigasiXmppRoomName = new StringProperty( "ofmeet.jigasi.xmpp.room-name", "siptest" );
+    public StringProperty getJigasiXmppRoomName() { return jigasiXmppRoomName; }
+
     public final StringProperty jigasiXmppPassword = new StringProperty( "ofmeet.jigasi.xmpp.password", null );
     public StringProperty getJigasiXmppPassword() { return jigasiXmppPassword; }
 }

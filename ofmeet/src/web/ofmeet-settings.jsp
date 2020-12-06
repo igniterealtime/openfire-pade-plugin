@@ -81,9 +81,11 @@
         final boolean useNicks = ParamUtils.getBooleanParameter( request, "usenicks" );
 
         final String maxFullResolutionParticipants = request.getParameter( "maxFullResolutionParticipants" );        
-        final boolean enableLayerSuspension = ParamUtils.getBooleanParameter( request, "enableLayerSuspension" );
-        final boolean capScreenshareBitrate = ParamUtils.getBooleanParameter( request, "capScreenshareBitrate" );    
-        
+        final String minHeightForQualityLow = request.getParameter( "minHeightForQualityLow" );  
+        final String minHeightForQualityStd = request.getParameter( "minHeightForQualityStd" );         
+        final String minHeightForQualityHigh = request.getParameter( "minHeightForQualityHigh" );           
+        final boolean capScreenshareBitrate = ParamUtils.getBooleanParameter( request, "capScreenshareBitrate" );     
+        final boolean enableLayerSuspension = ParamUtils.getBooleanParameter( request, "enableLayerSuspension" );        
         
         final String videoConstraintsIdealAspectRatio = request.getParameter( "videoConstraintsIdealAspectRatio" );
         if(!videoConstraintsIdealAspectRatio.matches("[0-9: .,/]+"))
@@ -172,6 +174,13 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.high.max.bitrates.video", highMaxBitratesVideo );
             JiveGlobals.setProperty( "org.jitsi.videobridge.standard.max.bitrates.video", standardMaxBitratesVideo );
             
+            JiveGlobals.setProperty( "ofmeet.max.full.resolution.participants", maxFullResolutionParticipants );            
+            JiveGlobals.setProperty( "ofmeet.min.height.for.quality.level.low", minHeightForQualityLow );  
+            JiveGlobals.setProperty( "ofmeet.min.height.for.quality.level.std", minHeightForQualityStd );  
+            JiveGlobals.setProperty( "ofmeet.min.height.for.quality.level.high", minHeightForQualityHigh );    
+            JiveGlobals.setProperty( "ofmeet.cap.screenshare.bitrate", Boolean.toString(capScreenshareBitrate) );             
+            JiveGlobals.setProperty( "ofmeet.enable.layer.suspension", Boolean.toString(enableLayerSuspension) );             
+                      
             ofmeetConfig.setDisableRtx( disableRtx );
             ofmeetConfig.setStartAudioOnly( startaudioonly );
             ofmeetConfig.setStartAudioMuted( startaudiomuted == null || startaudiomuted.isEmpty() ? null : Integer.parseInt( startaudiomuted ));
@@ -399,11 +408,43 @@
                 </td>
             </tr>            
         </table>
+        
+       <p style="margin-top: 2em"><fmt:message key="config.page.configuration.ofmeet.min.height.for.quality.level"/></p>
+        <table cellpadding="3" cellspacing="0" border="0" width="100%">
+            <tr>
+                <td align="left" width="300"><fmt:message key="config.page.configuration.ofmeet.min.height.for.quality.low"/>:</td>
+                <td><input type="text" size="10" maxlength="5" name="minHeightForQualityLow" value="${admin:getProperty( "ofmeet.min.height.for.quality.level.low", "180")}"></td>
+            </tr>
+            <tr>
+                <td align="left" width="300"><fmt:message key="config.page.configuration.ofmeet.min.height.for.quality.std"/>:</td>
+                <td><input type="text" size="10" maxlength="5" name="minHeightForQualityStd" value="${admin:getProperty( "ofmeet.min.height.for.quality.level.std", "360")}"></td>
+            </tr>
+            <tr>
+                <td align="left" width="300"><fmt:message key="config.page.configuration.ofmeet.min.height.for.quality.high"/>:</td>
+                <td><input type="text" size="10" maxlength="5" name="minHeightForQualityHigh" value="${admin:getProperty( "ofmeet.min.height.for.quality.level.high", "720")}"></td>
+            </tr>            
+        </table>
+        
+       <p style="margin-top: 2em"><fmt:message key="config.page.configuration.ofmeet.max.full.resolution.participants.desc"/></p>
+        <table cellpadding="3" cellspacing="0" border="0" width="100%">
+            <tr>
+                <td align="left" width="300"><fmt:message key="config.page.configuration.ofmeet.max.full.resolution.participants"/>:</td>
+                <td><input type="text" size="10" maxlength="5" name="maxFullResolutionParticipants" value="${admin:getProperty( "ofmeet.max.full.resolution.participants", "-1")}"></td>
+            </tr>           
+        </table>        
+
+        <p style="margin-top: 2em"><fmt:message key="config.page.configuration.ofmeet.startvideomuted.description"/></p>
+        <table cellpadding="3" cellspacing="0" border="0" width="100%">
+            <tr>
+                <td align="left" width="300"><fmt:message key="config.page.configuration.ofmeet.startvideomuted"/>:</td>
+                <td><input type="text" size="10" maxlength="5" name="startvideomuted" value="${ofmeetConfig.startVideoMuted}"></td>
+            </tr>
+        </table>        
 
         <p style="margin-top: 2em"><fmt:message key="config.page.configuration.ofmeet.startaudiomuted.description"/></p>
         <table cellpadding="3" cellspacing="0" border="0" width="100%">
             <tr>
-                <td align="left" width="400"><fmt:message key="config.page.configuration.ofmeet.startaudiomuted"/>:</td>
+                <td align="left" width="300"><fmt:message key="config.page.configuration.ofmeet.startaudiomuted"/>:</td>
                 <td><input type="text" size="10" maxlength="5" name="startaudiomuted" value="${ofmeetConfig.startAudioMuted}"></td>
             </tr>
         </table>
@@ -411,7 +452,7 @@
         <p style="margin-top: 2em"><fmt:message key="config.page.configuration.ofmeet.startvideomuted.description"/></p>
         <table cellpadding="3" cellspacing="0" border="0" width="100%">
             <tr>
-                <td align="left" width="400"><fmt:message key="config.page.configuration.ofmeet.startvideomuted"/>:</td>
+                <td align="left" width="300"><fmt:message key="config.page.configuration.ofmeet.startvideomuted"/>:</td>
                 <td><input type="text" size="10" maxlength="5" name="startvideomuted" value="${ofmeetConfig.startVideoMuted}"></td>
             </tr>
         </table>
@@ -465,7 +506,7 @@
                     <input type="checkbox" name="adaptivelastn" ${ofmeetConfig.adaptiveLastN ? "checked" : ""}>
                     <fmt:message key="config.page.configuration.adaptivelastn" />
                 </td>
-            </tr>
+            </tr>         
         </table>
     </admin:contentBox>
 
@@ -485,6 +526,18 @@
                     <fmt:message key="config.page.configuration.adaptivesimulcast" />
                 </td>
             </tr>
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="capScreenshareBitrate" ${admin:getBooleanProperty( "ofmeet.cap.screenshare.bitrate", true) ? "checked" : ""}>
+                    <fmt:message key="config.page.configuration.ofmeet.cap.screenshare.bitrate" />
+                </td>
+            </tr>  
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="enableLayerSuspension" ${admin:getBooleanProperty( "ofmeet.enable.layer.suspension", true) ? "checked" : ""}>
+                    <fmt:message key="config.page.configuration.ofmeet.enable.layer.suspension" />
+                </td>
+            </tr>                 
         </table>
     </admin:contentBox>
 

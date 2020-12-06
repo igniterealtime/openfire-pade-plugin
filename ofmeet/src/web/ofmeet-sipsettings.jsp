@@ -54,6 +54,7 @@
         final String jigasiSipUserId = request.getParameter( "jigasiSipUserId" );
         final String jigasiXmppPassword = request.getParameter( "jigasiXmppPassword" );
         final String jigasiXmppUserId = request.getParameter( "jigasiXmppUserId" );
+        final String jigasiXmppRoomName = request.getParameter( "jigasiXmppRoomName" );        
 
         if ( errors.isEmpty() )
         {
@@ -64,7 +65,8 @@
             ofmeetConfig.jigasiSipPassword.set( jigasiSipPassword );
             ofmeetConfig.jigasiSipUserId.set( jigasiSipUserId );
             ofmeetConfig.jigasiXmppPassword.set( jigasiXmppPassword );
-            ofmeetConfig.jigasiXmppUserId.set( jigasiXmppUserId );
+            ofmeetConfig.jigasiXmppRoomName.set( jigasiXmppRoomName );
+            ofmeetConfig.jigasiXmppUserId.set( jigasiXmppUserId );            
 
             // Only reload everything if something changed.
             if ( ofmeetConfig.jigasiSipServerAddress.wasChanged()
@@ -74,6 +76,7 @@
               || ofmeetConfig.jigasiSipPassword.wasChanged()
               || ofmeetConfig.jigasiSipUserId.wasChanged()
               || ofmeetConfig.jigasiXmppUserId.wasChanged()
+              || ofmeetConfig.jigasiXmppRoomName.wasChanged()                            
               || ofmeetConfig.jigasiXmppPassword.wasChanged() )
             {
                 container.populateJitsiSystemPropertiesWithJivePropertyValues();
@@ -203,6 +206,10 @@
                 <td width="200"><label for="jigasiXmppPassword"><fmt:message key="sipsettings.xmpp.account.password"/>:</label></td>
                 <td><input type="password" size="60" maxlength="100" name="jigasiXmppPassword" id="jigasiXmppPassword" value="${ofmeetConfig.jigasiXmppPassword.get() == null ? '' : ofmeetConfig.jigasiXmppPassword.get()}"></td>
             </tr>
+            <tr>
+                <td width="200"><label for="jigasiXmppRoomName"><fmt:message key="sipsettings.xmpp.room.name"/>:</label></td>
+                <td><input type="text" size="60" maxlength="100" name="jigasiXmppRoomName" id="jigasiXmppRoomName" value="${ofmeetConfig.jigasiXmppRoomName.get() == null ? 'siptest' : ofmeetConfig.jigasiXmppRoomName.get()}"></td>
+            </tr>            
         </table>
     </admin:contentBox>
 

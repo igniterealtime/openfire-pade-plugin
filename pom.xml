@@ -34,10 +34,10 @@
 
     <modules>        
         <module>web</module>
-        <module>config</module>      
-        <module>ofgasi</module>           
+        <module>config</module>              
         <module>ofmeet</module>        
-        <module>offocus</module>                        
+        <module>offocus</module>  
+        <module>ofgasi</module>           
         <module>pade</module>        
     </modules>
 

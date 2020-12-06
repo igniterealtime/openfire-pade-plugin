@@ -3,6 +3,9 @@ work/
 *.class
 *.cmd
 
+# ignore copied jitsi meet
+ofmeet/classes/jitsi-meet
+
 # Ignore Intellij Idea project files
 *.iml
 *.ipr

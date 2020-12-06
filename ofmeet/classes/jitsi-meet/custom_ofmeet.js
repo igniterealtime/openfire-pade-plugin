@@ -2121,6 +2121,15 @@ var ofmeet = (function(of)
 
     function postLoadSetup()
     {
+        // fake the interaction
+        APP.conference.commands.addCommandListener("___FAKE_INTERACTION", function()
+        {
+            if (interfaceConfig.OFMEET_ENABLE_BREAKOUT && APP.conference._room.isModerator())
+            {
+                breakoutRooms();
+            }
+       });
+        
         var dropZone = document.getElementById("videospace");
 
         console.debug("postLoadSetup", dropZone);
@@ -2150,6 +2159,10 @@ var ofmeet = (function(of)
 
     function postJoinSetup()
     {
+        // fake the interaction
+        APP.conference.commands.sendCommandOnce("___FAKE_INTERACTION", {value: !0});
+        
+        
         if (!APP.conference || !APP.conference.isJoined())
         {
             setTimeout(postJoinSetup, 500);

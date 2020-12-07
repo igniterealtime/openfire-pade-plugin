@@ -127,6 +127,8 @@ public class ConfigServlet extends HttpServlet
             String minHeightForQualityLvlStd = JiveGlobals.getProperty( "ofmeet.min.height.for.quality.level.std", "360" );
             String minHeightForQualityLvlHigh = JiveGlobals.getProperty( "ofmeet.min.height.for.quality.level.high", "720" );
 
+            boolean wsBridgeChannel = JiveGlobals.getBooleanProperty( "ofmeet.bridge.ws.channel", org.jitsi.util.OSUtils.IS_WINDOWS);
+
             if ( xirsysUrl != null )
             {
                 Log.info( "OFMeetConfig. found xirsys Url " + xirsysUrl );
@@ -294,7 +296,7 @@ public class ConfigServlet extends HttpServlet
             {
                 config.put( "websocket", new URI( "https".equals(request.getScheme()) ? "wss" : "ws", null, request.getServerName(), request.getServerPort(), "/ws/", null, null) );
             }
-            config.put( "openBridgeChannel", "websocket" );
+            config.put( "openBridgeChannel", wsBridgeChannel ? "websocket" : "datachannel" );
             config.put( "channelLastN", ofMeetConfig.getChannelLastN() );
             config.put( "adaptiveLastN", ofMeetConfig.getAdaptiveLastN() );
             config.put( "disableSimulcast", !ofMeetConfig.getSimulcast() );

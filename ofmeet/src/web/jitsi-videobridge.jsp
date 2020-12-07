@@ -15,6 +15,7 @@
 --%>
 <%@ page import="org.jitsi.videobridge.openfire.*" %>
 <%@ page import="org.jivesoftware.util.*" %>
+<%@ page import="org.jitsi.util.OSUtils" %>
 <%@ page import="org.ice4j.ice.harvest.AwsCandidateHarvester" %>
 <%@ page import="java.net.NetworkInterface" %>
 <%@ page import="org.ice4j.ice.NetworkUtils" %>
@@ -28,7 +29,7 @@
     boolean reset = request.getParameter( "reset" ) != null;
 
     Map<String, String> errors = new HashMap<>();
-    boolean singlePortEnabled, minmaxPortEnabled, tcpEnabled, sslTcpEnabled;
+    boolean singlePortEnabled, minmaxPortEnabled, tcpEnabled, sslTcpEnabled, wsChannelEnabled;
     String stunPort, singlePort, minPort, maxPort, tcpPort, mappedTcpPort, plainPort, securePort, publicPort;
 
     if (reset)
@@ -275,6 +276,10 @@
         }
         sslTcpEnabled = Boolean.parseBoolean( request.getParameter( "sslTcpEnabled" ) );
         JiveGlobals.setProperty( PluginImpl.TCP_SSLTCP_ENABLED_PROPERTY_NAME, Boolean.toString( sslTcpEnabled ) );
+        
+        wsChannelEnabled = Boolean.parseBoolean( request.getParameter( "wsChannelEnabled" ) );
+        JiveGlobals.setProperty( "ofmeet.bridge.ws.channel", Boolean.toString( wsChannelEnabled ) );
+
     }
     else
     {
@@ -297,6 +302,7 @@
         mappedTcpPort = RuntimeConfiguration.getTcpMappedPort() == null ? null : RuntimeConfiguration.getTcpMappedPort().toString();
         tcpEnabled = RuntimeConfiguration.isTcpEnabled();
         sslTcpEnabled = RuntimeConfiguration.isSslTcpEnabled();
+        wsChannelEnabled = JiveGlobals.getBooleanProperty( "ofmeet.bridge.ws.channel", OSUtils.IS_WINDOWS);
     }
 
     final Collection<String> allowedInterfaces = JiveGlobals.getListProperty( PluginImpl.INTERFACES_ALLOWED_PROPERTY_NAME, null ); // null if all interfaces are allowed.
@@ -553,6 +559,24 @@
         </p>
         <table>
             <tbody>
+            <tr>
+                <td width="1%" nowrap>
+                    <input type="radio" name="wsChannelEnabled" value="false" id="wsChannelEnabled" <%= (!wsChannelEnabled ? "checked" : "") %>>
+                    <label class="jive-label" for="wsChannelEnabled"><fmt:message key="config.page.configuration.ws.channel.disabled" /></label>
+                </td>
+                <td>
+                    <label for="rb03"><fmt:message key="config.page.configuration.ws.channel.disabled_info" /></label>
+                </td>
+            </tr>
+            <tr>
+                <td width="1%" nowrap>
+                <input type="radio" name="wsChannelEnabled" value="true" id="wsChannelEnabled" <%= (wsChannelEnabled ? "checked" : "") %>>
+                    <label class="jive-label" for="wsChannelEnabled"><fmt:message key="config.page.configuration.ws.channel.enabled" /></label>
+                </td>
+                <td>
+                    <label for="rb04"><fmt:message key="config.page.configuration.ws.channel.enabled_info" /></label>
+                </td>
+            </tr>            
             <tr>
                 <td width="10%" style="padding-left: 3em; padding-top: 1em;" nowrap colspan="2">
                     <label for="plainPort"><fmt:message key="config.page.configuration.websockets.plainport"/>:</label>

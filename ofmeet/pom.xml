@@ -25,7 +25,7 @@
     <artifactId>ofmeet</artifactId>
 
     <name>Pade Meetings</name>
-    <description>Provides high quality, scalable video conferences using Jitsi Meet and Jitsi Videobridge.</description>
+    <description>Provides audio and video conferences using Jitsi.</description>
 
     <build>
         <sourceDirectory>src/java</sourceDirectory>

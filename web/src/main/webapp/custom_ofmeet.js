@@ -32,6 +32,7 @@ var ofmeet = (function(of)
     let clockTrack = {start: 0, stop: 0, joins: 0, leaves: 0}, handsRaised = 0;
     let tags = {location: "", date: (new Date()).toISOString().split('T')[0], subject: "", host: "", activity: ""};
     let audioTemporaryUnmuted = false, cursorShared = false;
+    let breakoutIconVisible = false;
     //-------------------------------------------------------
     //
     //  window events
@@ -2152,19 +2153,21 @@ var ofmeet = (function(of)
         }
 
         console.debug("postJoinSetup");
-
+        
         // fake the interaction
         APP.conference.commands.addCommandListener("___FAKE_INTERACTION", function()
         {
-            if (interfaceConfig.OFMEET_ENABLE_BREAKOUT && APP.conference._room.isModerator())
+            if (interfaceConfig.OFMEET_ENABLE_BREAKOUT && APP.conference._room.isModerator() && !breakoutIconVisible)
             {
                 breakoutRooms();
+                breakoutIconVisible = true;
             }
        });
 
         if (interfaceConfig.OFMEET_ENABLE_BREAKOUT && APP.conference._room.isModerator())
         {
             breakoutRooms();
+            breakoutIconVisible= true;
         }
         else {
             APP.conference.commands.sendCommandOnce("___FAKE_INTERACTION", {value: !0});

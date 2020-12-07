@@ -68,19 +68,6 @@
             ofmeetConfig.jigasiXmppRoomName.set( jigasiXmppRoomName );
             ofmeetConfig.jigasiXmppUserId.set( jigasiXmppUserId );            
 
-            // Only reload everything if something changed.
-            if ( ofmeetConfig.jigasiSipServerAddress.wasChanged()
-              || ofmeetConfig.jigasiSipTransport.wasChanged()
-              || ofmeetConfig.jigasiProxyServer.wasChanged()     
-              || ofmeetConfig.jigasiProxyPort.wasChanged()                
-              || ofmeetConfig.jigasiSipPassword.wasChanged()
-              || ofmeetConfig.jigasiSipUserId.wasChanged()
-              || ofmeetConfig.jigasiXmppUserId.wasChanged()
-              || ofmeetConfig.jigasiXmppRoomName.wasChanged()                            
-              || ofmeetConfig.jigasiXmppPassword.wasChanged() )
-            {
-                container.populateJitsiSystemPropertiesWithJivePropertyValues();
-            }
             response.sendRedirect( "ofmeet-sipsettings.jsp?settingsSaved=true" );
             return;
         }

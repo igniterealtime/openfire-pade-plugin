@@ -38,8 +38,11 @@ import org.apache.tomcat.InstanceManager;
 import org.apache.tomcat.SimpleInstanceManager;
 
 import org.ice4j.ice.harvest.MappingCandidateHarvesters;
+
 import org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig;
 import org.jivesoftware.openfire.XMPPServer;
+import org.jivesoftware.openfire.user.UserManager;
+import org.jivesoftware.openfire.muc.MultiUserChatService;
 import org.jivesoftware.openfire.cluster.ClusterEventListener;
 import org.jivesoftware.openfire.cluster.ClusterManager;
 import org.jivesoftware.openfire.container.Plugin;
@@ -51,11 +54,13 @@ import org.jivesoftware.openfire.interceptor.InterceptorManager;
 import org.jivesoftware.openfire.session.ClientSession;
 import org.jivesoftware.openfire.session.Session;
 import org.jivesoftware.util.JiveGlobals;
+import org.jivesoftware.util.StringUtils;
 import org.jivesoftware.util.PropertyEventDispatcher;
 import org.jivesoftware.util.PropertyEventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xmpp.packet.IQ;
+import org.xmpp.packet.JID;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -77,12 +82,6 @@ import org.ifsoft.websockets.*;
 
 /**
  * Bundles various Jitsi components into one, standalone Openfire plugin.
- *
- * Changes from earlier version
- * - jitsi-plugin made standard. Extensions moved here:
- * -- Openfire properties to system settings (to configure jitsi)
- * -- autorecord should become jitsi videobridge feature: https://github.com/jitsi/jitsi-videobridge/issues/344
- * - jicofo moved from (modified) jitsiplugin and moved to this class
  */
 public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventListener, PropertyEventListener
 {
@@ -98,13 +97,21 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     private ServletContextHandler jvbWsContext = null;
     private BookmarkInterceptor bookmarkInterceptor;
 
-    private final JvbPluginWrapper jvbPluginWrapper;
+    private final OFMeetConfig config;
+    private final JitsiJvbWrapper jitsiJvbWrapper;
+    private final JitsiJicofoWrapper jitsiJicofoWrapper;
+    private final JitsiJigasiWrapper jitsiJigasiWrapper;
     private final MeetingPlanner meetingPlanner;
     private final LobbyMuc lobbyMuc;
 
     public OfMeetPlugin()
     {
-        jvbPluginWrapper = new JvbPluginWrapper();
+        config = new OFMeetConfig();
+
+        jitsiJigasiWrapper = new JitsiJigasiWrapper();
+        jitsiJicofoWrapper = new JitsiJicofoWrapper();
+        jitsiJvbWrapper = new JitsiJvbWrapper();
+
         meetingPlanner = new MeetingPlanner();
         lobbyMuc = new LobbyMuc();
     }
@@ -116,7 +123,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
     public String getConferenceStats()
     {
-        return jvbPluginWrapper.getConferenceStats();
+        return jitsiJvbWrapper.getConferenceStats();
     }
 
     public String getDescription()
@@ -132,8 +139,16 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         // Initialize all Jitsi software, which provided the video-conferencing functionality.
         try
         {
-            populateJitsiSystemPropertiesWithJivePropertyValues();
-            jvbPluginWrapper.initialize( manager, pluginDirectory );
+            jitsiJvbWrapper.initialize( manager, pluginDirectory );
+
+            if (config.getJigasiSipUserId() != null)
+            {
+                ensureJigasiUser();
+                jitsiJigasiWrapper.initialize(pluginDirectory);
+            }
+
+            ensureFocusUser();
+            jitsiJicofoWrapper.initialize(pluginDirectory);
         }
         catch ( Exception ex )
         {
@@ -224,7 +239,9 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
         try
         {
-            jvbPluginWrapper.destroy();
+            jitsiJigasiWrapper.destroy();
+            jitsiJvbWrapper.destroy();
+            jitsiJicofoWrapper.destroy();
         }
         catch ( Exception ex )
         {
@@ -367,65 +384,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         }
     }
 
-    /**
-     * Jitsi takes most of its configuration through system properties. This method sets these
-     * properties, using values defined in JiveGlobals.
-     */
-    public void populateJitsiSystemPropertiesWithJivePropertyValues()
-    {
-        System.setProperty( "net.java.sip.communicator.SC_HOME_DIR_LOCATION",  pluginDirectory.getAbsolutePath() );
-        System.setProperty( "net.java.sip.communicator.SC_HOME_DIR_NAME",      "." );
-        System.setProperty( "net.java.sip.communicator.SC_CACHE_DIR_LOCATION", pluginDirectory.getAbsolutePath() );
-        System.setProperty( "net.java.sip.communicator.SC_LOG_DIR_LOCATION",   pluginDirectory.getAbsolutePath() );
-
-        System.setProperty( "org.jitsi.impl.neomedia.device.PulseAudioSystem.disabled", "true" );
-        System.setProperty( "org.jitsi.impl.neomedia.device.PortAudioSystem.disabled", "true" );
-        System.setProperty( "org.jitsi.impl.neomedia.device.Video4Linux2System.disabled", "true" );
-        System.setProperty( "org.jitsi.impl.neomedia.device.ImgStreamingSystem.disabled", "true" );
-        System.setProperty( "net.java.sip.communicator.service.media.DISABLE_AUDIO_SUPPORT", "true" );
-        System.setProperty( "net.java.sip.communicator.service.media.DISABLE_VIDEO_SUPPORT", "true" );
-
-        // Set up the NAT harvester, but only when needed.
-        final InetAddress natPublic = new OFMeetConfig().getPublicNATAddress();
-        if ( natPublic == null )
-        {
-            System.clearProperty( MappingCandidateHarvesters.NAT_HARVESTER_PUBLIC_ADDRESS_PNAME );
-        }
-        else
-        {
-            System.setProperty( MappingCandidateHarvesters.NAT_HARVESTER_PUBLIC_ADDRESS_PNAME, natPublic.getHostAddress() );
-        }
-
-        final InetAddress natLocal = new OFMeetConfig().getLocalNATAddress();
-        if ( natLocal == null )
-        {
-            System.clearProperty( MappingCandidateHarvesters.NAT_HARVESTER_LOCAL_ADDRESS_PNAME );
-        }
-        else
-        {
-            System.setProperty( MappingCandidateHarvesters.NAT_HARVESTER_LOCAL_ADDRESS_PNAME, natLocal.getHostAddress() );
-        }
-
-        final List<String> stunMappingHarversterAddresses = new OFMeetConfig().getStunMappingHarversterAddresses();
-        if ( stunMappingHarversterAddresses == null || stunMappingHarversterAddresses.isEmpty() )
-        {
-            // TODO
-            //System.clearProperty( MappingCandidateHarvesters.STUN_MAPPING_HARVESTER_ADDRESSES_PNAME );
-        }
-        else
-        {
-            // Concat into comma-separated string.
-            final StringBuilder sb = new StringBuilder();
-            for ( final String address : stunMappingHarversterAddresses )
-            {
-                sb.append( address );
-                sb.append( "," );
-            }
-            // TODO
-            //System.setProperty( MappingCandidateHarvesters.STUN_MAPPING_HARVESTER_ADDRESSES_PNAME, sb.substring( 0, sb.length() - 1 ) );
-        }
-    }
-
     private void checkDownloadFolder(File pluginDirectory)
     {
         String ofmeetHome = JiveGlobals.getHomeDirectory() + File.separator + "resources" + File.separator + "spank" + File.separator + "ofmeet-cdn";
@@ -476,6 +434,77 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         return ourIpAddress;
     }
 
+    private void ensureJigasiUser()
+    {
+        // Ensure that the 'jigasi' user exists.
+        final UserManager userManager = XMPPServer.getInstance().getUserManager();
+        if ( !userManager.isRegisteredUser( config.jigasiXmppUserId.get() ) )
+        {
+            Log.info( "No pre-existing 'jigasi' user detected. Generating one." );
+
+            String password = config.jigasiXmppPassword.get();
+            if ( password == null || password.isEmpty() )
+            {
+                password = StringUtils.randomString( 40 );
+            }
+
+            try
+            {
+                userManager.createUser(config.jigasiXmppUserId.get(), password, "Jigasi User (generated)", null);
+                config.jigasiXmppUserId.set( password );
+            }
+            catch ( Exception e )
+            {
+                Log.error( "Unable to provision a 'jigasi' user.", e );
+            }
+        }
+    }
+    private void ensureFocusUser()
+    {
+        // Ensure that the 'focus' user exists.
+        final UserManager userManager = XMPPServer.getInstance().getUserManager();
+        if ( !userManager.isRegisteredUser( "focus" ) )
+        {
+            Log.info( "No pre-existing 'focus' user detected. Generating one." );
+
+            String password = config.getFocusPassword();
+            if ( password == null || password.isEmpty() )
+            {
+                password = StringUtils.randomString( 40 );
+            }
+
+            try
+            {
+                userManager.createUser(
+                        "focus",
+                        password,
+                        "Focus User (generated)",
+                        null
+                );
+                config.setFocusPassword( password );
+            }
+            catch ( Exception e )
+            {
+                Log.error( "Unable to provision a 'focus' user.", e );
+            }
+        }
+
+        if ( JiveGlobals.getBooleanProperty( "ofmeet.conference.admin", true ) )
+        {
+            // Ensure that the 'focus' user can grant permissions in persistent MUCs by making it a sysadmin of the conference service(s).
+            final JID focusUserJid = new JID( "focus@" + XMPPServer.getInstance().getServerInfo().getXMPPDomain() );
+
+            for ( final MultiUserChatService mucService : XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatServices() )
+            {
+                if ( !mucService.isSysadmin( focusUserJid ) )
+                {
+                    Log.info( "Adding 'focus' user as a sysadmin to the '{}' MUC service.", mucService.getServiceName() );
+                    mucService.addSysadmin( focusUserJid );
+                }
+            }
+        }
+    }
+
     //-------------------------------------------------------
     //
     //      clustering
@@ -488,7 +517,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         Log.info("OfMeet Plugin - joinedCluster");
         try
         {
-            jvbPluginWrapper.destroy();
+            jitsiJvbWrapper.destroy();
         }
         catch ( Exception ex )
         {
@@ -507,7 +536,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         Log.info("OfMeet Plugin - leftCluster");
         try
         {
-            jvbPluginWrapper.initialize( manager, pluginDirectory );
+            jitsiJvbWrapper.initialize( manager, pluginDirectory );
         }
         catch ( Exception ex )
         {
@@ -526,7 +555,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         Log.info("OfMeet Plugin - markedAsSeniorClusterMember");
         try
         {
-            jvbPluginWrapper.initialize( manager, pluginDirectory );
+            jitsiJvbWrapper.initialize( manager, pluginDirectory );
         }
         catch ( Exception ex )
         {

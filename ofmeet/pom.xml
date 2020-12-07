@@ -19,13 +19,13 @@
     <parent>
         <groupId>org.igniterealtime.openfire.ofmeet</groupId>
         <artifactId>parent</artifactId>
-        <version>1.1.3</version>
+        <version>1.2.0</version>
     </parent>
 
     <artifactId>ofmeet</artifactId>
 
-    <name>Pade VideoBridge Plugin</name>
-    <description>Provides high quality, scalable video conferences using Jitsi Meet and Videobridge.</description>
+    <name>Pade Meetings</name>
+    <description>Provides high quality, scalable video conferences using Jitsi Meet and Jitsi Videobridge.</description>
 
     <build>
         <sourceDirectory>src/java</sourceDirectory>

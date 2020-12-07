@@ -41,10 +41,10 @@ import org.ice4j.ice.harvest.MappingCandidateHarvesters;
  *
  * @author Guus der Kinderen, guus.der.kinderen@gmail.com
  */
-public class JvbPluginWrapper implements ProcessListener
+public class JitsiJvbWrapper implements ProcessListener
 {
-    private static final Logger Log = LoggerFactory.getLogger(JvbPluginWrapper.class);
-    public static JvbPluginWrapper self;
+    private static final Logger Log = LoggerFactory.getLogger(JitsiJvbWrapper.class);
+    public static JitsiJvbWrapper self;
 
     private PluginImpl jitsiPlugin;
     private XProcess jvbThread = null;
@@ -59,7 +59,7 @@ public class JvbPluginWrapper implements ProcessListener
     {
         Log.debug( "Initializing Jitsi Videobridge..." );
         System.setProperty("ofmeet.jvb.started", "false");
-        JvbPluginWrapper self = this;
+        JitsiJvbWrapper self = this;
 
         jitsiPlugin = new PluginImpl();
         jitsiPlugin.initializePlugin( manager, pluginDirectory );

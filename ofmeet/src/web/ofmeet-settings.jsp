@@ -201,8 +201,6 @@
             ofmeetConfig.setP2pDisableH264( p2pDisableH264 );
             ofmeetConfig.setP2pUseStunTurn( p2pUseStunTurn );            
 
-            container.populateJitsiSystemPropertiesWithJivePropertyValues();
-
             container.restartNeeded = true;
 
             response.sendRedirect( "ofmeet-settings.jsp?settingsSaved=true" );

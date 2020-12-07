@@ -225,8 +225,6 @@
 
             ofmeetConfig.setButtonsEnabled( buttonsEnabled );
 
-            container.populateJitsiSystemPropertiesWithJivePropertyValues();
-
             response.sendRedirect( "ofmeet-uisettings.jsp?settingsSaved=true" );
             return;
         }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jivesoftware.openfire.plugin.ofgasi;
+package org.jivesoftware.openfire.plugin.ofmeet;
 
 import org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig;
 import org.jivesoftware.openfire.XMPPServer;

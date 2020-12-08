@@ -18,18 +18,17 @@ First, there are few things you need to know. These include:
 
 * ofmeet does work with Firefox. It however works best with Chromium based apps like Chrome, Edge, Electron and Opera. 
 
-* ofmeet plugin will not work out of the box if your Openfire server is configured to use LDAP. You would need to create the Jitsi focus, jicofo and jigasi bot users manually. Give the focus bot user owner/admin permissions to the MUC service.
+* ofmeet plugin will not work out of the box if your Openfire server is configured to use LDAP. You would need to create the jvb, focus and jigasi bot users manually. Give the focus bot user owner/admin permissions to the MUC service.
 
 * ofmeet has minimal network requirements and works out of the box internally on a local area network (LAN) or with a hosted Openfire server on the internet. If your Openfire server is placed behind a NAT and firewall and you want to allow external internet access, then you require some network expertise to configure it. You would need to open a few UDP/TCP ports and provide both the public and private IP addresses of your openfire server.
 
 Download latest release from [here](https://github.com/igniterealtime/openfire-pade-plugin/releases) and upload the pade.jar and ofmeet.jar in any order from the admin web console of Openfire. Wait for both to appear in the plugins listing and then complete the following three steps to confirm it is working.
 
-* Confirm the focus bot user has logged in ok like this. If not, check log files and get help from the igniterealtime community.
-<img src="https://discourse.igniterealtime.org/uploads/default/original/2X/5/52c3d0c447afd6f08223bd1f04231fc301889e25.png" />
-<br/><br/>
+* Confirm the jvb and focus bot users have logged in ok. If not, check log files and get help from the igniterealtime community.
 
-* If you have an active focus user, then you can do a quick peer-to-peer test with two browser tabs on your desktop. Open both of them to the same https://your_server:7443/ofmeet/testconf and confirm that it is showing in the conference summary like this
-<img src="https://discourse.igniterealtime.org/uploads/default/original/2X/a/a30ea0d46c817be29feabc11bb1f0303045eeb8e.png" />
+* if you have configured a SIP account for jigasi, also confirm that the jigasi user has logged in.
+
+* If you have an active focus user, then you can do a quick peer-to-peer test with two browser tabs on your desktop. Open both of them to the same https://your_server:7443/ofmeet/testconf and confirm that it is showing in the conference summary.
 
 * If you get audio and video, then focus bot user is working ok and XMPP messages are passing around ok. If not, it is back to the log files and help from the community.
 

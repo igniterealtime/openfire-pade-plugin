@@ -323,7 +323,15 @@ public class ConfigServlet extends HttpServlet
             config.put( "enableNoisyMicDetection", true );
             config.put( "enableNoAudioDetection", true );
 
-            out.println( "var config = " + config.toString( 2 ) + ";" );
+            String body = "var config = " + config.toString( 2 ) + ";" );
+            final String addRaw = JiveGlobals.getProperty( "ofmeet.config.addRaw", null );
+            if ( addRaw != null )
+            {
+                addRaw.replaceAll("([^,])$","$1,");
+                body.replaceAll("^(var config = {)","$1\n" + addRaw + "\n");
+            }
+            out.println( body );
+            
         }
         catch ( Exception e )
         {

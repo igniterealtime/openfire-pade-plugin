@@ -16,7 +16,9 @@
 <% webManager.init(request, response, session, application, out ); %>
 
 <%         
-        List<MUCRoom> rooms = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService("conference").getChatRooms();        
+        String mainMuc = JiveGlobals.getProperty( "ofmeet.main.muc", "conference." + XMPPServer.getInstance().getServerInfo().getXMPPDomain());
+        String service = "conference"; //mainMuc.split(".")[0];
+        List<MUCRoom> rooms = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(service).getChatRooms();        
         int confCount = rooms.size();        
 %>
 <html>
@@ -42,9 +44,9 @@
     try {
         String current_timestamp = summary.getString("current_timestamp");
 
-        String jvb = System.getProperty("ofmeet.jvb.started");
-        String jicofo = System.getProperty("ofmeet.jicofo.started");
-        String jigasi = System.getProperty("ofmeet.jigasi.started");
+        String jvb = System.getProperty("ofmeet.jvb.started", "false");
+        String jicofo = System.getProperty("ofmeet.jicofo.started", "false");
+        String jigasi = System.getProperty("ofmeet.jigasi.started", "false");
         
         int total_conference_seconds = summary.getInt("total_conference_seconds");      
         int total_participants = summary.getInt("total_participants");
@@ -79,9 +81,9 @@
         <tbody>
             <tr>
                 <td nowrap><%= current_timestamp %></th>   
-                <td nowrap><img src="<%= jvb != null && jvb.equals("true") ? "images/success-16x16.gif" : "images/error-16x16.gif" %>"/></th>                   
-                <td nowrap><img src="<%= jicofo != null && jicofo.equals("true")  ? "images/success-16x16.gif" : "images/error-16x16.gif" %>"/></th>  
-                <td nowrap><img src="<%= jigasi != null && jigasi.equals("true")  ? "images/success-16x16.gif" : "images/error-16x16.gif" %>"/></th>                  
+                <td nowrap><img src="<%= jvb.equals("true") ? "images/success-16x16.gif" : "images/error-16x16.gif" %>"/></th>                   
+                <td nowrap><img src="<%= jicofo.equals("true")  ? "images/success-16x16.gif" : "images/error-16x16.gif" %>"/></th>  
+                <td nowrap><img src="<%= jigasi.equals("true")  ? "images/success-16x16.gif" : "images/error-16x16.gif" %>"/></th>                  
                 <td nowrap><%= total_conference_seconds %></th>
                 <td nowrap><%= total_participants %></th>
                 <td nowrap><%= total_failed_conferences %></th>           
@@ -106,7 +108,8 @@
                 <th>&nbsp;</th>
                 <th nowrap><fmt:message key="ofmeet.summary.conference" /></th>
                 <th nowrap><fmt:message key="ofmeet.summary.participants" /></th>                    
-                <th nowrap><fmt:message key="ofmeet.summary.focus" /></th>               
+                <th nowrap><fmt:message key="ofmeet.summary.focus" /></th>     
+                <th nowrap><fmt:message key="ofmeet.summary.freeswitch" /></th>                   
             </tr>
         </thead>
         <tbody>  
@@ -131,6 +134,7 @@
     {    
         String occupants = "";
         String focus = null;
+        String roomName = chatRoom.getJID().getNode();
 
         for ( final MUCRole occupant : chatRoom.getOccupants() ) {
             JID jid = occupant.getUserAddress();
@@ -147,23 +151,20 @@
             }
         }  
         
-        if (!chatRoom.getJID().getNode().equals("ofmeet") && !chatRoom.getJID().getNode().equals("ofgasi") && focus != null)
+        if (!roomName.equals("ofmeet") && !roomName.equals("ofgasi") && focus != null)
         {
+            String freeswitch = System.getProperty("ofmeet.freeswitch." + roomName, "false");
+        
             i++;            
 %>
             <tr class="jive-<%= (((i%2)==0) ? "even" : "odd") %>">
                 <td width="1%">
                     <%= i %>
                 </td>
-                <td width="10%" valign="middle">
-                <%= "<a href=\"/muc-room-occupants.jsp?roomJID=" + chatRoom.getJID().toBareJID() + "\">" + chatRoom.getName() + "</a>" %>
-                </td>
-                <td width="10%">
-                <%= occupants %>
-                </td>   
-                <td width="10%">
-                <%= focus %>
-                </td>                 
+                <td width="9%" valign="middle"><%= "<a href=\"/muc-room-occupants.jsp?roomJID=" + chatRoom.getJID().toBareJID() + "\">" + chatRoom.getName() + "</a>" %></td>
+                <td width="70%"><%= occupants %></td>   
+                <td width="10%"><%= focus %></td>  
+                <td width="10%"><img src="<%= freeswitch.equals("true") ? "images/success-16x16.gif" : "images/error-16x16.gif" %>"/></th>                                  
             </tr>
 <%
         }

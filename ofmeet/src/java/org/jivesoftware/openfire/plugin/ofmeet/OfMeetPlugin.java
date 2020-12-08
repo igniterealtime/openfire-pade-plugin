@@ -43,6 +43,8 @@ import org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.user.UserManager;
 import org.jivesoftware.openfire.muc.MultiUserChatService;
+import org.jivesoftware.openfire.muc.MUCEventListener;
+import org.jivesoftware.openfire.muc.MUCEventDispatcher;
 import org.jivesoftware.openfire.cluster.ClusterEventListener;
 import org.jivesoftware.openfire.cluster.ClusterManager;
 import org.jivesoftware.openfire.container.Plugin;
@@ -61,6 +63,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xmpp.packet.IQ;
 import org.xmpp.packet.JID;
+import org.xmpp.packet.Message;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -79,15 +82,31 @@ import java.util.List;
 import java.util.Map;
 
 import org.ifsoft.websockets.*;
+import java.util.concurrent.*;
+
+import org.freeswitch.esl.client.inbound.Client;
+import org.freeswitch.esl.client.inbound.InboundConnectionFailure;
+import org.freeswitch.esl.client.manager.*;
+import org.freeswitch.esl.client.transport.message.EslMessage;
+import org.freeswitch.esl.client.IEslEventListener;
+import org.freeswitch.esl.client.transport.event.EslEvent;
+
+import org.jboss.netty.channel.ExceptionEvent;
 
 /**
  * Bundles various Jitsi components into one, standalone Openfire plugin.
  */
-public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventListener, PropertyEventListener
+public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventListener, PropertyEventListener, IEslEventListener, MUCEventListener
 {
     private static final Logger Log = LoggerFactory.getLogger(OfMeetPlugin.class);
-
+    private static final ScheduledExecutorService connExec = Executors.newSingleThreadScheduledExecutor();
+    public static OfMeetPlugin self;
     public boolean restartNeeded = false;
+
+    private ManagerConnection managerConnection;
+    private Client client;
+    private ScheduledFuture<ConnectThread> connectTask;
+    private volatile boolean subscribed = false;
 
     private PluginManager manager;
     public File pluginDirectory;
@@ -133,6 +152,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
     public void initializePlugin(final PluginManager manager, final File pluginDirectory)
     {
+        self = this;
         this.manager = manager;
         this.pluginDirectory = pluginDirectory;
 
@@ -178,9 +198,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         try
         {
             ClusterManager.addListener(this);
-
-            Log.info("OfMeet Plugin - Initialize email listener");
-
             checkDownloadFolder(pluginDirectory);
 
             Log.info("OfMeet Plugin - Initialize IQ handler ");
@@ -195,20 +212,41 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
             }
 
             SessionEventDispatcher.addListener(this);
-
-            PropertyEventDispatcher.addListener( this );
+            PropertyEventDispatcher.addListener(this);
+            MUCEventDispatcher.addListener(this);
         }
         catch (Exception e) {
             Log.error("Could NOT start open fire meetings", e);
         }
+
+        String freeswitchServer = config.jigasiFreeSwitchHost.get();
+        String freeswitchPassword = config.jigasiFreeSwitchPassword.get();;
+
+        try
+        {
+            if (freeswitchServer != null)
+            {
+                managerConnection = new DefaultManagerConnection(freeswitchServer, freeswitchPassword);
+                managerConnection.getESLClient();
+                ConnectThread connector = new ConnectThread();
+                connectTask = (ScheduledFuture<ConnectThread>) connExec.scheduleAtFixedRate(connector, 30,  5, TimeUnit.SECONDS);
+            }
+        }
+        catch ( Exception ex )
+        {
+            Log.error( "An exception occurred while attempting to connect to FreeSWITCH", ex );
+        }
+
     }
 
     public void destroyPlugin()
     {
-        PropertyEventDispatcher.removeListener( this );
-
         try
         {
+            SessionEventDispatcher.removeListener(this);
+            PropertyEventDispatcher.removeListener( this );
+            MUCEventDispatcher.removeListener(this);
+
             unloadPublicWebApp();
         }
         catch ( Exception ex )
@@ -228,7 +266,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
         try
         {
-            SessionEventDispatcher.removeListener(this);
             XMPPServer.getInstance().getIQRouter().removeHandler(ofmeetIQHandler);
             ofmeetIQHandler = null;
         }
@@ -255,6 +292,9 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
             InterceptorManager.getInstance().removeInterceptor( bookmarkInterceptor );
             bookmarkInterceptor = null;
         }
+
+        if (connectTask != null) connectTask.cancel(true);
+        if (managerConnection != null) managerConnection.disconnect();
     }
 
     protected void loadPublicWebApp() throws Exception
@@ -570,6 +610,104 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
     //-------------------------------------------------------
     //
+    //      MUC room events
+    //
+    //-------------------------------------------------------
+
+    @Override
+    public void roomCreated(JID roomJID)
+    {
+
+    }
+
+    @Override
+    public void roomDestroyed(JID roomJID)
+    {
+
+    }
+
+    @Override
+    public void occupantJoined(final JID roomJID, JID user, String nickname)
+    {
+        Log.debug("occupantJoined " + roomJID + " " + nickname + " " + user);
+
+        String roomName = roomJID.getNode();
+        String userName = user.getNode();
+
+        try {
+
+            if ("focus".equals(userName) && nickname.startsWith("focus") && !"ofgasi".equals(roomName) && !"ofmeet".equals(roomName))
+            {
+                String sipUserId = config.jigasiSipUserId.get().split("@")[0];
+                String command = "originate {sip_from_user=" + userName + ",origination_uuid=" + roomName + "}[sip_h_Jitsi-Conference-Room=" + roomName + "]user/" + sipUserId + " &conference(" + roomName + ")";
+                String error = sendAsyncFWCommand(command);
+
+                if (error != null)
+                {
+                    Log.info("focus joined room, started freeswitch conference " + command);
+                    System.setProperty("ofmeet.freeswitch." + roomName, "true");
+                } else {
+                    Log.error("focus joined room, freeswitch originate failed - " + error);
+                }
+            }
+        } catch ( Exception e ) {
+            Log.error( "An exception occurred while trying to start freeswitch conference " + roomName, e );
+        }
+    }
+
+    @Override
+    public void occupantLeft(final JID roomJID, JID user)
+    {
+        Log.debug("occupantLeft " + roomJID + " " + user);
+
+        String roomName = roomJID.getNode();
+        String userName = user.getNode();
+
+        try {
+
+            if ("focus".equals(userName) && !"ofgasi".equals(roomName) && !"ofmeet".equals(roomName))
+            {
+                String error = sendAsyncFWCommand("uuid_kill " + roomName);
+
+                if (error != null)
+                {
+                    Log.info("focus joined room, stop freeswitch conference " + roomName);
+                    System.setProperty("ofmeet.freeswitch." + roomName, "false");
+                } else {
+                    Log.error("focus joined room, freeswitch originate failed - " + error);
+                }
+            }
+        } catch ( Exception e ) {
+            Log.error( "An exception occurred while trying to stop freeswitch conference " + roomName, e );
+        }
+    }
+
+    @Override
+    public void nicknameChanged(JID roomJID, JID user, String oldNickname, String newNickname)
+    {
+
+    }
+
+    @Override
+    public void messageReceived(JID roomJID, JID user, String nickname, Message message)
+    {
+
+    }
+
+    @Override
+    public void roomSubjectChanged(JID roomJID, JID user, String newSubject)
+    {
+
+    }
+
+    @Override
+    public void privateMessageRecieved(JID a, JID b, Message message)
+    {
+
+    }
+
+    //-------------------------------------------------------
+    //
     //      session management
     //
     //-------------------------------------------------------
@@ -598,6 +736,12 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     {
         Log.debug("OfMeet Plugin -  sessionDestroyed "+ session.getAddress().toString() + "\n" + ((ClientSession) session).getPresence().toXML());
     }
+
+    //-------------------------------------------------------
+    //
+    //      property management
+    //
+    //-------------------------------------------------------
 
     @Override
     public void propertySet( String s, Map map )
@@ -643,5 +787,158 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     public void xmlPropertyDeleted( String s, Map map )
     {
 
+    }
+
+    //-------------------------------------------------------
+    //
+    //  FreeSWITCH Events
+    //
+    //-------------------------------------------------------
+
+    private class ConnectThread implements Runnable
+    {
+        public void run()
+        {
+            try {
+                client = managerConnection.getESLClient();
+                if (! client.canSend()) {
+                    Log.info("Attempting to connect to FreeSWITCH ESL");
+                    subscribed = false;
+                    managerConnection.connect();
+                } else {
+                    if (!subscribed) {
+                        Log.info("Subscribing for FreeSWITCH ESL events.");
+                        client.cancelEventSubscriptions();
+                        client.addEventListener(self);
+                        client.setEventSubscriptions( "plain", "all" );
+                        client.addEventFilter("Event-Name", "heartbeat");
+                        client.addEventFilter("Event-Name", "custom");
+                        client.addEventFilter("Event-Name", "channel_callstate");
+                        client.addEventFilter("Event-Name", "presence_in");
+                        client.addEventFilter("Event-Name", "background_job");
+                        client.addEventFilter("Event-Name", "recv_info");
+                        client.addEventFilter("Event-Name", "dtmf");
+                        client.addEventFilter("Event-Name", "conference::maintenance");
+                        client.addEventFilter("Event-Name", "sofia::register");
+                        client.addEventFilter("Event-Name", "sofia::expire");
+                        client.addEventFilter("Event-Name", "message");
+                        client.addEventFilter("Event-Name", "dtmf");
+                        subscribed = true;
+                    }
+                }
+            } catch (InboundConnectionFailure e) {
+                Log.error("Failed to connect to FreeSWITCH ESL", e);
+            }
+        }
+    }
+
+
+    @Override public void eventReceived( EslEvent event )
+    {
+        String eventName = event.getEventName();
+        Map<String, String> headers = event.getEventHeaders();
+        String eventType = headers.get("Event-Subclass");
+
+        Log.debug("eventReceived " + eventName + " " + eventType);
+    }
+
+    @Override public void conferenceEventJoin(String uniqueId, String confName, int confSize, EslEvent event)
+    {
+        Log.info("conferenceEventJoin " + confName + " " + confSize);
+    }
+
+    @Override public void conferenceEventLeave(String uniqueId, String confName, int confSize, EslEvent event)
+    {
+        Log.info("conferenceEventLeave " + confName + " " + confSize);
+    }
+
+    @Override public void conferenceEventMute(String uniqueId, String confName, int confSize, EslEvent event)
+    {
+
+    }
+
+    @Override public void conferenceEventUnMute(String uniqueId, String confName, int confSize, EslEvent event)
+    {
+
+    }
+
+    @Override public void conferenceEventAction(String uniqueId, String confName, int confSize, String action, EslEvent event)
+    {
+
+    }
+
+    @Override public void conferenceEventTransfer(String uniqueId, String confName, int confSize, EslEvent event)
+    {
+
+    }
+
+    @Override public void conferenceEventThreadRun(String uniqueId, String confName, int confSize, EslEvent event)
+    {
+
+    }
+
+    @Override public void conferenceEventRecord(String uniqueId, String confName, int confSize, EslEvent event)
+    {
+
+    }
+
+    @Override public void conferenceEventPlayFile(String uniqueId, String confName, int confSize, EslEvent event)
+    {
+
+    }
+
+    @Override public void backgroundJobResultReceived( EslEvent event )
+    {
+
+    }
+
+    @Override public void exceptionCaught(ExceptionEvent e)
+    {
+        Log.error("exceptionCaught", e);
+    }
+
+    public String getSessionVar(String uuid, String var)
+    {
+        String value = null;
+
+        if (client.canSend())
+        {
+            EslMessage response = client.sendSyncApiCommand("uuid_getvar", uuid + " " + var);
+
+            if (response != null)
+            {
+                value = response.getBodyLines().get(0);
+            }
+        }
+
+        return value;
+    }
+
+    public String sendAsyncFWCommand(String command)
+    {
+        Log.debug("sendAsyncFWCommand " + command);
+
+        String response = null;
+
+        if (client != null)
+        {
+            response = client.sendAsyncApiCommand(command, "");
+        }
+
+        return response;
+    }
+
+    public EslMessage sendFWCommand(String command)
+    {
+        Log.debug("sendFWCommand " + command);
+
+        EslMessage response = null;
+
+        if (client != null)
+        {
+            response = client.sendSyncApiCommand(command, "");
+        }
+
+        return response;
     }
 }

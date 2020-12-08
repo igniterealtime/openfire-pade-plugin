@@ -715,4 +715,11 @@ public class OFMeetConfig
 
     public final StringProperty jigasiXmppPassword = new StringProperty( "ofmeet.jigasi.xmpp.password", null );
     public StringProperty getJigasiXmppPassword() { return jigasiXmppPassword; }
+
+    public final StringProperty jigasiFreeSwitchPassword = new StringProperty( "ofmeet.freeswitch.password", "ClueCon" );
+    public StringProperty getJigasiFreeSwitchPassword() { return jigasiFreeSwitchPassword; }
+
+    public final StringProperty jigasiFreeSwitchHost = new StringProperty( "ofmeet.freeswitch.hostname", null );
+    public StringProperty getJigasiFreeSwitchHost() { return jigasiFreeSwitchHost; }
+
 }

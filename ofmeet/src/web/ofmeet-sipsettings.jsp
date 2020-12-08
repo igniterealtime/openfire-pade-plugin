@@ -53,8 +53,10 @@
         final String jigasiProxyPort = request.getParameter( "jigasiProxyPort" );          
         final String jigasiSipUserId = request.getParameter( "jigasiSipUserId" );
         final String jigasiXmppPassword = request.getParameter( "jigasiXmppPassword" );
-        final String jigasiXmppUserId = request.getParameter( "jigasiXmppUserId" );
-        final String jigasiXmppRoomName = request.getParameter( "jigasiXmppRoomName" );        
+        final String jigasiXmppUserId = request.getParameter( "jigasiXmppUserId" );      
+        final String jigasiXmppRoomName = request.getParameter( "jigasiXmppRoomName" );  
+        final String jigasiFreeSwitchHost = request.getParameter( "jigasiFreeSwitchHost" );          
+        final String jigasiFreeSwitchPassword = request.getParameter( "jigasiFreeSwitchPassword" );         
 
         if ( errors.isEmpty() )
         {
@@ -66,7 +68,9 @@
             ofmeetConfig.jigasiSipUserId.set( jigasiSipUserId );
             ofmeetConfig.jigasiXmppPassword.set( jigasiXmppPassword );
             ofmeetConfig.jigasiXmppRoomName.set( jigasiXmppRoomName );
-            ofmeetConfig.jigasiXmppUserId.set( jigasiXmppUserId );            
+            ofmeetConfig.jigasiXmppUserId.set( jigasiXmppUserId );  
+            ofmeetConfig.jigasiFreeSwitchPassword.set( jigasiFreeSwitchPassword );
+            ofmeetConfig.jigasiFreeSwitchHost.set( jigasiFreeSwitchHost );
 
             response.sendRedirect( "ofmeet-sipsettings.jsp?settingsSaved=true" );
             return;
@@ -199,6 +203,23 @@
             </tr>            
         </table>
     </admin:contentBox>
+    
+    <fmt:message key="sipsettings.freeswitch.title" var="boxtitleAccount"/>
+    <admin:contentBox title="${boxtitleAccount}">
+        <p>
+            <fmt:message key="sipsettings.freeswitch.description"/>
+        </p>
+        <table cellpadding="3" cellspacing="0" border="0" width="100%">
+            <tr>
+                <td width="200"><label for="jigasiFreeSwitchHost"><fmt:message key="sipsettings.freeswitch.hostname"/>:</label></td>
+                <td><input type="text" size="60" maxlength="100" name="jigasiFreeSwitchHost" id="jigasiFreeSwitchHost" value="${ofmeetConfig.jigasiFreeSwitchHost.get() == null ? '' : ofmeetConfig.jigasiFreeSwitchHost.get()}"></td>
+            </tr>
+            <tr>
+                <td width="200"><label for="jigasiFreeSwitchPassword"><fmt:message key="sipsettings.freeswitch.password"/>:</label></td>
+                <td><input type="password" size="60" maxlength="100" name="jigasiFreeSwitchPassword" id="jigasiFreeSwitchPassword" value="${ofmeetConfig.jigasiFreeSwitchPassword.get() == null ? 'ClueCon' : ofmeetConfig.jigasiFreeSwitchPassword.get()}"></td>
+            </tr>            
+        </table>
+    </admin:contentBox>    
 
     <input type="hidden" name="csrf" value="${csrf}">
 

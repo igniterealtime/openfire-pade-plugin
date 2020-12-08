@@ -3,7 +3,7 @@ Pàdé for Openfire
 
 This project produces two Openfire plugins, ofmeet and pade to provide a unified communication solution for Openfire.
 
-The ofmeet plugin includes various third-party products, notably:
+The ofmeet plugin (Openfire Meetings) includes various third-party products, notably:
 - [Jitsi Videobridge](https://github.com/jitsi/jitsi-videobridge) project;
 - [Jitsi Conference Focus (jicofo)](https://github.com/jitsi/jicofo) project; 
 - [Jitsi Meet](https://github.com/jitsi/jitsi-meet) web client.
@@ -16,9 +16,9 @@ Installation
 ------------
 First, there are few things you need to know. These include:
 
-* ofmeet and offocus plugins does work with Firefox. It however works best with Chromium based apps like Chrome, Edge, Electron and Opera. 
+* ofmeet does work with Firefox. It however works best with Chromium based apps like Chrome, Edge, Electron and Opera. 
 
-* ofmeet and offocus plugins will not work out of the box if your Openfire server is configured to use LDAP. You would need to create the Jitsi focus, jicofo and jigasi bot users manually. Give the focus bot user owner/admin permissions to the MUC service.
+* ofmeet plugin will not work out of the box if your Openfire server is configured to use LDAP. You would need to create the Jitsi focus, jicofo and jigasi bot users manually. Give the focus bot user owner/admin permissions to the MUC service.
 
 * ofmeet has minimal network requirements and works out of the box internally on a local area network (LAN) or with a hosted Openfire server on the internet. If your Openfire server is placed behind a NAT and firewall and you want to allow external internet access, then you require some network expertise to configure it. You would need to open a few UDP/TCP ports and provide both the public and private IP addresses of your openfire server.
 

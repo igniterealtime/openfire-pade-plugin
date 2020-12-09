@@ -116,7 +116,7 @@ public class JitsiJicofoWrapper implements ProcessListener
         }
 
         final String customOptions = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.focus.jvm.customOptions", defaultOptions);
-        final String cmdLine = "\"" + javaExec + "\" " + customOptions + " -Dnet.java.sip.communicator.SC_HOME_DIR_LOCATION=" + jicofoHomePath + " -Dnet.java.sip.communicator.SC_HOME_DIR_NAME=config -Djava.util.logging.config.file=./logging.properties -Djdk.tls.ephemeralDHKeySize=2048 -cp ./jicofo-1.1-SNAPSHOT.jar" + File.pathSeparator + "./jicofo-1.1-SNAPSHOT-jar-with-dependencies.jar org.jitsi.jicofo.Main" + parameters;
+        final String cmdLine = javaExec + " " + customOptions + " -Dnet.java.sip.communicator.SC_HOME_DIR_LOCATION=" + jicofoHomePath + " -Dnet.java.sip.communicator.SC_HOME_DIR_NAME=config -Djava.util.logging.config.file=./logging.properties -Djdk.tls.ephemeralDHKeySize=2048 -cp ./jicofo-1.1-SNAPSHOT.jar" + File.pathSeparator + "./jicofo-1.1-SNAPSHOT-jar-with-dependencies.jar org.jitsi.jicofo.Main" + parameters;
         jicofoThread = Spawn.startProcess(cmdLine, new File(jicofoHomePath), this);
 
         Log.info( "Successfully initialized Jitsi Focus Component (jicofo).\n"  + cmdLine);

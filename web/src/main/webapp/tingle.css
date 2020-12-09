@@ -73,6 +73,8 @@
 }
 
 .tingle-modal-box {
+  height: 80%;
+  overflow-y: scroll;
   position: relative;
   flex-shrink: 0;
   margin-top: auto;

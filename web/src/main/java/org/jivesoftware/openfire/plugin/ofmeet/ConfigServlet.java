@@ -127,6 +127,7 @@ public class ConfigServlet extends HttpServlet
             String minHeightForQualityLvlStd = JiveGlobals.getProperty( "ofmeet.min.height.for.quality.level.std", "360" );
             String minHeightForQualityLvlHigh = JiveGlobals.getProperty( "ofmeet.min.height.for.quality.level.high", "720" );
 
+            String displayNotice = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.display.notice", "");
             boolean wsBridgeChannel = JiveGlobals.getBooleanProperty( "ofmeet.bridge.ws.channel", org.jitsi.util.OSUtils.IS_WINDOWS);
 
             if ( xirsysUrl != null )
@@ -322,6 +323,8 @@ public class ConfigServlet extends HttpServlet
 
             config.put( "enableNoisyMicDetection", true );
             config.put( "enableNoAudioDetection", true );
+
+            config.put( "noticeMessage", displayNotice);
 
             out.println( "var config = " + config.toString( 2 ) + ";" );
         }

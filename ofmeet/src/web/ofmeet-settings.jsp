@@ -129,6 +129,7 @@
             errors.put( "highMaxBitratesVideo", "Cannot parse value as integer value." );
         }         
 
+        final String displayNotice = request.getParameter( "displayNotice" );
         final String clientusername = request.getParameter( "clientusername" );
         final String clientpassword = request.getParameter( "clientpassword" );
         final String enableSip = request.getParameter( "enableSip" );
@@ -173,6 +174,8 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.low.max.bitrates.video", lowMaxBitratesVideo );            
             JiveGlobals.setProperty( "org.jitsi.videobridge.high.max.bitrates.video", highMaxBitratesVideo );
             JiveGlobals.setProperty( "org.jitsi.videobridge.standard.max.bitrates.video", standardMaxBitratesVideo );
+            
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.display.notice", displayNotice );            
             
             JiveGlobals.setProperty( "ofmeet.max.full.resolution.participants", maxFullResolutionParticipants );            
             JiveGlobals.setProperty( "ofmeet.min.height.for.quality.level.low", minHeightForQualityLow );  
@@ -285,6 +288,14 @@
                     <fmt:message key="config.page.configuration.ofmeet.usenicks.enabled_desc" />
                 </td>
             </tr>
+            <tr>
+                <td nowrap>
+                    <label class="jive-label" for="displayNotice"><fmt:message key="config.page.configuration.ofmeet.display.notice"/></label>
+                </td>
+                <td>
+                    <input type="text" size="70" maxlength="255" name="displayNotice" id="displayNotice" value="${admin:getProperty( "org.jitsi.videobridge.ofmeet.display.notice", "")}">
+                </td>
+            </tr>            
         </table>
     </admin:contentBox>
     

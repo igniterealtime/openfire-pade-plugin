@@ -56,7 +56,10 @@
         final String jigasiXmppUserId = request.getParameter( "jigasiXmppUserId" );      
         final String jigasiXmppRoomName = request.getParameter( "jigasiXmppRoomName" );  
         final String jigasiFreeSwitchHost = request.getParameter( "jigasiFreeSwitchHost" );          
-        final String jigasiFreeSwitchPassword = request.getParameter( "jigasiFreeSwitchPassword" );         
+        final String jigasiFreeSwitchPassword = request.getParameter( "jigasiFreeSwitchPassword" );    
+        
+        final boolean jigasiSipEnabled = ParamUtils.getBooleanParameter( request, "jigasiSipEnabled" );         
+        final boolean jigasiFreeSwitchEnabled = ParamUtils.getBooleanParameter( request, "jigasiFreeSwitchEnabled" );                 
 
         if ( errors.isEmpty() )
         {
@@ -71,6 +74,8 @@
             ofmeetConfig.jigasiXmppUserId.set( jigasiXmppUserId );  
             ofmeetConfig.jigasiFreeSwitchPassword.set( jigasiFreeSwitchPassword );
             ofmeetConfig.jigasiFreeSwitchHost.set( jigasiFreeSwitchHost );
+            ofmeetConfig.jigasiSipEnabled.set( Boolean.toString(jigasiSipEnabled) );            
+            ofmeetConfig.jigasiFreeSwitchEnabled.set( Boolean.toString(jigasiFreeSwitchEnabled) );            
 
             response.sendRedirect( "ofmeet-sipsettings.jsp?settingsSaved=true" );
             return;
@@ -135,6 +140,12 @@
             <fmt:message key="sipsettings.sip.account.description"/>
         </p>
         <table cellpadding="3" cellspacing="0" border="0" width="100%">
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" id="jigasiSipEnabled" name="jigasiSipEnabled" ${ofmeetConfig.getJigasiSipEnabled() ? "checked" : ""}>
+                    <fmt:message key="sipsettings.sip.enabled" />
+                </td>
+            </tr>        
             <tr>
                 <td width="200"><label for="jigasiSipUserId"><fmt:message key="sipsettings.sip.account.user-id"/>:</label></td>
                 <td><input type="text" size="60" maxlength="100" name="jigasiSipUserId" id="jigasiSipUserId" value="${ofmeetConfig.jigasiSipUserId.get() == null ? '' : ofmeetConfig.jigasiSipUserId.get()}"></td>
@@ -210,6 +221,12 @@
             <fmt:message key="sipsettings.freeswitch.description"/>
         </p>
         <table cellpadding="3" cellspacing="0" border="0" width="100%">
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" id="jigasiFreeSwitchEnabled" name="jigasiFreeSwitchEnabled" ${ofmeetConfig.getJigasiFreeSwitchEnabled() ? "checked" : ""}>
+                    <fmt:message key="sipsettings.freeswitch.enabled" />
+                </td>
+            </tr>         
             <tr>
                 <td width="200"><label for="jigasiFreeSwitchHost"><fmt:message key="sipsettings.freeswitch.hostname"/>:</label></td>
                 <td><input type="text" size="60" maxlength="100" name="jigasiFreeSwitchHost" id="jigasiFreeSwitchHost" value="${ofmeetConfig.jigasiFreeSwitchHost.get() == null ? '' : ofmeetConfig.jigasiFreeSwitchHost.get()}"></td>

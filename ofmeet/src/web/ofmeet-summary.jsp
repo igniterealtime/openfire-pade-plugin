@@ -22,13 +22,12 @@
         int confCount = rooms.size();        
 %>
 <html>
-    <head>
-        <title><fmt:message key="config.page.summary.title"/></title>
-        <meta name="pageID" content="ofmeet-summary"/>
-    </head>
-    <body>
-
-<% 
+<head>
+    <title><fmt:message key="config.page.summary.title"/></title>
+    <meta name="pageID" content="ofmeet-summary"/>
+</head>
+<body>
+<%
     final OfMeetPlugin container = (OfMeetPlugin) XMPPServer.getInstance().getPluginManager().getPlugin( "ofmeet" );
     
     JSONObject summary = new JSONObject("{\"current_timestamp\":\"Initialising...\", \"total_conference_seconds\":0, \"total_participants\":0, \"total_failed_conferences\":0, \"total_conferences_created\":0, \"total_conferences_completed\":0, \"conferences\":0, \"participants\":0, \"largest_conference\":0, \"p2p_conferences\":0}");        
@@ -43,10 +42,6 @@
 
     try {
         String current_timestamp = summary.getString("current_timestamp");
-
-        String jvb = System.getProperty("ofmeet.jvb.started", "false");
-        String jicofo = System.getProperty("ofmeet.jicofo.started", "false");
-        String jigasi = System.getProperty("ofmeet.jigasi.started", "false");
         
         int total_conference_seconds = summary.getInt("total_conference_seconds");      
         int total_participants = summary.getInt("total_participants");
@@ -63,10 +58,7 @@
         <table cellpadding="0" cellspacing="0" border="0" width="100%">
         <thead>
             <tr>
-                <th nowrap><fmt:message key="ofmeet.summary.current_timestamp" /></th>   
-                <th nowrap><fmt:message key="ofmeet.summary.jvb" /></th>                   
-                <th nowrap><fmt:message key="ofmeet.summary.jicofo" /></th>                 
-                <th nowrap><fmt:message key="ofmeet.summary.jigasi" /></th>                 
+                <th nowrap><fmt:message key="ofmeet.summary.current_timestamp" /></th>                 
                 <th nowrap><fmt:message key="ofmeet.summary.total_conference_seconds" /></th>
                 <th nowrap><fmt:message key="ofmeet.summary.total_participants" /></th>
                 <th nowrap><fmt:message key="ofmeet.summary.total_failed_conferences" /></th>           
@@ -81,9 +73,6 @@
         <tbody>
             <tr>
                 <td nowrap><%= current_timestamp %></th>   
-                <td nowrap><img src="<%= jvb.equals("true") ? "images/success-16x16.gif" : "images/error-16x16.gif" %>"/></th>                   
-                <td nowrap><img src="<%= jicofo.equals("true")  ? "images/success-16x16.gif" : "images/error-16x16.gif" %>"/></th>  
-                <td nowrap><img src="<%= jigasi.equals("true")  ? "images/success-16x16.gif" : "images/error-16x16.gif" %>"/></th>                  
                 <td nowrap><%= total_conference_seconds %></th>
                 <td nowrap><%= total_participants %></th>
                 <td nowrap><%= total_failed_conferences %></th>           
@@ -170,8 +159,35 @@
         }
     }
 %>
-</tbody>
-</table>
-</div>
+    </tbody>
+    </table>
+    </div>
+    <p>&nbsp;</p>    
+<% 
+    String jvb = System.getProperty("ofmeet.jvb.started", "false");
+    String jicofo = System.getProperty("ofmeet.jicofo.started", "false");
+    String jigasi = System.getProperty("ofmeet.jigasi.started", "false");
+    String freesw = System.getProperty("ofmeet.freeswitch.started", "false");    
+%>    
+    <div class="jive-table">
+    <table border="0">
+    <tr>
+        <th align="left"><fmt:message key="ofmeet.summary.jvb" /></th>  
+        <td align="left"><img src="<%= jvb.equals("true") ? "images/success-16x16.gif" : "images/error-16x16.gif" %>"/></th>         
+    </tr>   
+    <tr>    
+        <th align="left"><fmt:message key="ofmeet.summary.jicofo" /></th>     
+        <td align="left"><img src="<%= jicofo.equals("true")  ? "images/success-16x16.gif" : "images/error-16x16.gif" %>"/></th>        
+    </tr>   
+    <tr>         
+        <th align="left"><fmt:message key="ofmeet.summary.jigasi" /></th>  
+        <td align="left"><img src="<%= jigasi.equals("true")  ? "images/success-16x16.gif" : "images/error-16x16.gif" %>"/></th>          
+    </tr>   
+    <tr>         
+        <th align="left"><fmt:message key="ofmeet.summary.freeswitch" /></th>   
+        <td align="left"><img src="<%= freesw.equals("true")  ? "images/success-16x16.gif" : "images/error-16x16.gif" %>"/></th>          
+    </tr>
+    </table>   
+    </div>
 </body>
 </html>

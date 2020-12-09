@@ -161,7 +161,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         {
             jitsiJvbWrapper.initialize( manager, pluginDirectory );
 
-            if (config.getJigasiSipUserId() != null)
+            if (config.getJigasiSipEnabled() && config.getJigasiSipUserId() != null)
             {
                 ensureJigasiUser();
                 jitsiJigasiWrapper.initialize(pluginDirectory);
@@ -221,10 +221,11 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
         String freeswitchServer = config.jigasiFreeSwitchHost.get();
         String freeswitchPassword = config.jigasiFreeSwitchPassword.get();;
+        System.setProperty("ofmeet.freeswitch.started", "false");
 
         try
         {
-            if (freeswitchServer != null)
+            if (config.getJigasiFreeSwitchEnabled() && freeswitchServer != null)
             {
                 managerConnection = new DefaultManagerConnection(freeswitchServer, freeswitchPassword);
                 managerConnection.getESLClient();
@@ -629,56 +630,62 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     @Override
     public void occupantJoined(final JID roomJID, JID user, String nickname)
     {
-        Log.debug("occupantJoined " + roomJID + " " + nickname + " " + user);
+        if (client != null)
+        {
+            Log.debug("occupantJoined " + roomJID + " " + nickname + " " + user);
 
-        String roomName = roomJID.getNode();
-        String userName = user.getNode();
+            String roomName = roomJID.getNode();
+            String userName = user.getNode();
 
-        try {
+            try {
 
-            if ("focus".equals(userName) && nickname.startsWith("focus") && !"ofgasi".equals(roomName) && !"ofmeet".equals(roomName))
-            {
-                String sipUserId = config.jigasiSipUserId.get().split("@")[0];
-                String command = "originate {sip_from_user=" + userName + ",origination_uuid=" + roomName + "}[sip_h_Jitsi-Conference-Room=" + roomName + "]user/" + sipUserId + " &conference(" + roomName + ")";
-                String error = sendAsyncFWCommand(command);
-
-                if (error != null)
+                if ("focus".equals(userName) && nickname.startsWith("focus") && !"ofgasi".equals(roomName) && !"ofmeet".equals(roomName))
                 {
-                    Log.info("focus joined room, started freeswitch conference " + command);
-                    System.setProperty("ofmeet.freeswitch." + roomName, "true");
-                } else {
-                    Log.error("focus joined room, freeswitch originate failed - " + error);
+                    String sipUserId = config.jigasiSipUserId.get().split("@")[0];
+                    String command = "originate {sip_from_user=" + userName + ",origination_uuid=" + roomName + "}[sip_h_Jitsi-Conference-Room=" + roomName + "]user/" + sipUserId + " &conference(" + roomName + ")";
+                    String error = sendAsyncFWCommand(command);
+
+                    if (error != null)
+                    {
+                        Log.info("focus joined room, started freeswitch conference " + command);
+                        System.setProperty("ofmeet.freeswitch." + roomName, "true");
+                    } else {
+                        Log.error("focus joined room, freeswitch originate failed - " + error);
+                    }
                 }
+            } catch ( Exception e ) {
+                Log.error( "An exception occurred while trying to start freeswitch conference " + roomName, e );
             }
-        } catch ( Exception e ) {
-            Log.error( "An exception occurred while trying to start freeswitch conference " + roomName, e );
         }
     }
 
     @Override
     public void occupantLeft(final JID roomJID, JID user)
     {
-        Log.debug("occupantLeft " + roomJID + " " + user);
+        if (client != null)
+        {
+            Log.debug("occupantLeft " + roomJID + " " + user);
 
-        String roomName = roomJID.getNode();
-        String userName = user.getNode();
+            String roomName = roomJID.getNode();
+            String userName = user.getNode();
 
-        try {
+            try {
 
-            if ("focus".equals(userName) && !"ofgasi".equals(roomName) && !"ofmeet".equals(roomName))
-            {
-                String error = sendAsyncFWCommand("uuid_kill " + roomName);
-
-                if (error != null)
+                if ("focus".equals(userName) && !"ofgasi".equals(roomName) && !"ofmeet".equals(roomName))
                 {
-                    Log.info("focus joined room, stop freeswitch conference " + roomName);
-                    System.setProperty("ofmeet.freeswitch." + roomName, "false");
-                } else {
-                    Log.error("focus joined room, freeswitch originate failed - " + error);
+                    String error = sendAsyncFWCommand("uuid_kill " + roomName);
+
+                    if (error != null)
+                    {
+                        Log.info("focus joined room, stop freeswitch conference " + roomName);
+                        System.setProperty("ofmeet.freeswitch." + roomName, "false");
+                    } else {
+                        Log.error("focus joined room, freeswitch originate failed - " + error);
+                    }
                 }
+            } catch ( Exception e ) {
+                Log.error( "An exception occurred while trying to stop freeswitch conference " + roomName, e );
             }
-        } catch ( Exception e ) {
-            Log.error( "An exception occurred while trying to stop freeswitch conference " + roomName, e );
         }
     }
 
@@ -824,6 +831,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
                         client.addEventFilter("Event-Name", "message");
                         client.addEventFilter("Event-Name", "dtmf");
                         subscribed = true;
+                        System.setProperty("ofmeet.freeswitch.started", "true");
                     }
                 }
             } catch (InboundConnectionFailure e) {

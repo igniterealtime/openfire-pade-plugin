@@ -722,4 +722,9 @@ public class OFMeetConfig
     public final StringProperty jigasiFreeSwitchHost = new StringProperty( "ofmeet.freeswitch.hostname", null );
     public StringProperty getJigasiFreeSwitchHost() { return jigasiFreeSwitchHost; }
 
+    public final StringProperty jigasiSipEnabled = new StringProperty( "ofmeet.jigasi.enabled", "false" );
+    public boolean getJigasiSipEnabled() { return jigasiSipEnabled.get().equals("true"); }
+
+    public final StringProperty jigasiFreeSwitchEnabled = new StringProperty( "ofmeet.freeswitch.enabled", "false" );
+    public boolean getJigasiFreeSwitchEnabled() { return jigasiFreeSwitchEnabled.get().equals("true"); }
 }

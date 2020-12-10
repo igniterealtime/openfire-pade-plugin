@@ -76,12 +76,15 @@ var ofmeet = (function(of)
         //localStorage.removeItem("xmpp_username_override");
         //localStorage.removeItem("xmpp_password_override");
 
-        if (APP.connection && !config.webinar && of.recording)
+        if (APP.connection && !config.webinar)
         {
-            event.preventDefault();
-            event.returnValue = '';
+            if (dbnames.length > 0 || of.recording)
+            {
+                event.preventDefault();
+                event.returnValue = '';
+            }
 
-            stopRecorder();
+            if (of.recording) stopRecorder();
 
             dbnames.forEach(function(dbname)
             {
@@ -92,7 +95,10 @@ var ofmeet = (function(of)
                 };
             });
 
-            return event.returnValue;
+            if (dbnames.length > 0 || of.recording)
+            {
+                return event.returnValue;
+            }
         }
     });
 

@@ -379,7 +379,11 @@ var ofmeet = (function(of)
             APP.conference.changeLocalAvatarUrl(dataUri);
         }
 
-        createAvatarButton();
+        if (interfaceConfig.OFMEET_ALLOW_UPLOADS)
+        {
+            createAvatarButton();
+        }
+
         setOwnPresence();
 
         if (APP.connection.xmpp.connection._stropheConn.pass || config.ofmeetWinSSOEnabled)

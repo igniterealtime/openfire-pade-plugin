@@ -36,7 +36,7 @@
         <module>web</module>
         <module>config</module>              
         <module>ofmeet</module>               
-        <!--module>pade</module-->        
+        <module>pade</module>        
     </modules>
 
     <licenses>

@@ -108,6 +108,7 @@ public class InterfaceConfigServlet extends HttpServlet
             config.put( "VERTICAL_FILMSTRIP",                    ofMeetConfig.getVerticalFilmstrip()  );
             config.put( "FILM_STRIP_MAX_HEIGHT",                 ofMeetConfig.getFilmstripMaxHeight() );
             config.put( "INVITE_OPTIONS",                        new JSONArray( ofMeetConfig.getInviteOptions() ) );
+            config.put( "ENFORCE_NOTIFICATION_AUTO_DISMISS_TIMEOUT", "15000" );
 
 
             // Jitsi-meet appears to have replaced LOCAL_THUMBNAIL_RATIO_WIDTH and LOCAL_THUMBNAIL_RATIO_HEIGHT with a combined value in LOCAL_THUMBNAIL_RATIO.

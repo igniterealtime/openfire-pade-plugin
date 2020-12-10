@@ -24,6 +24,7 @@
 <html>
 <head>
     <title><fmt:message key="config.page.summary.title"/></title>
+    <meta http-equiv="refresh" content="60">    
     <meta name="pageID" content="ofmeet-summary"/>
 </head>
 <body>

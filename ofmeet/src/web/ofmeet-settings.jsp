@@ -457,15 +457,6 @@
                 <td><input type="text" size="10" maxlength="5" name="startaudiomuted" value="${ofmeetConfig.startAudioMuted}"></td>
             </tr>
         </table>
-
-        <p style="margin-top: 2em"><fmt:message key="config.page.configuration.ofmeet.startvideomuted.description"/></p>
-        <table cellpadding="3" cellspacing="0" border="0" width="100%">
-            <tr>
-                <td align="left" width="300"><fmt:message key="config.page.configuration.ofmeet.startvideomuted"/>:</td>
-                <td><input type="text" size="10" maxlength="5" name="startvideomuted" value="${ofmeetConfig.startVideoMuted}"></td>
-            </tr>
-        </table>
-
     </admin:contentBox>
 
     <fmt:message key="config.page.configuration.security.title" var="boxtitlesecurity"/>

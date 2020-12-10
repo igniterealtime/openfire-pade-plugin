@@ -380,6 +380,7 @@ var ofmeet = (function(of)
         }
 
         createAvatarButton();
+        setOwnPresence();
 
         if (APP.connection.xmpp.connection._stropheConn.pass || config.ofmeetWinSSOEnabled)
         {
@@ -412,6 +413,7 @@ var ofmeet = (function(of)
             getBookmarks();
         }
 
+        APP.connection.xmpp.connection.addHandler(handleMessage, null, "message");
         APP.connection.xmpp.connection.addHandler(handleMucMessage, "urn:xmpp:json:0", "message");
         APP.connection.xmpp.connection.addHandler(handlePresence, null, "presence");
 
@@ -477,6 +479,14 @@ var ofmeet = (function(of)
         }
     }
 
+    function setOwnPresence()
+    {
+        const connection = APP.connection.xmpp.connection;
+        const $pres = APP.connection.xmpp.connection.$pres;
+        const Strophe = APP.connection.xmpp.connection.Strophe;
+
+        connection.send($pres());
+    }
 
     function getOccupants()
     {
@@ -874,7 +884,7 @@ var ofmeet = (function(of)
 
                     //APP.UI.toggleChat();
                     APP.conference._room.sendTextMessage(clipText)
-                    APP.UI.messageHandler.notify("Clipboard shared with other participants", null, null, "");
+                    APP.UI.messageHandler.notify("Share Clipboard", "Clipboard shared with other participants");
                 });
             });
 
@@ -906,7 +916,7 @@ var ofmeet = (function(of)
         if (padContent)
         {
             padsModal.close();
-            APP.UI.messageHandler.notify("Quit active pad before opening a new one", null, null, "");
+            APP.UI.messageHandler.notify("CryptPad", "Quit active pad before opening a new one");
         }
         else {
             const largeVideo = document.querySelector("#largeVideo");
@@ -1091,7 +1101,7 @@ var ofmeet = (function(of)
             evt.stopPropagation();
             takePhoto();
 
-            APP.UI.messageHandler.notify("Conference Photo Taken", null, null, "");
+            APP.UI.messageHandler.notify("Recording", "Conference Photo Taken");
         });
     }
 
@@ -1180,7 +1190,7 @@ var ofmeet = (function(of)
 
         document.getElementById("ofmeet-record").style.fill = "white";
         document.getElementById("ofmeet-desktop").style.fill = "white";
-        APP.UI.messageHandler.notify("Conference Recording Stopped", null, null, "");
+        APP.UI.messageHandler.notify("Recording", "Conference Recording Stopped");
 
         clockTrack.stop = (new Date()).getTime();
         const ids = Object.getOwnPropertyNames(recordingVideoTrack);
@@ -1344,7 +1354,7 @@ var ofmeet = (function(of)
 
         const icon = document.getElementById("ofmeet-record");
         icon.style.fill = "red";
-        APP.UI.messageHandler.notify("Conference Recording Started", null, null, "");
+        APP.UI.messageHandler.notify("Recording", "Conference Recording Started");
 
         captions.msgs = [];
         clockTrack.start = (new Date()).getTime();
@@ -1451,7 +1461,7 @@ var ofmeet = (function(of)
         {
             const icon = document.getElementById("ofmeet-desktop");
             icon.style.fill = "red";
-            APP.UI.messageHandler.notify("Conference Recording Started", null, null, "");
+            APP.UI.messageHandler.notify("Recording", "Conference Recording Started");
 
             captions.msgs = [];
             clockTrack.start = (new Date()).getTime();
@@ -1618,6 +1628,22 @@ var ofmeet = (function(of)
         return true;
     }
 
+    function handleMessage(msg)
+    {
+        if (!msg.getAttribute("type")) // alert message
+        {
+            const body = msg.querySelector('body');
+
+            if (body)
+            {
+                console.debug("alert message", body.innerHTML);
+                APP.UI.messageHandler.notify("System Administrator", body.innerHTML);
+            }
+        }
+
+        return true;
+    }
+
     function handleMucMessage(msg)
     {
         const Strophe = APP.connection.xmpp.connection.Strophe;
@@ -1637,7 +1663,7 @@ var ofmeet = (function(of)
             console.debug("handleMucMessage", participant, json);
             const label = json.action == 'breakout' ? 'Joining' : 'Leaving';
 
-            APP.UI.messageHandler.notify(label + " breakout in " + breakout.wait + " seconds", null, null, "");
+            APP.UI.messageHandler.notify("Breakout Rooms", label + " breakout in " + breakout.wait + " seconds");
             setTimeout(function() {location.href = json.url}, breakout.wait * 1000);
         }
 
@@ -2153,7 +2179,7 @@ var ofmeet = (function(of)
         }
 
         console.debug("postJoinSetup");
-        
+
         // fake the interaction
         APP.conference.commands.addCommandListener("___FAKE_INTERACTION", function()
         {
@@ -2295,13 +2321,13 @@ var ofmeet = (function(of)
 
                 reader.onerror = function(event) {
                     console.error("uploadAvatar - error", event);
-                    APP.UI.messageHandler.notify("image file error", null, null, "");
+                    APP.UI.messageHandler.notify("Avatar Upload", "Image file error " + event);
                 };
 
                 reader.readAsDataURL(file);
 
             } else {
-                APP.UI.messageHandler.notify("image file must be a png or jpg file", null, null, "");
+                APP.UI.messageHandler.notify("Avatar Upload", "Image file must be a png or jpg file");
             }
         }
     }

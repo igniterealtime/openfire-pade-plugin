@@ -76,12 +76,12 @@ var ofmeet = (function(of)
         //localStorage.removeItem("xmpp_username_override");
         //localStorage.removeItem("xmpp_password_override");
 
-        if (APP.connection && !config.webinar)
+        if (APP.connection && !config.webinar && of.recording)
         {
             event.preventDefault();
             event.returnValue = '';
 
-            if (of.recording) stopRecorder();
+            stopRecorder();
 
             dbnames.forEach(function(dbname)
             {

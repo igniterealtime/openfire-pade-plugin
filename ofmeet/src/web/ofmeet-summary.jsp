@@ -13,6 +13,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <jsp:useBean id="webManager" class="org.jivesoftware.util.WebManager"  />
+<jsp:useBean id="ofmeetConfig" class="org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig"/>
 <% webManager.init(request, response, session, application, out ); %>
 
 <%         
@@ -88,7 +89,6 @@
         </table>
         </div>
         <br/>
-
         <p>&nbsp;</p>
 
         <div class="jive-table">
@@ -122,7 +122,8 @@
     
     for (MUCRoom chatRoom : rooms)     
     {    
-        String occupants = "";
+        int size = chatRoom.getOccupants().size() - 1;
+        String occupants = size <= 0 ? "&nbsp;" : "(" + size + ")&nbsp;";
         String focus = null;
         String roomName = chatRoom.getJID().getNode();
 
@@ -132,7 +133,7 @@
             
             if (!nick.startsWith("focus"))
             {
-                occupants = occupants + "<a href=\"/session-details.jsp?jid=" + jid + "\">" + nick + "</a>&nbsp;";
+                occupants = occupants + "<a href=\"/session-details.jsp?jid=" + jid + "\">" + nick + "</a> ";
             }
             
             if (jid.getNode().equals("focus"))
@@ -151,10 +152,10 @@
                 <td width="1%">
                     <%= i %>
                 </td>
-                <td width="9%" valign="middle"><%= "<a href=\"/muc-room-occupants.jsp?roomJID=" + chatRoom.getJID().toBareJID() + "\">" + chatRoom.getName() + "</a>" %></td>
-                <td width="70%"><%= occupants %></td>   
-                <td width="10%"><%= focus %></td>  
-                <td width="10%"><img src="<%= freeswitch.equals("true") ? "images/success-16x16.gif" : "images/error-16x16.gif" %>"/></th>                                  
+                <td align="left" width="9%" valign="middle"><%= "<a href=\"/muc-room-occupants.jsp?roomJID=" + chatRoom.getJID().toBareJID() + "\">" + chatRoom.getName() + "</a>" %></td>
+                <td align="left" width="70%"><%= occupants %></td>   
+                <td align="left" width="10%"><%= focus %></td>  
+                <td align="left" width="10%"><img src="<%= freeswitch.equals("true") ? "images/success-16x16.gif" : "images/error-16x16.gif" %>"/></th>                                  
             </tr>
 <%
         }
@@ -163,31 +164,58 @@
     </tbody>
     </table>
     </div>
+    <br/>    
     <p>&nbsp;</p>    
+
+    <div class="jive-table">
+    <table cellpadding="0" cellspacing="0" border="0" width="100%">
+    <thead>
+        <tr>
+            <th>&nbsp;</th>
+            <th nowrap><fmt:message key="ofmeet.summary.component" /></th>
+            <th nowrap><fmt:message key="ofmeet.summary.status" /></th>                                      
+        </tr>
+    </thead>
+    <tbody>      
 <% 
     String jvb = System.getProperty("ofmeet.jvb.started", "false");
     String jicofo = System.getProperty("ofmeet.jicofo.started", "false");
     String jigasi = System.getProperty("ofmeet.jigasi.started", "false");
     String freesw = System.getProperty("ofmeet.freeswitch.started", "false");    
 %>    
-    <div class="jive-table">
-    <table border="0">
     <tr>
-        <th align="left"><fmt:message key="ofmeet.summary.jvb" /></th>  
-        <td align="left"><img src="<%= jvb.equals("true") ? "images/success-16x16.gif" : "images/error-16x16.gif" %>"/></th>         
+        <td width="1%">1</td>    
+        <td align="left" width="29%"><fmt:message key="ofmeet.summary.jvb" /></td>  
+        <td align="left" width="70%"><img src="<%= jvb.equals("true") ? "images/success-16x16.gif" : "images/error-16x16.gif" %>"/></td>         
     </tr>   
+    <tr>   
+        <td width="1%">2</td>        
+        <td align="left" width="29%"><fmt:message key="ofmeet.summary.jicofo" /></td>     
+        <td align="left" width="70%"><img src="<%= jicofo.equals("true")  ? "images/success-16x16.gif" : "images/error-16x16.gif" %>"/></td>        
+    </tr>   
+<%
+    if (ofmeetConfig.getJigasiSipEnabled()) 
+    {
+%>   
     <tr>    
-        <th align="left"><fmt:message key="ofmeet.summary.jicofo" /></th>     
-        <td align="left"><img src="<%= jicofo.equals("true")  ? "images/success-16x16.gif" : "images/error-16x16.gif" %>"/></th>        
-    </tr>   
-    <tr>         
-        <th align="left"><fmt:message key="ofmeet.summary.jigasi" /></th>  
-        <td align="left"><img src="<%= jigasi.equals("true")  ? "images/success-16x16.gif" : "images/error-16x16.gif" %>"/></th>          
-    </tr>   
-    <tr>         
-        <th align="left"><fmt:message key="ofmeet.summary.freeswitch" /></th>   
-        <td align="left"><img src="<%= freesw.equals("true")  ? "images/success-16x16.gif" : "images/error-16x16.gif" %>"/></th>          
+        <td width="1%">3</td>        
+        <td align="left" width="29%"><fmt:message key="ofmeet.summary.jigasi" /></td>  
+        <td align="left" width="70%"><img src="<%= jigasi.equals("true")  ? "images/success-16x16.gif" : "images/error-16x16.gif" %>"/></td>          
+    </tr>  
+<%
+    }
+    if (ofmeetConfig.getJigasiFreeSwitchEnabled()) 
+    {
+%>    
+    <tr>   
+        <td width="1%">4</td>        
+        <td align="left" width="29%"><fmt:message key="ofmeet.summary.freeswitch" /></td>   
+        <td align="left" width="70%"><img src="<%= freesw.equals("true")  ? "images/success-16x16.gif" : "images/error-16x16.gif" %>"/></td>          
     </tr>
+<%
+    }
+%>     
+    </tbody>    
     </table>   
     </div>
 </body>

@@ -50,6 +50,7 @@ public class JitsiMeetRedirectFilter implements Filter
         excludedExtensions.add( "ico" );
         excludedExtensions.add( "css" );
         excludedExtensions.add( "json" );
+        excludedExtensions.add( "jsp" );
         excludedExtensions.add( "js" );
     }
 

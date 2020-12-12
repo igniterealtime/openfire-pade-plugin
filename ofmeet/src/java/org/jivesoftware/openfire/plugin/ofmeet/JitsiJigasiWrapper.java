@@ -73,6 +73,7 @@ public class JitsiJigasiWrapper implements ProcessListener
 
         props.setProperty("net.java.sip.communicator.impl.protocol.SingleCallInProgressPolicy.enabled", "false");
         props.setProperty("net.java.sip.communicator.impl.neomedia.codec.audio.opus.encoder.COMPLEXITY", "10");
+        props.setProperty("org.jitsi.impl.neomedia.transform.csrc.CsrcTransformEngine.DISCARD_CONTRIBUTING_SOURCES", "true");        
         props.setProperty("net.java.sip.communicator.packetlogging.PACKET_LOGGING_ENABLED", "false");
 
         props.setProperty("net.java.sip.communicator.impl.protocol.sip.acc1403273890647", "acc1403273890647");

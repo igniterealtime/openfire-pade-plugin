@@ -45,6 +45,9 @@ public class InterfaceConfigServlet extends HttpServlet
         {
             Log.trace( "[{}] interface_config requested.", request.getRemoteAddr() );
 
+            response.setCharacterEncoding( "UTF-8" ); 
+            response.setContentType( "UTF-8" );
+
             final OFMeetConfig ofMeetConfig = new OFMeetConfig();
             final JSONObject config = new JSONObject();
 

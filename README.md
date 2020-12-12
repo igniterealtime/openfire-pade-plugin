@@ -14,15 +14,16 @@ The pade plugin hosts the web and pwa version of
 
 Installation
 ------------
-First, there are few things you need to know. These include:
+
+Download latest release from [here](https://github.com/igniterealtime/openfire-pade-plugin/releases) and upload the pade.jar and ofmeet.jar in any order from the admin web console of Openfire. Wait for both to appear in the plugins listing and then complete the following steps to confirm it is working.
+
+There are few things you need to know. These include:
 
 * ofmeet does work with Firefox. It however works best with Chromium based apps like Chrome, Edge, Electron and Opera. 
 
 * ofmeet plugin will not work out of the box if your Openfire server is configured to use LDAP. You would need to create the jvb, focus and jigasi bot users manually. Give the focus bot user owner/admin permissions to the MUC service.
 
 * ofmeet has minimal network requirements and works out of the box internally on a local area network (LAN) or with a hosted Openfire server on the internet. If your Openfire server is placed behind a NAT and firewall and you want to allow external internet access, then you require some network expertise to configure it. You would need to open a few UDP/TCP ports and provide both the public and private IP addresses of your openfire server.
-
-Download latest release from [here](https://github.com/igniterealtime/openfire-pade-plugin/releases) and upload the pade.jar and ofmeet.jar in any order from the admin web console of Openfire. Wait for both to appear in the plugins listing and then complete the following steps to confirm it is working.
 
 * JVB  (ofmeet plugin) does not exposed an xmpp component anymore. Instead, it uses an XMPP user called **jvb** that will join a global conference called **ofmeet**
 

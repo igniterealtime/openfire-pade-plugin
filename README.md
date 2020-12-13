@@ -51,7 +51,7 @@ Special cases
 
 By default, ofmeet should run out of the box with Openfire default settings. However, if ldap or any other custom user provider is being used, user accounts must be created manually for jvb, focus and jigasi (if needed) as the plugin cannot do this automatically.
 
-On Windows servers, JVB2 cannot use the webrtc datachanel and **must** use websockets for the data channel to Jitsi Meet. Ports 8080/8443 will be used by default in Openfire. A websocket proxy has been implemented in ofmeet to proxy from the configured Openfire websocket TLS port (7443) to 8080. This removes the need to open port 8443 externally and allows JVB2 to reuse the Openfire domain certificate for TLS on port 7443.
+On Windows servers, ofmeet may not work if Openfire is installed in the default location **"Program Files/Openfire"** because of the embedded space in the name. Try using a different location with no embedded spaces. Also note that Jitsi videobridge cannot use the webrtc datachanel because of a missing binary in Windows and **must** use websockets for the data channel to Jitsi Meet. Ports 8080/8443 will be used by default in Openfire. A websocket proxy has been implemented in ofmeet to proxy from the configured Openfire websocket TLS port (7443) to 8080. This removes the need to open port 8443 externally and allows JVB2 to reuse the Openfire domain certificate for TLS on port 7443.
 
 If ports 8080/8443 are in use elsewhere and this needs to be changed, use the Network web page to do so.
 ![image](https://user-images.githubusercontent.com/110731/100220971-f4064a80-2f0f-11eb-9af3-b3e8716a8252.png)

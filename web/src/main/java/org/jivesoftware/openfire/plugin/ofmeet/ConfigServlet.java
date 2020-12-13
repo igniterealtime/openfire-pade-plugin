@@ -344,6 +344,7 @@ public class ConfigServlet extends HttpServlet
             response.setHeader( "Pragma", "no-cache" );
             response.setHeader( "Content-Type", "application/javascript" );
             response.setHeader( "Connection", "close" );
+            response.setCharacterEncoding( "UTF-8" );
         }
         catch ( Exception e )
         {

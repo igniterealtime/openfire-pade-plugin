@@ -24,7 +24,7 @@
 
     <groupId>org.igniterealtime.openfire.ofmeet</groupId>
     <artifactId>parent</artifactId>
-    <version>1.2.0</version>
+    <version>1.2.1</version>
     <packaging>pom</packaging>
 
     <organization>
@@ -36,7 +36,7 @@
         <module>web</module>
         <module>config</module>              
         <module>ofmeet</module>               
-        <module>pade</module>        
+        <!--module>pade</module-->        
     </modules>
 
     <licenses>

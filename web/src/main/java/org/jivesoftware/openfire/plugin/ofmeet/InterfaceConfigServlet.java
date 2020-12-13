@@ -45,8 +45,7 @@ public class InterfaceConfigServlet extends HttpServlet
         {
             Log.trace( "[{}] interface_config requested.", request.getRemoteAddr() );
 
-            response.setCharacterEncoding( "UTF-8" ); 
-            response.setContentType( "UTF-8" );
+            writeHeader( response );
 
             final OFMeetConfig ofMeetConfig = new OFMeetConfig();
             final JSONObject config = new JSONObject();
@@ -138,6 +137,24 @@ public class InterfaceConfigServlet extends HttpServlet
         catch ( Exception e )
         {
             Log.error( "[{}] Failed to generate interfaceconfig!", request.getRemoteAddr(), e );
+        }
+    }
+
+    private void writeHeader( HttpServletResponse response )
+    {
+        try
+        {
+            response.setHeader( "Expires", "Sat, 6 May 1995 12:00:00 GMT" );
+            response.setHeader( "Cache-Control", "no-store, no-cache, must-revalidate" );
+            response.addHeader( "Cache-Control", "post-check=0, pre-check=0" );
+            response.setHeader( "Pragma", "no-cache" );
+            response.setHeader( "Content-Type", "application/javascript" );
+            response.setHeader( "Connection", "close" );
+            response.setCharacterEncoding( "UTF-8" );
+        }
+        catch ( Exception e )
+        {
+            Log.error( "OFMeetConfig writeHeader Error", e );
         }
     }
 }

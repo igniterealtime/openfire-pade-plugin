@@ -133,11 +133,6 @@ public class PluginImpl
     public static final String PLAIN_PORT_NUMBER_PROPERTY_NAME = "ofmeet.websockets.plainport";
 
     /**
-     * The name of the Openfire property that contains the JVB port used for secure websockets
-     */
-    public static final String SECURE_PORT_NUMBER_PROPERTY_NAME = "ofmeet.websockets.secureport";
-
-    /**
      * The name of the Openfire property that contains the JVB port advertised as the public websockets
      */
     public static final String PUBLIC_PORT_NUMBER_PROPERTY_NAME = "ofmeet.websockets.publicport";
@@ -267,7 +262,7 @@ public class PluginImpl
             System.clearProperty( MappingCandidateHarvesters.STUN_MAPPING_HARVESTER_ADDRESSES_PNAME );
         }
 
-        System.setProperty( StackProperties.USE_DYNAMIC_HOST_HARVESTER, String.valueOf(JiveGlobals.getBooleanProperty( MINMAX_PORT_ENABLED_PROPERTY_NAME, true) ) );
+        System.setProperty( StackProperties.USE_DYNAMIC_HOST_HARVESTER, String.valueOf(JiveGlobals.getBooleanProperty( MINMAX_PORT_ENABLED_PROPERTY_NAME, false) ) );
 
         try
         {
@@ -408,7 +403,7 @@ public class PluginImpl
                 break;
 
             case MINMAX_PORT_ENABLED_PROPERTY_NAME:
-                System.setProperty( StackProperties.USE_DYNAMIC_HOST_HARVESTER, Boolean.toString( JiveGlobals.getBooleanProperty( MINMAX_PORT_ENABLED_PROPERTY_NAME, true ) ) );
+                System.setProperty( StackProperties.USE_DYNAMIC_HOST_HARVESTER, Boolean.toString( JiveGlobals.getBooleanProperty( MINMAX_PORT_ENABLED_PROPERTY_NAME, false ) ) );
                 break;
 
             case MAX_PORT_NUMBER_PROPERTY_NAME:
@@ -530,7 +525,7 @@ public class PluginImpl
                 break;
 
             case MINMAX_PORT_ENABLED_PROPERTY_NAME:
-                System.setProperty( StackProperties.USE_DYNAMIC_HOST_HARVESTER, Boolean.toString( JiveGlobals.getBooleanProperty( MINMAX_PORT_ENABLED_PROPERTY_NAME, true ) ) );
+                System.setProperty( StackProperties.USE_DYNAMIC_HOST_HARVESTER, Boolean.toString( JiveGlobals.getBooleanProperty( MINMAX_PORT_ENABLED_PROPERTY_NAME, false ) ) );
                 break;
 
             case MAX_PORT_NUMBER_PROPERTY_NAME:

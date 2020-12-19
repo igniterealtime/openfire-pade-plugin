@@ -43,9 +43,9 @@ public class ProxyConnection
     private boolean connected = false;
     private WebSocketClient client = null;
     private ProxySocket proxySocket = null;
-    private String subprotocol = null;
+    private List<String> subprotocol = null;
 
-    public ProxyConnection(URI uri, String subprotocol, int connectTimeout)
+    public ProxyConnection(URI uri, List<String> subprotocol, int connectTimeout)
     {
         Log.info("ProxyConnection " + uri + " " + subprotocol);
 
@@ -77,7 +77,7 @@ public class ProxyConnection
         }
         catch (Exception e)
         {
-            Log.error("ProxyConnection " + e.getMessage());
+            Log.error("ProxyConnection " + uri, e);
             connected = false;
         }
     }
@@ -190,7 +190,7 @@ public class ProxyConnection
 
         @OnWebSocketError public void onError(Throwable t)
         {
-            Log.error("Error: "  + t.getMessage());
+            Log.error("Error: "  + t.getMessage(), t);
         }
 
         @OnWebSocketClose public void onClose(int statusCode, String reason)

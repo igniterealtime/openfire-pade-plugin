@@ -75,8 +75,9 @@ public class JitsiJvbWrapper implements ProcessListener
         final String password = config.getJvbPassword();
         final String ipAddress = getIpAddress();
 
-        final String plain_port = JiveGlobals.getProperty( "ofmeet.websockets.plainport", "8080");
-        final String secure_port = JiveGlobals.getProperty( "ofmeet.websockets.secureport", "8443");
+        String plain_port = JiveGlobals.getProperty( "ofmeet.websockets.plainport", "8180");
+        if ("8080".equals(plain_port)) plain_port = "8180";
+
         final String public_port = JiveGlobals.getProperty( "httpbind.port.secure", "7443");
 
         String keystore = JiveGlobals.getHomeDirectory() + File.separator + "resources" + File.separator + "security" + File.separator + "keystore";
@@ -106,17 +107,12 @@ public class JitsiJvbWrapper implements ProcessListener
             "    }",
             "",
             "   http-servers {",
-            "       private {",
-            "           port = " + plain_port,
-            "       }",
             "       public {",
-            "           need-client-auth = false",
-            "           tls-port = " + secure_port,
-            "           key-store-path = \"" + keystore + "\"",
-            "           key-store-password = changeit",
+            "           port = " + plain_port,
             "       }",
             "   }",
             "    websockets {",
+            "      server-id = ofmeet",
             "      enabled = true",
             "      domain = \"" + JiveGlobals.getProperty( "ofmeet.websockets.domain", domain) + ":" + JiveGlobals.getProperty( "ofmeet.websockets.publicport", public_port) + "\"",
             "      tls = true",
@@ -302,7 +298,7 @@ public class JitsiJvbWrapper implements ProcessListener
                 break;
 
             case PluginImpl.MINMAX_PORT_ENABLED_PROPERTY_NAME:
-                props.setProperty( "org.ice4j.ice.harvest.USE_DYNAMIC_HOST_HARVESTER", Boolean.toString( JiveGlobals.getBooleanProperty( PluginImpl.MINMAX_PORT_ENABLED_PROPERTY_NAME, true ) ) );
+                props.setProperty( "org.ice4j.ice.harvest.USE_DYNAMIC_HOST_HARVESTER", Boolean.toString( JiveGlobals.getBooleanProperty( PluginImpl.MINMAX_PORT_ENABLED_PROPERTY_NAME, false ) ) );
                 break;
 
             case PluginImpl.MAX_PORT_NUMBER_PROPERTY_NAME:

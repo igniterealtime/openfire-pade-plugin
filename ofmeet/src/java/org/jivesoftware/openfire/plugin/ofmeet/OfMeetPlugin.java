@@ -335,17 +335,18 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         @Override public Object createWebSocket(ServletUpgradeRequest req, ServletUpgradeResponse resp)
         {
             String ipaddr = getIpAddress();
-            String jvbPort = JiveGlobals.getProperty( "ofmeet.websockets.plainport", "8080");
+            String jvbPort = JiveGlobals.getProperty( "ofmeet.websockets.plainport", "8180");
 
             HttpServletRequest request = req.getHttpServletRequest();
             String path = request.getRequestURI();
             String query = request.getQueryString();
-            String protocol = null;
+            List<String> protocols = new ArrayList<String>();
 
             for (String subprotocol : req.getSubProtocols())
             {
                 Log.info("WSocketCreator found protocol " + subprotocol);
-                protocol = subprotocol;
+                resp.setAcceptedSubProtocol(subprotocol);
+                protocols.add(subprotocol);
             }
 
             if (query != null) path += "?" + query;
@@ -355,11 +356,10 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
             String url = "ws://localhost:" + jvbPort + path;
 
             ProxyWebSocket socket = null;
-            ProxyConnection proxyConnection = new ProxyConnection(URI.create(url), protocol, 10000);
+            ProxyConnection proxyConnection = new ProxyConnection(URI.create(url), protocols, 10000);
 
             socket = new ProxyWebSocket();
             socket.setProxyConnection(proxyConnection);
-            if (protocol != null) resp.setAcceptedSubProtocol(protocol);
             return socket;
         }
     }

@@ -89,9 +89,7 @@ public class RuntimeConfiguration
      * The maximum port number default value.
      */
     public static final int MAX_PORT_DEFAULT_VALUE = 20000;
-
-    public static final int PLAIN_PORT_DEFAULT_VALUE = 8080;
-    public static final int SECURE_PORT_DEFAULT_VALUE = 8443;
+    public static final int PLAIN_PORT_DEFAULT_VALUE = 8180;
     public static final int PUBLIC_PORT_DEFAULT_VALUE = JiveGlobals.getIntProperty( "httpbind.port.secure", 7443);
 
     /**
@@ -173,13 +171,6 @@ public class RuntimeConfiguration
      * that was configured when this plugin got initialized, which is what is stored in this field.
      */
     private static final int PLAIN_PORT_AT_STARTUP = RuntimeConfiguration.getPlainPort();
-
-    /**
-     * Changes to port number configuration require a restart of the plugin to take effect.
-     * The websockets secure port number value that is currently in use is equal to the port number
-     * that was configured when this plugin got initialized, which is what is stored in this field.
-     */
-    private static final int SECURE_PORT_AT_STARTUP = RuntimeConfiguration.getSecurePort();
 
     /**
      * Changes to port number configuration require a restart of the plugin to take effect.
@@ -375,11 +366,6 @@ public class RuntimeConfiguration
         return JiveGlobals.getIntProperty(PluginImpl.PLAIN_PORT_NUMBER_PROPERTY_NAME, PLAIN_PORT_DEFAULT_VALUE );
     }
 
-    public static int getSecurePort()
-    {
-        return JiveGlobals.getIntProperty(PluginImpl.SECURE_PORT_NUMBER_PROPERTY_NAME, SECURE_PORT_DEFAULT_VALUE );
-    }
-
     public static int getPublicPort()
     {
         return JiveGlobals.getIntProperty(PluginImpl.PUBLIC_PORT_NUMBER_PROPERTY_NAME, PUBLIC_PORT_DEFAULT_VALUE );
@@ -572,7 +558,6 @@ public class RuntimeConfiguration
         || MAX_PORT_AT_STARTUP != RuntimeConfiguration.getMaxPort()
         || MIN_PORT_AT_STARTUP != RuntimeConfiguration.getMinPort()
         || PLAIN_PORT_AT_STARTUP != RuntimeConfiguration.getPlainPort()
-        || SECURE_PORT_AT_STARTUP != RuntimeConfiguration.getSecurePort()
         || WAS_TCP_PORT_ENABLED_AT_STARTUP != RuntimeConfiguration.isTcpEnabled()
         || ( TCP_PORT_AT_STARTUP == null && RuntimeConfiguration.getTcpPort() != null) || ( TCP_PORT_AT_STARTUP != null && !TCP_PORT_AT_STARTUP.equals( RuntimeConfiguration.getTcpPort() ) )
         || ( TCP_MAPPED_PORT_AT_STARTUP == null && RuntimeConfiguration.getTcpMappedPort() != null) || ( TCP_MAPPED_PORT_AT_STARTUP != null && !TCP_MAPPED_PORT_AT_STARTUP.equals( RuntimeConfiguration.getTcpMappedPort() ) )

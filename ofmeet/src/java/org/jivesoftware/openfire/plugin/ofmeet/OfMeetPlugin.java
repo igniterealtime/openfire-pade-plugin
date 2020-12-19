@@ -335,7 +335,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         @Override public Object createWebSocket(ServletUpgradeRequest req, ServletUpgradeResponse resp)
         {
             String ipaddr = getIpAddress();
-            String jvbPort = JiveGlobals.getProperty( "ofmeet.websockets.plainport", "8080");
+            String jvbPort = JiveGlobals.getProperty( "ofmeet.websockets.plainport", "8180");
 
             HttpServletRequest request = req.getHttpServletRequest();
             String path = request.getRequestURI();

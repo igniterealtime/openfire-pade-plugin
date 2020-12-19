@@ -75,7 +75,7 @@ public class JitsiJvbWrapper implements ProcessListener
         final String password = config.getJvbPassword();
         final String ipAddress = getIpAddress();
 
-        final String plain_port = JiveGlobals.getProperty( "ofmeet.websockets.plainport", "8080");
+        final String plain_port = JiveGlobals.getProperty( "ofmeet.websockets.plainport", "8180");
         final String secure_port = JiveGlobals.getProperty( "ofmeet.websockets.secureport", "8443");
         final String public_port = JiveGlobals.getProperty( "httpbind.port.secure", "7443");
 
@@ -106,14 +106,8 @@ public class JitsiJvbWrapper implements ProcessListener
             "    }",
             "",
             "   http-servers {",
-            "       private {",
-            "           port = " + plain_port,
-            "       }",
             "       public {",
-            "           need-client-auth = false",
-            "           tls-port = " + secure_port,
-            "           key-store-path = \"" + keystore + "\"",
-            "           key-store-password = changeit",
+            "           port = " + plain_port,
             "       }",
             "   }",
             "    websockets {",

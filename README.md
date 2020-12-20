@@ -53,7 +53,7 @@ By default, ofmeet should run out of the box with Openfire default settings. How
 
 On Windows servers, ofmeet may not work if Openfire is installed in the default location **"Program Files/Openfire"** because of the embedded space in the name. Try using a different location with no embedded spaces. Also note that Jitsi videobridge cannot use the webrtc datachanel because of a missing binary in Windows and **must** use websockets for the data channel to Jitsi Meet. Port 8180 will be used by default in Openfire. A websocket proxy has been implemented in ofmeet to proxy from the configured Openfire websocket TLS port (7443) to 8180. This allows JVB2 to reuse the Openfire domain certificate for TLS on port 7443.
 
-If you use an external web server like nginx or haproxy to redirect standard TLS port 433 to Openfire TLS port 7443, then the public 'advertised port' for websockets (the publicly-accessible port Jitsi Meet web client will use) should be set to 443. Otherwise leave the default value of your Openfire TLS port (7443). If port 8180 is in use elsewhere then this needs to be changed. Use the Network web page to do so.
+If port 8180 is in use elsewhere then this needs to be changed. Use the Network web page to do so. If you use an external web server like nginx or haproxy to redirect standard TLS port 433 to Openfire TLS port 7443, then the public 'advertised port' for websockets (the publicly-accessible port Jitsi Meet web client will use) should be set to 443. Otherwise leave the default value as your Openfire TLS port (7443). 
 
 ![image](https://user-images.githubusercontent.com/110731/102720510-ae5d5780-42ec-11eb-9531-2e4b9a9523e8.png)
 

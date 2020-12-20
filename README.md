@@ -54,7 +54,7 @@ By default, ofmeet should run out of the box with Openfire default settings. How
 On Windows servers, ofmeet may not work if Openfire is installed in the default location **"Program Files/Openfire"** because of the embedded space in the name. Try using a different location with no embedded spaces. Also note that Jitsi videobridge cannot use the webrtc datachanel because of a missing binary in Windows and **must** use websockets for the data channel to Jitsi Meet. Ports 8180/8443 will be used by default in Openfire. A websocket proxy has been implemented in ofmeet to proxy from the configured Openfire websocket TLS port (7443) to 8180. This removes the need to open port 8443 externally and allows JVB2 to reuse the Openfire domain certificate for TLS on port 7443.
 
 If ports 8180/8443 are in use elsewhere and this needs to be changed, use the Network web page to do so.
-![image](https://user-images.githubusercontent.com/110731/100220971-f4064a80-2f0f-11eb-9af3-b3e8716a8252.png)
+![image](https://user-images.githubusercontent.com/110731/102720510-ae5d5780-42ec-11eb-9531-2e4b9a9523e8.png)
 
 If you want to allow regular telephone users to join a conference from a home or office telephone, you would need to set up the SIP Gateway to a telephone provider. You would need to script an IVR (interective response) which will allow the caller to use the phone buttons/touch tones to select their destination meeting and convert that into a room name in the SIP header that Jigasi will use to route the call to the appropriate meeting room. For an example, see https://voximplant.com/docs/tutorials/jigasi-setup
 

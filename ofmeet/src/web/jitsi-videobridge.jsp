@@ -196,7 +196,7 @@
             plainPort = plainPort.trim();
             try {
                 int port = Integer.valueOf(plainPort);
-                if( port >= 1 && port <= 65535 ) {
+                if( port >= 1 && port <= 65535 && port != 8080 ) {  // 8080 reserved for internal JVB http
                     JiveGlobals.setProperty( PluginImpl.PLAIN_PORT_NUMBER_PROPERTY_NAME, plainPort );
                 } else {
                     throw new NumberFormatException( "out of range port" );
@@ -568,7 +568,7 @@
                 <td>
                     <input name="plainPort" id="plainPort" type="number" min="1" max="65535" value="<%=plainPort%>"/> <fmt:message key="config.page.configuration.tcp"/>
                     <%  if (errors.get("plainPort") != null) { %>
-                    <span class="jive-error-text"><fmt:message key="config.page.configuration.error.valid_port" /></span>
+                    <span class="jive-error-text"><fmt:message key="config.page.configuration.error.bad_port" /></span>
                     <%  } %>
                 </td>
             </tr>

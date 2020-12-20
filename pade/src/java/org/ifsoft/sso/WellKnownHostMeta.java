@@ -30,7 +30,7 @@ public class WellKnownHostMeta extends HttpServlet
 
         try {
             writeHeader(response);
-            final String server = XMPPServer.getInstance().getServerInfo().getHostname() + ":" + JiveGlobals.getProperty("httpbind.publicport.secure", JiveGlobals.getProperty("httpbind.port.secure", "7443"));
+            final String server = XMPPServer.getInstance().getServerInfo().getHostname() + ":" + JiveGlobals.getProperty("pade.publicport.secure", JiveGlobals.getProperty("httpbind.port.secure", "7443"));
             response.getOutputStream().println("<XRD xmlns=\"http://docs.oasis-open.org/ns/xri/xrd-1.0\">");
             response.getOutputStream().println("  <Link rel=\"urn:xmpp:alt-connections:xbosh\" href=\"https://" + server + "/http-bind/\"/>");
             response.getOutputStream().println("  <Link rel=\"urn:xmpp:alt-connections:websocket\" href=\"wss://" + server + "/ws/\"/>");

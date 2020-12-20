@@ -196,7 +196,7 @@
             plainPort = plainPort.trim();
             try {
                 int port = Integer.valueOf(plainPort);
-                if( port >= 1 && port <= 65535 && port != 8080 ) {  // 8080 reserved for internal JVB http
+                if( port >= 1 && port <= 65535 && port != 8080 && port != 8888 ) {  // 8080/8888 reserved for internal JVB/Jicofo http
                     JiveGlobals.setProperty( PluginImpl.PLAIN_PORT_NUMBER_PROPERTY_NAME, plainPort );
                 } else {
                     throw new NumberFormatException( "out of range port" );

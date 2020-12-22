@@ -575,7 +575,13 @@ var ofmeet = (function(of)
 
             if (photo)
             {
-                avatar = 'data:' + photo.querySelector('TYPE').innerHTML + ';base64,' + photo.querySelector('BINVAL').innerHTML;
+                const type = photo.querySelector('TYPE').innerHTML;
+                const binval = photo.querySelector('BINVAL').innerHTML;
+                if (type != "" && binval != "")
+                {
+                    avatar = 'data:' + type + ';base64,' + binval;
+                    console.debug("getVCard set avatar from photo", avatar);
+                }
             }
 
             console.debug("getVCard", email, fullname, username, avatar);

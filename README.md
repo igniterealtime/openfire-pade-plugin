@@ -1,31 +1,33 @@
 Pàdé for Openfire
 =========================
 
-This project produces two Openfire plugins, ofmeet and pade to provide a unified communication solution for Openfire.
+This project provides a web-based unified communication solution for Openfire.
+- peer to peer based chat, 
+- persistent groupchat, 
+- audio and video conferencing,
+- telephone access to conferences, 
 
-The ofmeet plugin (Openfire Meetings) includes various third-party products, notably:
+It includes third-party products, notably:
 - [Jitsi Videobridge](https://github.com/jitsi/jitsi-videobridge) project;
 - [Jitsi Conference Focus (jicofo)](https://github.com/jitsi/jicofo) project; 
 - [Jitsi Meet](https://github.com/jitsi/jitsi-meet) web client.
 - [Jitsi SIP Gateway](https://github.com/jitsi/jigasi) project.
-
-The pade plugin hosts the web and pwa version of
 - [Pàdé](https://github.com/igniterealtime/pade) web desktop client based on the [ConverseJS](https://github.com/conversejs/converse.js) project.
 
-ofmeet does work with Firefox. It however works best with Chromium based apps like Chrome, Edge, Electron and Opera. 
+Pade works with Firefox. It however works best with Chromium based apps like Chrome, Edge, Electron and Opera. 
 
-ofmeet has minimal network requirements and works out of the box internally on a local area network (LAN) or with a hosted Openfire server on the internet. If your Openfire server is placed behind a NAT and firewall and you want to allow external internet access, then you require some network expertise to configure it. You would need to open a few UDP/TCP ports and provide both the public and private IP addresses of your openfire server.
+Pade has minimal network requirements and works out of the box internally on a local area network (LAN) or with a hosted Openfire server on the internet. If your Openfire server is placed behind a NAT and firewall and you want to allow external internet access, then you require some network expertise to configure it. You would need to open a few UDP/TCP ports and provide both the public and private IP addresses of your openfire server.
 
-ofmeet uses an XMPP user called **jvb** that will join a global conference called **ofmeet** with  the focus user called **focus**. If you enable the SIP gateway, a new user called **jigasi** will be created and it will join a global conference called **jigasi** with the focus user **focus**
+Pade uses an XMPP user called **jvb** that will join a global conference called **ofmeet** with  the focus user called **focus**. If you enable the SIP gateway, a new user called **jigasi** will be created and it will join a global conference called **jigasi** with the focus user **focus**
 
 ![image](https://user-images.githubusercontent.com/110731/99916724-af0dc880-2d03-11eb-80c3-b35b9009910a.png)
 
-ofmeet plugin will not work out of the box if your Openfire server is configured to use LDAP. You would need to create the jvb, focus and jigasi bot users manually. Give the focus bot user owner/admin permissions to the MUC service.
+Pade will not work out of the box if your Openfire server is configured to use LDAP. You would need to create the jvb, focus and jigasi bot users manually. Give the focus bot user owner/admin permissions to the MUC service.
 
 Installation
 ------------
 
-Download latest release from [here](https://github.com/igniterealtime/openfire-pade-plugin/releases) and upload the pade.jar and ofmeet.jar in any order from the admin web console of Openfire. Wait for both to appear in the plugins listing and then complete the following steps to confirm it is working.
+Download latest release from [here](https://github.com/igniterealtime/openfire-pade-plugin/releases) and upload the pade.jar from the admin web console of Openfire. Wait for the plugin to appear in the plugins listing and then complete the following steps to confirm it is working.
 
 Make sure this user is online and has joined the **ofmeet** chat room. Confirm focus user is also online and has joined the **ofmeet** room as well.
 
@@ -49,9 +51,9 @@ The new summary admin page shows call statistics from JVB2 as well as all active
 Special cases
 --------------
 
-By default, ofmeet should run out of the box with Openfire default settings. However, if ldap or any other custom user provider is being used, user accounts must be created manually for jvb, focus and jigasi (if needed) as the plugin cannot do this automatically.
+By default, Pade should run out of the box with Openfire default settings. However, if ldap or any other custom user provider is being used, user accounts must be created manually for jvb, focus and jigasi (if needed) as the plugin cannot do this automatically.
 
-On Windows servers, ofmeet may not work if Openfire is installed in the default location **"Program Files/Openfire"** because of the embedded space in the name. Try using a different location with no embedded spaces. Also note that Jitsi videobridge cannot use the webrtc datachanel because of a missing binary in Windows and **must** use websockets for the data channel to Jitsi Meet. Port 8180 will be used by default in Openfire. A websocket proxy has been implemented in ofmeet to proxy from the configured Openfire websocket TLS port (7443) to 8180. This allows JVB2 to reuse the Openfire domain certificate for TLS on port 7443.
+On Windows servers, Pade may not work if Openfire is installed in the default location **"Program Files/Openfire"** because of the embedded space in the name. Try using a different location with no embedded spaces. Also note that Jitsi videobridge cannot use the webrtc datachanel because of a missing binary in Windows and **must** use websockets for the data channel to Jitsi Meet. Port 8180 will be used by default in Openfire. A websocket proxy has been implemented in Pade to proxy from the configured Openfire websocket TLS port (7443) to 8180. This allows JVB2 to reuse the Openfire domain certificate for TLS on port 7443.
 
 If port 8180 is in use elsewhere then this needs to be changed. Use the Network web page to do so. If you use iptables, an external web server like nginx or haproxy to redirect standard TLS port 433 to Openfire TLS port 7443, then the public 'advertised port' for websockets (the publicly-accessible port Jitsi Meet web client will use) should be set to 443. Otherwise leave the default value as your Openfire TLS port (7443). 
 
@@ -59,32 +61,23 @@ If port 8180 is in use elsewhere then this needs to be changed. Use the Network 
 
 If you want to allow regular telephone users to join a conference from a home or office telephone, you would need to set up the SIP Gateway to a telephone provider. You would need to script an IVR (interective response) which will allow the caller to use the phone buttons/touch tones to select their destination meeting and convert that into a room name in the SIP header that Jigasi will use to route the call to the appropriate meeting room. For an example, see https://voximplant.com/docs/tutorials/jigasi-setup
 
-The alternative is much simpler if you already have FreeSWITCH with working phones and trunks setup with an external telephone line provider. You enable the ofmeet to connect to FreeSWITCH via ESL (external socket libary) and ofmeet will start to monitor every meeting. When the focus user joins, it will create a FreeSWITCH audio conference and initiate a call from the audio conference to Jigasi adding a SIP header with the name of the meeting room. You can now update your FreeSWITCH dial plan with internal and external telephone numbers that can be used by your users to to join the FreeSWITCH audio conference that is bridged to the Jitsi meeting.
+The alternative is much simpler if you already have FreeSWITCH with working phones and trunks setup with an external telephone line provider. You enable the Pade to connect to FreeSWITCH via ESL (external socket libary) and Pade will start to monitor every meeting. When the focus user joins, it will create a FreeSWITCH audio conference and initiate a call from the audio conference to Jigasi adding a SIP header with the name of the meeting room. You can now update your FreeSWITCH dial plan with internal and external telephone numbers that can be used by your users to to join the FreeSWITCH audio conference that is bridged to the Jitsi meeting.
 
 
 Build instructions
 ------------------
 
-This project is a Apache Maven project
-
-First edit the pom.xml file and change the default properties. Electron build is disabled by default.
+This project is a Apache Maven project. 
 
 Build using the standard Maven invocation:
 
     mvn clean package
     
-After a successful execution, the four plugins should be available in these locations:
+After a successful execution, a plugin should be available in this locations:
 
-    ofmeet/target/ofmeet.jar
-    pade/target/pade.jar    
+    pade/target/pade.jar       
     
-Binary packages for Pade as an Electron desktop application are also available in these locations    
-
-    pade/target/pade-x.x.x-SNAPSHOT-darwin-64.zip
-    pade/target/pade-x.x.x-SNAPSHOT-linux-64.zip
-    pade/target/pade-x.x.x-SNAPSHOT-win-64.zip
-    
-Pade will be available as a web page and progressive web application from <pade.url>
+Pade will be available as a web page and progressive web application from /pade
 
     For example - https://desktop-545pc5b:7443/pade
    

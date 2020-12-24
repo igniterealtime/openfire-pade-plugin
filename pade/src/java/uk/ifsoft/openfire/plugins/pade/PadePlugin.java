@@ -50,6 +50,7 @@ import waffle.servlet.WaffleInfoServlet;
 import org.xmpp.packet.*;
 import org.dom4j.Element;
 import org.igniterealtime.openfire.plugins.pushnotification.PushInterceptor;
+import org.jivesoftware.openfire.plugin.ofmeet.OfMeetPlugin;
 
 public class PadePlugin implements Plugin, MUCEventListener
 {
@@ -61,6 +62,7 @@ public class PadePlugin implements Plugin, MUCEventListener
     private WebAppContext contextWinSSO;
     private WebAppContext contextWellKnown;
     private PushInterceptor interceptor;
+    private OfMeetPlugin ofMeetPlugin;
 
     /**
      * Initializes the plugin.
@@ -103,7 +105,7 @@ public class PadePlugin implements Plugin, MUCEventListener
         contextPrivate.setWelcomeFiles(new String[]{"index.jsp"});
         HttpBindManager.getInstance().addJettyHandler(contextPrivate);
 
-        contextPublic = new WebAppContext(null, pluginDirectory.getPath() + "/classes/public", "/pade");
+        contextPublic = new WebAppContext(null, pluginDirectory.getPath() + "/classes/docs", "/pade");
         contextPublic.setClassLoader(this.getClass().getClassLoader());
         contextPublic.getMimeTypes().addMimeMapping("wasm", "application/wasm");
         final List<ContainerInitializer> initializersCRM = new ArrayList<>();
@@ -152,6 +154,10 @@ public class PadePlugin implements Plugin, MUCEventListener
         {
             MUCEventDispatcher.addListener(this);
         }
+
+        Log.info("Starting Openfire Meetings");
+        ofMeetPlugin = new OfMeetPlugin();
+        ofMeetPlugin.initializePlugin( manager, pluginDirectory );
     }
 
     /**
@@ -167,6 +173,8 @@ public class PadePlugin implements Plugin, MUCEventListener
     public void destroyPlugin()
     {
         Log.info("stop pade server");
+
+        if (ofMeetPlugin != null) ofMeetPlugin.destroyPlugin();
 
         try {
             SASLAuthentication.removeSupportedMechanism( OfChatSaslServer.MECHANISM_NAME );
@@ -187,6 +195,11 @@ public class PadePlugin implements Plugin, MUCEventListener
 
         OfflineMessageStrategy.removeListener( interceptor );
         InterceptorManager.getInstance().removeInterceptor( interceptor );
+    }
+
+    public OfMeetPlugin getContainer()
+    {
+        return ofMeetPlugin;
     }
 
     private static final SecurityHandler basicAuth(String realm) {

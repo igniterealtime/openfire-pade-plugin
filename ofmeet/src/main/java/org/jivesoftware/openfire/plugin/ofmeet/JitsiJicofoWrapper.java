@@ -106,7 +106,7 @@ public class JitsiJicofoWrapper implements ProcessListener
         props.store(new FileOutputStream(props_file), "Jitsi Colibri Focus");
 
         final String javaHome = System.getProperty("java.home");
-        String defaultOptions = "";
+        String defaultOptions = "-Xmx1024m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp";
         String javaExec = javaHome + File.separator + "bin" + File.separator + "java";
 
         if (OSUtils.IS_WINDOWS)

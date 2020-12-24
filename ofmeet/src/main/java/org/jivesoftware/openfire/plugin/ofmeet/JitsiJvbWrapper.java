@@ -158,7 +158,7 @@ public class JitsiJvbWrapper implements ProcessListener
             Log.error("createConfigFile error", e);
         }
 
-        String defaultOptions = "";
+        String defaultOptions = "-Xmx1024m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp";
         final String javaHome = System.getProperty("java.home");
         String javaExec = javaHome + File.separator + "bin" + File.separator + "java";
 

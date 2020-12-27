@@ -60,8 +60,8 @@
                             groups = "All";
                         }
                         else {
-                            users = bookmark.getUsers().size() + " "+ LocaleUtils.getLocalizedString("ofmeet.planner.users", "ofmeet");
-                            groups = bookmark.getGroups().size() + " "+LocaleUtils.getLocalizedString("ofmeet.planner.groups", "ofmeet");
+                            users = bookmark.getUsers().size() + " "+ LocaleUtils.getLocalizedString("ofmeet.planner.users", "pade");
+                            groups = bookmark.getGroups().size() + " "+LocaleUtils.getLocalizedString("ofmeet.planner.groups", "pade");
                         }
                     }
             

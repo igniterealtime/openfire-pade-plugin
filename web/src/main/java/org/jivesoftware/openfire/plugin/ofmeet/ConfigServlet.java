@@ -86,7 +86,6 @@ public class ConfigServlet extends HttpServlet
             int minHDHeight = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.min.hdheight", 540 );
             String defaultLanguage = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.default.language", null );
             boolean useNicks = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.usenicks", false );
-            boolean webinar = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.webinar", false );
             boolean websockets = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.websockets", true );
             boolean useIPv6 = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.useipv6", false );
             boolean useStunTurn = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.use.stunturn", false );
@@ -173,7 +172,6 @@ public class ConfigServlet extends HttpServlet
                 config.put( "defaultLanguage", defaultLanguage.trim() );
             }
             config.put( "prejoinPageEnabled", enablePreJoinPage );
-            config.put( "webinar", webinar );
             config.put( "useIPv6", useIPv6 );
             config.put( "useNicks", useNicks );
             config.put( "useRtcpMux", useRtcpMux );

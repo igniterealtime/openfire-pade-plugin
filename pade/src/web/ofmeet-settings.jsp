@@ -75,8 +75,7 @@
             }
         }
 
-        final boolean websockets = ParamUtils.getBooleanParameter( request, "websockets" );
-        final boolean webinar = ParamUtils.getBooleanParameter( request, "webinar" );        
+        final boolean websockets = ParamUtils.getBooleanParameter( request, "websockets" );     
         final boolean useIPv6 = ParamUtils.getBooleanParameter( request, "useipv6" );
         final boolean useNicks = ParamUtils.getBooleanParameter( request, "usenicks" );
 
@@ -165,8 +164,7 @@
             JiveGlobals.setProperty( "voicebridge.default.proxy.sippassword", sippassword );
             JiveGlobals.setProperty( "voicebridge.default.proxy.sipserver", server );
             JiveGlobals.setProperty( "voicebridge.default.proxy.outboundproxy", outboundproxy );
-            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.websockets", Boolean.toString( websockets ) );
-            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.webinar", Boolean.toString( webinar ) );                        
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.websockets", Boolean.toString( websockets ) );                    
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.useipv6", Boolean.toString( useIPv6 ) );            
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.usenicks", Boolean.toString( useNicks ) );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.sip.username", clientusername );
@@ -296,12 +294,6 @@
     <fmt:message key="config.page.configuration.ofmeet.title" var="boxtitleofmeet"/>    
     <admin:contentBox title="${boxtitleofmeet}">
         <table cellpadding="3" cellspacing="0" border="0" width="100%">
-            <tr>
-                <td nowrap colspan="2">
-                    <input type="checkbox" name="webinar" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.webinar", false) ? "checked" : ""}>
-                    <fmt:message key="config.page.configuration.ofmeet.webinar.enabled_desc" />
-                </td>
-            </tr>
             <tr>
                 <td nowrap colspan="2">
                     <input type="checkbox" name="websockets" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.websockets", false) ? "checked" : ""}>

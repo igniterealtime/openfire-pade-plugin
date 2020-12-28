@@ -34,7 +34,7 @@
 
 <html>
     <head>
-        <title>FreeSwitch Overview</title>
+        <title>Overview</title>
         <meta name="pageID" content="freeswitch-overview"/>
     </head>
     <body>

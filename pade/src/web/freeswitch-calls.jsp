@@ -67,7 +67,7 @@
 %>
 <html>
 <head>
-<title>FreeSwitch Calls</title>
+<title>Calls</title>
 <meta name="pageID" content="freeswitch-calls"/>
 </head>
 <body>

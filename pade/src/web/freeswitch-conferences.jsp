@@ -73,11 +73,13 @@
 %>
 <html>
 <head>
-<title>FreeSwitch Conferences</title>
+<title>Conferences</title>
 <meta name="pageID" content="freeswitch-conferences"/>
 </head>
 <body>
-<p>FreeSwitch Conferences</p>
+<p>
+Active Conferences: <%= lines %>,
+</p>
 <div class="jive-table">
 <table cellpadding="0" cellspacing="0" border="0" width="100%">
 <thead>

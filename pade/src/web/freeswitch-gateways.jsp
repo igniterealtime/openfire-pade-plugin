@@ -69,7 +69,7 @@
 %>
 <html>
     <head>
-        <title>FreeSwitch Gateways</title>
+        <title>Gateways</title>
         <meta name="pageID" content="freeswitch-gateways"/>
     </head>
     <body>

@@ -62,7 +62,7 @@
 %>
 <html>
     <head>
-        <title>FreeSwitch Registrations</title>
+        <title>Registrations</title>
         <meta name="pageID" content="freeswitch-registrations"/>
     </head>
     <body>

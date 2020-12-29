@@ -80,17 +80,13 @@ public class JitsiJvbWrapper implements ProcessListener
 
         final String public_port = JiveGlobals.getProperty( "httpbind.port.secure", "7443");
 
-        String keystore = JiveGlobals.getHomeDirectory() + File.separator + "resources" + File.separator + "security" + File.separator + "keystore";
         String local_ip = JiveGlobals.getProperty( PluginImpl.MANUAL_HARVESTER_LOCAL_PROPERTY_NAME, ipAddress);
         String public_ip = JiveGlobals.getProperty( PluginImpl.MANUAL_HARVESTER_PUBLIC_PROPERTY_NAME, ipAddress);
-
         if (local_ip == null || local_ip.isEmpty()) local_ip = ipAddress;
         if (public_ip == null || public_ip.isEmpty()) public_ip = ipAddress;
 
-        if(OSUtils.IS_WINDOWS)
-        {
-            keystore = keystore.replace("\\", "/");
-        }
+        final String rest_ip = JiveGlobals.getProperty( "ofmeet.videobridge.rest.address", local_ip.equals(public_ip) ? "localhost" : local_ip);
+        final String rest_port = JiveGlobals.getProperty( "ofmeet.videobridge.rest.port", "8188");
 
         List<String> lines = Arrays.asList(
             "videobridge {",
@@ -107,6 +103,10 @@ public class JitsiJvbWrapper implements ProcessListener
             "    }",
             "",
             "   http-servers {",
+            "       private {",
+            "           host = " + rest_ip;
+            "           port = " + rest_port;
+            "       }",
             "       public {",
             "           port = " + plain_port,
             "       }",

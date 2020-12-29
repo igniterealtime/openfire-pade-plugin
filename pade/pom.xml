@@ -43,7 +43,7 @@
                         <goal>wget</goal>
                     </goals>
                     <configuration>
-                        <url>https://github.com/igniterealtime/pade/raw/master/docs.zip</url>
+                        <url>https://github.com/igniterealtime/pade/raw/master/docs-1.6.13.zip</url>
                         <unpack>true</unpack>
                         <outputDirectory>classes</outputDirectory>
                     </configuration>

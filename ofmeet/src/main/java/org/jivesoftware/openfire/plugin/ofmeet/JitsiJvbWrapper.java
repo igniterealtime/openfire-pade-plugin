@@ -85,7 +85,7 @@ public class JitsiJvbWrapper implements ProcessListener
         if (local_ip == null || local_ip.isEmpty()) local_ip = ipAddress;
         if (public_ip == null || public_ip.isEmpty()) public_ip = ipAddress;
 
-        final String rest_ip = JiveGlobals.getProperty( "ofmeet.videobridge.rest.address", local_ip.equals(public_ip) ? "localhost" : local_ip);
+        final String rest_ip = JiveGlobals.getProperty( "ofmeet.videobridge.rest.address", local_ip.equals(public_ip) ? "locahost" : "0");
         final String rest_port = JiveGlobals.getProperty( "ofmeet.videobridge.rest.port", "8188");
 
         List<String> lines = Arrays.asList(

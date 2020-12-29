@@ -2615,7 +2615,11 @@ var ofmeet = (function(of)
                         container.addEventListener("click", function(evt)
                         {
                             evt.stopPropagation();
-                            const parent = evt.target.parentNode;
+                            var parent = evt.target.parentNode;
+                            while ( parent.tagName != "LI" )
+                            {
+                              parent = parent.parentNode;
+                            }
                             const contact = parent.getAttribute("data-contact");
                             const email = parent.getAttribute("data-email");
                             const ele = parent.querySelector(".meeting-icon");

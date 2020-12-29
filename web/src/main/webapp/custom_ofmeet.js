@@ -1653,7 +1653,7 @@ var ofmeet = (function(of)
             if (body)
             {
                 console.debug("alert message", body.innerHTML);
-                APP.UI.messageHandler.notify("System Administrator", body.innerHTML);
+                APP.UI.messageHandler.showError({title:"System Adminitrator", description: body.innerHTML, hideErrorSupportLink: true});
             }
         }
 

@@ -2640,6 +2640,7 @@ var ofmeet = (function(of)
                     container.innerHTML = "";
 
                     var contacts = {};
+
                     for (var i = 0; i < localStorage.length; i++)
                     {
                         if (localStorage.key(i).indexOf("pade.webpush.") == 0)
@@ -2649,13 +2650,11 @@ var ofmeet = (function(of)
                             contacts[name] = email;
                         }
                     }
+
                     Object.entries(contacts).sort( (a,b) => a[0].localeCompare(b[0]) ).forEach(function(n)
                     {
                         addContact(n[0],contacts[n[0]])
                     });
-                            
-                        }
-                    }
                 }
             });
             contactsModal.addFooterBtn('Invite Selected', 'btn btn-danger tingle-btn tingle-btn--primary', function() {

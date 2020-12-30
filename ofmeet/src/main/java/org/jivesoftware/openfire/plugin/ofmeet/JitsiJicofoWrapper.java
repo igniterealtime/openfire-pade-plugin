@@ -88,14 +88,18 @@ public class JitsiJicofoWrapper implements ProcessListener
         final String jicofoHomePath = pluginDirectory.getPath() + File.separator + "classes" + File.separator + "jicofo";
         final File props_file = new File(jicofoHomePath + File.separator + "config" + File.separator + "sip-communicator.properties");
         Properties props = new Properties();
-
         props.load(new FileInputStream(props_file));
+
         props.setProperty("org.jitsi.jicofo.BRIDGE_MUC", "ofmeet@" + MAIN_MUC);
         props.setProperty("org.jitsi.jicofo.jigasi.BREWERY", "ofgasi@" + MAIN_MUC);
         props.setProperty( "org.jitsi.jicofo.ALWAYS_TRUST_MODE_ENABLED", "true" );
         props.setProperty( "org.jitsi.jicofo.PING_INTERVAL", "-1" );
         props.setProperty( "org.jitsi.jicofo.SERVICE_REDISCOVERY_INTERVAL", "60000" );
         props.setProperty( "org.jitsi.jicofo.DISABLE_AUTO_OWNER", Boolean.toString( !JiveGlobals.getBooleanProperty( "ofmeet.conference.auto-moderator", true ) ) );
+
+        props.setProperty( "org.jitsi.jicofo.ENABLE_H264", Boolean.toString( !JiveGlobals.getBooleanProperty( "ofmeet.jicofo.force.vp9", false ) ) );
+        props.setProperty( "org.jitsi.jicofo.ENABLE_VP8", Boolean.toString( !JiveGlobals.getBooleanProperty( "ofmeet.jicofo.force.vp9", false ) ) );
+        props.setProperty( "org.jitsi.jicofo.ENABLE_VP9", Boolean.toString( JiveGlobals.getBooleanProperty( "ofmeet.jicofo.force.vp9", false ) ) );
 
         Log.debug("sip-communicator.properties");
 

@@ -44,6 +44,7 @@
         final boolean conferenceadmin = ParamUtils.getBooleanParameter( request, "conferenceadmin" );
         final boolean securityenabled = ParamUtils.getBooleanParameter( request, "securityenabled" );
         final boolean disableRtx = !ParamUtils.getBooleanParameter( request, "enableRtx" );
+        final boolean forceVp9 = ParamUtils.getBooleanParameter( request, "forceVp9" );        
         final String authusername = request.getParameter( "authusername" );
         final String sippassword = request.getParameter( "sippassword" );
         final String server = request.getParameter( "server" );
@@ -165,7 +166,7 @@
             JiveGlobals.setProperty( "voicebridge.default.proxy.sipserver", server );
             JiveGlobals.setProperty( "voicebridge.default.proxy.outboundproxy", outboundproxy );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.websockets", Boolean.toString( websockets ) );                    
-            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.useipv6", Boolean.toString( useIPv6 ) );            
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.useipv6", Boolean.toString( useIPv6 ) );    
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.usenicks", Boolean.toString( useNicks ) );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.sip.username", clientusername );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.sip.password", clientpassword );
@@ -182,7 +183,8 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.jvb.jvm.customOptions", jvmJvb );               
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.focus.jvm.customOptions", jvmJicofo ); 
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.jigasi.jvm.customOptions", jvmJigasi ); 
-            
+
+            JiveGlobals.setProperty( "ofmeet.jicofo.force.vp9", Boolean.toString( forceVp9 ) );                          
             JiveGlobals.setProperty( "ofmeet.max.full.resolution.participants", maxFullResolutionParticipants );            
             JiveGlobals.setProperty( "ofmeet.min.height.for.quality.level.low", minHeightForQualityLow );  
             JiveGlobals.setProperty( "ofmeet.min.height.for.quality.level.std", minHeightForQualityStd );  
@@ -299,7 +301,13 @@
                     <input type="checkbox" name="websockets" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.websockets", false) ? "checked" : ""}>
                     <fmt:message key="config.page.configuration.ofmeet.websockets.enabled" />
                 </td>
-            </tr>            
+            </tr>      
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="forceVp9" ${admin:getBooleanProperty( "ofmeet.jicofo.force.vp9", false) ? "checked" : ""}>
+                    <fmt:message key="config.page.configuration.ofmeet.jicofo.force.vp9" />
+                </td>
+            </tr>             
             <tr>
                 <td nowrap colspan="2">
                     <input type="checkbox" name="enableRtx" ${ofmeetConfig.disableRtx ? "" : "checked"}>

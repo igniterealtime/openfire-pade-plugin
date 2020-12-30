@@ -348,7 +348,7 @@ public class JitsiJvbWrapper implements ProcessListener
 
         try {
             HttpClient client = new DefaultHttpClient();
-            HttpGet get = new HttpGet("http://localhost:8080/colibri/stats");
+            HttpGet get = new HttpGet("http://localhost:" + rest_port + "/colibri/stats");
             HttpResponse response2 = client.execute(get);
             BufferedReader rd = new BufferedReader(new InputStreamReader(response2.getEntity().getContent()));
 

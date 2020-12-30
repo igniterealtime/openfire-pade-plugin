@@ -78,19 +78,13 @@ public class JitsiJvbWrapper implements ProcessListener
         String plain_port = JiveGlobals.getProperty( "ofmeet.websockets.plainport", "8180");
         if ("8080".equals(plain_port)) plain_port = "8180";
 
+        final String rest_port = JiveGlobals.getProperty( "ofmeet.videobridge.rest.port", "8188");
         final String public_port = JiveGlobals.getProperty( "httpbind.port.secure", "7443");
 
-        String keystore = JiveGlobals.getHomeDirectory() + File.separator + "resources" + File.separator + "security" + File.separator + "keystore";
         String local_ip = JiveGlobals.getProperty( PluginImpl.MANUAL_HARVESTER_LOCAL_PROPERTY_NAME, ipAddress);
         String public_ip = JiveGlobals.getProperty( PluginImpl.MANUAL_HARVESTER_PUBLIC_PROPERTY_NAME, ipAddress);
-
         if (local_ip == null || local_ip.isEmpty()) local_ip = ipAddress;
         if (public_ip == null || public_ip.isEmpty()) public_ip = ipAddress;
-
-        if(OSUtils.IS_WINDOWS)
-        {
-            keystore = keystore.replace("\\", "/");
-        }
 
         List<String> lines = Arrays.asList(
             "videobridge {",
@@ -107,6 +101,9 @@ public class JitsiJvbWrapper implements ProcessListener
             "    }",
             "",
             "   http-servers {",
+            "       private {",
+            "           port = " + rest_port;
+            "       }",
             "       public {",
             "           port = " + plain_port,
             "       }",
@@ -351,7 +348,7 @@ public class JitsiJvbWrapper implements ProcessListener
 
         try {
             HttpClient client = new DefaultHttpClient();
-            HttpGet get = new HttpGet("http://localhost:8080/colibri/stats");
+            HttpGet get = new HttpGet("http://localhost:" + rest_port + "/colibri/stats");
             HttpResponse response2 = client.execute(get);
             BufferedReader rd = new BufferedReader(new InputStreamReader(response2.getEntity().getContent()));
 

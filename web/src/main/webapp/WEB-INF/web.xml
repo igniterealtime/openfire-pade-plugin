@@ -34,6 +34,16 @@
 		<url-pattern>/interface_config.js</url-pattern>
 	</servlet-mapping>
 
+	<servlet>
+		<servlet-name>inProgressList</servlet-name>
+		<servlet-class>org.jivesoftware.openfire.plugin.ofmeet.InProgressListServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>inProgressList</servlet-name>
+		<url-pattern>/inProgressList.json</url-pattern>
+	</servlet-mapping>
+
 	<filter>
 		<filter-name>WatermarkFilter</filter-name>
 		<filter-class>org.jivesoftware.openfire.plugin.ofmeet.WatermarkFilter</filter-class>

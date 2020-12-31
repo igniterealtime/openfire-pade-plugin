@@ -128,7 +128,16 @@
         final String welcomeDesc = ParamUtils.getParameter( request, "welcomeDesc" );          
         final String welcomeContent = ParamUtils.getParameter( request, "welcomeContent" );
         final String welcomeToolbarContent = ParamUtils.getParameter( request, "welcomeToolbarContent" );
-        
+        final boolean welcomeRecentList = ParamUtils.getBooleanParameter( request, "welcomepageRecentList" );
+        final boolean welcomeInProgressList = ParamUtils.getBooleanParameter( request, "welcomepageInProgressList" );
+        final String welcomeInProgressListInterval = request.getParameter( "welcomepageInProgressListInterval" );
+        try {
+            Integer.parseInt( welcomeInProgressListInterval );
+        } catch (NumberFormatException ex ) {
+            errors.put( "welcomeInProgressListInterval", "Cannot parse value as integer value." );
+        }
+        final String welcomeInProgressListExclude = ParamUtils.getParameter( request, "welcomepageInProgressListExclude" );
+
         final String language = ParamUtils.getParameter( request, "language" );                
         final boolean enableLanguageDetection = ParamUtils.getBooleanParameter( request, "enableLanguageDetection" );  
         
@@ -201,6 +210,10 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.random.roomnames", Boolean.toString( randomRoomNames ) );            
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.content", Boolean.toString( welcomepageContent ) );            
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.toolbarcontent", Boolean.toString( welcomepageToolbarContent ) );            
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.recentlist", Boolean.toString( welcomeRecentList ) );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist", Boolean.toString( welcomeInProgressList ) );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.interval", welcomeInProgressListInterval );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.exclude", welcomeInProgressListExclude );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.title",  welcomeTitle );     
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.description",  welcomeDesc );  
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcome.content",  welcomeContent );              
@@ -485,6 +498,26 @@
                     <input type="checkbox" name="welcomepageToolbarContent" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.toolbarcontent", false) ? "checked" : ""}>
                     <fmt:message key="ofmeet.welcomepage.toolbarcontent" />
                 </td>
+            </tr>
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="welcomepageRecentList" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.recentlist", true) ? "checked" : ""}>
+                    <fmt:message key="ofmeet.welcomepage.recentlist" />
+                </td>
+            </tr>
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="welcomepageInProgressList" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist", false) ? "checked" : ""}>
+                    <fmt:message key="ofmeet.welcomepage.inprogresslist" />
+                </td>
+            </tr>
+            <tr>
+                <td width="200"><fmt:message key="ofmeet.welcomepage.inprogresslist.interval" />:</td>
+                <td><input type="text" size="60" maxlength="100" name="welcomepageInProgressListInterval" value="${admin:getIntProperty("org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.interval", 10)}"></td>
+            </tr>
+            <tr>
+                <td width="200"><fmt:message key="ofmeet.welcomepage.inprogresslist.exclude" />:</td>
+                <td><input type="text" size="60" maxlength="100" name="welcomepageInProgressListExclude" value="${admin:getProperty("org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.exclude", "secret_")}"></td>
             </tr>
         </table>
     </admin:contentBox>

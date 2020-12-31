@@ -52,11 +52,11 @@ public class InProgressListServlet extends HttpServlet
         {
             Log.trace( "[{}] conferences requested.", request.getRemoteAddr() );
 
-            response.setCharacterEncoding( "UTF-8" ); 
+            response.setCharacterEncoding( "UTF-8" );
             response.setContentType( "UTF-8" );
-            
+
             String service = "conference"; //mainMuc.split(".")[0];
-            List<MUCRoom> rooms = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(service).getChatRooms();        
+            List<MUCRoom> rooms = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(service).getChatRooms();
 
             URL requestUrl = new URL(request.getRequestURL().toString());
 
@@ -74,7 +74,7 @@ public class InProgressListServlet extends HttpServlet
                 String roomDecodedName = URLDecoder.decode(roomName, "UTF-8");
                 boolean bExclusion = false;
 
-                if ( roomName.equals("ofmeet") || roomName.equals("ofgasi") )
+                if ( roomName.equals("ofmeet") || roomName.equals("ofgasi") || !chatRoom.isPublicRoom() )
                 {
                     continue;
                 }
@@ -97,7 +97,7 @@ public class InProgressListServlet extends HttpServlet
                 {
                     JID jid = occupant.getUserAddress();
                     String nick = jid.getNode();
-                    
+
                     if (nick.equals("focus"))
                     {
                         focus = jid.getResource();
@@ -115,7 +115,7 @@ public class InProgressListServlet extends HttpServlet
                 {
                     continue;
                 }
-                
+
                 meeting.put( "name", roomDecodedName);
                 meeting.put( "url", new URL(requestUrl, "./" + roomName).toString());
                 meeting.put( "date", chatRoom.getCreationDate().getTime());

@@ -58,7 +58,9 @@ public class InProgressListServlet extends HttpServlet
             String service = "conference"; //mainMuc.split(".")[0];
             List<MUCRoom> rooms = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(service).getChatRooms();
 
-            URL requestUrl = new URL(request.getRequestURL().toString());
+            String url = (String) request.getAttribute("javax.servlet.forward.request_uri");
+            if (url == null) url = request.getRequestURL().toString();
+            URL requestUrl = new URL(url);
 
             final JSONArray meetings = new JSONArray();
 

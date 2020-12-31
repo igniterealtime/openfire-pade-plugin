@@ -105,6 +105,10 @@ public class InterfaceConfigServlet extends HttpServlet
             config.put( "OFMEET_WELCOME_PAGE_TOOLBARCONTENT",    JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.welcome.toolbarcontent",        ""                  ) );
             config.put( "OFMEET_CRYPTPAD_URL",                   JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.cryptpad.url", "https://cryptpad.fr"                ) );
             config.put( "OFMEET_WHITEBOARD_URL",                 JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.whiteboard.url", "https://wbo.ophir.dev/boards/"    ) );
+            
+            config.put( "RECENT_LIST_ENABLED",                   JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.recentlist",        true                ) );
+            config.put( "IN_PROGRESS_LIST_ENABLED",              JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist",    false               ) );
+            config.put( "IN_PROGRESS_LIST_INTERVAL",             JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.interval", 10                ) );
 
             config.put( "filmStripOnly",                         ofMeetConfig.getFilmstripOnly()      );
             config.put( "VERTICAL_FILMSTRIP",                    ofMeetConfig.getVerticalFilmstrip()  );

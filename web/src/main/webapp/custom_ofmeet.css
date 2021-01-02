@@ -42,35 +42,3 @@
 
 /* >>> */
 
-
-/* <<<
- * 20210102/G.Jaekel@DNB.DE     make "green" (good) connection state indicator hidden after a while to keep display clean
- */
-
-/* to restart an animation on hover, use two exact clones with a different name,  see https://css-tricks.com/restart-css-animation/  */
-
-@keyframes status-high-1 {
-  from { }
-  to { opacity: 0%; filter: opacity(0%); }
-}
-
-@keyframes status-high-2 {
-  from { }
-  to { opacity: 0%; filter: opacity(0%); }
-}
-
-.connection-indicator.status-high {
-  animation-name: status-high-1;
-  animation-delay: 20s;
-  animation-duration: 2s;
-  animation-fill-mode: forwards;
-}
-
-.connection-indicator.status-high:hover {
-  animation-name: status-high-2;
-  animation-delay: 20s;
-  animation-duration: 2s;
-  animation-fill-mode: forwards;
-}
-
-/* >>> */

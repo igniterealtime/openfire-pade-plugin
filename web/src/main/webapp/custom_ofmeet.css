@@ -42,22 +42,3 @@
 
 /* >>> */
 
-
-/* <<<
- * 20210102/G.Jaekel@DNB.DE     make "green" (good) connection state indicator hidden after a while to keep display clean
- */
-
-@keyframes status-high {
-  from { }
-  99% { width:0; height: 0; overflow: hidden; clip: rect(0,0,0,0); }
-  to { width:0; height:0; overflow: hidden; clip: rect(0,0,0,0); border: 0;}
-}
-
-.connection-indicator.status-high {
-   animation-name: status-high;
-   animation-delay: 20s;
-   animation-duration: 2s;
-   animation-fill-mode: forwards;
-}
-
-/* >>> */

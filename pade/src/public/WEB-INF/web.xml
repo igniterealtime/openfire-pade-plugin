@@ -41,6 +41,17 @@
         <servlet-name>webhookServlet</servlet-name>
         <url-pattern>/webhook</url-pattern>
     </servlet-mapping>
+    
+    <servlet>
+        <servlet-name>branding</servlet-name>
+        <servlet-class>org.jivesoftware.openfire.plugin.ofmeet.BrandingServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>branding</servlet-name>
+        <url-pattern>/options/branding.js</url-pattern>
+    </servlet-mapping>    
+    
     <filter>
         <filter-name>Github-XHubFilter</filter-name>
         <filter-class>fr.brouillard.oss.security.xhub.servlet.XHubFilter</filter-class>

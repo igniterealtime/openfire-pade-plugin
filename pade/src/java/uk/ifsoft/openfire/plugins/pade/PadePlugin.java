@@ -55,6 +55,8 @@ import org.jivesoftware.openfire.plugin.ofmeet.OfMeetPlugin;
 public class PadePlugin implements Plugin, MUCEventListener
 {
     private static final Logger Log = LoggerFactory.getLogger( PadePlugin.class );
+    public static PadePlugin self;
+    public static String webRoot;
 
     private ServletContextHandler contextRest;
     private WebAppContext contextPublic;
@@ -73,6 +75,9 @@ public class PadePlugin implements Plugin, MUCEventListener
     @Override
     public void initializePlugin( final PluginManager manager, final File pluginDirectory )
     {
+        self = this;
+        webRoot = pluginDirectory.getPath() + "/classes";
+
         Log.info("start pade server");
 
         interceptor = new PushInterceptor();

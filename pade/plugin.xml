@@ -24,7 +24,10 @@
                 <item id="freeswitch-calls"         name="${config.freeswitch.calls.name}"          description="${config.freeswitch.calls.description}"            url="freeswitch-calls.jsp"/>
                 <item id="freeswitch-registrations" name="${config.freeswitch.registrations.name}"  description="${config.freeswitch.registrations.description}"    url="freeswitch-registrations.jsp"/>                                
                 <item id="freeswitch-gateways"      name="${config.freeswitch.gateways.name}"       description="${config.freeswitch.gateways.description}"                 url="freeswitch-gateways.jsp"/>                                
-            </sidebar>            
+            </sidebar>    
+           <sidebar id="siderbar-converse" name="${plugin.converse.title}">
+                <item id="converse-settings"      name="${config.converse.settings.name}"       description="${config.converse.settings.description}"         url="converse-settings.jsp"/>
+            </sidebar>              
         </tab>
     </adminconsole>      
 </plugin>

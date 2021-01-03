@@ -72,6 +72,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -80,6 +81,7 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.ifsoft.websockets.*;
 import java.util.concurrent.*;
@@ -92,6 +94,7 @@ import org.freeswitch.esl.client.IEslEventListener;
 import org.freeswitch.esl.client.transport.event.EslEvent;
 
 import org.jboss.netty.channel.ExceptionEvent;
+import org.json.JSONObject;
 
 /**
  * Bundles various Jitsi components into one, standalone Openfire plugin.
@@ -101,6 +104,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     private static final Logger Log = LoggerFactory.getLogger(OfMeetPlugin.class);
     private static final ScheduledExecutorService connExec = Executors.newSingleThreadScheduledExecutor();
     public static OfMeetPlugin self;
+    public static String webRoot;
     public boolean restartNeeded = false;
 
     private ManagerConnection managerConnection;
@@ -153,6 +157,8 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     public void initializePlugin(final PluginManager manager, final File pluginDirectory)
     {
         self = this;
+        webRoot = pluginDirectory.getPath() + "/classes";
+
         this.manager = manager;
         this.pluginDirectory = pluginDirectory;
 
@@ -169,6 +175,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
             ensureFocusUser();
             jitsiJicofoWrapper.initialize(pluginDirectory);
+            loadBranding();
         }
         catch ( Exception ex )
         {
@@ -544,6 +551,43 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
                 }
             }
         }
+    }
+
+    private void loadBranding()
+    {
+        JSONObject jsonObject;
+        String jsonString = getStringFromFile(webRoot + "/docs/options/branding.js");
+
+        if (jsonString.indexOf("var branding = ") == 0)
+        {
+            jsonObject = new JSONObject( jsonString.substring(15) );
+
+            for (String propertyName : jsonObject.keySet())
+            {
+                String json = jsonObject.getJSONObject(propertyName).toString();
+                Log.debug("loadBranding - processing " + propertyName + " " + json);
+                JiveGlobals.setProperty("pade.branding." + propertyName, json);
+            }
+        }
+        else {
+            Log.error( "[{}] Unexpected branding.js!\n" + jsonString);
+        }
+    }
+
+    private String getStringFromFile(String filePath)
+    {
+        StringBuilder contentBuilder = new StringBuilder();
+
+        try (Stream<String> stream = Files.lines( Paths.get(filePath), StandardCharsets.UTF_8))
+        {
+            stream.forEach(s -> contentBuilder.append(s).append("\n"));
+        }
+        catch (Exception e)
+        {
+            Log.error("getStringFromFile failed", e);
+        }
+
+        return contentBuilder.toString();
     }
 
     //-------------------------------------------------------

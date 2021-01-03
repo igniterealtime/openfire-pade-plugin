@@ -77,7 +77,11 @@ After a successful execution, a plugin should be available in this locations:
 
     pade/target/pade.jar       
     
-Pade will be available as a web page and progressive web application from /pade
+Pade Chat (Converse) will be available as a web page and progressive web application from /pade
 
     For example - https://desktop-545pc5b:7443/pade
+    
+Pade Meetings (Jitsi Meet) will be available as a web page and progressive web application from /ofmeet
+
+    For example - https://desktop-545pc5b:7443/ofmeet    
    

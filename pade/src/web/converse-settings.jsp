@@ -31,7 +31,19 @@
 
                 if (newValue != null)
                 {
-                    json.put("value", newValue); 
+                    if ("false".equals(newValue)) 
+                    {
+                        json.put("value", false);                     
+                    }
+                    else
+                    
+                    if ("true".equals(newValue)) 
+                    {
+                        json.put("value", true);                     
+                    }
+                    else {
+                        json.put("value", newValue);
+                    }
                 }
 
                 json.put("disable", true);
@@ -51,7 +63,7 @@
 %>
 <html>
 <head>
-   <title><fmt:message key="config.converse.settings.name" /></title>
+   <title><fmt:message key="config.converse.settings.branding" /></title>
    <meta name="pageID" content="converse-settings"/>
 </head>
 <body>
@@ -63,7 +75,12 @@
 <% } %>
 
 <p>
+    <fmt:message key="config.converse.settings.description" />
+    <br/>&nbsp;<br/>
+</p>
+<p>
     <fmt:message key="config.converse.connectivity.description" />&nbsp;<a target="_blank" href="<%= service_url %>"><%= service_url %></a>
+    <br/>&nbsp;<br/>
 </p> 
 <div class="jive-table">
 <form action="converse-settings.jsp" method="post">
@@ -71,7 +88,8 @@
         <table class="jive-table" cellpadding="0" cellspacing="0" border="0" width="100%">
             <thead> 
             <tr>
-                <th colspan="2"><fmt:message key="config.converse.settings.description"/></th>
+                <th><fmt:message key="config.converse.settings.name"/></th>
+                <th><fmt:message key="config.converse.settings.value"/></th>                
             </tr>
             </thead>
             <tbody>  

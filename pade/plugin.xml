@@ -26,7 +26,7 @@
                 <item id="freeswitch-gateways"      name="${config.freeswitch.gateways.name}"       description="${config.freeswitch.gateways.description}"                 url="freeswitch-gateways.jsp"/>                                
             </sidebar>    
            <sidebar id="siderbar-converse" name="${plugin.converse.title}">
-                <item id="converse-settings"      name="${config.converse.settings.name}"       description="${config.converse.settings.description}"         url="converse-settings.jsp"/>
+                <item id="converse-settings"      name="${config.converse.settings.branding}"       description="${config.converse.settings.description}"         url="converse-settings.jsp"/>
             </sidebar>              
         </tab>
     </adminconsole>      

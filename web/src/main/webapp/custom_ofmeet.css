@@ -1,4 +1,4 @@
-/* <<<
+/*
  * 20200427/G.Jaekel@DNB.DE   make raisehand more noticeable
  * 20200512/G.Jaekel@DNB.DE   make it even a bit more noticeable, humans seems more sensible to motion ...
  */
@@ -27,7 +27,7 @@
 }
 
 
-/* <<<
+/*
  * 20200522/G.Jaekel@DNB.DE     On small browser windows, the left toolbar renders to wide. Make it wrapping around.
  */
 
@@ -38,7 +38,7 @@
   flex-wrap: wrap;
 }
 
-/* <<<
+/*
  * 20210102/G.Jaekel@DNB.DE     make "green" (good) connection state indicator hidden after a while to keep display clean
  *
  * to restart an animation on hover, use two exact clones with a different name,  see https://css-tricks.com/restart-css-animation/
@@ -68,3 +68,12 @@
   animation-fill-mode: forwards;
 }
 
+
+/*
+ * 20210104/gj  Allow the Conferences Display at the Welcome Page to show more entires
+ */
+
+.welcome .tab-container .tab-content {
+    height: unset;
+    max-height: 500pt;
+}

@@ -564,9 +564,15 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
             for (String propertyName : jsonObject.keySet())
             {
+                String existingValue = JiveGlobals.getProperty("pade.branding." + propertyName, null);
                 String json = jsonObject.getJSONObject(propertyName).toString();
-                Log.debug("loadBranding - processing " + propertyName + " " + json);
-                JiveGlobals.setProperty("pade.branding." + propertyName, json);
+
+                Log.debug("loadBranding - processing " + propertyName + ", existing=" + existingValue + ", branding=" + json);
+
+                if (existingValue == null)  // add new settings, don't overwrite existing settings
+                {
+                    JiveGlobals.setProperty("pade.branding." + propertyName, json);
+                }
             }
         }
         else {

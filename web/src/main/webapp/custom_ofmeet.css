@@ -29,6 +29,7 @@
 
 /*
  * 20200522/G.Jaekel@DNB.DE     On small browser windows, the left toolbar renders to wide. Make it wrapping around.
+ * 20210109/G.Jaekel@DNB.DE     The same issue rises for the right toolbar, meanwhile
  */
 
 .new-toolbox {
@@ -37,6 +38,10 @@
 .button-group-left {
   flex-wrap: wrap;
 }
+.button-group-right {
+  flex-wrap: wrap;
+}
+
 
 /*
  * 20210102/G.Jaekel@DNB.DE     make "green" (good) connection state indicator hidden after a while to keep display clean

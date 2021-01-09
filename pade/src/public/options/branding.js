@@ -1,4 +1,5 @@
 var branding = {
+    "ofmeetUrl"               : {"disable": false, "value": "https://pade.chat:5443/ofmeet/"},
     "enableBeeKeeper"         : {"disable": true, "value": false},
     "beeKeeperTitle"          : {"disable": true},
     "beeKeeperTopic"          : {"disable": true},

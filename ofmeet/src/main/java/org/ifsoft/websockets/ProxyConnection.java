@@ -96,10 +96,25 @@ public class ProxyConnection
         }
     }
 
+    public void stop()
+    {
+        Log.debug("ProxyConnection - stop");
+
+        try
+        {
+            client.stop();
+        }
+        catch (Exception e)
+        {
+            Log.error("ProxyConnection - stop", e);
+        }
+    }
+
     public void disconnect()
     {
         Log.debug("ProxyConnection - disconnect");
         if (proxySocket != null) proxySocket.disconnect();
+        if (client != null) stop();
     }
 
     public void onClose(int code, String reason)

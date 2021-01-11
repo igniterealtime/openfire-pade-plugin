@@ -62,7 +62,7 @@ public class BookmarkInterceptor implements PacketInterceptor
         // Only interested in stanzas that are either:
         // - from the server itself.
         // - sent 'on behalf of' the user that is the recipient of the stanza ('from' matches session address).
-        if ( packet.getFrom() != null
+        if ( packet.getFrom() != null && session.getAddress() != null
             && !packet.getFrom().asBareJID().equals( session.getAddress().asBareJID() )
             && !packet.getFrom().toBareJID().equals( XMPPServer.getInstance().getServerInfo().getXMPPDomain() ) )
         {

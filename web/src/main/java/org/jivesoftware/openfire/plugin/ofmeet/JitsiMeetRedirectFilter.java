@@ -70,6 +70,7 @@ public class JitsiMeetRedirectFilter implements Filter
             }
         }
 
+        if (uri.contains("/webchat")) return true;
         if (uri.contains("/swagger")) return true;
         if (uri.contains("/win-sso")) return true;
         if (uri.contains("/dashboard")) return true;

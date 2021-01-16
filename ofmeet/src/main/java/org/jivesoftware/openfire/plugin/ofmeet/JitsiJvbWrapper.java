@@ -145,6 +145,12 @@ public class JitsiJvbWrapper implements ProcessListener
             "            public-address = " + public_ip,
             "        }",
             "    }",
+            "",
+            "    sctp {",
+            "        # Whether SCTP data channels are enabled",
+            "        enabled = " + (JiveGlobals.getBooleanProperty( "ofmeet.bridge.ws.channel", OSUtils.IS_WINDOWS) ? "false" : "true"),
+            "    }",
+            "",
             "}"
         );
 

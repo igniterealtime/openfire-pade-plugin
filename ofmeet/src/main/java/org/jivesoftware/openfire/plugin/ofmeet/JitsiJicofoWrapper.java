@@ -29,6 +29,9 @@ import org.jivesoftware.util.JiveGlobals;
 import org.jivesoftware.util.StringUtils;
 
 import java.io.*;
+import java.nio.file.*;
+import java.nio.charset.Charset;
+import java.util.*;
 import org.jitsi.util.OSUtils;
 import java.util.Properties;
 
@@ -109,6 +112,24 @@ public class JitsiJicofoWrapper implements ProcessListener
 
         props.store(new FileOutputStream(props_file), "Jitsi Colibri Focus");
 
+        List<String> lines = Arrays.asList(
+            "jicofo {",
+            "    sctp {",
+            "        # Whether SCTP data channels are enabled",
+            "        enabled = " + (JiveGlobals.getBooleanProperty( "ofmeet.bridge.ws.channel", OSUtils.IS_WINDOWS) ? "false" : "true"),
+            "    }",
+            "",
+            "}"
+        );
+
+        Path configFile = Paths.get(jicofoHomePath + File.separator + "application.conf");
+        try
+        {
+            Files.write(configFile, lines, Charset.forName("UTF-8"));
+        } catch (Exception e) {
+            Log.error("createConfigFile error", e);
+        }
+
         final String javaHome = System.getProperty("java.home");
         String defaultOptions = "-Xmx1024m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp";
         String javaExec = javaHome + File.separator + "bin" + File.separator + "java";
@@ -120,10 +141,11 @@ public class JitsiJicofoWrapper implements ProcessListener
         }
 
         final String customOptions = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.focus.jvm.customOptions", defaultOptions);
-        final String cmdLine = javaExec + " " + customOptions + " -Dnet.java.sip.communicator.SC_HOME_DIR_LOCATION=" + jicofoHomePath + " -Dnet.java.sip.communicator.SC_HOME_DIR_NAME=config -Djava.util.logging.config.file=./logging.properties -Djdk.tls.ephemeralDHKeySize=2048 -cp ./jicofo-1.1-SNAPSHOT.jar" + File.pathSeparator + "./jicofo-1.1-SNAPSHOT-jar-with-dependencies.jar org.jitsi.jicofo.Main" + parameters;
+        final String cmdLine = javaExec + " " + customOptions + " -Dconfig.file=" + configFile + " -Dnet.java.sip.communicator.SC_HOME_DIR_LOCATION=" + jicofoHomePath + " -Dnet.java.sip.communicator.SC_HOME_DIR_NAME=config -Djava.util.logging.config.file=./logging.properties -Djdk.tls.ephemeralDHKeySize=2048 -cp ./jicofo-1.1-SNAPSHOT.jar" + File.pathSeparator + "./jicofo-1.1-SNAPSHOT-jar-with-dependencies.jar org.jitsi.jicofo.Main" + parameters;
         jicofoThread = Spawn.startProcess(cmdLine, new File(jicofoHomePath), this);
 
         Log.info( "Successfully initialized Jitsi Focus Component (jicofo).\n"  + cmdLine);
+        Log.debug( "Jicofo config.\n" + String.join("\n", lines));
     }
 
     public synchronized void destroy() throws Exception

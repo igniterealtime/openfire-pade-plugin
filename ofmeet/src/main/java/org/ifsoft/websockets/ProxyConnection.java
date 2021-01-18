@@ -16,7 +16,10 @@ import javax.net.*;
 import javax.net.ssl.*;
 import javax.security.auth.callback.*;
 
+import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.client.http.HttpClientTransportOverHTTP;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
+import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.eclipse.jetty.websocket.api.Session;
@@ -38,39 +41,39 @@ import org.xmpp.packet.*;
 public class ProxyConnection
 {
     private static Logger Log = LoggerFactory.getLogger( "ProxyConnection" );
-    private boolean isSecure = false;
     private ProxyWebSocket socket;
     private boolean connected = false;
-    private WebSocketClient client = null;
-    private ProxySocket proxySocket = null;
-    private List<String> subprotocol = null;
+
+    private final WebSocketClient wsClient;
+    private final ProxySocket proxySocket;
+    private final boolean isSecure;
 
     public ProxyConnection(URI uri, List<String> subprotocol, int connectTimeout)
     {
         Log.info("ProxyConnection " + uri + " " + subprotocol);
 
-        this.subprotocol = subprotocol;
-
-        SslContextFactory sec = new SslContextFactory();
-
+        final SslContextFactory clientSslContextFactory = SslContextFactoryProvider.getClientSslContextFactory();
         if("wss".equals(uri.getScheme()))
         {
-            sec.setValidateCerts(false);
-
             Log.debug("ProxyConnection - SSL");
             getSSLContext();
             isSecure = true;
         }
+        else isSecure = false;
 
-        client = new WebSocketClient(sec);
+        final HttpClient httpClient = new HttpClient(new HttpClientTransportOverHTTP(1),clientSslContextFactory);
+        final QueuedThreadPool queuedThreadPool = QueuedThreadPoolProvider.getQueuedThreadPool("ProxyConnection-HttpClient");
+        httpClient.setExecutor(queuedThreadPool);
+        httpClient.setConnectTimeout(connectTimeout);
+        wsClient = new WebSocketClient(httpClient);
         proxySocket = new ProxySocket(this);
 
         try
         {
-            client.start();
-            ClientUpgradeRequest request = new ClientUpgradeRequest();
+            wsClient.start();
+            final ClientUpgradeRequest request = new ClientUpgradeRequest();
             if (subprotocol != null) request.setSubProtocols(subprotocol);
-            client.connect(proxySocket, uri, request);
+            wsClient.connect(proxySocket, uri, request);
 
             Log.debug("Connecting to : " + uri);
             connected = true;
@@ -102,7 +105,7 @@ public class ProxyConnection
 
         try
         {
-            client.stop();
+            wsClient.stop();
         }
         catch (Exception e)
         {
@@ -114,7 +117,7 @@ public class ProxyConnection
     {
         Log.debug("ProxyConnection - disconnect");
         if (proxySocket != null) proxySocket.disconnect();
-        if (client != null) stop();
+        if (wsClient != null) stop();
     }
 
     public void onClose(int code, String reason)
@@ -143,10 +146,6 @@ public class ProxyConnection
 
     public boolean isConnected() {
         return connected;
-    }
-
-    public void setSecure(boolean isSecure) {
-        this.isSecure = isSecure;
     }
 
     private SSLContext getSSLContext()

@@ -220,6 +220,9 @@ var ofmeet = (function(of)
             {
                 console.debug("user join", id, participants);
                 addParticipant(id);
+                
+                document.querySelector("#participant_"+id).setAttribute("draggable","true") // gj: POC
+
             });
 
             APP.conference._room.on(JitsiMeetJS.events.conference.USER_LEFT, function (id)

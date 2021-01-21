@@ -26,11 +26,12 @@ var ofmeet = (function(of)
     const SMILIES = [":)", ":(", ":D", ":+1:", ":P", ":wave:", ":blush:", ":slightly_smiling_face:", ":scream:", ":*", ":-1:", ":mag:", ":heart:", ":innocent:", ":angry:", ":angel:", ";(", ":clap:", ";)", ":beer:"];
     const nickColors = {}, padsList = [], captions = {msgsDisabled: true, msgs: []}, breakout = {rooms: [], duration: 60, roomCount: 10, wait: 10}, pdf_body = [];
     const lostAudioWorkaroundInterval = 300000; // 5min
+    const i18n = i18next.getFixedT(null, 'ofmeet');
 
     let tagsModal = null, padsModal = null, breakoutModal = null, contactsModal = null;
     let padsModalOpened = false, contactsModalOpened = false, swRegistration = null, participants = {}, recordingAudioTrack = {}, recordingVideoTrack = {}, videoRecorder = {}, recorderStreams = {}, customStore = {}, filenames = {}, dbnames = [];
     let clockTrack = {start: 0, stop: 0, joins: 0, leaves: 0}, handsRaised = 0;
-    let tags = {location: "", date: (new Date()).toISOString().split('T')[0], subject: "", host: "", activity: ""};
+    let tags = {location: "", date: localizedDate(new Date()).format('LL'), subject: "", host: "", activity: ""};
     let audioTemporaryUnmuted = false, cursorShared = false;
     let breakoutIconVisible = false;
     //-------------------------------------------------------
@@ -674,7 +675,7 @@ var ofmeet = (function(of)
 
     function createRecordButton()
     {
-        const recordButton = addToolbarItem('ofmeet-record', '<div class="toolbox-icon "><div class="jitsi-icon "><svg id="ofmeet-record" style="fill: white;" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 1000 1000" enable-background="new 0 0 1000 1000" xml:space="preserve"><g><path d="M928.8,438.8L745,561.3c0-37.2-16.9-70.1-43.1-92.5c62.3-37.5,104.3-105.1,104.3-183.1c0-118.4-96-214.4-214.4-214.4c-118.4,0-214.4,96-214.4,214.4c0,60.1,24.9,114.2,64.7,153.1H329.8c29.3-32.5,47.7-75.2,47.7-122.5c0-101.5-82.3-183.8-183.8-183.8C92.3,132.5,10,214.8,10,316.3c0,55.4,25,104.4,63.8,138.1C35.9,475.2,10,515,10,561.3v245c0,67.6,54.9,122.5,122.5,122.5h490c67.6,0,122.5-54.9,122.5-122.5v-30.6l183.8,153.1c33.8,0,61.3-27.4,61.3-61.3V500C990,466.2,962.6,438.8,928.8,438.8z M71.3,316.3c0-67.7,54.9-122.5,122.5-122.5c67.6,0,122.5,54.8,122.5,122.5s-54.9,122.5-122.5,122.5C126.1,438.7,71.3,383.9,71.3,316.3z M683.8,806.3c0,33.8-27.4,61.3-61.3,61.3h-490c-33.8,0-61.3-27.4-61.3-61.3v-245c0-33.8,27.4-61.3,61.3-61.3h490c33.8,0,61.3,27.4,61.3,61.3V806.3z M591.9,439.1c-84.8,0-153.5-68.7-153.5-153.5c0-84.8,68.7-153.5,153.5-153.5c84.8,0,153.5,68.7,153.5,153.5C745.4,370.4,676.6,439.1,591.9,439.1z M928.8,545.9v281.2c0,1.6,0,2.2,0,2.2v38.1L745,714.4v-61.3c0-16.2,0-12.3,0-30.6L928.8,500C928.8,543,928.8,520.6,928.8,545.9z"/></g></svg></div></div>', "Record Meeting");
+        const recordButton = addToolbarItem('ofmeet-record', '<div class="toolbox-icon "><div class="jitsi-icon "><svg id="ofmeet-record" style="fill: white;" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 1000 1000" enable-background="new 0 0 1000 1000" xml:space="preserve"><g><path d="M928.8,438.8L745,561.3c0-37.2-16.9-70.1-43.1-92.5c62.3-37.5,104.3-105.1,104.3-183.1c0-118.4-96-214.4-214.4-214.4c-118.4,0-214.4,96-214.4,214.4c0,60.1,24.9,114.2,64.7,153.1H329.8c29.3-32.5,47.7-75.2,47.7-122.5c0-101.5-82.3-183.8-183.8-183.8C92.3,132.5,10,214.8,10,316.3c0,55.4,25,104.4,63.8,138.1C35.9,475.2,10,515,10,561.3v245c0,67.6,54.9,122.5,122.5,122.5h490c67.6,0,122.5-54.9,122.5-122.5v-30.6l183.8,153.1c33.8,0,61.3-27.4,61.3-61.3V500C990,466.2,962.6,438.8,928.8,438.8z M71.3,316.3c0-67.7,54.9-122.5,122.5-122.5c67.6,0,122.5,54.8,122.5,122.5s-54.9,122.5-122.5,122.5C126.1,438.7,71.3,383.9,71.3,316.3z M683.8,806.3c0,33.8-27.4,61.3-61.3,61.3h-490c-33.8,0-61.3-27.4-61.3-61.3v-245c0-33.8,27.4-61.3,61.3-61.3h490c33.8,0,61.3,27.4,61.3,61.3V806.3z M591.9,439.1c-84.8,0-153.5-68.7-153.5-153.5c0-84.8,68.7-153.5,153.5-153.5c84.8,0,153.5,68.7,153.5,153.5C745.4,370.4,676.6,439.1,591.9,439.1z M928.8,545.9v281.2c0,1.6,0,2.2,0,2.2v38.1L745,714.4v-61.3c0-16.2,0-12.3,0-30.6L928.8,500C928.8,543,928.8,520.6,928.8,545.9z"/></g></svg></div></div>', i18n('toolbar.recordMeeting'));
 
         if (recordButton) recordButton.addEventListener("click", function(evt)
         {
@@ -721,7 +722,7 @@ var ofmeet = (function(of)
 
     function createDesktopButton()
     {
-        const desktopButton = addToolbarItem('ofmeet-desktop', '<div class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.desktop + '</div></div>', "Record Desktop App (Including Meeting Browser Tab)");
+        const desktopButton = addToolbarItem('ofmeet-desktop', '<div class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.desktop + '</div></div>', i18n('toolbar.recordDesktopApp'));
 
         if (desktopButton) desktopButton.addEventListener("click", function(evt)
         {
@@ -737,7 +738,7 @@ var ofmeet = (function(of)
 
     function createTagsButton()
     {
-        const tagsButton = addToolbarItem('ofmeet-tags', '<div id="ofmeet-tags" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;"><svg height="24" width="24" viewBox="0 0 24 24"><path d="M18 11.016V9.985a.96.96 0 00-.984-.984h-3c-.563 0-1.031.422-1.031.984v4.031c0 .563.469.984 1.031.984h3a.96.96 0 00.984-.984v-1.031h-1.5v.516h-2.016v-3H16.5v.516H18zm-6.984 0V9.985c0-.563-.469-.984-1.031-.984h-3a.96.96 0 00-.984.984v4.031a.96.96 0 00.984.984h3c.563 0 1.031-.422 1.031-.984v-1.031h-1.5v.516H7.5v-3h2.016v.516h1.5zm7.968-7.032C20.062 3.984 21 4.922 21 6v12c0 1.078-.938 2.016-2.016 2.016H5.015c-1.125 0-2.016-.938-2.016-2.016V6c0-1.078.891-2.016 2.016-2.016h13.969z"></path></svg></div></div>', "Enable Conference Captions/Subtitles");
+        const tagsButton = addToolbarItem('ofmeet-tags', '<div id="ofmeet-tags" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;"><svg height="24" width="24" viewBox="0 0 24 24"><path d="M18 11.016V9.985a.96.96 0 00-.984-.984h-3c-.563 0-1.031.422-1.031.984v4.031c0 .563.469.984 1.031.984h3a.96.96 0 00.984-.984v-1.031h-1.5v.516h-2.016v-3H16.5v.516H18zm-6.984 0V9.985c0-.563-.469-.984-1.031-.984h-3a.96.96 0 00-.984.984v4.031a.96.96 0 00.984.984h3c.563 0 1.031-.422 1.031-.984v-1.031h-1.5v.516H7.5v-3h2.016v.516h1.5zm7.968-7.032C20.062 3.984 21 4.922 21 6v12c0 1.078-.938 2.016-2.016 2.016H5.015c-1.125 0-2.016-.938-2.016-2.016V6c0-1.078.891-2.016 2.016-2.016h13.969z"></path></svg></div></div>', i18n('toolbar.enableConferenceTags'));
 
         if (tagsButton) tagsButton.addEventListener("click", function(evt)
         {
@@ -748,7 +749,7 @@ var ofmeet = (function(of)
 
     function createPadsButton()
     {
-        const padsButton = addToolbarItem('ofmeet-pads', '<div id="ofmeet-pads" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;"><img width="22" src="https://sandbox.cryptpad.info/customize/images/logo_white.png"/></div></div>', "Launch CryptPad Application", ".button-group-right");
+        const padsButton = addToolbarItem('ofmeet-pads', '<div id="ofmeet-pads" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;"><img width="22" src="https://sandbox.cryptpad.info/customize/images/logo_white.png"/></div></div>', i18n('toolbar.launchCryptPadApplication'), ".button-group-right");
 
         if (padsButton) padsButton.addEventListener("click", function(evt)
         {
@@ -759,7 +760,7 @@ var ofmeet = (function(of)
 
     function createAvatarButton()
     {
-        const avatarButton = addToolbarItem('ofmeet-avatar', '<div id="ofmeet-avatar" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.picture + '</div><input style="display:none;" id="ofmeet-upload-avatar" type="file" name="files[]"></div>', "Change personal avatar", ".button-group-right");
+        const avatarButton = addToolbarItem('ofmeet-avatar', '<div id="ofmeet-avatar" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.picture + '</div><input style="display:none;" id="ofmeet-upload-avatar" type="file" name="files[]"></div>', i18n('toolbar.changePersonalAvatar'), ".button-group-right");
 
         if (avatarButton) avatarButton.addEventListener("click", function(evt)
         {
@@ -987,21 +988,21 @@ var ofmeet = (function(of)
         const template =
         '    <!-- Modal Header -->' +
         '    <div class="modal-header">' +
-        '      <h4 class="modal-title">Conference Captions/Sub Titles</h4>' +
+        '      <h4 class="modal-title">' + i18n('tag.conferenceCaptionsSubTitles') + '</h4>' +
         '    </div>' +
 
         '    <!-- Modal body -->' +
         '    <div class="modal-body">' +
         '       <div class="form-group">' +
-        '       <label for="tags-location" class="col-form-label">Location:</label>' +
+        '       <label for="tags-location" class="col-form-label">' + i18n('tag.location') + ':</label>' +
         '       <input id="tags-location" type="text" class="form-control" name="tag-location" value="' + tags.location + '"/>' +
-        '       <label for="tags-date" class="col-form-label">Date:</label>' +
+        '       <label for="tags-date" class="col-form-label">' + i18n('tag.date') + ':</label>' +
         '       <input id="tags-date" type="text" class="form-control" name="tags-date"/>' +
-        '       <label for="tags-subject" class="col-form-label">Subject:</label>' +
+        '       <label for="tags-subject" class="col-form-label">' + i18n('tag.subject') + ':</label>' +
         '       <input id="tags-subject" type="text" class="form-control" name="tags-subject" value="' + tags.subject + '"/>' +
-        '       <label for="tags-host" class="col-form-label">Host:</label>' +
+        '       <label for="tags-host" class="col-form-label">' + i18n('tag.host') + ':</label>' +
         '       <input id="tags-host" type="text" class="form-control" name="tags-host" value="' + tags.host + '"/>' +
-        '       <label for="tags-activity" class="col-form-label">Activity:</label>' +
+        '       <label for="tags-activity" class="col-form-label">' + i18n('tag.activity') + ':</label>' +
         '       <input id="tags-activity" type="text" class="form-control" name="tags-activity" value="' + tags.activity + '"/>' +
         '       </div>' +
         '    </div>'
@@ -1021,7 +1022,7 @@ var ofmeet = (function(of)
                     console.debug('tags modal closed');
                 },
                 beforeOpen: function() {
-                    document.getElementById('tags-date').value = (new Date()).toISOString().split('T')[0]
+                    document.getElementById('tags-date').value = localizedDate(new Date()).format('LL')
                 },
                 beforeClose: function() {
                     tags.location = document.getElementById('tags-location').value;
@@ -1032,21 +1033,26 @@ var ofmeet = (function(of)
 
                     if (tags.location != "")
                     {
-                        document.getElementById("subtitles").innerHTML = `<b>Location</b>: ${tags.location} <br/><b>Date</b>: ${tags.date} <br/><b>Subject</b>: ${tags.subject} <br/><b>Host</b>: ${tags.host} <br/><b>Activity</b>: ${tags.activity}`;
+                        document.getElementById("subtitles").innerHTML =
+                        	`<b>` + i18n('tag.location') + `</b>: ${tags.location} <br/><b>` +
+                        	i18n('tag.date') + `</b>: ${tags.date} <br/><b>` +
+                        	i18n('tag.subject') + `</b>: ${tags.subject} <br/><b>` +
+                        	i18n('tag.host') + `</b>: ${tags.host} <br/><b>` +
+                        	i18n('tag.activity') + `</b>: ${tags.activity}`;
                     }
                     return true;
                 }
             });
             tagsModal.setContent(template);
 
-            tagsModal.addFooterBtn('Save', 'btn btn-success tingle-btn tingle-btn--primary', function() {
+            tagsModal.addFooterBtn(i18n('tag.save'), 'btn btn-success tingle-btn tingle-btn--primary', function() {
                 // here goes some logic
                 tagsModal.close();
             });
 
-            tagsModal.addFooterBtn('Cancel', 'btn btn-danger tingle-btn tingle-btn--danger', function() {
+            tagsModal.addFooterBtn(i18n('tag.cancel'), 'btn btn-danger tingle-btn tingle-btn--danger', function() {
                 event.preventDefault();
-                tags = {location: "", date: (new Date()).toISOString().split('T')[0], subject: "", host: "", activity: ""};
+                tags = {location: "", date: localizedDate(new Date()).format('LL'), subject: "", host: "", activity: ""};
 
                 document.getElementById('tags-location').value = tags.location;
                 document.getElementById('tags-date').value = tags.date;
@@ -1058,7 +1064,7 @@ var ofmeet = (function(of)
                 tagsModal.close();
             });
 
-            const msgCaptions = (captions.msgsDisabled ? 'Enable' : 'Disable') + ' Message Captions';
+            const msgCaptions = (captions.msgsDisabled ? i18n('tag.enableMessageCaptions') : i18n('tag.disableMessageCaptions'));
             const msgClass = (captions.msgsDisabled ? 'btn-secondary' : 'btn-success') + ' btn tingle-btn tingle-btn--pull-right';
 
             if (interfaceConfig.OFMEET_SHOW_CAPTIONS)
@@ -1067,14 +1073,14 @@ var ofmeet = (function(of)
                     captions.msgsDisabled = !captions.msgsDisabled;
                     evt.target.classList.remove(captions.msgsDisabled ? 'btn-success' : 'btn-secondary');
                     evt.target.classList.add(captions.msgsDisabled ? 'btn-secondary' : 'btn-success');
-                    evt.target.innerHTML = (captions.msgsDisabled ? 'Enable' : 'Disable') + ' Message Captions';
+                    evt.target.innerHTML = (captions.msgsDisabled ? i18n('tag.enableMessageCaptions') : i18n('tag.disableMessageCaptions'));
                     if (captions.ele) captions.ele.innerHTML = "";
                 });
             }
 
             if (of.recognition)
             {
-                const transcriptCaptions = (captions.transcriptDisabled ? 'Enable' : 'Disable') + ' Voice Transcription';
+                const transcriptCaptions = (captions.transcriptDisabled ? i18n('tag.enableVoiceTranscription') : i18n('tag.disableVoiceTranscription'));
                 const transcriptClass = (captions.transcriptDisabled ? 'btn-secondary' : 'btn-success') + ' btn tingle-btn tingle-btn--pull-right';
 
                 tagsModal.addFooterBtn(transcriptCaptions, transcriptClass, function(evt)
@@ -1083,7 +1089,7 @@ var ofmeet = (function(of)
                     of.recognitionActive = !captions.transcriptDisabled;
                     evt.target.classList.remove(captions.transcriptDisabled ? 'btn-success' : 'btn-secondary');
                     evt.target.classList.add(captions.transcriptDisabled ? 'btn-secondary' : 'btn-success');
-                    evt.target.innerHTML = (captions.transcriptDisabled ? 'Enable' : 'Disable') + ' Voice Transcription';
+                    evt.target.innerHTML = (captions.transcriptDisabled ? i18n('tag.enableVoiceTranscription') : i18n('tag.disableVoiceTranscription'));
 
                     if (captions.transcriptDisabled) of.recognition.stop();
                     if (!captions.transcriptDisabled) of.recognition.start();
@@ -1110,7 +1116,7 @@ var ofmeet = (function(of)
 
     function createPhotoButton()
     {
-        const photoButton = addToolbarItem('ofmeet-photo', '<div id="ofmeet-photo" class="toolbox-icon "><div class="jitsi-icon"><svg style="fill: white;" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M5 5h-3v-1h3v1zm8 5c-1.654 0-3 1.346-3 3s1.346 3 3 3 3-1.346 3-3-1.346-3-3-3zm11-4v15h-24v-15h5.93c.669 0 1.293-.334 1.664-.891l1.406-2.109h8l1.406 2.109c.371.557.995.891 1.664.891h3.93zm-19 4c0-.552-.447-1-1-1-.553 0-1 .448-1 1s.447 1 1 1c.553 0 1-.448 1-1zm13 3c0-2.761-2.239-5-5-5s-5 2.239-5 5 2.239 5 5 5 5-2.239 5-5z"/></svg></div></div>', "Take Photo");
+        const photoButton = addToolbarItem('ofmeet-photo', '<div id="ofmeet-photo" class="toolbox-icon "><div class="jitsi-icon"><svg style="fill: white;" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M5 5h-3v-1h3v1zm8 5c-1.654 0-3 1.346-3 3s1.346 3 3 3 3-1.346 3-3-1.346-3-3-3zm11-4v15h-24v-15h5.93c.669 0 1.293-.334 1.664-.891l1.406-2.109h8l1.406 2.109c.371.557.995.891 1.664.891h3.93zm-19 4c0-.552-.447-1-1-1-.553 0-1 .448-1 1s.447 1 1 1c.553 0 1-.448 1-1zm13 3c0-2.761-2.239-5-5-5s-5 2.239-5 5 2.239 5 5 5 5-2.239 5-5z"/></svg></div></div>', i18n('toolbar.takePhoto'));
 
         if (photoButton) photoButton.addEventListener("click", function(evt)
         {
@@ -1138,12 +1144,12 @@ var ofmeet = (function(of)
         {
             context.font = font;
             context.fillStyle = "#fff";
-            context.fillText("Hands Raised: " + handsRaised, 50, 25);
-            context.fillText("Location: " + tags.location, 50, 50);
-            context.fillText("Date: " +  tags.date, 50, 75);
-            context.fillText("Subject: " +  tags.subject, 50, 100);
-            context.fillText("Host: " +  tags.host, 50, 125);
-            context.fillText("Activity: " +  tags.activity, 50, 150);
+            context.fillText(i18n('takePhoto.handsRaised') + ": " + handsRaised, 50, 25);
+            context.fillText(i18n('takePhoto.location') + ": " + tags.location, 50, 50);
+            context.fillText(i18n('takePhoto.date') + ": " +  tags.date, 50, 75);
+            context.fillText(i18n('takePhoto.subject') + ": " +  tags.subject, 50, 100);
+            context.fillText(i18n('takePhoto.host') + ": " +  tags.host, 50, 125);
+            context.fillText(i18n('takePhoto.activity') + ": " +  tags.activity, 50, 150);
         }
 
         canvas.toBlob(function(blob)
@@ -1578,7 +1584,7 @@ var ofmeet = (function(of)
         if (!el.dataset.eid) return;
 
         const id = el.dataset.eid;
-        const label = participants[id]._displayName || 'Anonymous-' + id;
+        const label = participants[id]._displayName || i18n('breakout.anonymous', {id: id});
         const jid = participants[id]._jid;
         const webinar = participants[id]._tracks.length > 0 ? "false" : "true";
 
@@ -1627,7 +1633,7 @@ var ofmeet = (function(of)
             handsRaised = handsRaised + (ofHandRaised ? +1 : ( handsRaised > 0 ? -1 : 0));
             const handsTotal = 1 + APP.conference.listMembers().length;
             const handsPercentage = Math.round(100*handsRaised/handsTotal);
-            const label = handsRaised > 0 ? ("Hands Raised: " + handsRaised + " of " + handsTotal + " (" + handsPercentage + "%)" ) : "";
+            const label = handsRaised > 0 ? i18n('handsRaised.handsRaised', {raised: handsRaised, total: handsTotal, percentage: handsPercentage}) : "";
             if (captions.ele) captions.ele.innerHTML = label;
             captions.msgs.push({text: label, stamp: (new Date()).getTime()});
         }
@@ -1677,9 +1683,9 @@ var ofmeet = (function(of)
         {
             const json = JSON.parse(payload.innerHTML);
             console.debug("handleMucMessage", participant, json);
-            const label = json.action == 'breakout' ? 'Joining' : 'Leaving';
+            const label = json.action == 'breakout' ? 'breakout.joining' : 'breakout.leaving';
 
-            APP.UI.messageHandler.notify("Breakout Rooms", label + " breakout in " + breakout.wait + " seconds");
+            APP.UI.messageHandler.notify(i18n('breakout.breakoutRooms'), i18n(label, {sec: breakout.wait}));
             setTimeout(function() {location.href = json.url}, breakout.wait * 1000);
         }
 
@@ -1760,10 +1766,10 @@ var ofmeet = (function(of)
             if (breakout.duration > 0)
             {
                 breakout.timeout = setTimeout(toggleBreakout, 60000 * breakout.duration);
-                breakoutStatus("Breakout started and finishes in " + breakout.duration + " minutes ");
+                breakoutStatus(i18n('breakout.breakoutStartedWithDuration', {min: breakout.duration}));
             }
             else {
-                breakoutStatus("Breakout started. Click on reassemble to end and recall participants");
+                breakoutStatus(i18n('breakout.breakoutStarted'));
             }
         }
         else {
@@ -1783,14 +1789,14 @@ var ofmeet = (function(of)
                 }, 1000);
             }
 
-            breakoutStatus("Breakout has ended");
+            breakoutStatus(i18n('breakout.breakoutHasEnded'));
             if (breakout.timeout) clearTimeout(breakout.timeout);
         }
 
         breakout.started = !breakout.started;
         breakout.button.classList.remove(breakout.started ? 'btn-success' : 'btn-secondary');
         breakout.button.classList.add(breakout.started ? 'btn-secondary' : 'btn-success');
-        breakout.button.innerHTML = breakout.started ? 'Reassemble' : 'Breakout';
+        breakout.button.innerHTML = breakout.started ? i18n('breakout.reassemble') : i18n('breakout.breakout');
     }
 
     function messageBreakoutRooms(text)
@@ -1831,7 +1837,7 @@ var ofmeet = (function(of)
 
         const boards = [{
             id: "participants",
-            title: "Meeting Participants",
+            title: i18n('breakout.meetingParticipants'),
             class: "participants",
             item: []
         }]
@@ -1842,7 +1848,7 @@ var ofmeet = (function(of)
         {
             boards[i+1] = {
                 id: "room_" + i,
-                title: "Room " + (i+1).toString(),
+                title: i18n('breakout.room', {n: (i+1).toString()}),
                 class: "room",
                 item: []
             }
@@ -1855,7 +1861,7 @@ var ofmeet = (function(of)
                 {
                     console.debug("allocateToRooms - participant", j, ids[j], participants[ids[j]]);
 
-                    const label = participants[ids[j]]._displayName || 'Anonymous-' + id;
+                    const label = participants[ids[j]]._displayName || i18n('breakout.anonymous', {id: id});
                     const jid = participants[ids[j]]._jid;
                     const webinar = participants[ids[j]]._tracks.length > 0 ? "false" : "true";
 
@@ -1920,7 +1926,7 @@ var ofmeet = (function(of)
             boards: [
               {
                 id: "participants",
-                title: "Meeting Participants",
+                title: i18n('breakout.meetingParticipants'),
                 class: "participants",
                 dragTo: [],
                 item: []
@@ -1934,7 +1940,7 @@ var ofmeet = (function(of)
         {
             kanbanConfig.boards[0].item.push({
                 id: id,
-                title: participants[id]._displayName || 'Anonymous-' + id,
+                title: participants[id]._displayName || i18n('breakout.anonymous', {id: id}),
                 drop: function(el) {
                   breakoutDragAndDrop(el);
                 }
@@ -1957,10 +1963,10 @@ var ofmeet = (function(of)
 
         const template =
             '<div class="modal-header">' +
-            '    <h4 class="modal-title">Breakout Rooms - <span id="breakout-title">' + ids.length + '</span> Participants</h4>' +
-            '       <label for="breakout-duration" class="col-form-label">Duration (mins):</label>' +
+            '    <h4 class="modal-title">' + i18n('breakout.breakoutRooms') + ' - ' + i18n('breakout.participants', {title: '<span id="breakout-title">' + ids.length + '</span>'}) + '</h4>' +
+            '       <label for="breakout-duration" class="col-form-label">' + i18n('breakout.duration') + '</label>' +
             '       <input id="breakout-duration" type="number" min="0" max="480" step="30" name="breakout-duration" value="' + breakout.duration + '"/>' +
-            '       <label for="breakout-rooms" class="col-form-label">Rooms:</label>' +
+            '       <label for="breakout-rooms" class="col-form-label">' + i18n('breakout.rooms') + '</label>' +
             '       <input id="breakout-rooms" type="number" min="1" max="10" name="breakout-rooms" value="' + count + '"/>' +
             '       <div id="breakout-status" style="width:30%; color:red"></div>' +
             '</div>' +
@@ -1988,12 +1994,12 @@ var ofmeet = (function(of)
                 }
             });
 
-            breakoutModal.addFooterBtn('Close', 'btn btn-danger tingle-btn tingle-btn--primary', function()
+            breakoutModal.addFooterBtn(i18n('breakout.close'), 'btn btn-danger tingle-btn tingle-btn--primary', function()
             {
                 breakoutModal.close();
             });
 
-            breakoutModal.addFooterBtn('Allocate', 'btn btn-success tingle-btn tingle-btn--primary', function()
+            breakoutModal.addFooterBtn(i18n('breakout.allocate'), 'btn btn-success tingle-btn tingle-btn--primary', function()
             {
                 const roomCount = parseInt(document.getElementById('breakout-rooms').value);
                 const ids = Object.getOwnPropertyNames(participants);
@@ -2001,16 +2007,16 @@ var ofmeet = (function(of)
                 if (ids.length > 0 && roomCount > 0)
                 {
                     allocateToRooms(roomCount);
-                    breakoutStatus("Allocated " + ids.length + " participants to " + roomCount + " rooms");
+                    breakoutStatus(i18n('breakout.allocatedMessage', {participants: ids.length, rooms: roomCount}));
                 }
                 else {
-                    breakoutStatus("Missing participants or rooms");
+                    breakoutStatus(i18n('breakout.missingParticipants'));
                 }
 
                 breakout.roomCount = roomCount;
             });
 
-            const label = breakout.started ? 'Reassemble' : 'Breakout';
+            const label = breakout.started ? i18n('breakout.reassemble') : i18n('breakout.breakout');
 
             breakoutModal.addFooterBtn(label, 'btn btn-success tingle-btn tingle-btn--primary', function(evt)
             {
@@ -2022,7 +2028,7 @@ var ofmeet = (function(of)
                     toggleBreakout();
                 }
                 else {
-                    breakoutStatus("Allocate participants first before breakout");
+                    breakoutStatus(i18n('breakout.allocateParticipantsFirst'));
                 }
             });
 
@@ -2040,7 +2046,7 @@ var ofmeet = (function(of)
     function breakoutRooms()
     {
         console.debug("breakoutRooms");
-        const breakoutButton = addToolbarItem('ofmeet-breakout', '<div id="ofmeet-breakout" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.person + '</div></div>', "Create Breakout Rooms");
+        const breakoutButton = addToolbarItem('ofmeet-breakout', '<div id="ofmeet-breakout" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.person + '</div></div>', i18n('toolbar.createBreakoutRooms'));
 
         if (breakoutButton) breakoutButton.addEventListener("click", function(evt)
         {
@@ -2061,7 +2067,10 @@ var ofmeet = (function(of)
         const ele = document.createElement(el);
         if (id) ele.id = id;
         if (html) ele.innerHTML = html;
-        if (label) ele.title = label;
+        if (label) {
+			ele.setAttribute('aria-label', label);
+			ele.classList.add("ofmeet-tooltip");
+		}
         if (className) ele.classList.add(className);
         document.body.appendChild(ele);
         return ele;
@@ -2223,7 +2232,7 @@ var ofmeet = (function(of)
                 window.top.postMessage({ action: 'ofmeet.action.share', json: JSON.parse(event.value)}, '*');
            });
 
-            const cursorButton = addToolbarItem('ofmeet-cursor', '<div id="ofmeet-cursor" class="toolbox-icon"><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.cursor + '</div></div>', "Share cursor/mouse pointer", ".button-group-right");
+            const cursorButton = addToolbarItem('ofmeet-cursor', '<div id="ofmeet-cursor" class="toolbox-icon"><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.cursor + '</div></div>', i18n('toolbar.shareCursorMousePointer'), ".button-group-right");
 
             if (cursorButton) cursorButton.addEventListener("click", function(evt)
             {
@@ -2252,7 +2261,7 @@ var ofmeet = (function(of)
                     window.open(url, 'ofmeet-whiteboard');
                });
 
-                const whiteboardButton = addToolbarItem('ofmeet-whiteboard', '<div id="ofmeet-whiteboard" class="toolbox-icon"><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.whiteboard + '</div></div>', "Share a whiteboard", ".button-group-right");
+                const whiteboardButton = addToolbarItem('ofmeet-whiteboard', '<div id="ofmeet-whiteboard" class="toolbox-icon"><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.whiteboard + '</div></div>', i18n('toolbar.shareaWhiteboard'), ".button-group-right");
 
                 if (whiteboardButton) whiteboardButton.addEventListener("click", function(evt)
                 {
@@ -2283,7 +2292,7 @@ var ofmeet = (function(of)
                     window.confetti(options);
                });
 
-                const confettiButton = addToolbarItem('ofmeet-confetti', '<div id="ofmeet-confetti" class="toolbox-icon"><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.confetti + '</div></div>', "Share some confetti", ".button-group-right");
+                const confettiButton = addToolbarItem('ofmeet-confetti', '<div id="ofmeet-confetti" class="toolbox-icon"><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.confetti + '</div></div>', i18n('toolbar.shareSomeConfetti'), ".button-group-right");
 
                 if (confettiButton) confettiButton.addEventListener("click", function(evt)
                 {
@@ -2576,7 +2585,7 @@ var ofmeet = (function(of)
 
     function createContactsButton()
     {
-        const contactsButton = addToolbarItem('ofmeet-contacts', '<div id="ofmeet-contacts" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.contact + '</div></div>', "Contacts Manager");
+        const contactsButton = addToolbarItem('ofmeet-contacts', '<div id="ofmeet-contacts" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.contact + '</div></div>', i18n('toolbar.contactsManager'));
 
         if (contactsButton) contactsButton.addEventListener("click", function(evt)
         {

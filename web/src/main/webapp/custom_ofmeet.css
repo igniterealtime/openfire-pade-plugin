@@ -82,3 +82,44 @@
     height: unset;
     max-height: 500pt;
 }
+
+.ofmeet-tooltip {
+    position: relative;
+}
+
+.ofmeet-tooltip::after {
+    background-color: rgb(13, 20, 36);
+    border-radius: 3px;
+    color: rgb(184, 199, 224);
+    content: attr(aria-label);
+    display: block;
+    font-size: 12px;
+    font-weight: 400;    
+    line-height: 15.6px;
+    margin: 0;
+    max-width: 240px;
+    overflow-wrap: break-word;
+	opacity: 0;
+    padding: 2px 6px;
+    position: absolute;
+	pointer-events: none;
+    top: 0;
+    left: 0;
+    transform: translate(calc(-50% + 20px), calc(-100% - 8px));
+    transition-delay: 0.5s;
+	transition-duration: 0.3s;
+	transition-property: opacity;
+	transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1), linear;
+    white-space: nowrap;
+	user-select: none;
+    z-index: 800;
+}
+
+.ofmeet-tooltip:hover {
+    cursor: pointer;
+}
+
+.ofmeet-tooltip:hover::after {
+    opacity: 1;
+    visibility: visible;
+}

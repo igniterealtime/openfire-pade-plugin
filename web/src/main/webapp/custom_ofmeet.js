@@ -102,35 +102,38 @@ var ofmeet = (function(of)
             }
         }
     });
-    
-    
+
+
     //-------------------------------------------------------
     //  Auto-hide Mouse
     //-------------------------------------------------------
 
-    const mouseIdleTimeout = 10000 // msec
-    let mouseIdleTimer;
-    let mouseIsHidden = false;
-    document.addEventListener("mousemove", function()
+    if (!interfaceConfig.OFMEET_ENABLE_MOUSE_SHARING)
     {
-        if (mouseIdleTimer)
+        const mouseIdleTimeout = 10000 // msec
+        let mouseIdleTimer;
+        let mouseIsHidden = false;
+        document.addEventListener("mousemove", function()
         {
-            clearTimeout(mouseIdleTimer);
-        }
-        mouseIdleTimer = setTimeout(function()
-        {
-            if (!mouseIsHidden)
+            if (mouseIdleTimer)
             {
-                document.querySelector("body").style.cursor = "none";
-                mouseIsHidden = true;
+                clearTimeout(mouseIdleTimer);
             }
-        }, mouseIdleTimeout);
-        if (mouseIsHidden)
-        {
-            document.querySelector("body").style.cursor = "auto";
-            mouseIsHidden = false;
-        }
-    });
+            mouseIdleTimer = setTimeout(function()
+            {
+                if (!mouseIsHidden)
+                {
+                    document.querySelector("body").style.cursor = "none";
+                    mouseIsHidden = true;
+                }
+            }, mouseIdleTimeout);
+            if (mouseIsHidden)
+            {
+                document.querySelector("body").style.cursor = "auto";
+                mouseIsHidden = false;
+            }
+        });
+    }
     //-------------------------------------------------------
     //
     //  setup
@@ -2252,7 +2255,7 @@ var ofmeet = (function(of)
             APP.conference.commands.sendCommandOnce("___FAKE_INTERACTION", {value: !0});
         }
 
-        if (interfaceConfig.OFMEET_ENABLE_CRYPTPAD || interfaceConfig.OFMEET_ENABLE_WHITEBOARD || interfaceConfig.OFMEET_ENABLE_CONFETTI)
+        if (interfaceConfig.OFMEET_ENABLE_MOUSE_SHARING)
         {
             APP.conference.commands.addCommandListener("CURSOR", function(event)
             {
@@ -2275,59 +2278,59 @@ var ofmeet = (function(of)
                 }
                 cursorShared = !cursorShared;
             });
+        }
 
-            if (interfaceConfig.OFMEET_ENABLE_CRYPTPAD)
+        if (interfaceConfig.OFMEET_ENABLE_CRYPTPAD)
+        {
+            createPadsButton();
+        }
+
+        if (interfaceConfig.OFMEET_ENABLE_WHITEBOARD && interfaceConfig.OFMEET_WHITEBOARD_URL && interfaceConfig.OFMEET_WHITEBOARD_URL != "")
+        {
+            APP.conference.commands.addCommandListener("WHITEBOARD", function()
             {
-                createPadsButton();
-            }
+                const url = interfaceConfig.OFMEET_WHITEBOARD_URL.endsWith("/") ? interfaceConfig.OFMEET_WHITEBOARD_URL + APP.conference.roomName : interfaceConfig.OFMEET_WHITEBOARD_URL + "/" + APP.conference.roomName;
+                window.open(url, 'ofmeet-whiteboard');
+           });
 
-            if (interfaceConfig.OFMEET_ENABLE_WHITEBOARD && interfaceConfig.OFMEET_WHITEBOARD_URL && interfaceConfig.OFMEET_WHITEBOARD_URL != "")
+            const whiteboardButton = addToolbarItem('ofmeet-whiteboard', '<div id="ofmeet-whiteboard" class="toolbox-icon"><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.whiteboard + '</div></div>', i18n('toolbar.shareaWhiteboard'), ".button-group-right");
+
+            if (whiteboardButton) whiteboardButton.addEventListener("click", function(evt)
             {
-                APP.conference.commands.addCommandListener("WHITEBOARD", function()
-                {
-                    const url = interfaceConfig.OFMEET_WHITEBOARD_URL.endsWith("/") ? interfaceConfig.OFMEET_WHITEBOARD_URL + APP.conference.roomName : interfaceConfig.OFMEET_WHITEBOARD_URL + "/" + APP.conference.roomName;
-                    window.open(url, 'ofmeet-whiteboard');
-               });
+                evt.stopPropagation();
+                APP.conference.commands.sendCommandOnce("WHITEBOARD", {value: !0})
+            });
+        }
 
-                const whiteboardButton = addToolbarItem('ofmeet-whiteboard', '<div id="ofmeet-whiteboard" class="toolbox-icon"><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.whiteboard + '</div></div>', i18n('toolbar.shareaWhiteboard'), ".button-group-right");
-
-                if (whiteboardButton) whiteboardButton.addEventListener("click", function(evt)
-                {
-                    evt.stopPropagation();
-                    APP.conference.commands.sendCommandOnce("WHITEBOARD", {value: !0})
-                });
-            }
-
-            if (interfaceConfig.OFMEET_ENABLE_CONFETTI)
+        if (interfaceConfig.OFMEET_ENABLE_CONFETTI)
+        {
+            APP.conference.commands.addCommandListener("CONFETTI", function()
             {
-                APP.conference.commands.addCommandListener("CONFETTI", function()
+                var options = {particleCount: 100, spread: 70, origin: {y: .6}};
+                const today = new Date();
+                if ( today.getMonth() == 11 )
                 {
-                    var options = {particleCount: 100, spread: 70, origin: {y: .6}};
-                    const today = new Date();
-                    if ( today.getMonth() == 11 )
-                    {
-                        options = Object.assign({shapes: [
-                            "text:\u2744", "text:\u2744", "text:\u2744", "text:\u2744", "text:\u2744", "text:\u2744", "text:\u2744", // snow flake
-                            "text:"+String.fromCodePoint(0x1F381), // :gift:
-                            "text:"+String.fromCodePoint(0x1F384), // :christmas_tree:
-                            "text:"+String.fromCodePoint(0x1F385), // :santa:
-                            "text:"+String.fromCodePoint(0x1F31F), // :star2:
-                            "text:"+String.fromCodePoint(0x1F56F), // :candle:
-                            "text:"+String.fromCodePoint(0x1F98C), // :deer:
-                            "text:"+String.fromCodePoint(0x1F514)  // :bell:
-                        ]});
-                    }
-                    window.confetti(options);
-               });
+                    options = Object.assign({shapes: [
+                        "text:\u2744", "text:\u2744", "text:\u2744", "text:\u2744", "text:\u2744", "text:\u2744", "text:\u2744", // snow flake
+                        "text:"+String.fromCodePoint(0x1F381), // :gift:
+                        "text:"+String.fromCodePoint(0x1F384), // :christmas_tree:
+                        "text:"+String.fromCodePoint(0x1F385), // :santa:
+                        "text:"+String.fromCodePoint(0x1F31F), // :star2:
+                        "text:"+String.fromCodePoint(0x1F56F), // :candle:
+                        "text:"+String.fromCodePoint(0x1F98C), // :deer:
+                        "text:"+String.fromCodePoint(0x1F514)  // :bell:
+                    ]});
+                }
+                window.confetti(options);
+           });
 
-                const confettiButton = addToolbarItem('ofmeet-confetti', '<div id="ofmeet-confetti" class="toolbox-icon"><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.confetti + '</div></div>', i18n('toolbar.shareSomeConfetti'), ".button-group-right");
+            const confettiButton = addToolbarItem('ofmeet-confetti', '<div id="ofmeet-confetti" class="toolbox-icon"><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.confetti + '</div></div>', i18n('toolbar.shareSomeConfetti'), ".button-group-right");
 
-                if (confettiButton) confettiButton.addEventListener("click", function(evt)
-                {
-                    evt.stopPropagation();
-                    APP.conference.commands.sendCommandOnce("CONFETTI", {value: !0})
-                });
-            }
+            if (confettiButton) confettiButton.addEventListener("click", function(evt)
+            {
+                evt.stopPropagation();
+                APP.conference.commands.sendCommandOnce("CONFETTI", {value: !0})
+            });
         }
     }
 

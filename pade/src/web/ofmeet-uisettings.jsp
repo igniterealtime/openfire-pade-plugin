@@ -110,6 +110,8 @@
 
         final boolean showPoweredBy = ParamUtils.getBooleanParameter( request, "showPoweredBy" );
         final boolean enablePreJoinPage = ParamUtils.getBooleanParameter( request, "enablePreJoinPage" );
+        final boolean enableMouseSharing = ParamUtils.getBooleanParameter( request, "enableMouseSharing" );
+        
         final boolean conferenceRecording = ParamUtils.getBooleanParameter( request, "conferenceRecording" );
         final boolean conferenceTags = ParamUtils.getBooleanParameter( request, "conferenceTags" );
         final boolean enableCryptPad = ParamUtils.getBooleanParameter( request, "enableCryptPad" );    
@@ -196,6 +198,7 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.default.local.displayname", defLocalDisplName );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.show.poweredby", Boolean.toString( showPoweredBy ) );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.prejoin.page", Boolean.toString( enablePreJoinPage ) );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.mouse.sharing", Boolean.toString( enableMouseSharing ) );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.conference.recording", Boolean.toString( conferenceRecording ) );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.conference.tags", Boolean.toString( conferenceTags ) );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.cryptpad", Boolean.toString( enableCryptPad ) ); 
@@ -403,7 +406,13 @@
                     <input type="checkbox" name="enableConfetti" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.confetti", true) ? "checked" : ""}>
                     <fmt:message key="ofmeet.enable.confetti" />
                 </td>
-            </tr>             
+            </tr>   
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="enableMouseSharing" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.mouse.sharing", true) ? "checked" : ""}>
+                    <fmt:message key="ofmeet.enable.mouse.sharing" />
+                </td>
+            </tr>            
             <tr>
                 <td nowrap colspan="2">
                     <input type="checkbox" name="conferenceRecording" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.conference.recording", true) ? "checked" : ""}>

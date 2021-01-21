@@ -88,6 +88,7 @@ public class InterfaceConfigServlet extends HttpServlet
             config.put( "DISABLE_VIDEO_BACKGROUND",              JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.disable.video_background",      false               ) );
             config.put( "ACTIVE_SPEAKER_AVATAR_SIZE",            JiveGlobals.getIntProperty(     "org.jitsi.videobridge.ofmeet.active.speaker.avatarsize",     100                 ) );
 
+            config.put( "OFMEET_ENABLE_MOUSE_SHARING",           JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.mouse.sharing",          true                ) );
             config.put( "OFMEET_RECORD_CONFERENCE",              JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.conference.recording",          true                ) );
             config.put( "OFMEET_TAG_CONFERENCE",                 JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.conference.tags",               true                ) );
             config.put( "OFMEET_ENABLE_BREAKOUT",                JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.breakout",               false               ) );
@@ -105,7 +106,7 @@ public class InterfaceConfigServlet extends HttpServlet
             config.put( "OFMEET_WELCOME_PAGE_TOOLBARCONTENT",    JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.welcome.toolbarcontent",        ""                  ) );
             config.put( "OFMEET_CRYPTPAD_URL",                   JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.cryptpad.url", "https://cryptpad.fr"                ) );
             config.put( "OFMEET_WHITEBOARD_URL",                 JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.whiteboard.url", "https://wbo.ophir.dev/boards/"    ) );
-            
+
             config.put( "RECENT_LIST_ENABLED",                   JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.recentlist",        true                ) );
             config.put( "IN_PROGRESS_LIST_ENABLED",              JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist",    false               ) );
             config.put( "IN_PROGRESS_LIST_INTERVAL",             JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.interval", 10                ) );

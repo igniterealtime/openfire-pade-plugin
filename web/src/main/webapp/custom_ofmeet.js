@@ -102,7 +102,35 @@ var ofmeet = (function(of)
             }
         }
     });
+    
+    
+    //-------------------------------------------------------
+    //  Auto-hide Mouse
+    //-------------------------------------------------------
 
+    const mouseIdleTimeout = 10000 // msec
+    let mouseIdleTimer;
+    let mouseIsHidden = false;
+    document.addEventListener("mousemove", function()
+    {
+        if (mouseIdleTimer)
+        {
+            clearTimeout(mouseIdleTimer);
+        }
+        mouseIdleTimer = setTimeout(function()
+        {
+            if (!mouseIsHidden)
+            {
+                document.querySelector("body").style.cursor = "none";
+                mouseIsHidden = true;
+            }
+        }, mouseIdleTimeout);
+        if (mouseIsHidden)
+        {
+            document.querySelector("body").style.cursor = "auto";
+            mouseIsHidden = false;
+        }
+    });
     //-------------------------------------------------------
     //
     //  setup

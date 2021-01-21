@@ -179,7 +179,7 @@ var ofmeet = (function(of)
         {
             listenWebPushEvents();
 
-            APP.conference.addConferenceListener(JitsiMeetJS.events.conference.CONFERENCE_LEFT, function()
+            APP.conference._room.on(JitsiMeetJS.events.conference.CONFERENCE_LEFT, function()
             {
                 console.debug("ofmeet.js me left");
 
@@ -197,7 +197,7 @@ var ofmeet = (function(of)
                 }
             });
 
-            APP.conference.addConferenceListener(JitsiMeetJS.events.conference.TRACK_REMOVED, function(track)
+            APP.conference._room.on(JitsiMeetJS.events.conference.TRACK_REMOVED, function(track)
             {
                 console.debug("ofmeet.js track removed", track.getParticipantId());
 
@@ -216,13 +216,13 @@ var ofmeet = (function(of)
                 if (of.recording) stopRecorder();
             });
 
-            APP.conference.addConferenceListener(JitsiMeetJS.events.conference.USER_JOINED, function (id)
+            APP.conference._room.on(JitsiMeetJS.events.conference.USER_JOINED, function (id)
             {
                 console.debug("user join", id, participants);
                 addParticipant(id);
             });
 
-            APP.conference.addConferenceListener(JitsiMeetJS.events.conference.USER_LEFT, function (id)
+            APP.conference._room.on(JitsiMeetJS.events.conference.USER_LEFT, function (id)
             {
                 console.debug("user left", id);
 
@@ -234,7 +234,7 @@ var ofmeet = (function(of)
                 delete participants[id];
             });
 
-            APP.conference.addConferenceListener(JitsiMeetJS.events.conference.TRACK_ADDED, function(track)
+            APP.conference._room.on(JitsiMeetJS.events.conference.TRACK_ADDED, function(track)
             {
                 const id = track.getParticipantId();
                 console.debug("ofmeet.js track added", id, track.getType());
@@ -251,12 +251,12 @@ var ofmeet = (function(of)
                 }
             });
 
-            APP.conference.addConferenceListener(JitsiMeetJS.events.conference.PARTICIPANT_PROPERTY_CHANGED, function(e, t, n, r)
+            APP.conference._room.on(JitsiMeetJS.events.conference.PARTICIPANT_PROPERTY_CHANGED, function(e, t, n, r)
             {
                 console.debug("ofmeet.js property changed", e, t, n, r);
             });
 
-            APP.conference.addConferenceListener(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, function(track)
+            APP.conference._room.on(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, function(track)
             {
                 const id = track.getParticipantId();
                 console.debug("ofmeet.js track muted", id, track.getType(), track.isMuted());
@@ -294,7 +294,7 @@ var ofmeet = (function(of)
                 }
             });
 
-            APP.conference.addConferenceListener(JitsiMeetJS.events.conference.PRIVATE_MESSAGE_RECEIVED, function(id, text, ts)
+            APP.conference._room.on(JitsiMeetJS.events.conference.PRIVATE_MESSAGE_RECEIVED, function(id, text, ts)
             {
                 var participant = APP.conference.getParticipantById(id);
                 var displayName = participant ? (participant._displayName || 'Anonymous-' + id) : (APP.conference.getLocalDisplayName() || "Me");
@@ -305,7 +305,7 @@ var ofmeet = (function(of)
                 pdf_body.push([pretty_time, displayName, text]);
             });
 
-            APP.conference.addConferenceListener(JitsiMeetJS.events.conference.MESSAGE_RECEIVED, function(id, text, ts)
+            APP.conference._room.on(JitsiMeetJS.events.conference.MESSAGE_RECEIVED, function(id, text, ts)
             {
                 var participant = APP.conference.getParticipantById(id);
                 var displayName = participant ? (participant._displayName || 'Anonymous-' + id) : (APP.conference.getLocalDisplayName() || "Me");
@@ -1034,11 +1034,11 @@ var ofmeet = (function(of)
                     if (tags.location != "")
                     {
                         document.getElementById("subtitles").innerHTML =
-                        	`<b>` + i18n('tag.location') + `</b>: ${tags.location} <br/><b>` +
-                        	i18n('tag.date') + `</b>: ${tags.date} <br/><b>` +
-                        	i18n('tag.subject') + `</b>: ${tags.subject} <br/><b>` +
-                        	i18n('tag.host') + `</b>: ${tags.host} <br/><b>` +
-                        	i18n('tag.activity') + `</b>: ${tags.activity}`;
+                            `<b>` + i18n('tag.location') + `</b>: ${tags.location} <br/><b>` +
+                            i18n('tag.date') + `</b>: ${tags.date} <br/><b>` +
+                            i18n('tag.subject') + `</b>: ${tags.subject} <br/><b>` +
+                            i18n('tag.host') + `</b>: ${tags.host} <br/><b>` +
+                            i18n('tag.activity') + `</b>: ${tags.activity}`;
                     }
                     return true;
                 }
@@ -2068,9 +2068,9 @@ var ofmeet = (function(of)
         if (id) ele.id = id;
         if (html) ele.innerHTML = html;
         if (label) {
-			ele.setAttribute('aria-label', label);
-			ele.classList.add("ofmeet-tooltip");
-		}
+            ele.setAttribute('aria-label', label);
+            ele.classList.add("ofmeet-tooltip");
+        }
         if (className) ele.classList.add(className);
         document.body.appendChild(ele);
         return ele;

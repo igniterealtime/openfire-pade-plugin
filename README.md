@@ -1,6 +1,5 @@
 Pàdé for Openfire
 =========================
-
 This project provides a web-based unified communication solution for Openfire.
 - peer to peer based chat, 
 - persistent groupchat, 

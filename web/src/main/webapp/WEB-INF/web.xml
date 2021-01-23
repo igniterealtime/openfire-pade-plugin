@@ -44,6 +44,17 @@
 		<url-pattern>/inProgressList.json</url-pattern>
 	</servlet-mapping>
 
+	<servlet>
+		<servlet-name>feedback</servlet-name>
+		<servlet-class>org.jivesoftware.openfire.plugin.ofmeet.FeedbackServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>feedback</servlet-name>
+		<url-pattern>/static/close3.html</url-pattern>
+	</servlet-mapping>
+
+
 	<filter>
 		<filter-name>WatermarkFilter</filter-name>
 		<filter-class>org.jivesoftware.openfire.plugin.ofmeet.WatermarkFilter</filter-class>

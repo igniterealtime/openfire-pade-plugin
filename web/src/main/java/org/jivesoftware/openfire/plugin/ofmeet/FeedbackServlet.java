@@ -9,6 +9,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 
 import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
@@ -46,18 +47,14 @@ public class FeedbackServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		LOG.info("request content length: {}",  request.getContentLength());
 		
-		StringWriter writer = new StringWriter();
-		IOUtils.copy(request.getInputStream(), writer, Charset.defaultCharset());
-		LOG.info("request payload: {}", writer.toString());
-				
-//		final JSONObject feedback = new JSONObject();
-//		request.getParameterMap()
-//			.entrySet()
-//			.forEach(entry -> {
-//				feedback.put(entry.getKey(), entry.getValue());
-//			});	
-//		LOG.info(feedback.toString());
-		
+		final JSONObject feedback = new JSONObject();
+		for (final Part part : request.getParts()) {
+			String partName = part.getName();
+			StringWriter writer = new StringWriter();
+			IOUtils.copy(request.getInputStream(), writer, Charset.defaultCharset());
+			feedback.put(partName, writer.toString());			
+		}
+		LOG.info(feedback.toString());	
 		response.setStatus(200);
 	}
 }

@@ -41,6 +41,7 @@ public class FeedbackServlet extends HttpServlet {
 
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		super.doPost(request, response);
+		LOG.info("post called");
+		response.setStatus(200);
 	}
 }

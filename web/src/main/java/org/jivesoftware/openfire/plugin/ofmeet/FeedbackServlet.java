@@ -1,12 +1,14 @@
 package org.jivesoftware.openfire.plugin.ofmeet;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +16,7 @@ public class FeedbackServlet extends HttpServlet {
 
 	private static final long serialVersionUID = -8057457730888335346L;
 
-	private static final Logger Log = LoggerFactory.getLogger( FeedbackServlet.class );
+	private static final Logger LOG = LoggerFactory.getLogger( FeedbackServlet.class );
 	
     @Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -27,8 +29,14 @@ public class FeedbackServlet extends HttpServlet {
         response.setHeader( "Content-Type",  "text/html" );
         response.setHeader( "Connection",    "close" );
         
-        String resultMsg = "Hello world!";
-		response.getOutputStream().println(resultMsg);       
+        final ClassLoader classLoader = this.getClass().getClassLoader();
+        try (InputStream inputStream = classLoader.getResourceAsStream("static/feedback.html")) {
+            IOUtils.copy(inputStream, response.getOutputStream());
+        } catch (final Exception e) {
+        	LOG.error(e.getMessage(), e);
+        	response.getOutputStream().println(e.getMessage());
+        	response.setStatus(500);
+        }
 	}
 
 	@Override

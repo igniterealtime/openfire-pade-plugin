@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +42,14 @@ public class FeedbackServlet extends HttpServlet {
 
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		LOG.info("post called");
+		final JSONObject feedback = new JSONObject();
+		request.getParameterMap()
+			.entrySet()
+			.forEach(entry -> {
+				feedback.put(entry.getKey(), entry.getValue());
+			});
+		
+		LOG.info(feedback.toString());
 		response.setStatus(200);
 	}
 }

@@ -174,7 +174,7 @@
     let request_body = new FormData(form);
     request_body.append("callStatsUserName", statsID);
 
-    fetch(".", {
+    fetch(window.location.href, {
       method: "POST",
       body: request_body
     })

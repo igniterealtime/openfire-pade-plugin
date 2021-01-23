@@ -2,6 +2,8 @@ package org.jivesoftware.openfire.plugin.ofmeet;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
+import java.nio.charset.Charset;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -42,14 +44,20 @@ public class FeedbackServlet extends HttpServlet {
 
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		final JSONObject feedback = new JSONObject();
-		request.getParameterMap()
-			.entrySet()
-			.forEach(entry -> {
-				feedback.put(entry.getKey(), entry.getValue());
-			});
+		LOG.info("request content length: {}",  request.getContentLength());
 		
-		LOG.info(feedback.toString());
+		StringWriter writer = new StringWriter();
+		IOUtils.copy(request.getInputStream(), writer, Charset.defaultCharset());
+		LOG.info("request payload: {}", writer.toString());
+				
+//		final JSONObject feedback = new JSONObject();
+//		request.getParameterMap()
+//			.entrySet()
+//			.forEach(entry -> {
+//				feedback.put(entry.getKey(), entry.getValue());
+//			});	
+//		LOG.info(feedback.toString());
+		
 		response.setStatus(200);
 	}
 }

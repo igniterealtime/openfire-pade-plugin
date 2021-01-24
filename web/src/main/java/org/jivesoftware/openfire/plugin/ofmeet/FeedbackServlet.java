@@ -6,6 +6,7 @@ import java.io.StringWriter;
 import java.nio.charset.Charset;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -16,6 +17,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@MultipartConfig
 public class FeedbackServlet extends HttpServlet {
 
 	private static final long serialVersionUID = -8057457730888335346L;

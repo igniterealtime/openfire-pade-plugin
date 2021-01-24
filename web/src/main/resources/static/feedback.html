@@ -108,12 +108,15 @@
 
 
 <div class="center" id="step1">
+  ${description-message}
+  <!--
   <h1>Danke, dass Sie DNBmeetings benutzt haben!</h1>
   <br/>
   <p>Bitte beurteilen Sie die erzielte Qualit&auml;t.</p>
   <p>Teilen Sie Ihre Anregungen oder Wünsch mit.</p>
   <p>Sie tragen damit aktiv zur Verbesserung bei!</p>
   <p>Die Daten werden anonym erfasst, nennen Sie ggf. Ihren Namen.</p>
+  -->
 
   <br/>
   <form>
@@ -128,18 +131,25 @@
 
     <br/>
     <div>
-      <textarea id="usertext" name="text" placeholder="Falls etwas nicht so gut lief: Wann? Wo? Was? Und optional Wer? "></textarea>
+      <!-- textarea id="usertext" name="text" placeholder="Falls etwas nicht so gut lief: Wann? Wo? Was? Und optional Wer? "></textarea -->
+      <textarea id="usertext" name="text" placeholder="${placeholder-text}"></textarea>
     </div>
     <br/>
-    <button name="" value="" type="submit">Weiter</button>
+    <!-- button name="" value="" type="submit">Weiter</button -->
+    <button name="" value="" type="submit">${submit-text}</button>
   </form>
 </div>
 
 <div class="center" id="step2" style="display: none">
+  ${success-message}
+  <!--
   <h1>Vielen Dank!</h1>
+  -->
 </div>
 
 <div class="center" id="error-page" style="display: none">
+  ${error-message}
+  <!-- 
   <h1>Upps, da ist beim Senden was schiefgegangen 😓</h1>
   <br/>
   <p>Wenn du uns trotzdem helfen möchtest, kannst du uns aber auch eine Mail an <a
@@ -148,6 +158,7 @@
   <p>Hier ist was du im Textfeld eingegeben hattest zusammen mit einem Fehlercode:</p>
   <br/>
   <pre id="error-message"></pre>
+  -->
 </div>
 
 <script>
@@ -179,7 +190,7 @@
       body: request_body
     })
       .then(function (response) {
-        if (false && !response.ok) {
+        if (!response.ok) {
           handleFeedbackError(response.statusText);
         } else {
           console.info("success:" + response);

@@ -47,6 +47,11 @@
 	<servlet>
 		<servlet-name>feedback</servlet-name>
 		<servlet-class>org.jivesoftware.openfire.plugin.ofmeet.FeedbackServlet</servlet-class>
+		<multipart-config>
+            <max-file-size>2048</max-file-size>
+            <max-request-size>2048</max-request-size>
+            <file-size-threshold>2048</file-size-threshold>
+        </multipart-config>
 	</servlet>
 
 	<servlet-mapping>

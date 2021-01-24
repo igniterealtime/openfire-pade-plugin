@@ -53,7 +53,7 @@ public class FeedbackServlet extends HttpServlet {
 		for (final Part part : request.getParts()) {
 			String partName = part.getName();
 			StringWriter writer = new StringWriter();
-			IOUtils.copy(request.getInputStream(), writer, Charset.defaultCharset());
+			IOUtils.copy(part.getInputStream(), writer, Charset.defaultCharset());
 			feedback.put(partName, writer.toString());			
 		}
 		LOG.info(feedback.toString());	

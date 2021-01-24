@@ -249,6 +249,11 @@ public class ConfigServlet extends HttpServlet
             {
                 config.put( "startVideoMuted", ofMeetConfig.getStartVideoMuted() );
             }
+            
+            if ( ofMeetConfig.getFeedbackEnabled() != null )
+            {
+                config.put( "enableClosePage", ofMeetConfig.getFeedbackEnabled() );
+            }
 
 
             // 'resolution' is used in some cases (chrome <61), newer versions use 'constraints'.

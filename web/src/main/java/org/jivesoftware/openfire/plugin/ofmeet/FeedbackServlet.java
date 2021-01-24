@@ -17,7 +17,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@MultipartConfig
+// @MultipartConfig <- don't work, done in web.xml
 public class FeedbackServlet extends HttpServlet {
 
 	private static final long serialVersionUID = -8057457730888335346L;
@@ -25,25 +25,54 @@ public class FeedbackServlet extends HttpServlet {
 	private static final Logger LOG = LoggerFactory.getLogger( FeedbackServlet.class );
 	
     @Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    	
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+    {
+        
         // Add response headers that instruct not to cache this data.
-        response.setHeader( "Expires",       "Sat, 6 May 1995 12:00:00 GMT" );
+        response.setHeader( "Expires",       "Sun, 18 Sep 1966 12:00:00 GMT" );
         response.setHeader( "Cache-Control", "no-store, no-cache, must-revalidate" );
         response.addHeader( "Cache-Control", "post-check=0, pre-check=0" );
         response.setHeader( "Pragma",        "no-cache" );
         response.setHeader( "Content-Type",  "text/html" );
         response.setHeader( "Connection",    "close" );
-        
+
         final ClassLoader classLoader = this.getClass().getClassLoader();
-        try (InputStream inputStream = classLoader.getResourceAsStream("static/feedback.html")) {
-            IOUtils.copy(inputStream, response.getOutputStream());
-        } catch (final Exception e) {
-        	LOG.error(e.getMessage(), e);
-        	response.getOutputStream().println(e.getMessage());
-        	response.setStatus(500);
+        try (InputStream template = classLoader.getResourceAsStream("static/feedback.html"))
+        {
+            // IOUtils.copy(inputStream, response.getOutputStream());
+            IOUtils.copy
+            (
+                new ReplacingInputStream
+                (
+                    new ReplacingInputStream
+                    (
+                        new ReplacingInputStream
+                        (
+                            new ReplacingInputStream
+                            (
+                                new ReplacingInputStream
+                                (
+                                    template
+                                    , "${description-message}", "description"
+                                )
+                                , "${placeholder-text}", "placeholder"
+                            )
+                        ,   "${submit-text}", "submit"
+                        )
+                        , "${success-message}", "success"
+                        )
+                    ,"${error-message}","error"
+                )
+                , response.getOutputStream()
+            );
         }
-	}
+        catch (final Exception e)
+        {
+            LOG.error(e.getMessage(), e);
+            response.getOutputStream().println(e.getMessage());
+            response.setStatus(500);
+        }
+    }
 
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

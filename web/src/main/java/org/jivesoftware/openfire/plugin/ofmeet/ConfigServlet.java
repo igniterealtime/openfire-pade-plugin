@@ -111,7 +111,8 @@ public class ConfigServlet extends HttpServlet
             boolean enablePreJoinPage = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.prejoin.page", false );
             boolean enableStereo = JiveGlobals.getBooleanProperty( "ofmeet.stereo.enabled", false );
             boolean enableAudioLevels = JiveGlobals.getBooleanProperty( "ofmeet.audioLevels.enabled", false );
-
+            boolean enableFeedback = JiveGlobals.getBooleanProperty( "ofmeet.feedback.enabled", false );
+            
             int video_width_ideal =  JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.constraints.video.width.ideal", ofMeetConfig.getVideoConstraintsIdealHeight() * 16/9);
             int video_width_max = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.constraints.video.width.max", ofMeetConfig.getVideoConstraintsMaxHeight() * 16/9);
             int video_width_min = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.constraints.video.width.min", ofMeetConfig.getVideoConstraintsMinHeight() * 16/9);
@@ -177,6 +178,7 @@ public class ConfigServlet extends HttpServlet
             config.put( "useRtcpMux", useRtcpMux );
             //config.put( "useBundle", useBundle );
             config.put( "enableWelcomePage", enableWelcomePage );
+            config.put( "enableClosePage", enableFeedback );
             config.put( "enableRtpStats", enableRtpStats );
             config.put( "enableLipSync", ofMeetConfig.getLipSync() );
 
@@ -250,11 +252,7 @@ public class ConfigServlet extends HttpServlet
                 config.put( "startVideoMuted", ofMeetConfig.getStartVideoMuted() );
             }
             
-            if ( ofMeetConfig.getFeedbackEnabled() != null )
-            {
-                config.put( "enableClosePage", ofMeetConfig.getFeedbackEnabled() );
-            }
-
+                        
 
             // 'resolution' is used in some cases (chrome <61), newer versions use 'constraints'.
             config.put( "resolution", ofMeetConfig.getResolution() );

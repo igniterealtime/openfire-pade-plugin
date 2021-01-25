@@ -1,6 +1,8 @@
 package org.jivesoftware.openfire.plugin.ofmeet;
 
 import org.jivesoftware.util.JiveGlobals;
+import org.jivesoftware.util.LocaleUtils;
+import org.jivesoftware.openfire.security.SecurityAuditManager;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,20 +26,24 @@ import org.slf4j.LoggerFactory;
 // @MultipartConfig <- don't work, done in web.xml
 public class FeedbackServlet extends HttpServlet
 {
-
     private static final long serialVersionUID = -8057457730888335346L;
-
     private static final Logger LOG = LoggerFactory.getLogger( FeedbackServlet.class );
-    
+    private final SecurityAuditManager securityAuditManager = SecurityAuditManager.getInstance();
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
-        
-        String descriptionMessage = JiveGlobals.getProperty( "ofmeet.feedback.descriptionMessage", "Give feedback to us, please!" );
-        String placeholderText    = JiveGlobals.getProperty( "ofmeet.feedback.placeholderText", "Enter additional comments here." );
-        String submitText         = JiveGlobals.getProperty( "ofmeet.feedback.submitText", "Send" );
-        String successMessage     = JiveGlobals.getProperty( "ofmeet.feedback.successMessage", "Thank you a lot!" );
-        String errorMessage       = JiveGlobals.getProperty( "ofmeet.feedback.errorMessage", "Ups, something went wrong!" );
+        String descriptionMessageDefault = LocaleUtils.getLocalizedString("ofmeet.feedback.description.default", "pade");
+        String placeholderTextDefault = LocaleUtils.getLocalizedString("ofmeet.feedback.placeholder.default", "pade");
+        String submitTextDefault = LocaleUtils.getLocalizedString("ofmeet.feedback.submit.default", "pade");
+        String successMessageDefault = LocaleUtils.getLocalizedString("ofmeet.feedback.success.default", "pade");
+        String errorMessageDefault = LocaleUtils.getLocalizedString("ofmeet.feedback.error.default", "pade");
+
+        String descriptionMessage = JiveGlobals.getProperty( "ofmeet.feedback.description", descriptionMessageDefault );
+        String placeholderText    = JiveGlobals.getProperty( "ofmeet.feedback.placeholder", placeholderTextDefault );
+        String submitText         = JiveGlobals.getProperty( "ofmeet.feedback.submit", submitTextDefault );
+        String successMessage     = JiveGlobals.getProperty( "ofmeet.feedback.success", successMessageDefault );
+        String errorMessage       = JiveGlobals.getProperty( "ofmeet.feedback.error", errorMessageDefault );
 
         // Add response headers that instruct not to cache this data.
         response.setHeader( "Expires",       "Sun, 18 Sep 1966 12:00:00 GMT" );
@@ -89,15 +95,22 @@ public class FeedbackServlet extends HttpServlet
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
-        final JSONObject feedback = new JSONObject();
-        for (final Part part : request.getParts())
-        {
-            String partName = part.getName();
-            StringWriter writer = new StringWriter();
-            IOUtils.copy(part.getInputStream(), writer, Charset.defaultCharset());
-            feedback.put(partName, writer.toString());          
+        try {
+            final JSONObject feedback = new JSONObject();
+            for (final Part part : request.getParts())
+            {
+                String partName = part.getName();
+                StringWriter writer = new StringWriter();
+                IOUtils.copy(part.getInputStream(), writer, Charset.defaultCharset());
+                feedback.put(partName, writer.toString());
+            }
+            LOG.info(feedback.toString());
+            securityAuditManager.logEvent(feedback.getString("callStatsUserName"), "pade feedback rating:" + feedback.getString("rating"), feedback.getString("comment"));
         }
-        LOG.info(feedback.toString());  
+        catch (final Exception e)
+        {
+            LOG.error("FeedbackServlet post failed", e);
+        }
         response.setStatus(200);
     }
 }

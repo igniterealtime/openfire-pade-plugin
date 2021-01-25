@@ -25,6 +25,12 @@
 <jsp:useBean id="random" class="java.util.Random"/>
 <jsp:useBean id="ofmeetConfig" class="org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig"/>
 <%
+    String descriptionMessageDefault = LocaleUtils.getLocalizedString("ofmeet.feedback.description.default", "pade");
+    String placeholderTextDefault = LocaleUtils.getLocalizedString("ofmeet.feedback.placeholder.default", "pade");
+    String submitTextDefault = LocaleUtils.getLocalizedString("ofmeet.feedback.submit.default", "pade");
+    String successMessageDefault = LocaleUtils.getLocalizedString("ofmeet.feedback.success.default", "pade");
+    String errorMessageDefault = LocaleUtils.getLocalizedString("ofmeet.feedback.error.default", "pade");
+
     boolean update = request.getParameter( "update" ) != null;
 
     final Cookie csrfCookie = CookieUtils.getCookie( request, "csrf" );
@@ -144,6 +150,14 @@
         final String jvbpassword = request.getParameter( "jvbpassword" );        
         final String hqVoice = request.getParameter( "hqVoice" );
 
+     
+        final boolean enablefeedback = ParamUtils.getBooleanParameter( request, "enablefeedback" );
+        final String descriptionMessage = request.getParameter( "descriptionMessage" );        
+        final String placeholderText = request.getParameter( "placeholderText" ); 
+        final String submitText = request.getParameter( "submitText" ); 
+        final String successMessage = request.getParameter( "successMessage" ); 
+        final String errorMessage = request.getParameter( "errorMessage" );         
+
         int channelLastN = -1;
         try {
             channelLastN = Integer.parseInt( request.getParameter( "channellastn" ) );
@@ -191,6 +205,13 @@
             JiveGlobals.setProperty( "ofmeet.min.height.for.quality.level.high", minHeightForQualityHigh );    
             JiveGlobals.setProperty( "ofmeet.cap.screenshare.bitrate", Boolean.toString(capScreenshareBitrate) );             
             JiveGlobals.setProperty( "ofmeet.enable.layer.suspension", Boolean.toString(enableLayerSuspension) );             
+            
+            JiveGlobals.setProperty( "ofmeet.feedback.enabled", Boolean.toString(enablefeedback) );             
+            JiveGlobals.setProperty( "ofmeet.feedback.description", descriptionMessage );             
+            JiveGlobals.setProperty( "ofmeet.feedback.placeholder", placeholderText ); 
+            JiveGlobals.setProperty( "ofmeet.feedback.submit", submitText ); 
+            JiveGlobals.setProperty( "ofmeet.feedback.success", successMessage ); 
+            JiveGlobals.setProperty( "ofmeet.feedback.error", errorMessage );             
                       
             ofmeetConfig.setDisableRtx( disableRtx );
             ofmeetConfig.setStartAudioOnly( startaudioonly );
@@ -530,6 +551,38 @@
             </tr>            
         </table>
     </admin:contentBox>
+
+    <fmt:message key="config.page.configuration.ofmeet.feedback.title" var="boxtitlefeedback"/>
+    <admin:contentBox title="${boxtitlefeedback}">
+        <table cellpadding="3" cellspacing="0" border="0" width="100%">    
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="enablefeedback" ${admin:getBooleanProperty( "ofmeet.feedback.enabled", true) ? "checked" : ""}>
+                    <fmt:message key="config.page.configuration.ofmeet.feedback.enabled" />
+                </td>
+            </tr> 
+            <tr>
+                <td align="left" width="200"><fmt:message key="config.page.configuration.ofmeet.feedback.description"/>:</td>
+                <td><input type="text" size="70" maxlength="255" name="descriptionMessage" value="${admin:getProperty("ofmeet.feedback.description", descriptionMessageDefault)}"></td>
+            </tr>    
+            <tr>
+                <td align="left" width="200"><fmt:message key="config.page.configuration.ofmeet.feedback.placeholder"/>:</td>
+                <td><input type="text" size="70" maxlength="255" name="placeholderText" value="${admin:getProperty("ofmeet.feedback.placeholder", placeholderTextDefault)}"></td>
+            </tr> 
+            <tr>
+                <td align="left" width="200"><fmt:message key="config.page.configuration.ofmeet.feedback.submit"/>:</td>
+                <td><input type="text" size="70" maxlength="255" name="submitText" value="${admin:getProperty("ofmeet.feedback.submit", submitTextDefault)}"></td>
+            </tr> 
+            <tr>
+                <td align="left" width="200"><fmt:message key="config.page.configuration.ofmeet.feedback.success"/>:</td>
+                <td><input type="text" size="70" maxlength="255" name="successMessage" value="${admin:getProperty("ofmeet.feedback.success", successMessageDefault)}"></td>
+            </tr> 
+            <tr>
+                <td align="left" width="200"><fmt:message key="config.page.configuration.ofmeet.feedback.error"/>:</td>
+                <td><input type="text" size="70" maxlength="255" name="errorMessage" value="${admin:getProperty("ofmeet.feedback.error", errorMessageDefault)}"></td>
+            </tr>             
+        </table>
+    </admin:contentBox>    
 
     <fmt:message key="config.page.configuration.lastn.title" var="boxtitlelastn"/>
     <admin:contentBox title="${boxtitlelastn}">

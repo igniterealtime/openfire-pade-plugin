@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <link id="favicon" rel="shortcut icon" href="../icon.png" type="image/png" />
   <title>Feedback</title>
   <meta content="width=device-width, initial-scale=1" name="viewport">
   <style>
@@ -94,14 +95,6 @@
       opacity: 0
     }
 
-    .audio > label::before {
-      content: "👂"
-    }
-
-    .video > label::before {
-      content: "👁️"
-    }
-
     .rating > label:hover:before,
     .rating > label:hover ~ label:before {
       opacity: 1 !important
@@ -134,7 +127,6 @@
   <br/>
   <form>
     <!-- Source: https://bbbootstrap.com/snippets/star-rating-pure-css-19646372 -->
-    <!-- 
     <div class="rating">
       <input id="5" name="rating" type="radio" value="5"><label for="5">☆</label>
       <input id="4" name="rating" type="radio" value="4"><label for="4">☆</label>
@@ -142,24 +134,6 @@
       <input id="2" name="rating" type="radio" value="2"><label for="2">☆</label>
       <input id="1" name="rating" type="radio" value="1"><label for="1">☆</label>
     </div>
-    -->
-
-    <div class="rating audio">
-      <input id="a5" name="audio" type="radio" value="5"><label for="a5">👂</label>
-      <input id="a4" name="audio" type="radio" value="4"><label for="a4">👂</label>
-      <input id="a3" name="audio" type="radio" value="3"><label for="a3">👂</label>
-      <input id="a2" name="audio" type="radio" value="2"><label for="a2">👂</label>
-      <input id="a1" name="audio" type="radio" value="1"><label for="a1">👂</label>
-    </div>
-
-    <div class="rating video">
-      <input id="v5" name="video" type="radio" value="5"><label for="v5">👁️</label>
-      <input id="v4" name="video" type="radio" value="4"><label for="v4">👁️</label>
-      <input id="v3" name="video" type="radio" value="3"><label for="v3">👁️</label>
-      <input id="v2" name="video" type="radio" value="2"><label for="v2">👁️</label>
-      <input id="v1" name="video" type="radio" value="1"><label for="v1">👁️</label>
-    </div>
-
     <br/>
     <div>
       <textarea id="comment" name="comment" placeholder="${placeholder-text}"></textarea>
@@ -180,7 +154,7 @@
 
 <div class="center" id="error-page" style="display: none">
   ${error-message}
-  <!-- 
+  <!--
   <h1>Upps, da ist beim Senden was schiefgegangen 😓</h1>
   <br/>
   <p>Wenn du uns trotzdem helfen möchtest, kannst du uns aber auch eine Mail an <a
@@ -188,8 +162,8 @@
   <br/>
   <p>Hier ist was du im Textfeld eingegeben hattest zusammen mit einem Fehlercode:</p>
   <br/>
-  <pre id="error-message"></pre>
   -->
+  <pre id="error-message"></pre>
 </div>
 
 <script>
@@ -211,6 +185,12 @@
   function sendFeedback() {
     // fetch statsID
     let statsID = localStorage.getItem("callStatsUserName");
+
+    if (localStorage["features/base/settings"]) // override with actual user name
+    {
+        const json = JSON.parse(localStorage.getItem("features/base/settings"));
+        if (json && json.displayName) statsID = json.displayName;
+    }
 
     // build request body
     let request_body = new FormData(form);

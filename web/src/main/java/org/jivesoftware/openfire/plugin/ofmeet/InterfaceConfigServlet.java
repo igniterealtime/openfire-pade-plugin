@@ -72,7 +72,7 @@ public class InterfaceConfigServlet extends HttpServlet
             config.put( "BRAND_WATERMARK_LINK",                  JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.brand.watermark.link",          ""                  ) );
             config.put( "RECENT_LIST_ENABLED",                   JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.recent.list.enabled",           true                ) );
             config.put( "SHOW_POWERED_BY",                       JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.show.poweredby",                false               ) );
-            config.put( "SHOW_PROMOTIONAL_CLOSE_PAGE",           JiveGlobals.getBooleanProperty( "ofmeet.feedback.enabled",                                    false               ) );
+            config.put( "SHOW_PROMOTIONAL_CLOSE_PAGE",           JiveGlobals.getBooleanProperty( "ofmeet.feedback.enabled",                                    true               ) );
             config.put( "GENERATE_ROOMNAMES_ON_WELCOME_PAGE",    JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.random.roomnames",              true                ) );
             config.put( "DISPLAY_WELCOME_PAGE_CONTENT",          JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.content",           true                ) );
             config.put( "DISPLAY_WELCOME_PAGE_TOOLBAR_ADDITIONAL_CONTENT",JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.toolbarcontent",          false) );

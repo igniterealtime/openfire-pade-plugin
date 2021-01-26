@@ -105,7 +105,13 @@ public class FeedbackServlet extends HttpServlet
                 feedback.put(partName, writer.toString());
             }
             LOG.info(feedback.toString());
-            securityAuditManager.logEvent(feedback.getString("callStatsUserName"), "pade feedback rating:" + feedback.getString("rating"), feedback.getString("comment"));
+            final String comment = feedback.optString("comment","");
+            securityAuditManager.logEvent
+            (
+                feedback.getString("callStatsUserName")
+                , "pade feedback A/V-rating: " + feedback.optString("audio","-") +"/" + feedback.optString("video","-") + ( ! comment.isEmpty() ? " +" + Integer.toString(comment.length()) + "c" : "" )
+                , comment
+            );
         }
         catch (final Exception e)
         {

@@ -1,4 +1,7 @@
 var branding = {
+    "publishLocation"         : {disable: false, value: true},
+    "enableHomePage"          : {"disable": true, "value": false},
+    "homePage"                : {"disable": true, "value": false},
     "ofmeetUrl"               : {"disable": false, "value": "https://pade.chat:5443/ofmeet/"},
     "enableBeeKeeper"         : {"disable": true, "value": false},
     "beeKeeperTitle"          : {"disable": true},

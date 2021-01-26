@@ -111,7 +111,7 @@ public class ConfigServlet extends HttpServlet
             boolean enablePreJoinPage = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.prejoin.page", false );
             boolean enableStereo = JiveGlobals.getBooleanProperty( "ofmeet.stereo.enabled", false );
             boolean enableAudioLevels = JiveGlobals.getBooleanProperty( "ofmeet.audioLevels.enabled", false );
-            boolean enableFeedback = JiveGlobals.getBooleanProperty( "ofmeet.feedback.enabled", false );
+            boolean enableFeedback = JiveGlobals.getBooleanProperty( "ofmeet.feedback.enabled", true );
             
             int video_width_ideal =  JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.constraints.video.width.ideal", ofMeetConfig.getVideoConstraintsIdealHeight() * 16/9);
             int video_width_max = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.constraints.video.width.max", ofMeetConfig.getVideoConstraintsMaxHeight() * 16/9);

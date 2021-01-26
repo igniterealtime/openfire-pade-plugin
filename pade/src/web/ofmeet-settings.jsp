@@ -15,6 +15,8 @@
   --%>
 <%@ page import="org.jivesoftware.openfire.XMPPServer" %>
 <%@ page import="org.jivesoftware.openfire.plugin.ofmeet.OfMeetPlugin" %>
+<%@ page import="org.slf4j.Logger" %>
+<%@ page import="org.slf4j.LoggerFactory" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.HashMap" %>
 <%@ page import="org.jivesoftware.util.*" %>
@@ -25,12 +27,7 @@
 <jsp:useBean id="random" class="java.util.Random"/>
 <jsp:useBean id="ofmeetConfig" class="org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig"/>
 <%
-    String descriptionMessageDefault = LocaleUtils.getLocalizedString("ofmeet.feedback.description.default", "pade");
-    String placeholderTextDefault = LocaleUtils.getLocalizedString("ofmeet.feedback.placeholder.default", "pade");
-    String submitTextDefault = LocaleUtils.getLocalizedString("ofmeet.feedback.submit.default", "pade");
-    String successMessageDefault = LocaleUtils.getLocalizedString("ofmeet.feedback.success.default", "pade");
-    String errorMessageDefault = LocaleUtils.getLocalizedString("ofmeet.feedback.error.default", "pade");
-
+    Logger Log = LoggerFactory.getLogger( "ofmeet-settings.jsp" );
     boolean update = request.getParameter( "update" ) != null;
 
     final Cookie csrfCookie = CookieUtils.getCookie( request, "csrf" );
@@ -553,6 +550,12 @@
     </admin:contentBox>
 
     <fmt:message key="config.page.configuration.ofmeet.feedback.title" var="boxtitlefeedback"/>
+    <fmt:message key="ofmeet.feedback.description.default" var="descriptionMessageDefault"/> 
+    <fmt:message key="ofmeet.feedback.placeholder.default" var="placeholderTextDefault"/> 
+    <fmt:message key="ofmeet.feedback.submit.default" var="submitTextDefault"/> 
+    <fmt:message key="ofmeet.feedback.success.default" var="successMessageDefault"/> 
+    <fmt:message key="ofmeet.feedback.error.default" var="errorMessageDefault"/>        
+    
     <admin:contentBox title="${boxtitlefeedback}">
         <table cellpadding="3" cellspacing="0" border="0" width="100%">    
             <tr>

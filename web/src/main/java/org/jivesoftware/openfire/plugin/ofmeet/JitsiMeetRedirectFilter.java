@@ -49,6 +49,8 @@ public class JitsiMeetRedirectFilter implements Filter
         excludedExtensions.add( "jpg" );
         excludedExtensions.add( "ico" );
         excludedExtensions.add( "css" );
+        excludedExtensions.add( "json" );
+        excludedExtensions.add( "jsp" );
         excludedExtensions.add( "js" );
     }
 
@@ -68,6 +70,7 @@ public class JitsiMeetRedirectFilter implements Filter
             }
         }
 
+        if (uri.contains("/webchat")) return true;
         if (uri.contains("/swagger")) return true;
         if (uri.contains("/win-sso")) return true;
         if (uri.contains("/dashboard")) return true;

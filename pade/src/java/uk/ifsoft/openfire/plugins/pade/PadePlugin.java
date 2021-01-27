@@ -1,10 +1,14 @@
 package uk.ifsoft.openfire.plugins.pade;
 
+import org.jivesoftware.openfire.OfflineMessageStrategy;
+import org.jivesoftware.openfire.interceptor.InterceptorManager;
 import org.jivesoftware.openfire.http.HttpBindManager;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.container.Plugin;
 import org.jivesoftware.openfire.container.PluginManager;
 import org.jivesoftware.openfire.net.SASLAuthentication;
+import org.jivesoftware.openfire.user.User;
+import org.jivesoftware.openfire.user.UserNotFoundException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,16 +49,22 @@ import waffle.servlet.NegotiateSecurityFilter;
 import waffle.servlet.WaffleInfoServlet;
 import org.xmpp.packet.*;
 import org.dom4j.Element;
-
+import org.igniterealtime.openfire.plugins.pushnotification.PushInterceptor;
+import org.jivesoftware.openfire.plugin.ofmeet.OfMeetPlugin;
 
 public class PadePlugin implements Plugin, MUCEventListener
 {
     private static final Logger Log = LoggerFactory.getLogger( PadePlugin.class );
+    public static PadePlugin self;
+    public static String webRoot;
 
     private ServletContextHandler contextRest;
     private WebAppContext contextPublic;
     private WebAppContext contextPrivate;
     private WebAppContext contextWinSSO;
+    private WebAppContext contextWellKnown;
+    private PushInterceptor interceptor;
+    private OfMeetPlugin ofMeetPlugin;
 
     /**
      * Initializes the plugin.
@@ -65,12 +75,28 @@ public class PadePlugin implements Plugin, MUCEventListener
     @Override
     public void initializePlugin( final PluginManager manager, final File pluginDirectory )
     {
+        self = this;
+        webRoot = pluginDirectory.getPath() + "/classes";
+
         Log.info("start pade server");
+
+        interceptor = new PushInterceptor();
+        InterceptorManager.getInstance().addInterceptor( interceptor );
+        OfflineMessageStrategy.addListener( interceptor );
 
         contextRest = new ServletContextHandler(null, "/rest", ServletContextHandler.SESSIONS);
         contextRest.setClassLoader(this.getClass().getClassLoader());
         contextRest.addServlet(new ServletHolder(new JerseyWrapper()), "/api/*");
         HttpBindManager.getInstance().addJettyHandler(contextRest);
+
+        contextWellKnown = new WebAppContext(null, pluginDirectory.getPath() + "/classes/well-known", "/.well-known");
+        contextWellKnown.setClassLoader(this.getClass().getClassLoader());
+        final List<ContainerInitializer> initializersWellKnown = new ArrayList<>();
+        initializersWellKnown.add(new ContainerInitializer(new JettyJasperInitializer(), null));
+        contextWellKnown.setAttribute("org.eclipse.jetty.containerInitializers", initializersWellKnown);
+        contextWellKnown.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
+        contextWellKnown.setWelcomeFiles(new String[]{"index.jsp"});
+        HttpBindManager.getInstance().addJettyHandler(contextWellKnown);
 
         contextPrivate = new WebAppContext(null, pluginDirectory.getPath() + "/classes/private", "/dashboard");
         contextPrivate.setClassLoader(this.getClass().getClassLoader());
@@ -84,7 +110,7 @@ public class PadePlugin implements Plugin, MUCEventListener
         contextPrivate.setWelcomeFiles(new String[]{"index.jsp"});
         HttpBindManager.getInstance().addJettyHandler(contextPrivate);
 
-        contextPublic = new WebAppContext(null, pluginDirectory.getPath() + "/classes/public", "/pade");
+        contextPublic = new WebAppContext(null, pluginDirectory.getPath() + "/classes/docs", "/pade");
         contextPublic.setClassLoader(this.getClass().getClassLoader());
         contextPublic.getMimeTypes().addMimeMapping("wasm", "application/wasm");
         final List<ContainerInitializer> initializersCRM = new ArrayList<>();
@@ -94,17 +120,16 @@ public class PadePlugin implements Plugin, MUCEventListener
         contextPublic.setWelcomeFiles(new String[]{"index.html"});
         HttpBindManager.getInstance().addJettyHandler(contextPublic);
 
+        contextWinSSO = new WebAppContext(null, pluginDirectory.getPath() + "/classes/win-sso", "/sso");
+        contextWinSSO.setClassLoader(this.getClass().getClassLoader());
+        final List<ContainerInitializer> initializers7 = new ArrayList<>();
+        initializers7.add(new ContainerInitializer(new JettyJasperInitializer(), null));
+        contextWinSSO.setAttribute("org.eclipse.jetty.containerInitializers", initializers7);
+        contextWinSSO.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
+        contextWinSSO.setWelcomeFiles(new String[]{"index.jsp"});
+
         if (OSUtils.IS_WINDOWS)
         {
-            contextWinSSO = new WebAppContext(null, pluginDirectory.getPath() + "/classes/win-sso", "/sso");
-            contextWinSSO.setClassLoader(this.getClass().getClassLoader());
-
-            final List<ContainerInitializer> initializers7 = new ArrayList<>();
-            initializers7.add(new ContainerInitializer(new JettyJasperInitializer(), null));
-            contextWinSSO.setAttribute("org.eclipse.jetty.containerInitializers", initializers7);
-            contextWinSSO.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
-            contextWinSSO.setWelcomeFiles(new String[]{"index.jsp"});
-
             NegotiateSecurityFilter securityFilter = new NegotiateSecurityFilter();
             FilterHolder filterHolder = new FilterHolder();
             filterHolder.setFilter(securityFilter);
@@ -113,9 +138,9 @@ public class PadePlugin implements Plugin, MUCEventListener
 
             contextWinSSO.addFilter(filterHolder, "/*", enums);
             contextWinSSO.addServlet(new ServletHolder(new WaffleInfoServlet()), "/waffle");
-            contextWinSSO.addServlet(new ServletHolder(new org.ifsoft.sso.Password()), "/password");
-            HttpBindManager.getInstance().addJettyHandler(contextWinSSO);
         }
+        contextWinSSO.addServlet(new ServletHolder(new org.ifsoft.sso.Password()), "/password");
+        HttpBindManager.getInstance().addJettyHandler(contextWinSSO);
 
         try
         {
@@ -134,6 +159,10 @@ public class PadePlugin implements Plugin, MUCEventListener
         {
             MUCEventDispatcher.addListener(this);
         }
+
+        Log.info("Starting Openfire Meetings");
+        ofMeetPlugin = new OfMeetPlugin();
+        ofMeetPlugin.initializePlugin( manager, pluginDirectory );
     }
 
     /**
@@ -150,6 +179,8 @@ public class PadePlugin implements Plugin, MUCEventListener
     {
         Log.info("stop pade server");
 
+        if (ofMeetPlugin != null) ofMeetPlugin.destroyPlugin();
+
         try {
             SASLAuthentication.removeSupportedMechanism( OfChatSaslServer.MECHANISM_NAME );
             Security.removeProvider( OfChatSaslProvider.NAME );
@@ -159,12 +190,21 @@ public class PadePlugin implements Plugin, MUCEventListener
         HttpBindManager.getInstance().removeJettyHandler(contextPublic);
         HttpBindManager.getInstance().removeJettyHandler(contextPrivate);
 
+        if (contextWellKnown != null) HttpBindManager.getInstance().removeJettyHandler(contextWellKnown);
         if (contextWinSSO != null) HttpBindManager.getInstance().removeJettyHandler(contextWinSSO);
 
         if ( JiveGlobals.getBooleanProperty( "pade.mucevent.dispatcher.enabled", true))
         {
             MUCEventDispatcher.removeListener(this);
         }
+
+        OfflineMessageStrategy.removeListener( interceptor );
+        InterceptorManager.getInstance().removeInterceptor( interceptor );
+    }
+
+    public OfMeetPlugin getContainer()
+    {
+        return ofMeetPlugin;
     }
 
     private static final SecurityHandler basicAuth(String realm) {
@@ -190,21 +230,20 @@ public class PadePlugin implements Plugin, MUCEventListener
 
     private void checkRecordingsFolder()
     {
-        String ofmeetHome = JiveGlobals.getHomeDirectory() + File.separator + "resources" + File.separator + "spank" + File.separator + "ofmeet-cdn";
+        String resourcesHome = JiveGlobals.getHomeDirectory() + File.separator + "resources" + File.separator + "spank";
 
         try
         {
-            File ofmeetFolderPath = new File(ofmeetHome);
+            File ofmeetHome = new File(resourcesHome + File.separator + "ofmeet-cdn");
 
-            if(!ofmeetFolderPath.exists())
+            if(!ofmeetHome.exists())
             {
-                ofmeetFolderPath.mkdirs();
+                ofmeetHome.mkdirs();
 
+                List<String> lines = Arrays.asList("Move on, nothing here....");
+                Path file = Paths.get(ofmeetHome + File.separator + "index.html");
+                Files.write(file, lines, Charset.forName("UTF-8"));
             }
-
-            List<String> lines = Arrays.asList("Move on, nothing here....");
-            Path file = Paths.get(ofmeetHome + File.separator + "index.html");
-            Files.write(file, lines, Charset.forName("UTF-8"));
 
             File recordingsHome = new File(ofmeetHome + File.separator + "recordings");
 
@@ -212,11 +251,25 @@ public class PadePlugin implements Plugin, MUCEventListener
             {
                 recordingsHome.mkdirs();
 
+                List<String> lines = Arrays.asList("Move on, nothing here....");
+                Path file = Paths.get(recordingsHome + File.separator + "index.html");
+                Files.write(file, lines, Charset.forName("UTF-8"));
             }
 
-            lines = Arrays.asList("Move on, nothing here....");
-            file = Paths.get(recordingsHome + File.separator + "index.html");
+            // create .well-known/host-meta
+
+            File wellknownFolder = new File(resourcesHome + File.separator + ".well-known");
+
+            if(!wellknownFolder.exists())
+            {
+                wellknownFolder.mkdirs();
+            }
+
+            String server = XMPPServer.getInstance().getServerInfo().getHostname() + ":" + JiveGlobals.getProperty("httpbind.port.secure", "7443");
+            List<String> lines = Arrays.asList("<XRD xmlns=\"http://docs.oasis-open.org/ns/xri/xrd-1.0\">", "<Link rel=\"urn:xmpp:alt-connections:xbosh\" href=\"https://" + server + "/http-bind/\"/>", "<Link rel=\"urn:xmpp:alt-connections:websocket\" href=\"wss://" + server + "/ws/\"/>", "</XRD>");
+            Path file = Paths.get(wellknownFolder + File.separator + "host-meta");
             Files.write(file, lines, Charset.forName("UTF-8"));
+
         }
         catch (Exception e)
         {
@@ -272,19 +325,35 @@ public class PadePlugin implements Plugin, MUCEventListener
                     {
                         MUCRoom room = mucService.getChatRoom(roomJID.getNode());
 
-                        for (JID jid : room.getOwners())
+                        if (room != null)
                         {
-                            notifyRoomSubscribers(jid, room, roomJID);
-                        }
+                            for (JID jid : room.getOwners())
+                            {
+                                Log.debug("notifyRoomSubscribers owners " + jid + " " + roomJID);
+                                notifyRoomSubscribers(jid, room, roomJID, message, nickname, userJid);
+                            }
 
-                        for (JID jid : room.getAdmins())
-                        {
-                            notifyRoomSubscribers(jid, room, roomJID);
-                        }
+                            for (JID jid : room.getAdmins())
+                            {
+                                Log.debug("notifyRoomSubscribers admins " + jid + " " + roomJID);
+                                notifyRoomSubscribers(jid, room, roomJID, message, nickname, userJid);
+                            }
 
-                        for (JID jid : room.getMembers())
-                        {
-                            notifyRoomSubscribers(jid, room, roomJID);
+                            for (JID jid : room.getMembers())
+                            {
+                                Log.debug("notifyRoomSubscribers members " + jid + " " + roomJID);
+                                notifyRoomSubscribers(jid, room, roomJID, message, nickname, userJid);
+                            }
+
+                            for (MUCRole role : room.getModerators())
+                            {
+                                Log.debug("notifyRoomSubscribers moderators " + role.getUserAddress() + " " + roomJID, message);
+                            }
+
+                            for (MUCRole role : room.getParticipants())
+                            {
+                                Log.debug("notifyRoomSubscribers participants " + role.getUserAddress() + " " + roomJID, message);
+                            }
                         }
 
                     }
@@ -305,19 +374,17 @@ public class PadePlugin implements Plugin, MUCEventListener
 
     }
 
-    private void notifyRoomSubscribers(JID subscriberJID, MUCRoom room, JID roomJID)
+    private void notifyRoomSubscribers(JID subscriberJID, MUCRoom room, JID roomJID, Message message, String nickname, String senderJid)
     {
-        Log.debug("notifyRoomSubscribers " + subscriberJID + " " + roomJID);
-
         try {
             if (GroupJID.isGroup(subscriberJID)) {
                 Group group = GroupManager.getInstance().getGroup(subscriberJID);
 
                 for (JID groupMemberJID : group.getAll()) {
-                    notifyRoomActivity(groupMemberJID, room, roomJID);
+                    notifyRoomActivity(groupMemberJID, room, roomJID, message, nickname, senderJid);
                 }
             } else {
-                notifyRoomActivity(subscriberJID, room, roomJID);
+                notifyRoomActivity(subscriberJID, room, roomJID, message, nickname, senderJid);
             }
 
         } catch (GroupNotFoundException gnfe) {
@@ -325,35 +392,69 @@ public class PadePlugin implements Plugin, MUCEventListener
         }
     }
 
-    private void notifyRoomActivity(JID subscriberJID, MUCRoom room, JID roomJID)
+    private void notifyRoomActivity(JID subscriberJID, MUCRoom room, JID roomJID, Message message, String nickname, String senderJid)
     {
-        if (room.getAffiliation(subscriberJID) != MUCRole.Affiliation.none)
+        if (room.getAffiliation(subscriberJID) != MUCRole.Affiliation.none && !senderJid.equals(subscriberJID.toBareJID()))
         {
             Log.debug("notifyRoomActivity checking " + subscriberJID + " " + roomJID);
-            boolean inRoom = true;
+            boolean inRoom = false;
 
             try {
-                List<MUCRole> roles = room.getOccupantsByBareJID(subscriberJID);
-
-                if (roles.size() > 1 && roles.get(0).getPresence().isAvailable() == false)
+                for (MUCRole role : room.getOccupants())
                 {
-                    inRoom = false;
+                    if (role.getUserAddress().asBareJID().toString().equals(subscriberJID.toString())) inRoom = true;
                 }
 
             } catch (Exception e) {
                 inRoom = false;
+                Log.error("notifyRoomActivity error", e);
             }
 
             Log.debug("notifyRoomActivity confirmed " + subscriberJID + " " + roomJID + " " + inRoom);
 
             if (!inRoom)
             {
-                Message message = new Message();
-                message.setFrom(roomJID);
-                message.setTo(subscriberJID);
-                Element rai = message.addChildElement("rai", "xmpp:prosody.im/protocol/rai");
-                rai.addElement("activity").setText(roomJID.toString());
-                XMPPServer.getInstance().getRoutingTable().routePacket(subscriberJID, message, true);
+                if (XMPPServer.getInstance().getRoutingTable().getRoutes(subscriberJID, null).size() > 0)
+                {
+                    Log.debug("notifyRoomActivity notifying " + subscriberJID + " " + roomJID);
+                    Message notification = new Message();
+                    notification.setFrom(roomJID);
+                    notification.setTo(subscriberJID);
+                    Element rai = notification.addChildElement("rai", "xmpp:prosody.im/protocol/rai");
+                    rai.addElement("activity").setText(roomJID.toString());
+                    XMPPServer.getInstance().getRoutingTable().routePacket(subscriberJID, notification, true);
+                }
+                else {
+                    // user is offline, send web push notification if user mentioned
+                    // <reference xmlns='urn:xmpp:reference:0' uri='xmpp:juliet@capulet.lit' begin='72' end='78' type='mention' />
+
+                    Element referenceElement = message.getChildElement("reference", "urn:xmpp:reference:0");
+                    boolean mentioned = message.getBody().indexOf(subscriberJID.getNode()) > -1;
+
+                    if (referenceElement != null)
+                    {
+                        String uri = referenceElement.attribute("uri").getStringValue();
+
+                        if (uri.startsWith("xmpp:") && uri.substring(5).equals(subscriberJID.toString()))
+                        {
+                            mentioned = true;
+                        }
+                    }
+
+                    if (mentioned)
+                    {
+                        try
+                        {
+                            User user = XMPPServer.getInstance().getUserManager().getUser(subscriberJID.getNode());
+                            interceptor.webPush(user, message.getBody(), roomJID, Message.Type.groupchat, nickname );
+                            Log.debug( "notifyRoomActivity - notifying mention of " + user.getName());
+                        }
+                        catch ( UserNotFoundException e )
+                        {
+                            Log.debug( "notifyRoomActivity - Not a recognized user.", e );
+                        }
+                    }
+                }
             }
         }
     }

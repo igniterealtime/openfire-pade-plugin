@@ -402,6 +402,36 @@ public class OFMeetConfig
         JiveGlobals.deleteProperty( "ofmeet.lipSync.enabled" );
     }
 
+    public void setJvbName (String name )
+    {
+        JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.jvb.user.name", name );
+    }
+
+    public String getJvbName()
+    {
+        return JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.jvb.user.name", "jvb" );
+    }
+
+    public void resetJvbName()
+    {
+        JiveGlobals.deleteProperty( "org.jitsi.videobridge.ofmeet.jvb.user.name" );
+    }
+
+    public void setJvbPassword( String password )
+    {
+        JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.jvb.user.password", password );
+    }
+
+    public String getJvbPassword()
+    {
+        return JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.jvb.user.password" );
+    }
+
+    public void resetJvbPassword()
+    {
+        JiveGlobals.deleteProperty( "org.jitsi.videobridge.ofmeet.jvb.user.password" );
+    }
+
     public void setFocusPassword( String password )
     {
         JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.focus.user.password", password );
@@ -623,6 +653,42 @@ public class OFMeetConfig
         JiveGlobals.deleteProperty( "ofmeet.webrtcIceTcpDisable" );
     }
 
+    public void resetLanguage()
+    {
+        JiveGlobals.deleteProperty( "org.jitsi.videobridge.ofmeet.default.language" );
+    }
+
+    public void setLanguage(Language language)
+    {
+        JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.default.language", language.getCode() );
+    }
+
+    public Language[] getLanguages()
+    {
+        return Language.values();
+    }
+
+    public Language getLanguage()
+    {
+        final String jitsiLanguage = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.default.language" );
+        if ( jitsiLanguage != null )
+        {
+            final Language result = Language.byConverseCode( jitsiLanguage );
+            if ( result != null )
+            {
+                return result;
+            }
+        }
+
+        final Language result = Language.byLocale( JiveGlobals.getLocale() );
+        if ( result != null )
+        {
+            return result;
+        }
+
+        return Language.English;
+    }
+
     public final StringProperty jigasiSipUserId = new StringProperty( "ofmeet.jigasi.sip.user-id", null );
     public StringProperty getJigasiSipUserId() { return jigasiSipUserId; }
 
@@ -632,12 +698,33 @@ public class OFMeetConfig
     public final StringProperty jigasiSipServerAddress = new StringProperty( "ofmeet.jigasi.sip.server-address", null );
     public StringProperty getJigasiSipServerAddress() { return jigasiSipServerAddress; }
 
-    public final StringProperty jigasiSipDomainBase = new StringProperty( "ofmeet.jigasi.sip.domain-base", null );
-    public StringProperty getJigasiSipDomainBase() { return jigasiSipDomainBase; }
+    public final StringProperty jigasiSipTransport = new StringProperty( "ofmeet.jigasi.sip.transport", "UDP" );
+    public StringProperty getJigasiSipTransport() { return jigasiSipTransport; }
+
+    public final StringProperty jigasiProxyServer = new StringProperty( "ofmeet.jigasi.proxy.server", null );
+    public StringProperty getJigasiProxyServer() { return jigasiProxyServer; }
+
+    public final StringProperty jigasiProxyPort = new StringProperty( "ofmeet.jigasi.proxy.port", "5060" );
+    public StringProperty getJigasiProxyPort() { return jigasiProxyPort; }
 
     public final StringProperty jigasiXmppUserId = new StringProperty( "ofmeet.jigasi.xmpp.user-id", "jigasi" );
     public StringProperty getJigasiXmppUserId() { return jigasiXmppUserId; }
 
+    public final StringProperty jigasiXmppRoomName = new StringProperty( "ofmeet.jigasi.xmpp.room-name", "siptest" );
+    public StringProperty getJigasiXmppRoomName() { return jigasiXmppRoomName; }
+
     public final StringProperty jigasiXmppPassword = new StringProperty( "ofmeet.jigasi.xmpp.password", null );
     public StringProperty getJigasiXmppPassword() { return jigasiXmppPassword; }
+
+    public final StringProperty jigasiFreeSwitchPassword = new StringProperty( "ofmeet.freeswitch.password", "ClueCon" );
+    public StringProperty getJigasiFreeSwitchPassword() { return jigasiFreeSwitchPassword; }
+
+    public final StringProperty jigasiFreeSwitchHost = new StringProperty( "ofmeet.freeswitch.hostname", null );
+    public StringProperty getJigasiFreeSwitchHost() { return jigasiFreeSwitchHost; }
+
+    public final StringProperty jigasiSipEnabled = new StringProperty( "ofmeet.jigasi.enabled", "false" );
+    public boolean getJigasiSipEnabled() { return jigasiSipEnabled.get().equals("true"); }
+
+    public final StringProperty jigasiFreeSwitchEnabled = new StringProperty( "ofmeet.freeswitch.enabled", "false" );
+    public boolean getJigasiFreeSwitchEnabled() { return jigasiFreeSwitchEnabled.get().equals("true"); }
 }

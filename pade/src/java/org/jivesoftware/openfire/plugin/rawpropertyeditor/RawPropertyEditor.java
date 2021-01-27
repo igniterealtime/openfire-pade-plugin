@@ -26,7 +26,7 @@ public class RawPropertyEditor {
     }
 
     public User getAndCheckUser(String username) {
-        JID targetJID = XMPPServer.getInstance().createJID(username, null);
+        JID targetJID = XMPPServer.getInstance().createJID(JID.escapeNode(username), null);
         try {
             return XMPPServer.getInstance().getUserManager().getUser(targetJID.getNode());
         } catch (UserNotFoundException e) {

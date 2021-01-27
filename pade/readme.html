@@ -2,7 +2,7 @@
 
 <html>
 <head>
-    <title>Pade Server Plugin Changelog</title>
+    <title>Pade Readme</title>
     <style type="text/css">
         BODY {
             font-size : 100%;
@@ -51,37 +51,46 @@
 <body>
 
 <h1>
-Pade Server Plugin Readme
+    Pade Readme
 </h1>
 
-<h2>Overview</h2>
-
-<p>
-Pade Server and Web Applications
-</p>
-
-<h2>Known Issues</h2>
-
-<p>
-
-</p>
-<h2>Installation</h2>
-
-<ol>
-    <li>Copy the pade.jar file to the OPENFIRE_HOME/plugins directory.</li>
-    <li>Configure the admin properties page.</li>
-</ol>
-
-<h2>Configuration</h2>
-<p>
-TODO
-<p/>
-
-<h2>How to use</h2>
-
-<p>
-Under Meetings -> Pade tab you can configure.
-<p/>
-
+<p>This project provides a web-based unified communication solution for Openfire.</p>
+<ul>
+<li>peer to peer based chat,</li>
+<li>persistent groupchat,</li>
+<li>audio and video conferencing,</li>
+<li>telephone access to conferences,</li>
+</ul>
+<p>It includes third-party products, notably:</p>
+<ul>
+<li><a href="https://github.com/jitsi/jitsi-videobridge">Jitsi Videobridge</a> project;</li>
+<li><a href="https://github.com/jitsi/jicofo">Jitsi Conference Focus (jicofo)</a> project;</li>
+<li><a href="https://github.com/jitsi/jitsi-meet">Jitsi Meet</a> web client.</li>
+<li><a href="https://github.com/jitsi/jigasi">Jitsi SIP Gateway</a> project.</li>
+<li><a href="https://github.com/igniterealtime/pade">Pàdé</a> web desktop client based on the <a href="https://github.com/conversejs/converse.js">ConverseJS</a> project.</li>
+</ul>
+<p>Pade does work with Firefox. It however works best with Chromium based apps like Chrome, Edge, Electron and Opera.</p>
+<p>Pade has minimal network requirements and works out of the box internally on a local area network (LAN) or with a hosted Openfire server on the internet. If your Openfire server is placed behind a NAT and firewall and you want to allow external internet access, then you require some network expertise to configure it. You would need to open a few UDP/TCP ports and provide both the public and private IP addresses of your openfire server.</p>
+<p>Pade uses an XMPP user called <strong>jvb</strong> that will join a global conference called <strong>ofmeet</strong> with  the focus user called <strong>focus</strong>. If you enable the SIP gateway, a new user called <strong>jigasi</strong> will be created and it will join a global conference called <strong>jigasi</strong> with the focus user <strong>focus</strong></p>
+<p><img src="https://user-images.githubusercontent.com/110731/99916724-af0dc880-2d03-11eb-80c3-b35b9009910a.png" alt="image" style="max-width:100%;"></p>
+<p>Pade will not work out of the box if your Openfire server is configured to use LDAP. You would need to create the jvb, focus and jigasi bot users manually. Give the focus bot user owner/admin permissions to the MUC service.</p>
+<h2><a id="user-content-installation" class="anchor" aria-hidden="true" href="#installation"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg></a>Installation</h2>
+<p>Download latest release from <a href="https://github.com/igniterealtime/openfire-pade-plugin/releases">here</a> and upload the pade.jar from the admin web console of Openfire. Wait for the plugin to appear in the listing and then complete the following steps to confirm it is working.</p>
+<p>Make sure this user is online and has joined the <strong>ofmeet</strong> chat room. Confirm focus user is also online and has joined the <strong>ofmeet</strong> room as well.</p>
+<p><img src="https://user-images.githubusercontent.com/110731/99916763-eb412900-2d03-11eb-9028-c391713d4384.png" alt="image" style="max-width:100%;"></p>
+<p>Jicofo (offocus plugin) is still has as an xmpp component even though I suspect it is not being used. It connects to Openfire now as an external component</p>
+<p><img src="https://user-images.githubusercontent.com/110731/99916862-a10c7780-2d04-11eb-838c-0ba134643852.png" alt="image" style="max-width:100%;"></p>
+<p>if you have configured a SIP account for jigasi, also confirm that the jigasi user has logged in.</p>
+<p>If you have an active focus user, then you can do a quick peer-to-peer test with two browser tabs on your desktop. Open both of them to the same conference like https://your_server:7443/ofmeet/testconf and confirm that it is showing in the conference summary.</p>
+<p>If you get audio and video, then focus bot user is working ok and XMPP messages are passing around ok. If not, it is back to the log files and help from the community.</p>
+<p>To confirm the video-bridge is working, you need to run the last step again with 3 users. If audio and video stops with third participant, then double check on the network configuration, making sure TCP port 7443 and UDP port 10000 are opened for listening from the openfire server. Otherwise, check the log files and ask for help from ignte-realtime community.</p>
+<p>The new summary admin page shows call statistics from JVB2 as well as all active calls</p>
+<img src="https://user-images.githubusercontent.com/110731/100152444-9e438b00-2e9a-11eb-9294-6df1112446d6.png" alt="image" style="max-width:100%;"></p>
+<h2><a id="user-content-special-cases" class="anchor" aria-hidden="true" href="#special-cases"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg></a>Special cases</h2>
+<p>By default, pade should run out of the box with Openfire default settings. However, if ldap or any other custom user provider is being used, user accounts must be created manually for jvb, focus and jigasi (if needed) as the plugin cannot do this automatically.</p>
+<p>On Windows servers, ofmeet may not work if Openfire is installed in the default location "Program Files/Openfire" because of the embedded space in the name. Try using a different location with no embedded spaces. Also note that Jitsi videobridge cannot use the webrtc datachanel because of a missing binary in Windows and must use websockets for the data channel to Jitsi Meet. Port 8180 will be used by default in Openfire. A websocket proxy has been implemented in ofmeet to proxy from the configured Openfire websocket TLS port (7443) to 8180. This allows JVB2 to reuse the Openfire domain certificate for TLS on port 7443. If port 8180 is in use elsewhere then this needs to be changed. Use the Network web page to do so. If you use iptables, an external web server like nginx or haproxy to redirect standard TLS port 433 to Openfire TLS port 7443, then the public 'advertised port' for websockets (the publicly-accessible port Jitsi Meet web client will use) should be set to 443. Otherwise leave the default value as your Openfire TLS port (7443).</p>
+<img src="https://user-images.githubusercontent.com/110731/102720510-ae5d5780-42ec-11eb-9531-2e4b9a9523e8.png" alt="image" style="max-width:100%;"></p>
+<p>If you want to allow regular telephone users to join a conference from a home or office telephone, you would need to set up the SIP Gateway to a telephone provider. You would need to script an IVR (interective response) which will allow the caller to use the phone buttons/touch tones to select their destination meeting and convert that into a room name in the SIP header that Jigasi will use to route the call to the appropriate meeting room. For an example, see https://voximplant.com/docs/tutorials/jigasi-setup</p>
+<p>The alternative is much simpler if you already have FreeSWITCH with working phones and trunks setup with an external telephone line provider. You enable the ofmeet to connect to FreeSWITCH via ESL (external socket libary) and ofmeet will start to monitor every meeting. When the focus user joins, it will create a FreeSWITCH audio conference and initiate a call from the audio conference to Jigasi adding a SIP header with the name of the meeting room. You can now update your FreeSWITCH dial plan with internal and external telephone numbers that can be used by your users to to join the FreeSWITCH audio conference that is bridged to the Jitsi meeting</p>
 </body>
 </html>

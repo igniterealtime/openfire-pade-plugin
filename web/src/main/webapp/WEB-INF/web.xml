@@ -34,6 +34,32 @@
 		<url-pattern>/interface_config.js</url-pattern>
 	</servlet-mapping>
 
+	<servlet>
+		<servlet-name>inProgressList</servlet-name>
+		<servlet-class>org.jivesoftware.openfire.plugin.ofmeet.InProgressListServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>inProgressList</servlet-name>
+		<url-pattern>/inProgressList.json</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>feedback</servlet-name>
+		<servlet-class>org.jivesoftware.openfire.plugin.ofmeet.FeedbackServlet</servlet-class>
+		<multipart-config>
+            <max-file-size>2048</max-file-size>
+            <max-request-size>2048</max-request-size>
+            <file-size-threshold>2048</file-size-threshold>
+        </multipart-config>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>feedback</servlet-name>
+		<url-pattern>/static/close3.html</url-pattern>
+	</servlet-mapping>
+
+
 	<filter>
 		<filter-name>WatermarkFilter</filter-name>
 		<filter-class>org.jivesoftware.openfire.plugin.ofmeet.WatermarkFilter</filter-class>

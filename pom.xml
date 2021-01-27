@@ -16,9 +16,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>      
+        <openfire.version>4.6.0</openfire.version> 
+        <pade.url>https://igniterealtime.github.io/pade</pade.url>        
+    </properties>
+
     <groupId>org.igniterealtime.openfire.ofmeet</groupId>
     <artifactId>parent</artifactId>
-    <version>0.9.9-SNAPSHOT</version>
+    <version>1.3.1</version>
     <packaging>pom</packaging>
 
     <organization>
@@ -26,23 +32,10 @@
         <url>https://www.igniterealtime.org</url>
     </organization>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <openfire.version>4.2.0</openfire.version>
-        <videobridge.version>1.1-20200124.173127-125</videobridge.version>        
-        <jicofo.version>1.1-20200331.220657-111</jicofo.version>
-        <jigasi.version>1.1-20190806.132856-49</jigasi.version>    
-        <jicoco.version>1.1-20190509.130302-15</jicoco.version>     
-        <pade.url>https://igniterealtime.github.io/pade</pade.url>        
-    </properties>
-
     <modules>        
         <module>web</module>
-        <module>config</module>
-        <module>videobridge</module>            
-        <module>ofmeet</module>        
-        <module>offocus</module>        
-        <module>ofgasi</module>           
+        <module>config</module>              
+        <module>ofmeet</module>               
         <module>pade</module>        
     </modules>
 
@@ -97,22 +90,7 @@
 
     <dependencyManagement>
         <dependencies>
-            <!-- Third-party dependencies -->
-            <dependency>
-                <groupId>org.jitsi</groupId>
-                <artifactId>jigasi</artifactId>
-                <version>${jigasi.version}</version>
-            </dependency>   
-            <dependency>
-                <groupId>org.jitsi</groupId>
-                <artifactId>jicofo</artifactId>
-                <version>${jicofo.version}</version>
-            </dependency>   
-            <dependency>
-                <groupId>org.jitsi</groupId>
-                <artifactId>jitsi-videobridge</artifactId>
-                <version>${videobridge.version}</version>
-            </dependency>            
+            <!-- Third-party dependencies -->           
             <dependency>
                 <groupId>org.igniterealtime.openfire</groupId>
                 <artifactId>xmppserver</artifactId>
@@ -134,22 +112,12 @@
                 <groupId>${project.groupId}</groupId>
                 <artifactId>ofmeet</artifactId>
                 <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>videobridge</artifactId>
-                <version>${project.version}</version>
-            </dependency>            
+            </dependency>           
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>offocus</artifactId>
                 <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>ofgasi</artifactId>
-                <version>${project.version}</version>
-            </dependency>            
+            </dependency>         
 
         </dependencies>
     </dependencyManagement>
@@ -180,11 +148,16 @@
             <url>https://github.com/jitsi/jitsi-maven-repository/raw/master/snapshots/</url>
         </repository>
         <repository>
-            <id>igniterealtime</id>
+            <id>igniterealtime1</id>
+            <name>Ignite Realtime Repository</name>
+            <url>https://igniterealtime.org/archiva/repository/maven/</url>
+        </repository>        
+        <repository>
+            <id>igniterealtime2</id>
             <name>Ignite Realtime Repository (Snapshots)</name>
             <url>http://igniterealtime.org/repo/</url>
             <releases>
-                <enabled>false</enabled>
+                <enabled>true</enabled>
             </releases>
             <snapshots>
                 <enabled>true</enabled>
@@ -193,11 +166,16 @@
     </repositories>
     <pluginRepositories>
         <pluginRepository>
-            <id>igniterealtime</id>
+            <id>igniterealtime1</id>
+            <name>Ignite Realtime Repository</name>
+            <url>https://igniterealtime.org/archiva/repository/maven/</url>
+        </pluginRepository>    
+        <pluginRepository>
+            <id>igniterealtime2</id>
             <name>Ignite Realtime Repository (Snapshots)</name>
             <url>http://igniterealtime.org/repo/</url>
             <releases>
-                <enabled>false</enabled>
+                <enabled>true</enabled>
             </releases>
             <snapshots>
                 <enabled>true</enabled>

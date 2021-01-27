@@ -11,6 +11,7 @@ import org.jivesoftware.util.*;
 import org.jivesoftware.openfire.group.*;
 import org.jivesoftware.openfire.user.*;
 import org.jivesoftware.openfire.session.*;
+import org.jivesoftware.openfire.muc.*;
 
 import org.xmpp.packet.*;
 import org.jivesoftware.openfire.plugin.rawpropertyeditor.RawPropertyEditor;
@@ -30,6 +31,7 @@ import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.interfaces.ECPrivateKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
+import org.igniterealtime.openfire.plugins.pushnotification.PushInterceptor;
 
 /**
  * The Class MeetController.
@@ -38,11 +40,6 @@ public class MeetController {
 
     private static final Logger Log = LoggerFactory.getLogger(MeetController.class);
     public static final MeetController INSTANCE = new MeetController();
-
-    private final ConcurrentHashMap<String, String> callIds = new ConcurrentHashMap<String, String>();
-    private final ConcurrentHashMap<String, String> droppedCalls = new ConcurrentHashMap<String, String>();
-    private final ConcurrentHashMap<String, String> makeCalls = new ConcurrentHashMap<String, String>();
-    private final ConcurrentHashMap<String, JSONObject> callList = new ConcurrentHashMap<String, JSONObject>();
 
     /**
      * Gets the instance.
@@ -248,6 +245,88 @@ public class MeetController {
 
     //-------------------------------------------------------
     //
+    //  Message
+    //
+    //-------------------------------------------------------
+
+    public boolean postMessage(String username, String payload)
+    {
+        Log.debug("postMessage "  + username + "\n" + payload);
+
+        User user = RawPropertyEditor.getInstance().getAndCheckUser(username);
+        if (user == null) return false;
+        boolean ok = false;
+
+        try {
+            JSONObject json = new JSONObject(payload);
+
+            if ("chat".equals(json.getString("msgType"))) {
+                postChatMessage(user, json);
+            } else {
+                postGroupChatMessage(user, json);
+            }
+
+        } catch (Exception e1) {
+            Log.error("postMessage failed "  + username + "\n" + payload, e1);
+        }
+
+        return ok;
+    }
+
+    private void postChatMessage(User user, JSONObject json)
+    {
+        Log.debug("postChatMessage "  + user + "\n" + json);
+
+        try {
+            final String domain = XMPPServer.getInstance().getServerInfo().getXMPPDomain();
+            final String username = user.getUsername();
+
+            JID jid1 = new JID(username + "@" + domain);
+            JID jid2 = new JID(json.getString("msgFrom"));
+
+            Message message = new Message();
+            message.setFrom(jid1);
+            message.setTo(jid2);
+            message.setType(Message.Type.chat);
+            message.setBody(">" + json.getString("msgBody") + "\n\n" + json.getString("reply"));
+            XMPPServer.getInstance().getRoutingTable().routePacket(jid2, message, true);
+
+            PushInterceptor.notifications.remove(username); // reset notification indicator
+
+        } catch (Exception e) {
+            Log.error("postChatMessage", e);
+        }
+    }
+
+    private void postGroupChatMessage(User user, JSONObject json)
+    {
+        Log.debug("postGroupChatMessage "  + user + "\n" + json);
+
+        try {
+            String domain = XMPPServer.getInstance().getServerInfo().getXMPPDomain();
+            JID jid1 = new JID(user.getUsername() + "@" + domain);
+            JID jid2 = new JID(json.getString("msgFrom"));
+            String muc = jid2.getDomain();
+            muc = muc.substring(0, muc.indexOf("."));
+
+            MultiUserChatService mucService = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(muc);
+            MUCRoom room = mucService.getChatRoom(jid2.getNode());
+
+            Message message = new Message();
+            message.setFrom(jid2 + "/" + user.getName());
+            //message.setTo(jid2);
+            message.setType(Message.Type.groupchat);
+            message.setBody("> " + json.getString("msgNick") + " : " + json.getString("msgBody") + "\n\n" + json.getString("reply"));
+            room.send(message, room.getRole());
+
+        } catch (Exception e) {
+            Log.error("postGroupChatMessage", e);
+        }
+    }
+
+
+    //-------------------------------------------------------
+    //
     //  Jitsi Meet
     //
     //-------------------------------------------------------
@@ -258,12 +337,13 @@ public class MeetController {
         {
             String room = username + "-" + System.currentTimeMillis();
             String domain = XMPPServer.getInstance().getServerInfo().getXMPPDomain();
+            String mucDomain = JiveGlobals.getProperty( "ofmeet.main.muc", "conference" + "." + domain);
 
             try {
                 JID jid1 = new JID(username + "@" + domain);
                 JID jid2 = new JID(jid);
 
-                String confJid = room + "@conference." + domain;
+                String confJid = room + "@" + mucDomain;
 
                 Message message1 = new Message();
                 message1.setFrom(jid1);

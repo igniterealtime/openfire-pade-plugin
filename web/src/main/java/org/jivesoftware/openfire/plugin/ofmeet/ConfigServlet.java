@@ -73,6 +73,7 @@ public class ConfigServlet extends HttpServlet
             final OFMeetConfig ofMeetConfig = new OFMeetConfig();
 
             final String xmppDomain = XMPPServer.getInstance().getServerInfo().getXMPPDomain();
+            final String mucDomain = JiveGlobals.getProperty( "ofmeet.main.muc", "conference" + "." + xmppDomain);
 
             final JSONArray conferences = new JSONArray();
 
@@ -82,10 +83,10 @@ public class ConfigServlet extends HttpServlet
 
             String recordingKey = null;
 
-
             int minHDHeight = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.min.hdheight", 540 );
+            String defaultLanguage = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.default.language", null );
             boolean useNicks = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.usenicks", false );
-            boolean webinar = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.webinar", false );
+            boolean websockets = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.websockets", true );
             boolean useIPv6 = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.useipv6", false );
             boolean useStunTurn = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.use.stunturn", false );
             boolean recordVideo = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.media.record", false );
@@ -94,7 +95,6 @@ public class ConfigServlet extends HttpServlet
             boolean useBundle = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.use.bundle", true );
             boolean enableWelcomePage = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.welcomePage", true );
             boolean enableRtpStats = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.rtp.stats", true );
-            boolean openSctp = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.open.sctp", true );
             String desktopSharingChromeExtensionId = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.chrome.extension.id", null );
             String desktopSharingFirefoxExtensionId = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.firefox.extension.id", null );
             boolean desktopSharingChromeEnabled = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.desktop.sharing.chrome.enabled", true );
@@ -107,6 +107,28 @@ public class ConfigServlet extends HttpServlet
             boolean logStats = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.stats.logging", false );
             String iceServers = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.iceservers", "" );
             String xirsysUrl = JiveGlobals.getProperty( "ofmeet.xirsys.url", null );
+            boolean ofmeetWinSSOEnabled = JiveGlobals.getBooleanProperty( "ofmeet.winsso.enabled", false );
+            boolean enablePreJoinPage = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.prejoin.page", false );
+            boolean enableStereo = JiveGlobals.getBooleanProperty( "ofmeet.stereo.enabled", false );
+            boolean enableAudioLevels = JiveGlobals.getBooleanProperty( "ofmeet.audioLevels.enabled", false );
+            boolean enableFeedback = JiveGlobals.getBooleanProperty( "ofmeet.feedback.enabled", true );
+            
+            int video_width_ideal =  JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.constraints.video.width.ideal", ofMeetConfig.getVideoConstraintsIdealHeight() * 16/9);
+            int video_width_max = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.constraints.video.width.max", ofMeetConfig.getVideoConstraintsMaxHeight() * 16/9);
+            int video_width_min = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.constraints.video.width.min", ofMeetConfig.getVideoConstraintsMinHeight() * 16/9);
+
+            int lowMaxBitratesVideo = JiveGlobals.getIntProperty( "org.jitsi.videobridge.low.max.bitrates.video", 200000 );
+            int standardMaxBitratesVideo = JiveGlobals.getIntProperty( "org.jitsi.videobridge.standard.max.bitrates.video", 500000 );
+            int highMaxBitratesVideo = JiveGlobals.getIntProperty( "org.jitsi.videobridge.high.max.bitrates.video", 1500000 );
+
+            boolean capScreenshareBitrate = JiveGlobals.getBooleanProperty( "ofmeet.cap.screenshare.bitrate", true);
+            boolean enableLayerSuspension = JiveGlobals.getBooleanProperty( "ofmeet.enable.layer.suspension", true);
+            String minHeightForQualityLvlLow = JiveGlobals.getProperty( "ofmeet.min.height.for.quality.level.low", "180" );
+            String minHeightForQualityLvlStd = JiveGlobals.getProperty( "ofmeet.min.height.for.quality.level.std", "360" );
+            String minHeightForQualityLvlHigh = JiveGlobals.getProperty( "ofmeet.min.height.for.quality.level.high", "720" );
+
+            String displayNotice = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.display.notice", "");
+            boolean wsBridgeChannel = JiveGlobals.getBooleanProperty( "ofmeet.bridge.ws.channel", org.jitsi.util.OSUtils.IS_WINDOWS);
 
             if ( xirsysUrl != null )
             {
@@ -125,8 +147,8 @@ public class ConfigServlet extends HttpServlet
 
             final Map<String, String> hosts = new HashMap<>();
             hosts.put( "domain", xmppDomain );
-            hosts.put( "muc", "conference." + xmppDomain );
-            hosts.put( "bridge", "jitsi-videobridge." + xmppDomain );
+            hosts.put( "muc", mucDomain );
+            //hosts.put( "bridge", "jitsi-videobridge." + xmppDomain );
             hosts.put( "focus", "focus." + xmppDomain );
             config.put( "hosts", hosts );
 
@@ -144,17 +166,24 @@ public class ConfigServlet extends HttpServlet
             {
                 config.put( "iceServers", iceServers.trim() );
             }
-            config.put( "enforcedBridge", "jitsi-videobridge." + xmppDomain );
+            //config.put( "enforcedBridge", "jitsi-videobridge." + xmppDomain );
             config.put( "useStunTurn", useStunTurn );
-            config.put( "webinar", webinar );
+            if ( defaultLanguage != null && !defaultLanguage.trim().isEmpty() )
+            {
+                config.put( "defaultLanguage", defaultLanguage.trim() );
+            }
+            config.put( "prejoinPageEnabled", enablePreJoinPage );
             config.put( "useIPv6", useIPv6 );
             config.put( "useNicks", useNicks );
             config.put( "useRtcpMux", useRtcpMux );
-            config.put( "useBundle", useBundle );
+            //config.put( "useBundle", useBundle );
             config.put( "enableWelcomePage", enableWelcomePage );
+            config.put( "enableClosePage", enableFeedback );
             config.put( "enableRtpStats", enableRtpStats );
             config.put( "enableLipSync", ofMeetConfig.getLipSync() );
-            config.put( "openSctp", openSctp );
+
+            config.put( "enableRemb", true );
+            config.put( "enableTcc", true );
 
             if ( recordingKey == null || recordingKey.isEmpty() )
             {
@@ -193,11 +222,27 @@ public class ConfigServlet extends HttpServlet
             config.put( "minHDHeight", minHDHeight );
             config.put( "hiddenDomain", "recorder." + xmppDomain );
             config.put( "startBitrate", startBitrate );
+
+            final JSONObject videoQuality = new JSONObject();
+            final JSONObject maxBitratesVideo = new JSONObject();
+            maxBitratesVideo.put( "low", lowMaxBitratesVideo );
+            maxBitratesVideo.put( "standard", standardMaxBitratesVideo );
+            maxBitratesVideo.put( "high", highMaxBitratesVideo );
+            videoQuality.put( "maxBitratesVideo", maxBitratesVideo );
+
+            final JSONObject minHeightForQualityLvl = new JSONObject();
+            minHeightForQualityLvl.put( minHeightForQualityLvlLow, "low" );
+            minHeightForQualityLvl.put( minHeightForQualityLvlStd, "standard" );
+            minHeightForQualityLvl.put( minHeightForQualityLvlHigh, "high" );
+            videoQuality.put( "minHeightForQualityLvl", minHeightForQualityLvl );
+            config.put( "videoQuality", videoQuality );
+
             config.put( "recordingType", "colibri" );
-            config.put( "disableAudioLevels", true );   // reduces CPU. see https://community.jitsi.org/t/host-a-meeting-with-500-people-ideas/34672/3
+            config.put( "disableAudioLevels", ! enableAudioLevels );
             config.put( "stereo", false );
             config.put( "requireDisplayName", true );
             config.put( "startAudioOnly", ofMeetConfig.getStartAudioOnly() );
+
             if ( ofMeetConfig.getStartAudioMuted() != null )
             {
                 config.put( "startAudioMuted", ofMeetConfig.getStartAudioMuted() );
@@ -206,32 +251,54 @@ public class ConfigServlet extends HttpServlet
             {
                 config.put( "startVideoMuted", ofMeetConfig.getStartVideoMuted() );
             }
+            
+                        
 
             // 'resolution' is used in some cases (chrome <61), newer versions use 'constraints'.
             config.put( "resolution", ofMeetConfig.getResolution() );
             final JSONObject constraints = new JSONObject();
             final JSONObject videoConstraints = new JSONObject();
-
             videoConstraints.put( "aspectRatio", (JSONString) ofMeetConfig::getVideoConstraintsIdealAspectRatio ); // This cast causes the JSON-quoting of strings to be skipped (the ratio here is a simple function, not text)
             final Map<String, Object> height = new HashMap<>();
             height.put( "ideal", ofMeetConfig.getVideoConstraintsIdealHeight() );
             height.put( "max", ofMeetConfig.getVideoConstraintsMaxHeight() );
             height.put( "min", ofMeetConfig.getVideoConstraintsMinHeight() );
             videoConstraints.put( "height", height );
+            final Map<String, Object> width = new HashMap<>();
+            width.put( "ideal", video_width_ideal );
+            width.put( "max", video_width_max );
+            width.put( "min", video_width_min );
+
+            videoConstraints.put( "width", width );
             constraints.put( "video", videoConstraints );
             config.put( "constraints", constraints );
+            config.put( "enableLayerSuspension", enableLayerSuspension );
 
+            final JSONObject testing = new JSONObject();
+            final JSONObject octo = new JSONObject();
+            octo.put( "probability", 0 );
+            testing.put( "octo", octo);
+            testing.put( "capScreenshareBitrate", capScreenshareBitrate ? 1 : 0 );
+            config.put( "testing", testing );
+
+            config.put( "maxFullResolutionParticipants", -1);
             config.put( "useRoomAsSharedDocumentName", false );
             config.put( "logStats", logStats );
+            config.put( "ofmeetWinSSOEnabled", ofmeetWinSSOEnabled );
+
             config.put( "conferences", conferences );
+
             if ( globalConferenceId != null && !globalConferenceId.isEmpty() )
             {
                 config.put( "globalConferenceId", globalConferenceId );
             }
             config.put( "disableRtx", ofMeetConfig.getDisableRtx() );
-            config.put( "bosh", new URI( "https", null, request.getServerName(), request.getServerPort(), "/http-bind/", null, null) );
-            config.put( "websocket", new URI( "wss", null, request.getServerName(), request.getServerPort(), "/ws/", null, null) );
-
+            config.put( "bosh", new URI( request.getScheme(), null, request.getServerName(), request.getServerPort(), "/http-bind/", null, null) );
+            if (websockets)
+            {
+                config.put( "websocket", new URI( "https".equals(request.getScheme()) ? "wss" : "ws", null, request.getServerName(), request.getServerPort(), "/ws/", null, null) );
+            }
+            config.put( "openBridgeChannel", wsBridgeChannel ? "websocket" : "datachannel" );
             config.put( "channelLastN", ofMeetConfig.getChannelLastN() );
             config.put( "adaptiveLastN", ofMeetConfig.getAdaptiveLastN() );
             config.put( "disableSimulcast", !ofMeetConfig.getSimulcast() );
@@ -242,6 +309,23 @@ public class ConfigServlet extends HttpServlet
             // TODO: find out if both of the settings below are in use (seems silly).
             config.put( "adaptiveSimulcast", ofMeetConfig.getAdaptiveSimulcast() );
             config.put( "disableAdaptiveSimulcast", !ofMeetConfig.getAdaptiveSimulcast() );
+
+            if (enableStereo)
+            {
+                config.put( "disableAP", true );
+                config.put( "disableAEC", true );
+                config.put( "disableNS", true );
+                config.put( "disableAGC", true );
+                config.put( "disableHPF", true );
+                config.put( "enableLipSync", false );
+                config.put( "stereo", true );
+                config.put( "opusMaxAverageBitrate", 510000 );
+            }
+
+            config.put( "enableNoisyMicDetection", true );
+            config.put( "enableNoAudioDetection", true );
+
+            config.put( "noticeMessage", displayNotice);
 
             out.println( "var config = " + config.toString( 2 ) + ";" );
         }
@@ -261,6 +345,7 @@ public class ConfigServlet extends HttpServlet
             response.setHeader( "Pragma", "no-cache" );
             response.setHeader( "Content-Type", "application/javascript" );
             response.setHeader( "Connection", "close" );
+            response.setCharacterEncoding( "UTF-8" );
         }
         catch ( Exception e )
         {

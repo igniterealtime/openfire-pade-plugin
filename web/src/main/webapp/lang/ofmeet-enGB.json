@@ -1,0 +1,65 @@
+{
+    "welcomepage": {
+        "inProgressList": "In Progress",
+        "inProgressListEmpty": "There are no meetings in progress."
+    },
+    "toolbar": {
+        "recordMeeting": "Record Meeting",
+        "recordDesktopApp": "Record Desktop App (Including Meeting Browser Tab)",
+        "enableConferenceTags": "Enable Conference Captions/Subtitles",
+        "launchCryptPadApplication": "Launch CryptPad Application",
+        "changePersonalAvatar": "Change personal avatar",
+        "takePhoto": "Take Photo",
+        "createBreakoutRooms": "Create Breakout Rooms",
+        "shareCursorMousePointer": "Share cursor/mouse pointer",
+        "shareaWhiteboard": "Share a whiteboard",
+        "shareSomeConfetti": "Share some confetti",
+        "contactsManager": "Contacts Manager"
+    },
+    "breakout": {
+        "breakoutRooms": "Breakout Rooms",
+        "participants": "{{title}} Participants",
+        "duration": "Duration (mins):",
+        "rooms": "Rooms:",
+        "close": "Close",
+        "allocate": "Allocate",
+        "reassemble": "Reassemble",
+        "breakout": "Breakout",
+        "allocatedMessage": "Allocated {{participants}} participants to {{rooms}} rooms",
+        "missingParticipants": "Missing participants or rooms",
+        "allocateParticipantsFirst": "Allocate participants first before breakout",
+        "anonymous": "Anonymous-{{id}}",
+        "room": "Room {{n}}",
+        "meetingParticipants": "Meeting Participants",
+        "breakoutStartedWithDuration": "Breakout started and finishes in {{min}} minutes ",
+        "breakoutStarted": "Breakout started. Click on reassemble to end and recall participants",
+        "breakoutHasEnded": "Breakout has ended",
+        "joining": "Joining breakout in {{sec}} seconds",
+        "leaving": "Leaving breakout in {{sec}} seconds"
+    },
+    "takePhoto": {
+	    "handsRaised": "Hands Raised",
+	    "location": "Location",
+	    "date": "Date",
+	    "subject": "Subject",
+	    "host": "Host",
+	    "activity": "Activity"
+	},
+	"handsRaised": {
+		"handsRaised": "Hands Raised: {{raised}} of {{total}} ({{percentage}}%)"
+	},
+	"tag": {
+		"conferenceCaptionsSubTitles": "Conference Captions/Sub Titles",
+		"location": "Location",
+		"date": "Date",
+		"subject": "Subject",
+		"host": "Host",
+		"activity": "Activity",
+		"enableMessageCaptions": "Enable Message Captions",
+		"disableMessageCaptions": "Disable Message Captions",
+		"enableVoiceTranscription": "Enable Voice Transcription",
+		"disableVoiceTranscription": "Disable Voice Transcription",
+		"save": "Save",
+		"cancel": "Cancel"
+	}
+}

@@ -70,6 +70,9 @@ public class InProgressListServlet extends HttpServlet
             final List<MUCRoom> rooms = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(service).getChatRooms();
             final JSONArray meetings = new JSONArray();
             final String[] excludeKeywords = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.exclude", "").split(":");
+            final Boolean isSizeInfoEnabled = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.enableSizeInfo", false);
+            final Boolean isParticipantsInfoEnabled = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.enableParticipantsInfo", false);
+            final Boolean isProtectionInfoEnabled = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.enableProtectionInfo", false);
             final URL requestUrl = new URL(url);
             final Date Now = new Date();
             for (MUCRoom chatRoom : rooms)
@@ -129,9 +132,9 @@ public class InProgressListServlet extends HttpServlet
                 final long duration = Now.getTime() - chatRoom.getCreationDate().getTime();
                 final boolean hasPassword = ! StringUtils.isEmpty(chatRoom.getPassword());
                 final String title = roomDecodedName
-                                   + (hasPassword ? " \uD83D\uDD12" :  "")
-                                   + (size > 0 ? " (" + Integer.toString(size) + ")" : "")
-                                   + " " + nicks.toString();
+                                   + ( isProtectionInfoEnabled && hasPassword ? " \uD83D\uDD12" :  "")
+                                   + ( isSizeInfoEnabled && size > 0 ? " (" + Integer.toString(size) + ")" : "")
+                                   + ( isParticipantsInfoEnabled ? " " + nicks.toString() : "");
 
                 meeting.put( "room", roomDecodedName);
                 meeting.put( "url", new URL(requestUrl, "./" + roomName).toString());
@@ -139,10 +142,9 @@ public class InProgressListServlet extends HttpServlet
                 meeting.put( "duration", (duration/60000)*60000); // round down to minutes
                 meeting.put( "name", title); // TODO: might be refactored to title in app.bundle.min.js
 
-                // additional JSON data to be used by other apps
-                meeting.put( "size", size);
-                meeting.put( "members", members);
-                meeting.put( "password", Boolean.toString(hasPassword));
+                if ( isSizeInfoEnabled ) meeting.put( "size", size);
+                if ( isProtectionInfoEnabled) meeting.put( "password", Boolean.toString(hasPassword));
+                if ( isParticipantsInfoEnabled) meeting.put( "members", members);
 
                 meetings.put(meeting);
             }

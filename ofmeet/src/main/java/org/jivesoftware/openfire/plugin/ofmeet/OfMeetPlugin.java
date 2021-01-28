@@ -55,6 +55,7 @@ import org.jivesoftware.openfire.http.HttpBindManager;
 import org.jivesoftware.openfire.interceptor.InterceptorManager;
 import org.jivesoftware.openfire.session.ClientSession;
 import org.jivesoftware.openfire.session.Session;
+import org.jivesoftware.openfire.security.SecurityAuditManager;
 import org.jivesoftware.util.JiveGlobals;
 import org.jivesoftware.util.StringUtils;
 import org.jivesoftware.util.PropertyEventDispatcher;
@@ -126,6 +127,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     private final JitsiJigasiWrapper jitsiJigasiWrapper;
     private final MeetingPlanner meetingPlanner;
     private final LobbyMuc lobbyMuc;
+    private final SecurityAuditManager securityAuditManager = SecurityAuditManager.getInstance();
 
     public OfMeetPlugin()
     {
@@ -712,30 +714,57 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     @Override
     public void occupantLeft(final JID roomJID, JID user)
     {
-        if (client != null)
-        {
-            Log.debug("occupantLeft " + roomJID + " " + user);
+        Log.debug("occupantLeft " + roomJID + " " + user);
 
-            String roomName = roomJID.getNode();
-            String userName = user.getNode();
+        String roomName = roomJID.getNode();
+        String userName = user.getNode();
 
-            try {
+        try {
 
-                if ("focus".equals(userName) && !"ofgasi".equals(roomName) && !"ofmeet".equals(roomName))
+            if ("focus".equals(userName) && !"ofgasi".equals(roomName) && !"ofmeet".equals(roomName))
+            {
+                if (client != null)
                 {
                     String error = sendAsyncFWCommand("uuid_kill " + roomName);
 
                     if (error != null)
                     {
-                        Log.info("focus joined room, stop freeswitch conference " + roomName);
+                        Log.info("focus left room, stop freeswitch conference " + roomName);
                         System.setProperty("ofmeet.freeswitch." + roomName, "false");
                     } else {
-                        Log.error("focus joined room, freeswitch originate failed - " + error);
+                        Log.error("focus left room, freeswitch uuid_kill failed - " + error);
                     }
                 }
-            } catch ( Exception e ) {
-                Log.error( "An exception occurred while trying to stop freeswitch conference " + roomName, e );
+
+                String json = getConferenceStats();
+                String comment = "";
+
+                if (json != null)
+                {
+                    try {
+                        net.sf.json.JSONObject summary = new net.sf.json.JSONObject(json);
+
+                        String current_timestamp = summary.getString("current_timestamp");
+                        int total_conference_seconds = summary.getInt("total_conference_seconds");
+                        int total_participants = summary.getInt("total_participants");
+                        int total_failed_conferences = summary.getInt("total_failed_conferences");
+                        int total_conferences_created = summary.getInt("total_conferences_created");
+                        int total_conferences_completed = summary.getInt("total_conferences_completed");
+                        int conferences = summary.getInt("conferences");
+                        int participants = summary.getInt("participants");
+                        int largest_conference = summary.getInt("largest_conference");
+                        int p2p_conferences = summary.getInt("p2p_conferences");
+
+                        comment = "time: " + current_timestamp + ", elapsed: " + total_conference_seconds + ", people: " + total_participants + ", failed: " + total_failed_conferences + ", completed: " + total_conferences_completed + ", conferences: " + conferences + ",participants: " + participants + ", largest: " + largest_conference + ", p2p: " + p2p_conferences;
+
+                    } catch (Exception e1) {
+                        Log.error("error getting jvb colibri stats");
+                    }
+                    securityAuditManager.logEvent("pade", "meeting - " + roomName, comment);
+                }
             }
+        } catch ( Exception e ) {
+            Log.error( "An exception occurred while trying to stop freeswitch conference " + roomName, e );
         }
     }
 
@@ -974,12 +1003,11 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
     public String sendAsyncFWCommand(String command)
     {
-        Log.debug("sendAsyncFWCommand " + command);
-
         String response = null;
 
         if (client != null)
         {
+            Log.debug("sendAsyncFWCommand " + command);
             response = client.sendAsyncApiCommand(command, "");
         }
 
@@ -988,12 +1016,11 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
     public EslMessage sendFWCommand(String command)
     {
-        Log.debug("sendFWCommand " + command);
-
         EslMessage response = null;
 
         if (client != null)
         {
+            Log.debug("sendFWCommand " + command);
             response = client.sendSyncApiCommand(command, "");
         }
 

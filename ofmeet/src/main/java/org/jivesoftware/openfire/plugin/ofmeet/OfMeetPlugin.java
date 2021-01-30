@@ -151,6 +151,19 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         return jitsiJvbWrapper.getConferenceStats();
     }
 
+    public String getJvbDuration()
+    {
+        long current_time = System.currentTimeMillis();
+        String duration = "";
+
+        try {
+            long start_timestamp = Long.parseLong(System.getProperty("ofmeet.jvb.started.timestamp", String.valueOf(System.currentTimeMillis())));
+            duration = StringUtils.getFullElapsedTime(System.currentTimeMillis() - start_timestamp);
+        } catch (Exception e) {}
+
+        return duration;
+    }
+
     public String getDescription()
     {
         return "OfMeet Plugin";
@@ -744,7 +757,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
                     try {
                         net.sf.json.JSONObject summary = new net.sf.json.JSONObject(json);
 
-                        String current_timestamp = summary.getString("current_timestamp");
                         int total_conference_seconds = summary.getInt("total_conference_seconds");
                         int total_participants = summary.getInt("total_participants");
                         int total_failed_conferences = summary.getInt("total_failed_conferences");
@@ -755,7 +767,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
                         int largest_conference = summary.getInt("largest_conference");
                         int p2p_conferences = summary.getInt("p2p_conferences");
 
-                        comment = "time: " + current_timestamp + ", elapsed: " + total_conference_seconds + ", people: " + total_participants + ", failed: " + total_failed_conferences + ", completed: " + total_conferences_completed + ", conferences: " + conferences + ",participants: " + participants + ", largest: " + largest_conference + ", p2p: " + p2p_conferences;
+                        comment = "uptime: " + getJvbDuration() + ", elapsed: " + total_conference_seconds + ", people: " + total_participants + ", failed: " + total_failed_conferences + ", completed: " + total_conferences_completed + ", conferences: " + conferences + ",participants: " + participants + ", largest: " + largest_conference + ", p2p: " + p2p_conferences;
 
                     } catch (Exception e1) {
                         Log.error("error getting jvb colibri stats");

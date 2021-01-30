@@ -1,3 +1,4 @@
+root@evalfire0 /opt/.opt/openfire/_src/git/openfire-pade-plugin-master # expand ./web/src/main/java/org/jivesoftware/openfire/plugin/ofmeet/FeedbackServlet.java
 package org.jivesoftware.openfire.plugin.ofmeet;
 
 import org.jivesoftware.util.JiveGlobals;
@@ -106,12 +107,17 @@ public class FeedbackServlet extends HttpServlet
             }
             LOG.info(feedback.toString());
             final String comment = feedback.optString("comment","");
-            securityAuditManager.logEvent
-            (
-                feedback.getString("callStatsUserName")
-                , "pade feedback A/V-rating: " + feedback.optString("audio","-") +"/" + feedback.optString("video","-") + ( ! comment.isEmpty() ? " +" + Integer.toString(comment.length()) + "c" : "" )
-                , comment
-            );
+            final String audioRating = feedback.optString("audio","-");
+            final String videoRating = feedback.optString("video","-");
+            if ( ! audioRating.equals("-") || ! videoRating.equals("-") || ! comment.isEmpty() )
+            {
+                securityAuditManager.logEvent
+                (
+                    feedback.getString("callStatsUserName")
+                    , "pade feedback A/V-rating: " + audioRating +"/" + videoRating + ( ! comment.isEmpty() ? ", comment: " + Integer.toString(comment.length()) + "c" : "" )
+                    , comment
+                );
+            }
         }
         catch (final Exception e)
         {

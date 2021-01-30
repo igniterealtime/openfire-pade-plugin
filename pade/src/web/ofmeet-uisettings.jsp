@@ -132,6 +132,10 @@
         final String welcomeToolbarContent = ParamUtils.getParameter( request, "welcomeToolbarContent" );
         final boolean welcomeRecentList = ParamUtils.getBooleanParameter( request, "welcomepageRecentList" );
         final boolean welcomeInProgressList = ParamUtils.getBooleanParameter( request, "welcomepageInProgressList" );
+        final boolean enableSizeInfo = ParamUtils.getBooleanParameter( request, "enableSizeInfo" );       
+        final boolean enableParticipantsInfo = ParamUtils.getBooleanParameter( request, "enableParticipantsInfo" ); 
+        final boolean enableProtectionInfo = ParamUtils.getBooleanParameter( request, "enableProtectionInfo" ); 
+        
         final String welcomeInProgressListInterval = request.getParameter( "welcomepageInProgressListInterval" );
         try {
             Integer.parseInt( welcomeInProgressListInterval );
@@ -213,8 +217,11 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.random.roomnames", Boolean.toString( randomRoomNames ) );            
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.content", Boolean.toString( welcomepageContent ) );            
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.toolbarcontent", Boolean.toString( welcomepageToolbarContent ) );            
-            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.recentlist", Boolean.toString( welcomeRecentList ) );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.recentlist", Boolean.toString( welcomeRecentList ) );            
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist", Boolean.toString( welcomeInProgressList ) );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.enableSizeInfo", Boolean.toString( enableSizeInfo ) );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.enableParticipantsInfo", Boolean.toString( enableParticipantsInfo ) );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.enableProtectionInfo", Boolean.toString( enableProtectionInfo ) );            
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.interval", welcomeInProgressListInterval );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.exclude", welcomeInProgressListExclude );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.title",  welcomeTitle );     
@@ -520,6 +527,24 @@
                     <fmt:message key="ofmeet.welcomepage.inprogresslist" />
                 </td>
             </tr>
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="enableSizeInfo" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.enableSizeInfo", false) ? "checked" : ""}>
+                    <fmt:message key="ofmeet.welcomepage.inprogresslist.enable.size.info" />
+                </td>
+            </tr>
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="enableParticipantsInfo" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.enableParticipantsInfo", false) ? "checked" : ""}>
+                    <fmt:message key="ofmeet.welcomepage.inprogresslist.enable.participants.info" />
+                </td>
+            </tr>
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="enableProtectionInfo" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.enableProtectionInfo", false) ? "checked" : ""}>
+                    <fmt:message key="ofmeet.welcomepage.inprogresslist.enable.protection.info" />
+                </td>
+            </tr>            
             <tr>
                 <td width="200"><fmt:message key="ofmeet.welcomepage.inprogresslist.interval" />:</td>
                 <td><input type="text" size="60" maxlength="100" name="welcomepageInProgressListInterval" value="${admin:getIntProperty("org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.interval", 10)}"></td>

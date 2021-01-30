@@ -28,6 +28,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -55,33 +57,35 @@ public class InProgressListServlet extends HttpServlet
             response.setCharacterEncoding( "UTF-8" );
             response.setContentType( "UTF-8" );
 
-            String service = "conference"; //mainMuc.split(".")[0];
-            List<MUCRoom> rooms = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(service).getChatRooms();
-
-            String url = (String) request.getHeader("referer");
-            if (url == null) url = request.getRequestURL().toString();
+            final String url = (String) request.getHeader("referer");
+            // if (url == null) url = request.getRequestURL().toString();
+            if ((url == null) || (url.trim().isEmpty()))
+            {
+              response.sendError(HttpServletResponse.SC_NOT_FOUND);
+              return;
+            }
             Log.debug("ofmeet base url: {}", url);
-            URL requestUrl = new URL(url);
 
+            final String service = "conference"; //mainMuc.split(".")[0];
+            final List<MUCRoom> rooms = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(service).getChatRooms();
             final JSONArray meetings = new JSONArray();
-
             final String[] excludeKeywords = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.exclude", "").split(":");
-
+            final Boolean isSizeInfoEnabled = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.enableSizeInfo", false);
+            final Boolean isParticipantsInfoEnabled = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.enableParticipantsInfo", false);
+            final Boolean isProtectionInfoEnabled = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.enableProtectionInfo", false);
+            final URL requestUrl = new URL(url);
+            final Date Now = new Date();
             for (MUCRoom chatRoom : rooms)
             {
-                final JSONObject meeting = new JSONObject();
-
-                final JSONArray members = new JSONArray();
-                String focus = null;
-                String roomName = chatRoom.getJID().getNode();
-                String roomDecodedName = URLDecoder.decode(roomName, "UTF-8");
-                boolean bExclusion = false;
+                final String roomName = chatRoom.getJID().getNode();
+                final String roomDecodedName = URLDecoder.decode(roomName, "UTF-8");
 
                 if ( roomName.equals("ofmeet") || roomName.equals("ofgasi") || !chatRoom.isPublicRoom() )
                 {
                     continue;
                 }
 
+                boolean bExclusion = false;
                 for ( String keyword : excludeKeywords )
                 {
                     if ( !keyword.isEmpty() && roomDecodedName.toLowerCase().contains(keyword.toLowerCase()) )
@@ -90,12 +94,15 @@ public class InProgressListServlet extends HttpServlet
                         break;
                     }
                 }
-
                 if ( bExclusion )
                 {
                     continue;
                 }
 
+
+                final JSONArray members = new JSONArray();
+                List<String> nicks = new ArrayList<String>();
+                String focus = null;
                 for ( final MUCRole occupant : chatRoom.getOccupants() )
                 {
                     JID jid = occupant.getUserAddress();
@@ -107,23 +114,37 @@ public class InProgressListServlet extends HttpServlet
                     }
                     else
                     {
+                        final String bareJID = occupant.getUserAddress().toBareJID();
                         final JSONObject member = new JSONObject();
-
-                        member.put("id", occupant.getUserAddress().toBareJID());
+                        member.put("id", bareJID);
                         members.put(member);
+                        nicks.add(nick);
                     }
                 }
-
                 if (focus == null)
                 {
                     continue;
                 }
 
-                meeting.put( "name", roomDecodedName);
+
+                final JSONObject meeting = new JSONObject();
+                final int size = members.length();
+                final long duration = Now.getTime() - chatRoom.getCreationDate().getTime();
+                final boolean hasPassword = ! StringUtils.isEmpty(chatRoom.getPassword());
+                final String title = roomDecodedName
+                                   + ( isProtectionInfoEnabled && hasPassword ? " \uD83D\uDD12" :  "")
+                                   + ( isSizeInfoEnabled && size > 0 ? " (" + Integer.toString(size) + ")" : "")
+                                   + ( isParticipantsInfoEnabled ? " " + nicks.toString() : "");
+
+                meeting.put( "room", roomDecodedName);
                 meeting.put( "url", new URL(requestUrl, "./" + roomName).toString());
                 meeting.put( "date", chatRoom.getCreationDate().getTime());
-                meeting.put( "members", members);
-                meeting.put( "password", StringUtils.isEmpty(chatRoom.getPassword())? "false" : "true" );
+                meeting.put( "duration", (duration/60000)*60000); // round down to minutes
+                meeting.put( "name", title); // TODO: might be refactored to title in app.bundle.min.js
+
+                if ( isSizeInfoEnabled ) meeting.put( "size", size);
+                if ( isProtectionInfoEnabled) meeting.put( "password", Boolean.toString(hasPassword));
+                if ( isParticipantsInfoEnabled) meeting.put( "members", members);
 
                 meetings.put(meeting);
             }

@@ -427,7 +427,12 @@ public class JitsiJvbWrapper implements ProcessListener
     public void onErrorLine(final String line)
     {
         Log.info(line);
-        if (line.contains("Server.doStart: Started")) System.setProperty("ofmeet.jvb.started", "true");
+
+        if (line.contains("Server.doStart: Started"))
+        {
+            System.setProperty("ofmeet.jvb.started", "true");
+            System.setProperty("ofmeet.jvb.started.timestamp", String.valueOf(System.currentTimeMillis()));
+        }
     }
 
     public void onError(final Throwable t)

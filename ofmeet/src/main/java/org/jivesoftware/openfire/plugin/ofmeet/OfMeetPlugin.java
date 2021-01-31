@@ -767,7 +767,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
                         int largest_conference = summary.getInt("largest_conference");
                         int p2p_conferences = summary.getInt("p2p_conferences");
 
-                        comment = "uptime: " + getJvbDuration() + ", elapsed: " + total_conference_seconds + ", people: " + total_participants + ", failed: " + total_failed_conferences + ", completed: " + total_conferences_completed + ", conferences: " + conferences + ",participants: " + participants + ", largest: " + largest_conference + ", p2p: " + p2p_conferences;
+                        comment = "uptime: " + getJvbDuration() + ", elapsed (secs): " + total_conference_seconds + ", people: " + total_participants + ", failed: " + total_failed_conferences + ", completed: " + total_conferences_completed + ", conferences: " + conferences + ",participants: " + participants + ", largest: " + largest_conference + ", p2p: " + p2p_conferences;
 
                     } catch (Exception e1) {
                         Log.error("error getting jvb colibri stats");

@@ -1,4 +1,3 @@
-root@evalfire0 /opt/.opt/openfire/_src/git/openfire-pade-plugin-master # expand ./web/src/main/java/org/jivesoftware/openfire/plugin/ofmeet/FeedbackServlet.java
 package org.jivesoftware.openfire.plugin.ofmeet;
 
 import org.jivesoftware.util.JiveGlobals;

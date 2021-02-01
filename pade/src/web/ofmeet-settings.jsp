@@ -113,6 +113,25 @@
         } catch (NumberFormatException ex ) {
             errors.put( "videoConstraintsMaxHeight", "Cannot parse value as integer value." );
         }
+        final String videoConstraintsMinWidth = request.getParameter( "videoConstraintsMinWidth" );
+        try {
+            Integer.parseInt( videoConstraintsMinWidth );
+        } catch (NumberFormatException ex ) {
+            errors.put( "videoConstraintsMinWidth", "Cannot parse value as integer value." );
+        }
+        final String videoConstraintsIdealWidth = request.getParameter( "videoConstraintsIdealWidth" );
+        try {
+            Integer.parseInt( videoConstraintsIdealWidth );
+        } catch (NumberFormatException ex ) {
+            errors.put( "videoConstraintsIdealWidth", "Cannot parse value as integer value." );
+        }
+        final String videoConstraintsMaxWidth = request.getParameter( "videoConstraintsMaxWidth" );
+        try {
+            Integer.parseInt( videoConstraintsMaxWidth );
+        } catch (NumberFormatException ex ) {
+            errors.put( "videoConstraintsMaxWidth", "Cannot parse value as integer value." );
+        }
+
         final String lowMaxBitratesVideo = request.getParameter( "lowMaxBitratesVideo" );
         try {
             Integer.parseInt( lowMaxBitratesVideo );
@@ -199,10 +218,15 @@
             ofmeetConfig.setStartAudioOnly( startaudioonly );
             ofmeetConfig.setStartAudioMuted( startaudiomuted == null || startaudiomuted.isEmpty() ? null : Integer.parseInt( startaudiomuted ));
             ofmeetConfig.setStartVideoMuted( startvideomuted == null || startvideomuted.isEmpty() ? null : Integer.parseInt( startvideomuted ));
+
             ofmeetConfig.setVideoConstraintsIdealAspectRatio( videoConstraintsIdealAspectRatio );
             ofmeetConfig.setVideoConstraintsMinHeight( Integer.parseInt( videoConstraintsMinHeight ) );
             ofmeetConfig.setVideoConstraintsIdealHeight( Integer.parseInt( videoConstraintsIdealHeight ) );
             ofmeetConfig.setVideoConstraintsMaxHeight( Integer.parseInt( videoConstraintsMaxHeight ) );
+            ofmeetConfig.setVideoConstraintsMinWidth( Integer.parseInt( videoConstraintsMinWidth ) );
+            ofmeetConfig.setVideoConstraintsIdealWidth( Integer.parseInt( videoConstraintsIdealWidth ) );
+            ofmeetConfig.setVideoConstraintsMaxWidth( Integer.parseInt( videoConstraintsMaxWidth ) );
+
             ofmeetConfig.setChannelLastN( channelLastN );
             ofmeetConfig.setAdaptiveLastN( adaptivelastn );
             ofmeetConfig.setSimulcast( simulcast );
@@ -383,9 +407,18 @@
                 <td>
                     <input type="text" name="videoConstraintsIdealAspectRatio" id="videoConstraintsIdealAspectRatio" value="${ofmeetConfig.videoConstraintsIdealAspectRatio}">
                 </td>
+                <td></td>
+                <td></td>
             </tr>
             <tr>
                 <td nowrap>
+                    <label class="jive-label" for="videoConstraintsMinWidth"><fmt:message key="config.page.configuration.ofmeet.constraints.video.width.min"/></label>
+                </td>
+                <td>
+                    <input type="number" min="0" name="videoConstraintsMinWidth" id="videoConstraintsMinWidth" value="${ofmeetConfig.videoConstraintsMinWidth}">
+                    <label for="videoConstraintsMinWidth"><fmt:message key="config.page.configuration.ofmeet.constraints.video.width.unit"/></label>
+                </td>
+                <td nowrap style="padding-left: 10px;">
                     <label class="jive-label" for="videoConstraintsMinHeight"><fmt:message key="config.page.configuration.ofmeet.constraints.video.height.min"/></label>
                 </td>
                 <td>
@@ -395,6 +428,13 @@
             </tr>
             <tr>
                 <td nowrap>
+                    <label class="jive-label" for="videoConstraintsIdealWidth"><fmt:message key="config.page.configuration.ofmeet.constraints.video.width.ideal"/></label>
+                </td>
+                <td>
+                    <input type="number" min="0" name="videoConstraintsIdealWidth" id="videoConstraintsIdealWidth" value="${ofmeetConfig.videoConstraintsIdealWidth}">
+                    <label for="videoConstraintsIdealWidth"><fmt:message key="config.page.configuration.ofmeet.constraints.video.width.unit"/></label>
+                </td>
+                <td nowrap style="padding-left: 10px;">
                     <label class="jive-label" for="videoConstraintsIdealHeight"><fmt:message key="config.page.configuration.ofmeet.constraints.video.height.ideal"/></label>
                 </td>
                 <td>
@@ -404,6 +444,13 @@
             </tr>
             <tr>
                 <td nowrap>
+                    <label class="jive-label" for="videoConstraintsMaxWidth"><fmt:message key="config.page.configuration.ofmeet.constraints.video.width.max"/></label>
+                </td>
+                <td>
+                    <input type="number" min="0" name="videoConstraintsMaxWidth" id="videoConstraintsMaxWidth" value="${ofmeetConfig.videoConstraintsMaxWidth}">
+                    <label for="videoConstraintsMaxWidth"><fmt:message key="config.page.configuration.ofmeet.constraints.video.width.unit"/></label>
+                </td>
+                <td nowrap style="padding-left: 10px;">
                     <label class="jive-label" for="videoConstraintsMaxHeight"><fmt:message key="config.page.configuration.ofmeet.constraints.video.height.max"/></label>
                 </td>
                 <td>

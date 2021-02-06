@@ -11,6 +11,7 @@ import org.jivesoftware.openfire.interceptor.*;
 import org.jivesoftware.openfire.muc.*;
 import org.jivesoftware.openfire.session.*;
 import org.jivesoftware.util.JiveGlobals;
+import org.jivesoftware.util.Version;
 
 import org.dom4j.*;
 import org.xmpp.forms.*;
@@ -41,7 +42,9 @@ public class LobbyMuc implements ServerIdentitiesProvider, ServerFeaturesProvide
 
     protected void initialize() throws Exception
     {
-        if (!XMPPServer.getInstance().getMultiUserChatManager().isServiceRegistered(LOBBY_NAME)) {
+        final boolean backwardsCompatible = new Version(4, 6, 1, null, -1 ).isNewerThan( XMPPServer.getInstance().getServerInfo().getVersion() );
+
+        if (!XMPPServer.getInstance().getMultiUserChatManager().isServiceRegistered(LOBBY_NAME) && backwardsCompatible) {
             lobbyService = XMPPServer.getInstance().getMultiUserChatManager().createMultiUserChatService(LOBBY_NAME, LOBBY_DESC, false);
             lobbyService.addExtraIdentity("component", LOBBY_MUC, LOBBY_IDENTITY_TYPE);
             lobbyService.addExtraFeature(DISPLAY_NAME_REQUIRED_FEATURE);

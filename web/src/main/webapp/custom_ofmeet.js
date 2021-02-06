@@ -519,7 +519,62 @@ var ofmeet = (function(of)
             const ids = Object.getOwnPropertyNames(participants);
             document.getElementById('breakout-rooms').value = Math.round(ids.length / 2)
         }
+
+        if (participant && id)
+        {
+            addParticipantDragDropHandlers(document.getElementById("participant_"+id));
+        }
     }
+
+
+    function addParticipantDragDropHandlers(element)
+    {
+        if (!element) return;
+        element.setAttribute("draggable","true");
+        element.addEventListener("dragstart",participantDragStart);
+        element.addEventListener("dragover" ,participantDragOver);
+        element.addEventListener("drop"     ,participantDrop);
+    }
+
+    function participantDragStart(event)
+    {
+        event.dataTransfer.effectAllowed = "move";
+        event.dataTransfer.setData("application/x.id", event.target.id);
+        console.debug('dragstart: source ', event.target.id);
+    }
+
+    function participantDragOver(event)
+    {
+        event.preventDefault();
+        event.stopPropagation();
+        event.dataTransfer.dropEffect = "move";
+        // console.debug('dragover: destination ', this.id);
+    }
+
+    function participantDrop(event)
+    {
+        event.preventDefault();
+        event.stopPropagation();
+        const sourceId = event.dataTransfer.getData("application/x.id");
+        const source = document.getElementById(sourceId);
+        // const target = event.target; <- this points to any inner childs but not to the parent, use this instead
+        const destination = this;
+        console.debug('drop: swap ', sourceId, destination.id);
+        swapNodes(source, destination);
+    }
+
+    function swapNodes(nodeA, nodeB) {
+        const afterNodeB = nodeB.nextElementSibling;
+        const parent = nodeB.parentNode;
+        if (nodeA === afterNodeB) { // just below
+            parent.insertBefore(nodeA, nodeB);
+        } else {
+            nodeA.replaceWith(nodeB);
+            parent.insertBefore(nodeA, afterNodeB);
+        }
+    }
+
+
 
     function setOwnPresence()
     {
@@ -2239,6 +2294,10 @@ var ofmeet = (function(of)
 
         console.debug("postJoinSetup");
 
+        console.debug("add drag&drop handlers to local VideoContainer and participants");
+        addParticipantDragDropHandlers(document.getElementById("localVideoContainer"));
+        getOccupants();
+        
         // fake the interaction
         APP.conference.commands.addCommandListener("___FAKE_INTERACTION", function()
         {

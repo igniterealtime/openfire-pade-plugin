@@ -32,7 +32,7 @@ var ofmeet = (function(of)
     let padsModalOpened = false, contactsModalOpened = false, swRegistration = null, participants = {}, recordingAudioTrack = {}, recordingVideoTrack = {}, videoRecorder = {}, recorderStreams = {}, customStore = {}, filenames = {}, dbnames = [];
     let clockTrack = {start: 0, stop: 0, joins: 0, leaves: 0}, handsRaised = 0;
     let tags = {location: "", date: localizedDate(new Date()).format('LL'), subject: "", host: "", activity: ""};
-    let audioTemporaryUnmuted = false, cursorShared = false;
+    let audioTemporaryUnmuted = false,  cursorShared = false;
     let breakoutIconVisible = false;
     //-------------------------------------------------------
     //
@@ -2257,11 +2257,7 @@ var ofmeet = (function(of)
 
         if (interfaceConfig.OFMEET_ENABLE_MOUSE_SHARING)
         {
-            APP.conference.commands.addCommandListener("CURSOR", function(event)
-            {
-                //console.log("CURSOR remote event", event);
-                window.top.postMessage({ action: 'ofmeet.action.share', json: JSON.parse(event.value)}, '*');
-           });
+            collab.init();
 
             const cursorButton = addToolbarItem('ofmeet-cursor', '<div id="ofmeet-cursor" class="toolbox-icon"><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.cursor + '</div></div>', i18n('toolbar.shareCursorMousePointer'), ".button-group-right");
 
@@ -2270,14 +2266,26 @@ var ofmeet = (function(of)
                 evt.stopPropagation();
 
                 if (!cursorShared) {
-                    handleCursorEvent({data: {event: 'ofmeet.event.url.message', action: 'setup', from: APP.conference.getLocalDisplayName()}});
-                    window.addEventListener('message', handleCursorEvent);
+					$('#ofmeet-cursor').addClass('toggled');
+                    collab.startSharing(Object.values(nickColors)[0]);
                 } else {
-                    handleCursorEvent({data: {event: 'ofmeet.event.url.message', action: 'destroy', from: APP.conference.getLocalDisplayName()}});
-                    window.removeEventListener('message', handleCursorEvent);
+					$('#ofmeet-cursor').removeClass('toggled');
+                    collab.stopSharing();
                 }
                 cursorShared = !cursorShared;
             });
+
+            // Observe tile view status.
+            // TODO: When the tile view change event is implemented in Jitsi Meet, it will be replaced with it.
+            const localVideoTileViewContainer = document.getElementById('localVideoTileViewContainer')
+
+			const observer = new MutationObserver(mutations => {
+				APP.UI.emitEvent('UI.tile_view_changed', APP.store.getState()['features/video-layout'].tileViewEnabled);
+			})
+
+			observer.observe(localVideoTileViewContainer, {
+				childList: true
+			})
         }
 
         if (interfaceConfig.OFMEET_ENABLE_CRYPTPAD)
@@ -2331,18 +2339,6 @@ var ofmeet = (function(of)
                 evt.stopPropagation();
                 APP.conference.commands.sendCommandOnce("CONFETTI", {value: !0})
             });
-        }
-    }
-
-    function handleCursorEvent(event)
-    {
-        //console.log("handleCursorEvent", event.data);
-
-        if (event.data.event == 'ofmeet.event.url.message')
-        {
-            event.data.from = APP.conference.getLocalDisplayName();
-            const value = JSON.stringify(event.data);
-            APP.conference.commands.sendCommandOnce("CURSOR", {value: value});
         }
     }
 

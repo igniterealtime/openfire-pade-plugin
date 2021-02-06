@@ -1,5 +1,9 @@
 var branding = {
+    "publishLocation"         : {"disable": false, "value": true},
+    "enableHomePage"          : {"disable": true, "value": false},
+    "homePage"                : {"disable": true, "value": "https://www.free-solutions.ch"},
     "ofmeetUrl"               : {"disable": false, "value": "https://pade.chat:5443/ofmeet/"},
+    "showToolbarIcons"        : {"disable": false, "value": true},
     "enableBeeKeeper"         : {"disable": true, "value": false},
     "beeKeeperTitle"          : {"disable": true},
     "beeKeeperTopic"          : {"disable": true},

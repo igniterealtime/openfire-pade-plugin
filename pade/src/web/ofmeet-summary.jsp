@@ -42,8 +42,8 @@
         if (jsonObj != null && jsonObj.has("current_timestamp")) summary = jsonObj;
     }
 
-    try {
-        String current_timestamp = summary.getString("current_timestamp");
+    try {        
+        String uptime = container.getJvbDuration();
         
         int total_conference_seconds = summary.getInt("total_conference_seconds");      
         int total_participants = summary.getInt("total_participants");
@@ -60,7 +60,7 @@
         <table cellpadding="0" cellspacing="0" border="0" width="100%">
         <thead>
             <tr>
-                <th nowrap><fmt:message key="ofmeet.summary.current_timestamp" /></th>                 
+                <th nowrap><fmt:message key="ofmeet.summary.uptime" /></th>                 
                 <th nowrap><fmt:message key="ofmeet.summary.total_conference_seconds" /></th>
                 <th nowrap><fmt:message key="ofmeet.summary.total_participants" /></th>
                 <th nowrap><fmt:message key="ofmeet.summary.total_failed_conferences" /></th>           
@@ -74,7 +74,7 @@
         </thead>
         <tbody>
             <tr>
-                <td nowrap><%= current_timestamp %></th>   
+                <td nowrap><%= uptime %></th>   
                 <td nowrap><%= total_conference_seconds %></th>
                 <td nowrap><%= total_participants %></th>
                 <td nowrap><%= total_failed_conferences %></th>           

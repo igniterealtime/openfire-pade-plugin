@@ -132,6 +132,17 @@
         final String welcomeToolbarContent = ParamUtils.getParameter( request, "welcomeToolbarContent" );
         final boolean welcomeRecentList = ParamUtils.getBooleanParameter( request, "welcomepageRecentList" );
         final boolean welcomeInProgressList = ParamUtils.getBooleanParameter( request, "welcomepageInProgressList" );
+        final boolean enableSizeInfo = ParamUtils.getBooleanParameter( request, "enableSizeInfo" );       
+        final boolean enableParticipantsInfo = ParamUtils.getBooleanParameter( request, "enableParticipantsInfo" ); 
+        final boolean enableProtectionInfo = ParamUtils.getBooleanParameter( request, "enableProtectionInfo" ); 
+        
+        final boolean enablefeedback = ParamUtils.getBooleanParameter( request, "enablefeedback" );
+        final String descriptionMessage = request.getParameter( "descriptionMessage" );
+        final String placeholderText = request.getParameter( "placeholderText" );
+        final String submitText = request.getParameter( "submitText" );
+        final String successMessage = request.getParameter( "successMessage" );
+        final String errorMessage = request.getParameter( "errorMessage" );
+
         final String welcomeInProgressListInterval = request.getParameter( "welcomepageInProgressListInterval" );
         try {
             Integer.parseInt( welcomeInProgressListInterval );
@@ -211,16 +222,28 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.allow.uploads", Boolean.toString( allowUploads ) );             
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.breakout", Boolean.toString( enableBreakout ) );              
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.random.roomnames", Boolean.toString( randomRoomNames ) );            
+            
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.content", Boolean.toString( welcomepageContent ) );            
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.toolbarcontent", Boolean.toString( welcomepageToolbarContent ) );            
-            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.recentlist", Boolean.toString( welcomeRecentList ) );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.recentlist", Boolean.toString( welcomeRecentList ) );            
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist", Boolean.toString( welcomeInProgressList ) );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.enableSizeInfo", Boolean.toString( enableSizeInfo ) );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.enableParticipantsInfo", Boolean.toString( enableParticipantsInfo ) );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.enableProtectionInfo", Boolean.toString( enableProtectionInfo ) );            
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.interval", welcomeInProgressListInterval );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.exclude", welcomeInProgressListExclude );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.title",  welcomeTitle );     
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.description",  welcomeDesc );  
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcome.content",  welcomeContent );              
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcome.toolbarcontent", welcomeToolbarContent );            
+
+            JiveGlobals.setProperty( "ofmeet.feedback.enabled", Boolean.toString(enablefeedback) );
+            JiveGlobals.setProperty( "ofmeet.feedback.description", descriptionMessage );
+            JiveGlobals.setProperty( "ofmeet.feedback.placeholder", placeholderText );
+            JiveGlobals.setProperty( "ofmeet.feedback.submit", submitText );
+            JiveGlobals.setProperty( "ofmeet.feedback.success", successMessage );
+            JiveGlobals.setProperty( "ofmeet.feedback.error", errorMessage );
+
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.languagedetection", Boolean.toString( enableLanguageDetection ) );            
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.default.language", language );             
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.watermark.link", watermarkLink );
@@ -521,6 +544,24 @@
                 </td>
             </tr>
             <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="enableSizeInfo" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.enableSizeInfo", false) ? "checked" : ""}>
+                    <fmt:message key="ofmeet.welcomepage.inprogresslist.enable.size.info" />
+                </td>
+            </tr>
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="enableParticipantsInfo" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.enableParticipantsInfo", false) ? "checked" : ""}>
+                    <fmt:message key="ofmeet.welcomepage.inprogresslist.enable.participants.info" />
+                </td>
+            </tr>
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="enableProtectionInfo" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.enableProtectionInfo", false) ? "checked" : ""}>
+                    <fmt:message key="ofmeet.welcomepage.inprogresslist.enable.protection.info" />
+                </td>
+            </tr>            
+            <tr>
                 <td width="200"><fmt:message key="ofmeet.welcomepage.inprogresslist.interval" />:</td>
                 <td><input type="text" size="60" maxlength="100" name="welcomepageInProgressListInterval" value="${admin:getIntProperty("org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.interval", 10)}"></td>
             </tr>
@@ -531,6 +572,44 @@
         </table>
     </admin:contentBox>
     
+    <fmt:message key="config.page.configuration.ofmeet.feedback.title" var="boxtitlefeedback"/>
+    <fmt:message key="ofmeet.feedback.description.default" var="descriptionMessageDefault"/>
+    <fmt:message key="ofmeet.feedback.placeholder.default" var="placeholderTextDefault"/>
+    <fmt:message key="ofmeet.feedback.submit.default" var="submitTextDefault"/>
+    <fmt:message key="ofmeet.feedback.success.default" var="successMessageDefault"/>
+    <fmt:message key="ofmeet.feedback.error.default" var="errorMessageDefault"/>
+
+    <admin:contentBox title="${boxtitlefeedback}">
+        <table cellpadding="3" cellspacing="0" border="0" width="100%">
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="enablefeedback" ${admin:getBooleanProperty( "ofmeet.feedback.enabled", true) ? "checked" : ""}>
+                    <fmt:message key="config.page.configuration.ofmeet.feedback.enabled" />
+                </td>
+            </tr>
+            <tr>
+                <td align="left" width="200"><fmt:message key="config.page.configuration.ofmeet.feedback.description"/>:</td>
+                <td><textarea cols="60" rows="5" name="descriptionMessage">${admin:getProperty("ofmeet.feedback.description", descriptionMessageDefault)}</textarea></td>
+            </tr>
+            <tr>
+                <td align="left" width="200"><fmt:message key="config.page.configuration.ofmeet.feedback.placeholder"/>:</td>
+                <td><input type="text" size="60" maxlength="255" name="placeholderText" value="${admin:getProperty("ofmeet.feedback.placeholder", placeholderTextDefault)}"></td>
+            </tr>
+            <tr>
+                <td align="left" width="200"><fmt:message key="config.page.configuration.ofmeet.feedback.submit"/>:</td>
+                <td><input type="text" size="60" maxlength="255" name="submitText" value="${admin:getProperty("ofmeet.feedback.submit", submitTextDefault)}"></td>
+            </tr>
+            <tr>
+                <td align="left" width="200"><fmt:message key="config.page.configuration.ofmeet.feedback.success"/>:</td>
+                <td><textarea cols="60" rows="5" name="successMessage">${admin:getProperty("ofmeet.feedback.success", successMessageDefault)}</textarea></td>
+            </tr>
+            <tr>
+                <td align="left" width="200"><fmt:message key="config.page.configuration.ofmeet.feedback.error"/>:</td>
+                <td><textarea cols="60" rows="5" name="errorMessage">${admin:getProperty("ofmeet.feedback.error", errorMessageDefault)}</textarea></td>
+            </tr>
+        </table>
+    </admin:contentBox>
+
     <fmt:message key="ofmeet.filmstrip.title" var="boxtitleFilmstrip"/>
     <admin:contentBox title="${boxtitleFilmstrip}">
         <p><fmt:message key="ofmeet.filmstrip.description"/></p>

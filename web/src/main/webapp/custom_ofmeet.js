@@ -646,10 +646,12 @@ var ofmeet = (function(of)
         context.fillRect(0, 0, canvas.width, canvas.height);
         context.font = font;
         context.fillStyle = "#fff";
+        context.textAlign = "center";
 
         if (nickname)
         {
             // try to split nickname into words at different symbols with preference
+            nickname = nickname.replace(/\s/g, ' '); // replace multibyte space with ASCII space
             let words = nickname.split(/[, ]/); // "John W. Doe" -> "John "W." "Doe"  or  "Doe,John W." -> "Doe" "John" "W."
             if (words.length == 1) words = nickname.split("."); // "John.Doe" -> "John" "Doe"  or  "John.W.Doe" -> "John" "W" "Doe"
             if (words.length == 1) words = nickname.split("-"); // "John-Doe" -> "John" "Doe"  or  "John-W-Doe" -> "John" "W" "Doe"
@@ -666,13 +668,14 @@ var ofmeet = (function(of)
                 }
 
                 // if nickname consist of more than one words, compose the initials as two letter
+                var initials = firstInitial;
                 if (lastInitial) {
                     // if any comma is in the nickname, treat it to have the lastname in front, i.e. compose reversed
-                    const initials = nickname.indexOf(",") == -1 ? firstInitial + lastInitial : lastInitial + firstInitial;
-                    context.fillText(initials.toUpperCase(), 20, 88);
-                } else {
-                    context.fillText(firstInitial.toUpperCase(), 44, 88);
+                    initials = nickname.indexOf(",") == -1 ? firstInitial + lastInitial : lastInitial + firstInitial;
                 }
+                
+                var metrics = context.measureText(initials.toUpperCase());
+                context.fillText(initials.toUpperCase(), width / 2, (height - metrics.actualBoundingBoxAscent - metrics.actualBoundingBoxDescent) / 2 + metrics.actualBoundingBoxAscent);
             }
         }
 

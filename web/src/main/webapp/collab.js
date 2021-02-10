@@ -65,6 +65,10 @@ var collab = (function (coop) {
         return null;
     }
 
+    function getColorFromId(id) {
+        return '#' + id.substr(0, 6);
+    }
+
     class PointTransform {
         static _invalidPos = { x: -100, y: -100 };
         static _$videos = {};
@@ -106,13 +110,14 @@ var collab = (function (coop) {
             let height = video.height();
             if (!offset || !width || !height) { return PointTransform.invalidPos; }
 
+            let pPoint = { x: point.x, y: point.y };
             if (PointTransform.shouldInvert(videoId)) {
-                point.x = 1 - point.x;
+                pPoint.x = 1 - pPoint.x;
             }
 
             return {
-                x: (clamp(point.x, 0, 1) * width) + offset.left,
-                y: (clamp(point.y, 0, 1) * height) + offset.top
+                x: (clamp(pPoint.x, 0, 1) * width) + offset.left,
+                y: (clamp(pPoint.y, 0, 1) * height) + offset.top
             };
         }
 
@@ -154,7 +159,7 @@ var collab = (function (coop) {
             this.videoPos = { x: 0, y: 0 };
             this.pagePos = { x: 0, y: 0 };
 
-            this.color = null;
+            this.color = getColorFromId(clientId);
 
             this.$element = $('<div id="togetherjs-template-cursor-' + clientId + '" class="togetherjs-cursor togetherjs"><svg id="Layer" width="11.647" height="20" viewBox="0 0 11.647 20" fill="#000000"><g><path d="M 11.562 13.295 C 11.695 13.067 11.671 12.778 11.5 12.576 L 1.103 0.223 C 0.933 0.022 0.657 -0.052 0.412 0.038 C 0.165 0.128 0 0.363 0 0.625 L 0 16.934 C 0 17.203 0.177 17.43 0.429 17.527 C 0.722 17.641 1.005 17.469 1.127 17.306 L 3.921 13.541 L 5.86 19.088 C 6.108 19.798 6.886 20.172 7.596 19.924 C 8.305 19.675 8.681 18.898 8.432 18.188 L 6.53 12.746 L 10.902 13.592 C 11.166 13.643 11.426 13.522 11.562 13.295 Z"></path></g></svg><span class="togetherjs-cursor-container"><span class="togetherjs-cursor-name"></span></span></div>');
             this.$element.hide();
@@ -178,16 +183,18 @@ var collab = (function (coop) {
         }
 
         setColor(color) {
-            this.color = color;
-            this.$element.css('color', this.color);
+            if (color && color.match(/^#[0-9a-f]{3}|[0-9a-f]{6}$/i)) {
+                this.color = color;
+                this.$element.css('color', this.color);
 
-            this.$element.find('.togetherjs-cursor-container').css({
-                backgroundColor: this.color,
-                color: tinycolor.mostReadable(this.color, FOREGROUND_COLORS)
-            });
+                this.$element.find('.togetherjs-cursor-container').css({
+                    backgroundColor: this.color,
+                    color: tinycolor.mostReadable(this.color, FOREGROUND_COLORS)
+                });
 
-            var path = this.$element.find('svg path');
-            path.attr('fill', this.color);
+                var path = this.$element.find('svg path');
+                path.attr('fill', this.color);
+            }
         }
 
         setName(name) {
@@ -533,6 +540,9 @@ var collab = (function (coop) {
             });
 
             let conference = getConference();
+
+            conference.eventEmitter.setMaxListeners(20);
+
             conference.on(JitsiMeetJS.events.conference.PARTICIPANT_PROPERTY_CHANGED,
                 (participant, property, oldValue, newValue) => {
                     this.onParticipantPropertyChanged(participant, property, newValue);
@@ -588,7 +598,7 @@ var collab = (function (coop) {
             if (color) {
                 this.localCursorColor = color;
             } else if (!this.localCursorColor) {
-                this.localCursorColor = tinycolor(tinycolor.random()).toHexString();
+                this.localCursorColor = getColorFromId(getLocalVideoId());
             }
 
             let conference = getConference();

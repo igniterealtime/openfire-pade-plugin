@@ -6,23 +6,26 @@ var ofmeet = (function(of)
     //
     //-------------------------------------------------------
 
-    const IMAGES = {};
-    IMAGES.pad = '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 30.122,30.122L 28.020,23.778L 11.050,6.808L 10,7.858L 6.808,11.050L 23.778,28.020 zM 3.98,8.222L 8.222,3.98l-2.1-2.1c-1.172-1.172-3.070-1.172-4.242,0c-1.172,1.17-1.172,3.072,0,4.242 L 3.98,8.222z"></path></g></svg></span>';
-    IMAGES.sheet = '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 4,10l 4,0 c 1.104,0, 2-0.896, 2-2L 10,4 c0-1.104-0.896-2-2-2L 4,2 C 2.896,2, 2,2.896, 2,4l0,4 C 2,9.104, 2.896,10, 4,10zM 14,10l 4,0 c 1.104,0, 2-0.896, 2-2L 20,4 c0-1.104-0.896-2-2-2L 14,2 C 12.896,2, 12,2.896, 12,4l0,4 C 12,9.104, 12.896,10, 14,10zM 24,10l 4,0 c 1.104,0, 2-0.896, 2-2L 30,4 c0-1.104-0.896-2-2-2l-4,0 c-1.104,0-2,0.896-2,2l0,4 C 22,9.104, 22.896,10, 24,10zM 2,18c0,1.104, 0.896,2, 2,2l 4,0 c 1.104,0, 2-0.896, 2-2L 10,14 c0-1.104-0.896-2-2-2L 4,12 C 2.896,12, 2,12.896, 2,14L 2,18 zM 12,18c0,1.104, 0.896,2, 2,2l 4,0 c 1.104,0, 2-0.896, 2-2L 20,14 c0-1.104-0.896-2-2-2L 14,12 C 12.896,12, 12,12.896, 12,14L 12,18 zM 22,18c0,1.104, 0.896,2, 2,2l 4,0 c 1.104,0, 2-0.896, 2-2L 30,14 c0-1.104-0.896-2-2-2l-4,0 c-1.104,0-2,0.896-2,2L 22,18 zM 2,28c0,1.104, 0.896,2, 2,2l 4,0 c 1.104,0, 2-0.896, 2-2l0-4 c0-1.104-0.896-2-2-2L 4,22 c-1.104,0-2,0.896-2,2L 2,28 zM 12,28c0,1.104, 0.896,2, 2,2l 4,0 c 1.104,0, 2-0.896, 2-2l0-4 c0-1.104-0.896-2-2-2L 14,22 c-1.104,0-2,0.896-2,2L 12,28 zM 22,28c0,1.104, 0.896,2, 2,2l 4,0 c 1.104,0, 2-0.896, 2-2l0-4 c0-1.104-0.896-2-2-2l-4,0 c-1.104,0-2,0.896-2,2L 22,28 z"></path></g></svg></span>';
-    IMAGES.code = '<svg width="32.24800109863281" height="32.24800109863281" viewBox="0 0 32.24800109863281 32.24800109863281" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 21.172,21.172L 19.39,15.792L 9.11,5.512L 5.512,9.11L 15.792,19.39 zM 0.746,0.746c-0.994,0.994-0.994,2.604,0,3.598l 2.648,2.648l 3.598-3.598L 4.344,0.746 C 3.35-0.248, 1.74-0.248, 0.746,0.746zM 30,6L 15.822,6 l 2,2L 30,8 l0,22 L 8,30 L 8,17.822 l-2-2L 6,30 c0,1.104, 0.896,2, 2,2l 22,0 c 1.104,0, 2-0.896, 2-2L 32,8 C 32,6.896, 31.104,6, 30,6z"></path></g></svg></span>';
-    IMAGES.slide = '<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="32" height="32.11199951171875" viewBox="0 0 32 32.11199951171875" enable-background="new 0 0 16 16" xml:space="preserve" fill="#000000"> <g><path d="M 9.030,16.5c 0.296,0, 0.592-0.132, 0.79-0.386l 4.404-5.67l 3.016,3.542c 0.192,0.222, 0.408,0.32, 0.766,0.352 C 18.296,14.336, 18.576,14.208, 18.766,13.98l 7-8.338c 0.356-0.422, 0.3-1.052-0.124-1.408c-0.422-0.358-1.052-0.298-1.408,0.124 l-6.24,7.432L 14.95,8.21C 14.752,7.982, 14.388,7.876, 14.166,7.86C 13.864,7.868, 13.582,8.008, 13.398,8.246L 8.24,14.886 C 7.9,15.322, 7.98,15.952, 8.416,16.29C 8.598,16.432, 8.814,16.5, 9.030,16.5zM 30.978,0L 28,0 L 6,0 L 3.022,0 C 2.458,0, 2,0.448, 2,1C 2,1.552, 2.458,2, 3.022,2L 4,2 l0,18 c0,1.104, 0.896,2, 2,2l 10,0 l0,3.122 L 10.328,30.26c-0.408,0.37-0.44,1.002-0.068,1.412c 0.374,0.408, 1.006,0.44, 1.412,0.068L 16,27.82l0,3.18 C 16,31.552, 16.448,32, 17,32 S 18,31.552, 18,31l0-3.18 l 4.328,3.92C 22.52,31.914, 22.76,32, 23,32c 0.272,0, 0.542-0.112, 0.74-0.328 c 0.372-0.41, 0.34-1.042-0.068-1.412L 18,25.122L 18,22 l 10,0 c 1.104,0, 2-0.896, 2-2L 30,2 l 0.978,0 C 31.542,2, 32,1.552, 32,1 C 32,0.448, 31.542,0, 30.978,0z M 28,20L 6,20 L 6,2 l 22,0 L 28,20 z"></path></g></svg></span>' ;
-    IMAGES.poll = '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 13.774,26.028A2.060,2.060 1080 1 0 17.894,26.028A2.060,2.060 1080 1 0 13.774,26.028zM 19.464,18.252c 2.898-1.596, 4.37-3.91, 4.37-6.876c0-5.094-4.018-7.376-8-7.376c-3.878,0-8,2.818-8,8.042 c0,1.104, 0.894,2, 2,2s 2-0.896, 2-2c0-2.778, 2.074-4.042, 4-4.042c 1.494,0, 4,0.438, 4,3.376c0,1.042-0.274,2.258-2.298,3.374 C 16.16,15.504, 13.834,17.462, 13.834,20c0,1.104, 0.894,2, 2,2s 2-0.896, 2-2C 17.834,19.628, 18.624,18.714, 19.464,18.252z"></path></g></svg></span>';
-    IMAGES.kanban = '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 31.966,3.896C 31.878,2.866, 31.046,2, 30,2L 2,2 C 0.954,2, 0.122,2.866, 0.034,3.896L0,3.896 l0,0.166 L0,8 l0,14.166 L0,24 l0,6 c0,1.104, 0.896,2, 2,2l 28,0 c 1.104,0, 2-0.896, 2-2L 32,8 L 32,4.062 L 32,3.896 L 31.966,3.896 z M 12,14L 12,8 l 8,0 l0,6 L 12,14 z M 20,16l0,6.166 L 12,22.166 L 12,16 L 20,16 z M 10,8l0,6 L 2,14 L 2,8 L 10,8 z M 2,16l 8,0 l0,6.166 L 2,22.166 L 2,16 z M 2,30l0-6 l 8,0 l0,6 L 2,30 z M 12,30l0-6 l 8,0 l0,6 L 12,30 z M 30,30l-8,0 l0-6 l 8,0 L 30,30 z M 30,22.166l-8,0 L 22,16 l 8,0 L 30,22.166 z M 30,14l-8,0 L 22,8 l 8,0 L 30,14 z"></path></g></svg></span>';
-    IMAGES.whiteboard = '<svg width="24" height="24" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="32" height="32.11199951171875" viewBox="0 0 32 32.11199951171875" enable-background="new 0 0 16 16" xml:space="preserve" fill="#000000"> <g><path d="M 30,0L 4,0 C 2.896,0, 2,0.896, 2,2c0,1.104, 0.896,2, 2,2l0,16 c0,1.104, 0.896,2, 2,2l 10,0 l0,3.122 L 10.328,30.26 c-0.408,0.37-0.44,1.002-0.068,1.412c 0.374,0.408, 1.006,0.44, 1.412,0.068L 16,27.82l0,3.18 C 16,31.552, 16.448,32, 17,32S 18,31.552, 18,31 l0-3.18 l 4.328,3.92C 22.52,31.914, 22.76,32, 23,32c 0.272,0, 0.542-0.112, 0.74-0.328c 0.372-0.41, 0.34-1.042-0.068-1.412L 18,25.122L 18,22 l 10,0 c 1.104,0, 2-0.896, 2-2L 30,4 c 1.104,0, 2-0.896, 2-2C 32,0.896, 31.104,0, 30,0z M 25.694,7.72l-7,6.75 C 18.31,14.842, 17.702,14.844, 17.31,14.474L 14.22,11.536L 9.75,16.194C 9.554,16.396, 9.292,16.5, 9.030,16.5c-0.25,0-0.498-0.092-0.694-0.28 C 7.938,15.84, 7.926,15.208, 8.308,14.806l 5.158-5.376C 13.848,9.040, 14.48,9.024, 14.876,9.4l 3.12,2.964l 6.31-6.086 c 0.396-0.378, 1.030-0.376, 1.414,0.028C 26.104,6.704, 26.092,7.336, 25.694,7.72z"></path></g></svg>';
-    IMAGES.person   = '<svg width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 16,0C 7.164,0,0,7.164,0,16s 7.164,16, 16,16s 16-7.164, 16-16C 32,7.162, 24.836,0, 16,0z M 16.568,7.984 C 16.74,7.594, 16.972,7.25, 17.266,6.956c 0.296-0.296, 0.636-0.528, 1.028-0.7C 18.684,6.084, 19.11,6, 19.564,6 c 0.458,0, 0.88,0.084, 1.27,0.256c 0.39,0.17, 0.732,0.404, 1.026,0.7c 0.296,0.294, 0.53,0.638, 0.7,1.028 c 0.172,0.39, 0.258,0.812, 0.258,1.27c0,0.458-0.086,0.88-0.258,1.27c-0.17,0.39-0.404,0.732-0.7,1.028 c-0.296,0.294-0.636,0.528-1.026,0.7c-0.39,0.17-0.812,0.256-1.27,0.256c-0.456,0-0.88-0.086-1.27-0.256 c-0.39-0.172-0.732-0.404-1.028-0.7C 16.972,11.256, 16.74,10.914, 16.568,10.524C 16.396,10.134, 16.31,9.71, 16.31,9.254 C 16.31,8.796, 16.396,8.374, 16.568,7.984z M 11.502,7.468c 0.486-0.484, 1.070-0.726, 1.754-0.726c 0.704,0, 1.3,0.242, 1.784,0.726 C 15.526,7.954, 15.768,8.54, 15.768,9.226c0,0.704-0.244,1.298-0.73,1.784C 14.556,11.494, 13.96,11.736, 13.256,11.736 c-0.682,0-1.268-0.242-1.754-0.728c-0.486-0.486-0.73-1.080-0.73-1.784C 10.774,8.54, 11.016,7.954, 11.502,7.468z M 7.136,7.926 c 0.37-0.372, 0.822-0.558, 1.354-0.558c 0.534,0, 0.98,0.186, 1.342,0.558c 0.36,0.37, 0.54,0.812, 0.54,1.326 c0,0.534-0.182,0.984-0.54,1.356C 9.47,10.98, 9.024,11.166, 8.49,11.166c-0.532,0-0.984-0.186-1.354-0.556 C 6.764,10.238, 6.578,9.786, 6.578,9.254C 6.578,8.74, 6.764,8.296, 7.136,7.926z M 24,26L 15.21,26 l0-4 L 9.704,22 L 9.704,18 L 6.418,18 L 6.418,14.362 c0-0.646-0.016-1.194, 0.432-1.64c 0.446-0.446, 0.994-0.67, 1.64-0.67c 0.552,0, 1.030,0.166, 1.428,0.5 c 0.4,0.334, 0.664,0.746, 0.8,1.242c 0.322-0.38, 0.704-0.674, 1.14-0.886c 0.438-0.208, 0.904-0.314, 1.398-0.314 c 0.78,0, 1.46,0.234, 2.042,0.7c 0.58,0.466, 0.966,1.052, 1.156,1.754c 0.4-0.38, 0.864-0.686, 1.4-0.912 c 0.532-0.228, 1.104-0.342, 1.712-0.342c 0.61,0, 1.186,0.114, 1.728,0.342c 0.54,0.228, 1.012,0.542, 1.412,0.942 c 0.4,0.4, 0.718,0.87, 0.954,1.412C 23.898,17.030, 24,17.606, 24,18.216L 24,26 z"></path></g></svg>'
-    IMAGES.contact  = '<svg width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 2,0C 0.896,0,0,0.896,0,2l0,28 c0,1.104, 0.896,2, 2,2l 2,0 L 4,0 L 2,0 zM 26,0L 6,0 l0,32 l 20,0 c 1.104,0, 2-0.896, 2-2L 28,2 C 28,0.896, 27.104,0, 26,0z M 16.89,7.708 c 1.672,0, 3.026,1.356, 3.026,3.026c0,1.672-1.356,3.028-3.026,3.028c-1.672,0-3.028-1.356-3.028-3.028 C 13.862,9.062, 15.218,7.708, 16.89,7.708z M 12,21.614c0-3.668, 2.218-6.64, 4.952-6.64s 4.952,2.974, 4.952,6.64S 12,25.28, 12,21.614zM 30,2L 32,2L 32,8L 30,8zM 30,10L 32,10L 32,16L 30,16zM 30,18L 32,18L 32,24L 30,24z"></path></g></svg>';
-    IMAGES.mic      = '<svg style="fill:white;margin-top:4px" width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 14,25.808L 14,30 L 11,30 C 10.448,30, 10,30.448, 10,31C 10,31.552, 10.448,32, 11,32l 4.98,0 L 16.020,32 l 4.98,0 c 0.552,0, 1-0.448, 1-1c0-0.552-0.448-1-1-1L 18,30 l0-4.204 c 4.166-0.822, 8-4.194, 8-9.796L 26,13 C 26,12.448, 25.552,12, 25,12 S 24,12.448, 24,13L 24,16 c0,5.252-4.026,8-8,8c-3.854,0-8-2.504-8-8L 8,13 C 8,12.448, 7.552,12, 7,12S 6,12.448, 6,13L 6,16 C 6,21.68, 9.766,25.012, 14,25.808zM 16,20c 2.21,0, 4-1.79, 4-4L 20,4 c0-2.21-1.79-4-4-4S 12,1.79, 12,4l0,12 C 12,18.21, 13.79,20, 16,20z"></path></g></svg>';
-    IMAGES.mail     = '<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 30,8L 2,8 C 0.896,8,0,8.896,0,10l0,3.358 l 16,6.4l 16-6.4L 32,10 C 32,8.896, 31.104,8, 30,8zM0,16.624L0,30 c0,1.104, 0.896,2, 2,2l 28,0 c 1.104,0, 2-0.896, 2-2L 32,16.624 l-16,6.4L0,16.624z"></path></g></svg>';
-    IMAGES.desktop  = '<svg id="ofmeet-desktop" width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 30,2L 2,2 C 0.896,2,0,2.896,0,4l0,18 c0,1.104, 0.896,2, 2,2l 9.998,0 c-0.004,1.446-0.062,3.324-0.61,4L 10.984,28 C 10.44,28, 10,28.448, 10,29C 10,29.552, 10.44,30, 10.984,30l 10.030,0 C 21.56,30, 22,29.552, 22,29c0-0.552-0.44-1-0.984-1l-0.404,0 c-0.55-0.676-0.606-2.554-0.61-4L 30,24 c 1.104,0, 2-0.896, 2-2L 32,4 C 32,2.896, 31.104,2, 30,2z M 14,24l-0.002,0.004 C 13.998,24.002, 13.998,24.002, 14,24L 14,24z M 18.002,24.004L 18,24l 0.002,0 C 18.002,24.002, 18.002,24.002, 18.002,24.004z M 30,20L 2,20 L 2,4 l 28,0 L 30,20 z"></path></g></svg>';
-    IMAGES.confetti = '<svg width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 30,8L 18.084,8 l0,6 L 32,14 L 32,10 C 32,8.896, 31.104,8, 30,8zM 2,8C 0.896,8,0,8.896,0,10l0,4 l 14,0 L 14,8 L 2,8 zM 2,16l0,14 c0,1.104, 0.896,2, 2,2l 10,0 L 14,16 L 2,16 zM 28,32c 1.104,0, 2-0.896, 2-2L 30,16 L 18.084,16 l0,16 L 28,32 zM 15.998,5.984l 0.006,0 C 16.002,5.988, 16,5.996, 16,6l 2.084,0 C 19.854,6, 22.36,6, 24,6c 2.762,0, 4-1.344, 4-3 S 26.762,0, 24,0c-2.586,0-4.622,1.164-6,2.514C 17.396,2.156, 16.698,1.938, 15.942,1.938c-0.724,0-1.394,0.204-1.982,0.536 C 12.584,1.14, 10.56,0, 8,0C 5.238,0, 4,1.344, 4,3S 5.238,6, 8,6c 1.666,0, 4.226,0, 6,0l 2,0 C 16,5.996, 15.998,5.988, 15.998,5.984z M 26,3 C 26,3.826, 24.912,4, 24,4L 19.458,4 C 19.442,3.972, 19.428,3.942, 19.412,3.916C 20.428,2.928, 21.968,2, 24,2C 24.912,2, 26,2.174, 26,3z M 6,3 C 6,2.174, 7.088,2, 8,2c 1.988,0, 3.496,0.89, 4.512,1.844C 12.48,3.894, 12.456,3.948, 12.426,4L 8,4 C 7.088,4, 6,3.826, 6,3z"></path></g></svg>';
-    IMAGES.picture  = '<svg width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 17.228,11.688A2.782,2.782 1080 1 0 22.792,11.688A2.782,2.782 1080 1 0 17.228,11.688zM 26,28L 28,28L 28,26L 28,22L 28,16L 20,22L 10,14L 4,20L 4,22L 4,26L 4,28L 6,28 zM 30,4L 2,4 C 0.896,4,0,4.896,0,6l0,24 c0,1.104, 0.896,2, 2,2l 28,0 c 1.104,0, 2-0.896, 2-2L 32,6 C 32,4.896, 31.104,4, 30,4z M 30,30L 2,30 L 2,6 l 28,0 L 30,30 z"></path></g></svg>';
-    IMAGES.cursor   = '<svg width="24" height="24" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g><path d="M 26.56,21.272c 0.214-0.366, 0.176-0.826-0.098-1.15L 9.828,0.356C 9.556,0.034, 9.112-0.084, 8.72,0.060 C 8.326,0.204, 8.062,0.58, 8.062,1l0,26.094 c0,0.432, 0.276,0.814, 0.686,0.95c 0.102,0.034, 0.208,0.050, 0.314,0.050 c 0.31,0, 0.61-0.144, 0.802-0.404l 4.472-6.024l 3.102,8.874c 0.398,1.136, 1.642,1.736, 2.778,1.338s 1.736-1.642, 1.338-2.778 l-3.044-8.706l 6.996,1.354C 25.928,21.83, 26.346,21.636, 26.56,21.272z"></path></g></svg>';
-
+    const IMAGES = {
+        pad: '<svg width="32" height="32" viewBox="0 0 32 32"><path d="M30.122 30.122l-2.102-6.344-16.97-16.97L10 7.858 6.808 11.05l16.97 16.97zM3.98 8.222L8.222 3.98l-2.1-2.1a2.998 2.998 0 00-4.242 0 2.998 2.998 0 000 4.242l2.1 2.1z"/></svg>',
+        sheet: '<svg width="32" height="32" viewBox="0 0 32 32"><path d="M4 10h4a2 2 0 002-2V4a2 2 0 00-2-2H4a2 2 0 00-2 2v4a2 2 0 002 2zm10 0h4a2 2 0 002-2V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v4a2 2 0 002 2zm10 0h4a2 2 0 002-2V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v4a2 2 0 002 2zM2 18a2 2 0 002 2h4a2 2 0 002-2v-4a2 2 0 00-2-2H4a2 2 0 00-2 2v4zm10 0a2 2 0 002 2h4a2 2 0 002-2v-4a2 2 0 00-2-2h-4a2 2 0 00-2 2v4zm10 0a2 2 0 002 2h4a2 2 0 002-2v-4a2 2 0 00-2-2h-4a2 2 0 00-2 2v4zM2 28a2 2 0 002 2h4a2 2 0 002-2v-4a2 2 0 00-2-2H4a2 2 0 00-2 2v4zm10 0a2 2 0 002 2h4a2 2 0 002-2v-4a2 2 0 00-2-2h-4a2 2 0 00-2 2v4zm10 0a2 2 0 002 2h4a2 2 0 002-2v-4a2 2 0 00-2-2h-4a2 2 0 00-2 2v4z"/></svg>',
+        code: '<svg width="32" height="32" viewBox="0 0 32 32"><path d="M21.165 21.165l-1.779-5.373L9.118 5.525 5.525 9.118l10.267 10.268zM.765.765a2.54 2.54 0 000 3.594L3.41 7.003 7.003 3.41 4.359.765a2.54 2.54 0 00-3.594 0zm29.217 5.247h-14.16l1.997 1.998h12.163v21.972H8.01V17.819l-1.998-1.997v14.16c0 1.103.895 1.998 1.998 1.998h21.972a1.999 1.999 0 001.998-1.998V8.01a1.999 1.999 0 00-1.998-1.998z"/></svg>',
+        slide: '<svg width="32" height="32" viewBox="0 0 32 32"><path d="M8.03 16.49c.309.001.6-.142.79-.386l4.404-5.67 3.016 3.542c.192.222.408.32.766.352.29-.002.57-.13.76-.358l7-8.338a.998.998 0 10-1.532-1.284l-6.24 7.432L13.95 8.2c-.198-.228-.562-.334-.784-.35a1.004 1.004 0 00-.768.386l-5.158 6.64a1 1 0 00.79 1.614zM29.978-.01H2.022C1.458-.01 1 .438 1 .99s.458 1 1.022 1H3v18a2 2 0 002 2h10v3.122L9.328 30.25a1 1 0 101.344 1.48L15 27.81v3.18a1 1 0 102 0v-3.18l4.328 3.92a1 1 0 001.344-1.48L17 25.112V21.99h10a2 2 0 002-2v-18h.978c.564 0 1.022-.448 1.022-1s-.458-1-1.022-1zM27 19.99H5v-18h22v18z"/></svg>',
+        poll: '<svg width="32" height="32" viewBox="0 0 32 32"><path d="M13.774 26.028a2.06 2.06 1080 104.12 0 2.06 2.06 1080 10-4.12 0zm5.69-7.776c2.898-1.596 4.37-3.91 4.37-6.876 0-5.094-4.018-7.376-8-7.376-3.878 0-8 2.818-8 8.042a2 2 0 104 0c0-2.778 2.074-4.042 4-4.042 1.494 0 4 .438 4 3.376 0 1.042-.274 2.258-2.298 3.374-1.376.754-3.702 2.712-3.702 5.25a2 2 0 104 0c0-.372.79-1.286 1.63-1.748z"/></svg>',
+        kanban: '<svg width="32" height="32" viewBox="0 0 32 32"><path d="M31.966 3.896C31.878 2.866 31.046 2 30 2H2C.954 2 .122 2.866.034 3.896H0V30a2 2 0 002 2h28a2 2 0 002-2V3.896h-.034zM12 14V8h8v6h-8zm8 2v6.166h-8V16h8zM10 8v6H2V8h8zm-8 8h8v6.166H2V16zm0 14v-6h8v6H2zm10 0v-6h8v6h-8zm18 0h-8v-6h8v6zm0-7.834h-8V16h8v6.166zM30 14h-8V8h8v6z"/></svg>',
+        whiteboard: '<svg width="32" height="32" viewBox="0 0 32 32"><path d="M29 0H3a2 2 0 000 4v16a2 2 0 002 2h10v3.122L9.328 30.26a1 1 0 101.344 1.48L15 27.82V31a1 1 0 002 0v-3.18l4.328 3.92a.997.997 0 001.412-.068 1 1 0 00-.068-1.412L17 25.122V22h10a2 2 0 002-2V4a2 2 0 000-4zm-4.306 7.72l-7 6.75a1 1 0 01-1.384.004l-3.09-2.938-4.47 4.658a1.003 1.003 0 01-1.414.026 1 1 0 01-.028-1.414l5.158-5.376a1.009 1.009 0 011.41-.03l3.12 2.964 6.31-6.086a1 1 0 011.414.028 1 1 0 01-.026 1.414z"/></svg>',
+        person: '<svg width="24" height="24" viewBox="0 0 32 32"><path d="M16 0C7.164 0 0 7.164 0 16s7.164 16 16 16 16-7.164 16-16c0-8.838-7.164-16-16-16zm.568 7.984a3.323 3.323 0 011.726-1.728A3.12 3.12 0 0119.564 6c.458 0 .88.084 1.27.256.39.17.732.404 1.026.7.296.294.53.638.7 1.028.172.39.258.812.258 1.27 0 .458-.086.88-.258 1.27-.17.39-.404.732-.7 1.028a3.373 3.373 0 01-1.026.7 3.14 3.14 0 01-1.27.256c-.456 0-.88-.086-1.27-.256a3.347 3.347 0 01-1.028-.7 3.376 3.376 0 01-.698-1.028 3.114 3.114 0 01-.258-1.27c0-.458.086-.88.258-1.27zm-5.066-.516a2.395 2.395 0 011.754-.726c.704 0 1.3.242 1.784.726.486.486.728 1.072.728 1.758 0 .704-.244 1.298-.73 1.784-.482.484-1.078.726-1.782.726a2.392 2.392 0 01-1.754-.728 2.426 2.426 0 01-.73-1.784c.002-.684.244-1.27.73-1.756zm-4.366.458c.37-.372.822-.558 1.354-.558.534 0 .98.186 1.342.558.36.37.54.812.54 1.326 0 .534-.182.984-.54 1.356a1.796 1.796 0 01-1.342.558c-.532 0-.984-.186-1.354-.556a1.846 1.846 0 01-.558-1.356c0-.514.186-.958.558-1.328zM24 26h-8.79v-4H9.704v-4H6.418v-3.638c0-.646-.016-1.194.432-1.64.446-.446.994-.67 1.64-.67.552 0 1.03.166 1.428.5.4.334.664.746.8 1.242.322-.38.704-.674 1.14-.886a3.22 3.22 0 011.398-.314c.78 0 1.46.234 2.042.7.58.466.966 1.052 1.156 1.754.4-.38.864-.686 1.4-.912a4.304 4.304 0 011.712-.342c.61 0 1.186.114 1.728.342.54.228 1.012.542 1.412.942.4.4.718.87.954 1.412.238.54.34 1.116.34 1.726V26z"/></svg>',
+        contact: '<svg width="24" height="24" viewBox="0 0 32 32"><path d="M2 0a2 2 0 00-2 2v28a2 2 0 002 2h2V0H2zm24 0H6v32h20a2 2 0 002-2V2a2 2 0 00-2-2zm-9.11 7.708a3.026 3.026 0 110 6.053 3.026 3.026 0 010-6.053zM12 21.614c0-3.668 2.218-6.64 4.952-6.64s4.952 2.974 4.952 6.64S12 25.28 12 21.614zM30 2h2v6h-2zm0 8h2v6h-2zm0 8h2v6h-2z"/></svg>',
+        mic: '<svg width="24" height="24" viewBox="0 0 32 32"><path d="M14 25.808V30h-3a1 1 0 000 2h10a1 1 0 000-2h-3v-4.204c4.166-.822 8-4.194 8-9.796v-3a1 1 0 00-2 0v3c0 5.252-4.026 8-8 8-3.854 0-8-2.504-8-8v-3a1 1 0 00-2 0v3c0 5.68 3.766 9.012 8 9.808zM16 20c2.21 0 4-1.79 4-4V4c0-2.21-1.79-4-4-4s-4 1.79-4 4v12c0 2.21 1.79 4 4 4z"/></svg>',
+        mail: '<svg width="32" height="32" viewBox="0 0 32 32"><path d="M30 8H2a2 2 0 00-2 2v3.358l16 6.4 16-6.4V10a2 2 0 00-2-2zM0 16.624V30a2 2 0 002 2h28a2 2 0 002-2V16.624l-16 6.4-16-6.4z"/></svg>',
+        tags: '<svg width="24" height="24" viewBox="0 0 32 32"><path d="M26.667 14.251v-1.833a1.705 1.705 0 00-1.748-1.749h-5.334c-1.001 0-1.833.75-1.833 1.749v7.165c0 1.002.833 1.75 1.833 1.75h5.334a1.706 1.706 0 001.748-1.75v-1.832H24v.918h-3.583v-5.334H24v.918h2.667zm-12.416 0v-1.833c0-1.001-.834-1.749-1.832-1.749H7.085a1.706 1.706 0 00-1.749 1.749v7.165a1.707 1.707 0 001.749 1.75h5.334c1.001 0 1.832-.75 1.832-1.75v-1.832h-2.666v.918H8.001v-5.334h3.584v.918h2.666zM28.416 1.75C30.332 1.75 32 3.418 32 5.334v21.332c0 1.916-1.668 3.584-3.584 3.584H3.584c-2 0-3.584-1.668-3.584-3.584V5.334C0 3.418 1.584 1.75 3.584 1.75h24.832z"/></svg>',
+        photo: '<svg width="24" height="24" viewBox="0 0 32 32"><path d="M6.667 5.667h-4V4.333h4v1.334zm10.666 6.666c-2.205 0-4 1.795-4 4 0 2.206 1.795 4 4 4 2.206 0 4-1.794 4-4 0-2.205-1.794-4-4-4zM32 7v20H0V7h7.907c.892 0 1.724-.445 2.218-1.188L12 3h10.667l1.874 2.812A2.665 2.665 0 0026.76 7H32zM6.667 12.333a1.333 1.333 0 10-2.667 0 1.333 1.333 0 102.667 0zm17.333 4c-.001-5.132-5.557-8.339-10.002-5.773a6.67 6.67 0 00-3.333 5.775c.001 5.132 5.557 8.339 10.002 5.773A6.668 6.668 0 0024 16.333z"/></svg>',
+        desktop: '<svg width="24" height="24" viewBox="0 0 32 32"><path d="M30 2H2a2 2 0 00-2 2v18a2 2 0 002 2h9.998c-.004 1.446-.062 3.324-.61 4h-.404A.992.992 0 0010 29c0 .552.44 1 .984 1h10.03A.992.992 0 0022 29c0-.552-.44-1-.984-1h-.404c-.55-.676-.606-2.554-.61-4H30a2 2 0 002-2V4a2 2 0 00-2-2zM14 24l-.002.004L14 24zm4.002.004L18 24h.002v.004zM30 20H2V4h28v16z"/><path d="M19.231 11.918a3.305 3.305 0 01-3.305 3.305 3.305 3.305 0 01-3.305-3.305 3.305 3.305 0 013.305-3.305 3.305 3.305 0 013.305 3.305z"/><path d="M16 5.33A6.677 6.677 0 009.33 12 6.677 6.677 0 0016 18.67 6.677 6.677 0 0022.67 12 6.677 6.677 0 0016 5.33zm0 1A5.662 5.662 0 0121.67 12 5.662 5.662 0 0116 17.67 5.662 5.662 0 0110.33 12 5.662 5.662 0 0116 6.33z"/></svg>',
+        picture: '<svg width="24" height="24" viewBox="0 0 32 32"><path d="M17.228 11.688a2.782 2.782 1080 105.564 0 2.782 2.782 1080 10-5.564 0zM26 28h2V16l-8 6-10-8-6 6v8h2zm4-24H2a2 2 0 00-2 2v24a2 2 0 002 2h28a2 2 0 002-2V6a2 2 0 00-2-2zm0 26H2V6h28v24z"/></svg>',
+        cursor: '<svg width="24" height="24" viewBox="0 0 32 32"><path d="M26.56 21.272a.998.998 0 00-.098-1.15L9.828.356A1.001 1.001 0 008.062 1v26.094a1 1 0 001.802.596l4.472-6.024 3.102 8.874a2.18 2.18 0 004.116-1.44l-3.044-8.706 6.996 1.354a.998.998 0 001.054-.476z"/></svg>',
+        cryptpad: '<svg width="24" height="24" viewBox="0 0 32 32"><path d="M16.057 0l-9.9 1.824a2.129 2.129 0 10-2.26 3.583v14.257c0 1.351.607 2.803 1.789 4.292a22.185 22.185 0 004.425 4.087 43.451 43.451 0 003.85 2.441c.148.492.462.938.966 1.229 1.201.694 2.646.058 3.063-1.145a43.4 43.4 0 003.982-2.525 21.993 21.993 0 004.426-4.087c1.184-1.52 1.791-2.977 1.791-4.292V5.407c1.431-.798 1.457-2.846.053-3.685a2.096 2.096 0 00-2.319.102L16.057 0zm-.031 2.096l9.02 1.652c.011.128.035.255.071.376l-5.306 3.479a5.172 5.172 0 00-7.639.033l-5.238-3.38c.051-.153.089-.309.102-.47l8.99-1.69zm9.732 3.04c.18.154.385.282.608.37v13.855c.004.195-.009.385-.037.574a7.22 7.22 0 01-1.382 2.634 19.059 19.059 0 01-3.819 3.516 36.8 36.8 0 01-3.628 2.287 2.127 2.127 0 00-2.575-.346c-.147.084-.27.189-.387.297a37.297 37.297 0 01-3.546-2.239 18.816 18.816 0 01-3.785-3.514 6.668 6.668 0 01-1.488-3.14V5.54c.209-.08.403-.193.574-.336l6.692 4.288a3.413 3.413 0 013.041-1.823 3.39 3.39 0 013.038 1.824l6.694-4.357zM11.024 9.628a5.042 5.042 0 001.421 5.204l-1.819 3.683h-.04a1.573 1.573 0 101.188 2.603h2.7v-1.757h-2.302l2.162-4.327a.905.905 0 00-.27-1.113 3.282 3.282 0 01-1.45-3.245l-1.591-1.048zm9.969.034l-1.587 1.049c.018.134.027.269.032.405a3.377 3.377 0 01-1.452 2.805.91.91 0 00-.269 1.113l2.126 4.327h-2.297v1.757h2.772c.298.344.731.541 1.186.541a1.572 1.572 0 10-.111-3.138l-1.82-3.688a5.133 5.133 0 001.42-5.171zm-5 .17a1.422 1.422 0 00-.714 2.651 1.421 1.421 0 002.134-1.228v-.005c0-.785-.637-1.418-1.42-1.418z"/></svg>',
+        confetti: '<svg width="24" height="24" viewBox="0 0 32 32"><path d="M30 8H18.084v6H32v-4a2 2 0 00-2-2zM2 8a2 2 0 00-2 2v4h14V8H2zm0 8v14a2 2 0 002 2h10V16H2zm26 16a2 2 0 002-2V16H18.084v16H28zM15.998 5.984h.006A.047.047 0 0016 6h8c2.762 0 4-1.344 4-3s-1.238-3-4-3c-2.586 0-4.622 1.164-6 2.514a4.018 4.018 0 00-2.058-.576c-.724 0-1.394.204-1.982.536C12.584 1.14 10.56 0 8 0 5.238 0 4 1.344 4 3s1.238 3 4 3h8l-.002-.016zM26 3c0 .826-1.088 1-2 1h-4.542c-.016-.028-.03-.058-.046-.084C20.428 2.928 21.968 2 24 2c.912 0 2 .174 2 1zM6 3c0-.826 1.088-1 2-1 1.988 0 3.496.89 4.512 1.844-.032.05-.056.104-.086.156H8c-.912 0-2-.174-2-1z"/></svg>',
+    };
     const SMILIES = [":)", ":(", ":D", ":+1:", ":P", ":wave:", ":blush:", ":slightly_smiling_face:", ":scream:", ":*", ":-1:", ":mag:", ":heart:", ":innocent:", ":angry:", ":angel:", ";(", ":clap:", ";)", ":beer:"];
     const nickColors = {}, padsList = [], captions = {msgsDisabled: true, msgs: []}, breakout = {rooms: [], duration: 60, roomCount: 10, wait: 10}, pdf_body = [];
     const lostAudioWorkaroundInterval = 300000; // 5min
@@ -49,7 +52,7 @@ var ofmeet = (function(of)
     {
         console.debug("ofmeet.js load");
 
-        setTimeout(setup, 1000);
+        setTimeout(setup);
 
         if (!config.webinar)
         {
@@ -134,11 +137,26 @@ var ofmeet = (function(of)
             }
         });
     }
+
     //-------------------------------------------------------
     //
     //  setup
     //
     //-------------------------------------------------------
+
+    function newElement(el, id, html, className, label)
+    {
+        const ele = document.createElement(el);
+        if (id) ele.id = id;
+        if (html) ele.innerHTML = html;
+        if (label) {
+            ele.setAttribute('aria-label', label);
+            ele.classList.add("ofmeet-tooltip");
+        }
+        if (className) ele.classList.add(className);
+        document.body.appendChild(ele);
+        return ele;
+    }
 
     function setupVoiceCommand()
     {
@@ -375,39 +393,7 @@ var ofmeet = (function(of)
                 }
             });
 
-            navigator.mediaDevices.getUserMedia({audio: true, video: true}).then(function(stream)
-            {
-                if (interfaceConfig.OFMEET_RECORD_CONFERENCE)
-                {
-                    recordingVideoTrack[APP.conference.getMyUserId()] = stream;
-                    recordingAudioTrack[APP.conference.getMyUserId()] = stream;
-
-                    createRecordButton();
-                    createPhotoButton();
-                    createDesktopButton();
-
-                    if (APP.conference.getMyUserId())
-                    {
-                        showClock();
-                        clockTrack.joins = (new Date()).getTime();
-                    }
-                }
-            });
-
             captions.ele = document.getElementById("captions");
-
-            if (interfaceConfig.OFMEET_TAG_CONFERENCE)
-            {
-                if (interfaceConfig.OFMEET_ENABLE_TRANSCRIPTION && window.webkitSpeechRecognition && !isElectron())
-                {
-                    setupSpeechRecognition();
-                }
-
-                captions.msgsDisabled = !interfaceConfig.OFMEET_SHOW_CAPTIONS;
-                captions.transcriptDisabled = !interfaceConfig.OFMEET_ENABLE_TRANSCRIPTION || isElectron();
-
-                createTagsButton();
-            }
         }
 
         if (window.localStorage["ofmeet.settings.avatar"])
@@ -415,11 +401,6 @@ var ofmeet = (function(of)
             const dataUri = JSON.parse(window.localStorage["ofmeet.settings.avatar"]);
             console.log("ofmeet.js found avatar", dataUri);
             APP.conference.changeLocalAvatarUrl(dataUri);
-        }
-
-        if (interfaceConfig.OFMEET_ALLOW_UPLOADS)
-        {
-            createAvatarButton();
         }
 
         setOwnPresence();
@@ -464,13 +445,504 @@ var ofmeet = (function(of)
             console.debug('Service worker registered', registration);
         });
 
-        setTimeout(postLoadSetup, 5000);
+        setTimeout(postLoadSetup);
+        setTimeout(postJoinSetup);
 
         console.log("ofmeet.js setup", APP.connection, captions);
 
         setTimeout(lostAudioWorkaround, 5000);
     }
 
+    function postLoadSetup()
+    {
+        var dropZone = document.getElementById("videospace");
+
+        console.debug("postLoadSetup", dropZone);
+
+        if (!dropZone)
+        {
+            setTimeout(postLoadSetup, 1000);
+            return;
+        }
+
+        if (interfaceConfig.OFMEET_CONTACTS_MGR) setupPushNotification();
+
+        if (interfaceConfig.OFMEET_ALLOW_UPLOADS)
+        {
+            console.debug("postLoadSetup", dropZone);
+            dropZone.addEventListener('dragover', handleDragOver, false);
+            dropZone.addEventListener('drop', handleDropFileSelect, false);
+        }
+    }
+
+    function postJoinSetup() {
+        if (!APP.conference || !APP.conference.isJoined() || !document.getElementById('new-toolbox')) {
+            setTimeout(postJoinSetup, 100);
+            return;
+        }
+
+        console.debug("postJoinSetup");
+
+        // custom events for show/hide toolbox
+        const toolboxObserver = new MutationObserver(mutations => {
+            mutations.forEach((mutation) => {
+                if (mutation.target.className.search('visible') > 0) {
+                    $(mutation.target).trigger('show');
+                } else {
+                    $(mutation.target).trigger('hide');
+                }
+            });
+        })
+        toolboxObserver.observe(document.getElementById('new-toolbox'), {
+            attributes: true,
+            attributeFilter: ['class']
+        })
+
+        // fake the interaction
+        APP.conference.commands.addCommandListener("___FAKE_INTERACTION", function () {
+            if (interfaceConfig.OFMEET_ENABLE_BREAKOUT && APP.conference._room.isModerator() && !breakoutIconVisible) {
+                createBreakoutRoomsButton();
+                breakoutIconVisible = true;
+            }
+        });
+
+        if (interfaceConfig.OFMEET_ENABLE_BREAKOUT && APP.conference._room.isModerator()) {
+            createBreakoutRoomsButton();
+            breakoutIconVisible = true;
+        } else {
+            APP.conference.commands.sendCommandOnce("___FAKE_INTERACTION", { value: !0 });
+        }
+
+        if (interfaceConfig.OFMEET_RECORD_CONFERENCE && !config.webinar) {
+            navigator.mediaDevices.getUserMedia({ audio: true, video: true }).then(function (stream) {
+                recordingVideoTrack[APP.conference.getMyUserId()] = stream;
+                recordingAudioTrack[APP.conference.getMyUserId()] = stream;
+
+                createRecordButton();
+                createPhotoButton();
+                createDesktopButton();
+
+                if (APP.conference.getMyUserId()) {
+                    showClock();
+                    clockTrack.joins = (new Date()).getTime();
+                }
+            });
+        }
+
+        if (interfaceConfig.OFMEET_TAG_CONFERENCE && !config.webinar) {
+            if (interfaceConfig.OFMEET_ENABLE_TRANSCRIPTION && window.webkitSpeechRecognition && !isElectron()) {
+                setupSpeechRecognition();
+            }
+
+            captions.msgsDisabled = !interfaceConfig.OFMEET_SHOW_CAPTIONS;
+            captions.transcriptDisabled = !interfaceConfig.OFMEET_ENABLE_TRANSCRIPTION || isElectron();
+
+            createTagsButton();
+        }
+
+        if (interfaceConfig.OFMEET_ALLOW_UPLOADS) {
+            createAvatarButton();
+        }
+
+        if (interfaceConfig.OFMEET_ENABLE_MOUSE_SHARING) {
+            createShareCursorButton();
+        }
+
+        if (interfaceConfig.OFMEET_ENABLE_CRYPTPAD) {
+            createPadsButton();
+        }
+
+        if (interfaceConfig.OFMEET_ENABLE_WHITEBOARD && interfaceConfig.OFMEET_WHITEBOARD_URL) {
+            createWhiteboardButton();
+        }
+
+        if (interfaceConfig.OFMEET_ENABLE_CONFETTI) {
+            createConfettiButton();
+        }
+    }
+
+    //-------------------------------------------------------
+    //
+    //  setup toolbar buttons
+    //
+    //-------------------------------------------------------
+    
+    function createContactsButton() {
+        addToolbarItem({
+            id: 'ofmeet-contacts',
+            icon: IMAGES.contact,
+            label: i18n('toolbar.contactsManager'),
+            callback:
+                (evt) => {
+                    evt.stopPropagation();
+                    doContacts();
+                }
+        });
+    }
+
+    function createRecordButton() {
+        addToolbarItem({
+            id: 'ofmeet-record',
+            icon: IMAGES.record,
+            label: i18n('toolbar.recordMeeting'),
+            callback:
+                (evt) => {
+                    evt.stopPropagation();
+
+                    if (!of.recording) {
+                        startMeetingRecorder();
+                    } else {
+                        stopRecorder();
+                    }
+                }
+        });
+
+        const leaveButton = document.querySelector('div[aria-label="Leave the call"]');
+
+        if (leaveButton) leaveButton.addEventListener("click", function (evt) {
+            if (of.recording) stopRecorder();
+
+            if (pdf_body.length > 0) {
+                const margins = {
+                    top: 70,
+                    bottom: 40,
+                    left: 30,
+                    width: 550
+                };
+                const pdf = new jsPDF('p', 'pt', 'a4');
+                //pdf.setFontSize(18);
+
+                pdf.autoTable({
+                    head: [['Date', 'Person', 'Message']],
+                    body: pdf_body,
+                    columnStyles: {
+                        0: { cellWidth: 100 },
+                        1: { cellWidth: 100 },
+                        2: { cellWidth: 300 }
+                    }
+                })
+                const roomLabel = APP.conference.roomName + '-' + Math.random().toString(36).substr(2, 9);
+                pdf.save(roomLabel + '.pdf');
+            }
+        });
+    }
+
+    function createPhotoButton() {
+        addToolbarItem({
+            id: 'ofmeet-photo',
+            icon: IMAGES.photo,
+            label: i18n('toolbar.takePhoto'),
+            callback: (evt) => {
+                evt.stopPropagation();
+                takePhoto();
+
+                APP.UI.messageHandler.notify("Recording", "Conference Photo Taken");
+            }
+        });
+    }
+
+    function createDesktopButton() {
+        addToolbarItem({
+            id: 'ofmeet-desktop',
+            icon: IMAGES.desktop,
+            label: i18n('toolbar.recordDesktopApp'),
+            callback:
+                (evt) => {
+                    evt.stopPropagation();
+
+                    if (!of.recording) {
+                        startDesktopRecorder();
+                    } else {
+                        stopRecorder();
+                    }
+                }
+        });
+    }
+
+    function createBreakoutRoomsButton() {
+        console.debug("breakoutRooms");
+        addToolbarItem({
+            id: 'ofmeet-breakout',
+            icon: IMAGES.person,
+            label: i18n('toolbar.createBreakoutRooms'),
+            callback:
+                (evt) => {
+                    evt.stopPropagation();
+                    doBreakout();
+                    getOccupants();
+                }
+        });
+    }
+
+    function createTagsButton() {
+        addToolbarItem({
+            id: 'ofmeet-tags',
+            icon: IMAGES.tags,
+            label: i18n('toolbar.enableConferenceTags'),
+            callback:
+                (evt) => {
+                    evt.stopPropagation();
+                    doTags();
+                }
+        });
+    }
+
+    function createPadsButton() {
+        addToolbarItem({
+            id: 'ofmeet-pads',
+            icon: IMAGES.cryptpad,
+            label: i18n('toolbar.launchCryptPadApplication'),
+            group: '.button-group-right',
+            callback:
+                (evt) => {
+                    evt.stopPropagation();
+                    doPads();
+                }
+        });
+    }
+
+    function createAvatarButton() {
+        addToolbarItem({
+            id: 'ofmeet-avatar',
+            icon: IMAGES.picture,
+            label: i18n('toolbar.changePersonalAvatar'),
+            group: '.button-group-right',
+            callback:
+                (evt) => {
+                    evt.stopPropagation();
+                    doAvatar();
+                }
+        }).append('<input style="display:none" id="ofmeet-upload-avatar" type="file" name="files[]">');
+    }
+
+    function createShareCursorButton() {
+        collab.init();
+
+        addToolbarItem({
+            id: 'ofmeet-cursor',
+            icon: IMAGES.cursor,
+            label: i18n('toolbar.shareCursorMousePointer'),
+            group: '.button-group-right',
+            callback:
+                (evt) => {
+                    evt.stopPropagation();
+
+                    if (!cursorShared) {
+                        $('#ofmeet-cursor').addClass('toggled');
+                        collab.startSharing(Object.values(nickColors)[0]);
+                    } else {
+                        $('#ofmeet-cursor').removeClass('toggled');
+                        collab.stopSharing();
+                    }
+                    cursorShared = !cursorShared;
+                }
+        });
+
+        // Observe tile view status.
+        // TODO: When the tile view change event is implemented in Jitsi Meet, it will be replaced with it.
+        const localVideoTileViewContainer = document.getElementById('localVideoTileViewContainer')
+
+        const observer = new MutationObserver(mutations => {
+            APP.UI.emitEvent('UI.tile_view_changed', APP.store.getState()['features/video-layout'].tileViewEnabled);
+        })
+
+        observer.observe(localVideoTileViewContainer, {
+            childList: true
+        })
+    }
+
+    function createWhiteboardButton() {
+        APP.conference.commands.addCommandListener("WHITEBOARD", function () {
+            const url = interfaceConfig.OFMEET_WHITEBOARD_URL.endsWith("/") ? interfaceConfig.OFMEET_WHITEBOARD_URL + APP.conference.roomName : interfaceConfig.OFMEET_WHITEBOARD_URL + "/" + APP.conference.roomName;
+            window.open(url, 'ofmeet-whiteboard');
+        });
+
+        addToolbarItem({
+            id: 'ofmeet-whiteboard',
+            icon: IMAGES.whiteboard,
+            label: i18n('toolbar.shareaWhiteboard'),
+            group: '.button-group-right',
+            callback:
+                (evt) => {
+                    evt.stopPropagation();
+                    APP.conference.commands.sendCommandOnce("WHITEBOARD", { value: !0 })
+                }
+        });
+    }
+
+    function createConfettiButton() {
+        APP.conference.commands.addCommandListener("CONFETTI", e => {
+            window.confetti(JSON.parse(e.value));
+        });
+
+        let sendConfettiCommand = (text) => {
+            var options = {
+                particleCount: 100,
+                spread: 75,
+                origin: {
+                    x: 0.5 + (Math.random() - 0.5) * 0.1,
+                    y: 0.6
+                },
+                angle: 90 + (Math.random() - 0.5) * 15,
+                ticks: 250,
+                scalar: 1.2,
+                dispersion: 0.6
+            };
+
+            if (text) {
+                options = {
+                    ...options,
+                    shapes: ['text:' + text]
+                };
+            } else if ((new Date()).getMonth() == 11) {
+                options = {
+                    ...options,
+                    shapes: [
+                        'text:\u2744', 'text:\u2744', 'text:\u2744', 'text:\u2744', 'text:\u2744', 'text:\u2744', 'text:\u2744', // snow flake
+                        'text:' + String.fromCodePoint(0x1F381), // :gift:
+                        'text:' + String.fromCodePoint(0x1F384), // :christmas_tree:
+                        'text:' + String.fromCodePoint(0x1F385), // :santa:
+                        'text:' + String.fromCodePoint(0x1F31F), // :star2:
+                        'text:' + String.fromCodePoint(0x1F56F), // :candle:
+                        'text:' + String.fromCodePoint(0x1F98C), // :deer:
+                        'text:' + String.fromCodePoint(0x1F514)  // :bell:
+                    ]
+                };
+            }
+
+            APP.conference.commands.sendCommandOnce("CONFETTI", { value: JSON.stringify(options) })
+        };
+
+        addToolbarItem({
+            id: 'ofmeet-confetti',
+            icon: IMAGES.confetti,
+            label: i18n('toolbar.shareSomeConfetti'),
+            group: '.button-group-right',
+            callback: (evt) => { sendConfettiCommand() },
+            menu: {
+                type: 'tile',
+                items: [
+                    { icon: '&#x1f600;', text: 'aijdfsalsdf' },
+                    { icon: '&#x1f604;' },
+                    { icon: '&#x1f605;' },
+                    { icon: '&#x1f602;' },
+                    { icon: '&#x1f642;', text: 'aijdfsalsds ssf' },
+                    { icon: '&#x1f643;' },
+                    { icon: '&#x1f60a;' },
+                    { icon: '&#x1f607;' },
+                    { icon: '&#x1f61b;' },
+                    { icon: '&#x1f60d;' },
+                    { icon: '&#x1f618;' },
+                    { icon: '&#x1f61b;' },
+                    { icon: '&#x1f914;' },
+                    { icon: '&#x2764;' },
+                    { icon: '&#x2b50;' },
+                    { icon: '&#x1f338;' },
+                    { icon: '&#x1f37a;' },
+                    { icon: '&#x1f44d;' },
+                ],
+                callback: (evt) => { sendConfettiCommand($(evt.target).text()) }
+            }
+        });
+    }
+
+    function addToolbarItem(option) {
+        option = {
+            id: undefined,
+            icon: undefined,
+            label: undefined,
+            group: '.button-group-left',
+            callback: undefined,
+            menu: {
+                type: 'list',
+                items: [],
+                callback: undefined
+            },
+            ...option
+        };
+
+        const $placeHolder = $(option.group);
+
+        if (option.id && option.icon && option.label && $placeHolder.length && option.callback) {
+            let $button = $(`
+	        <div aria-label="${option.label}" class="toolbox-button ofmeet-tooltip">
+				<div id="${option.id}" class="toolbox-icon">
+				    <div class="jitsi-icon" style="font-size: 12px;">${option.icon}</div>
+				</div>
+			</div>`);
+            $button.children('.toolbox-icon').on('click.ofmeet-toolbox-icon', option.callback);
+
+            let $toolbarItem = appendMenuToToolbarButton($button, option.menu);
+
+            if ($placeHolder.hasClass('button-group-right')) {
+                $placeHolder.children().last().before($toolbarItem);
+            } else {
+                $placeHolder.append($toolbarItem);
+            }
+
+            return $toolbarItem;
+        }
+
+        return $();
+    }
+    
+    function appendMenuToToolbarButton($button, option) {
+        let menuClass = undefined;
+        switch (option.type) {
+            case 'list':
+                menuClass = 'ofmeet-toolbox-list-menu';
+                break;
+            case 'tile':
+                menuClass = 'ofmeet-toolbox-tile-menu';
+                break;
+        }
+
+        if (menuClass && option.items.length && option.callback) {
+            let $menuContainer = $(`<div class="ofmeet-toolbox-menu-container" style="display: none"><div class="ofmeet-toolbox-menu ${menuClass}"></div></div>`);
+            let $menu = $('<ul class="overflow-menu"></ul>');
+            for (let item of option.items) {
+                let $item;
+                switch (option.type) {
+                    case 'list':
+                        $item = $(`<li class="ofmeet-toolbox-menu-item"><span class="overflow-menu-item-icon"><div class="jitsi-icon">${item.icon}</div></span><span class="profile-text">${item.text}</span></li>`);
+                        break;
+                    case 'tile':
+                        $item = $(`<li class="ofmeet-toolbox-menu-item"><div class="jitsi-icon">${item.icon}</div></li>`);
+                        break;
+                }
+
+                if (item.attr) {
+                    for (let key in item.attr) {
+                        $item.attr(key, item.attr[key]);
+                    }
+                }
+                $menu.append($item);
+            }
+            $menu.on('click.ofmeet-toolbox-menu', 'li', option.callback);
+            $menuContainer.children('.ofmeet-toolbox-menu').append($menu);
+
+            $smallIcon = $('<div class="ofmeet-toolbox-small-icon"><svg fill="none" height="9" width="9" viewBox="0 0 10 6"><path clip-rule="evenodd" d="M8.07.248a.75.75 0 111.115 1.004L5.656 5.193a.75.75 0 01-1.115 0L1.068 1.252A.75.75 0 012.182.248L5.1 3.571 8.07.248z"></path></svg></div>');
+            $smallIcon.on('click.ofmeet-toolbox-small-icon', (e) => {
+                let hideMenu = () => {
+                    $menuContainer.hide();
+                    $('#new-toolbox').off('hide.ofmeet-toolbox-menu');
+                    $(window).off('click.ofmeet-toolbox-menu');
+                };
+                if ($menuContainer.css('display') == 'none') {
+                    $menuContainer.show();
+                    $(window).one('click.ofmeet-toolbox-menu', (e) => hideMenu());
+                    $('#new-toolbox').one('hide.ofmeet-toolbox-menu', (e) => hideMenu());
+                } else {
+                    hideMenu();
+                }
+                return false;
+            });
+
+            return $('<div class="toolbox-button-wth-dialog"></div>').append($button.append($smallIcon), $menuContainer);
+        }
+
+        return $button;
+    }
 
     //-------------------------------------------------------
     //  WORKAROUND: prevent disruption of a muted audio connection by a short toggle
@@ -573,7 +1045,6 @@ var ofmeet = (function(of)
             parent.insertBefore(nodeA, afterNodeB);
         }
     }
-
 
 
     function setOwnPresence()
@@ -762,102 +1233,6 @@ var ofmeet = (function(of)
     //
     //-------------------------------------------------------
 
-    function createRecordButton()
-    {
-        const recordButton = addToolbarItem('ofmeet-record', '<div class="toolbox-icon "><div class="jitsi-icon "><svg id="ofmeet-record" style="fill: white;" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 1000 1000" enable-background="new 0 0 1000 1000" xml:space="preserve"><g><path d="M928.8,438.8L745,561.3c0-37.2-16.9-70.1-43.1-92.5c62.3-37.5,104.3-105.1,104.3-183.1c0-118.4-96-214.4-214.4-214.4c-118.4,0-214.4,96-214.4,214.4c0,60.1,24.9,114.2,64.7,153.1H329.8c29.3-32.5,47.7-75.2,47.7-122.5c0-101.5-82.3-183.8-183.8-183.8C92.3,132.5,10,214.8,10,316.3c0,55.4,25,104.4,63.8,138.1C35.9,475.2,10,515,10,561.3v245c0,67.6,54.9,122.5,122.5,122.5h490c67.6,0,122.5-54.9,122.5-122.5v-30.6l183.8,153.1c33.8,0,61.3-27.4,61.3-61.3V500C990,466.2,962.6,438.8,928.8,438.8z M71.3,316.3c0-67.7,54.9-122.5,122.5-122.5c67.6,0,122.5,54.8,122.5,122.5s-54.9,122.5-122.5,122.5C126.1,438.7,71.3,383.9,71.3,316.3z M683.8,806.3c0,33.8-27.4,61.3-61.3,61.3h-490c-33.8,0-61.3-27.4-61.3-61.3v-245c0-33.8,27.4-61.3,61.3-61.3h490c33.8,0,61.3,27.4,61.3,61.3V806.3z M591.9,439.1c-84.8,0-153.5-68.7-153.5-153.5c0-84.8,68.7-153.5,153.5-153.5c84.8,0,153.5,68.7,153.5,153.5C745.4,370.4,676.6,439.1,591.9,439.1z M928.8,545.9v281.2c0,1.6,0,2.2,0,2.2v38.1L745,714.4v-61.3c0-16.2,0-12.3,0-30.6L928.8,500C928.8,543,928.8,520.6,928.8,545.9z"/></g></svg></div></div>', i18n('toolbar.recordMeeting'));
-
-        if (recordButton) recordButton.addEventListener("click", function(evt)
-        {
-            evt.stopPropagation();
-
-            if (!of.recording) {
-                startMeetingRecorder();
-            } else {
-                stopRecorder();
-            }
-        });
-
-        const leaveButton = document.querySelector('div[aria-label="Leave the call"]');
-
-        if (leaveButton) leaveButton.addEventListener("click", function(evt)
-        {
-            if (of.recording) stopRecorder();
-
-            if (pdf_body.length > 0)
-            {
-                const margins = {
-                  top: 70,
-                  bottom: 40,
-                  left: 30,
-                  width: 550
-                };
-                const pdf = new jsPDF('p','pt','a4');
-                //pdf.setFontSize(18);
-
-                pdf.autoTable({
-                    head: [['Date', 'Person', 'Message']],
-                    body: pdf_body,
-                    columnStyles: {
-                        0: {cellWidth: 100},
-                        1: {cellWidth: 100},
-                        2: {cellWidth: 300}
-                    }
-                })
-                const roomLabel = APP.conference.roomName + '-' + Math.random().toString(36).substr(2,9);
-                pdf.save(roomLabel + '.pdf');
-            }
-        });
-    }
-
-    function createDesktopButton()
-    {
-        const desktopButton = addToolbarItem('ofmeet-desktop', '<div class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.desktop + '</div></div>', i18n('toolbar.recordDesktopApp'));
-
-        if (desktopButton) desktopButton.addEventListener("click", function(evt)
-        {
-            evt.stopPropagation();
-
-            if (!of.recording) {
-                startDesktopRecorder();
-            } else {
-                stopRecorder();
-            }
-        });
-    }
-
-    function createTagsButton()
-    {
-        const tagsButton = addToolbarItem('ofmeet-tags', '<div id="ofmeet-tags" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;"><svg height="24" width="24" viewBox="0 0 24 24"><path d="M18 11.016V9.985a.96.96 0 00-.984-.984h-3c-.563 0-1.031.422-1.031.984v4.031c0 .563.469.984 1.031.984h3a.96.96 0 00.984-.984v-1.031h-1.5v.516h-2.016v-3H16.5v.516H18zm-6.984 0V9.985c0-.563-.469-.984-1.031-.984h-3a.96.96 0 00-.984.984v4.031a.96.96 0 00.984.984h3c.563 0 1.031-.422 1.031-.984v-1.031h-1.5v.516H7.5v-3h2.016v.516h1.5zm7.968-7.032C20.062 3.984 21 4.922 21 6v12c0 1.078-.938 2.016-2.016 2.016H5.015c-1.125 0-2.016-.938-2.016-2.016V6c0-1.078.891-2.016 2.016-2.016h13.969z"></path></svg></div></div>', i18n('toolbar.enableConferenceTags'));
-
-        if (tagsButton) tagsButton.addEventListener("click", function(evt)
-        {
-            evt.stopPropagation();
-            doTags();
-        });
-    }
-
-    function createPadsButton()
-    {
-        const padsButton = addToolbarItem('ofmeet-pads', '<div id="ofmeet-pads" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;"><img width="22" src="https://sandbox.cryptpad.info/customize/images/logo_white.png"/></div></div>', i18n('toolbar.launchCryptPadApplication'), ".button-group-right");
-
-        if (padsButton) padsButton.addEventListener("click", function(evt)
-        {
-            evt.stopPropagation();
-            doPads();
-        });
-    }
-
-    function createAvatarButton()
-    {
-        const avatarButton = addToolbarItem('ofmeet-avatar', '<div id="ofmeet-avatar" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.picture + '</div><input style="display:none;" id="ofmeet-upload-avatar" type="file" name="files[]"></div>', i18n('toolbar.changePersonalAvatar'), ".button-group-right");
-
-        if (avatarButton) avatarButton.addEventListener("click", function(evt)
-        {
-            evt.stopPropagation();
-            doAvatar();
-        });
-    }
-
     function hideClock()
     {
         document.getElementById("clocktext").style.display = "none";
@@ -868,14 +1243,12 @@ var ofmeet = (function(of)
         const textElem = document.getElementById("clocktext");
         textElem.style.display = "";
 
-        let totalSeconds = 0;
-
         function pad(val) {
           return (10 > val ? "0" : "") + val;
         }
 
         function updateClock() {
-            ++totalSeconds;
+            let totalSeconds = parseInt((Date.now() - clockTrack.joins) / 1000);
 
             const secs = pad(totalSeconds % 60);
             const mins = pad(parseInt((totalSeconds / 60) % 60));
@@ -1201,19 +1574,6 @@ var ofmeet = (function(of)
                 (tags.activity != "" ? tags.activity : "") +
                 Math.random().toString(36).substr(2,9) +
                 suffix;
-    }
-
-    function createPhotoButton()
-    {
-        const photoButton = addToolbarItem('ofmeet-photo', '<div id="ofmeet-photo" class="toolbox-icon "><div class="jitsi-icon"><svg style="fill: white;" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M5 5h-3v-1h3v1zm8 5c-1.654 0-3 1.346-3 3s1.346 3 3 3 3-1.346 3-3-1.346-3-3-3zm11-4v15h-24v-15h5.93c.669 0 1.293-.334 1.664-.891l1.406-2.109h8l1.406 2.109c.371.557.995.891 1.664.891h3.93zm-19 4c0-.552-.447-1-1-1-.553 0-1 .448-1 1s.447 1 1 1c.553 0 1-.448 1-1zm13 3c0-2.761-2.239-5-5-5s-5 2.239-5 5 2.239 5 5 5 5-2.239 5-5z"/></svg></div></div>', i18n('toolbar.takePhoto'));
-
-        if (photoButton) photoButton.addEventListener("click", function(evt)
-        {
-            evt.stopPropagation();
-            takePhoto();
-
-            APP.UI.messageHandler.notify("Recording", "Conference Photo Taken");
-        });
     }
 
     function addTagsToImage(bitmap, callback)
@@ -2132,59 +2492,6 @@ var ofmeet = (function(of)
         breakoutModal.open();
     }
 
-    function breakoutRooms()
-    {
-        console.debug("breakoutRooms");
-        const breakoutButton = addToolbarItem('ofmeet-breakout', '<div id="ofmeet-breakout" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.person + '</div></div>', i18n('toolbar.createBreakoutRooms'));
-
-        if (breakoutButton) breakoutButton.addEventListener("click", function(evt)
-        {
-            evt.stopPropagation();
-            doBreakout();
-            getOccupants();
-        });
-    }
-
-    //-------------------------------------------------------
-    //
-    //  Toolbar handler
-    //
-    //-------------------------------------------------------
-
-    function newElement(el, id, html, className, label)
-    {
-        const ele = document.createElement(el);
-        if (id) ele.id = id;
-        if (html) ele.innerHTML = html;
-        if (label) {
-            ele.setAttribute('aria-label', label);
-            ele.classList.add("ofmeet-tooltip");
-        }
-        if (className) ele.classList.add(className);
-        document.body.appendChild(ele);
-        return ele;
-    }
-
-    function addToolbarItem (id, html, label, group)
-    {
-        if (!group) group = '.button-group-left';
-        const placeHolder = document.querySelector(group);
-        let tool = null;
-
-        if (placeHolder)
-        {
-            tool = newElement('div', null, html, 'toolbox-button', label);
-
-            if (group == '.button-group-right') {
-                const more = document.querySelector(".toolbox-button-wth-dialog");
-                placeHolder.insertBefore(tool, more);
-            } else {
-                placeHolder.appendChild(tool);
-            }
-        }
-        return tool;
-    }
-
     //-------------------------------------------------------
     //
     //  SpeechRecognition
@@ -2259,150 +2566,6 @@ var ofmeet = (function(of)
     //  File upload handler
     //
     //-------------------------------------------------------
-
-    function postLoadSetup()
-    {
-        var dropZone = document.getElementById("videospace");
-
-        console.debug("postLoadSetup", dropZone);
-
-        if (!dropZone)
-        {
-            setTimeout(postLoadSetup, 1000);
-            return;
-        }
-
-        if (interfaceConfig.OFMEET_CONTACTS_MGR) setupPushNotification();
-
-        if (interfaceConfig.OFMEET_ALLOW_UPLOADS)
-        {
-            console.debug("postLoadSetup", dropZone);
-            dropZone.addEventListener('dragover', handleDragOver, false);
-            dropZone.addEventListener('drop', handleDropFileSelect, false);
-        }
-
-        setTimeout(postJoinSetup, 500);
-    }
-
-    function postJoinSetup()
-    {
-        if (!APP.conference || !APP.conference.isJoined())
-        {
-            setTimeout(postJoinSetup, 500);
-            return;
-        }
-
-        console.debug("postJoinSetup");
-
-        console.debug("add drag&drop handlers to local VideoContainer and participants");
-        addParticipantDragDropHandlers(document.getElementById("localVideoContainer"));
-        getOccupants();
-        
-        // fake the interaction
-        APP.conference.commands.addCommandListener("___FAKE_INTERACTION", function()
-        {
-            if (interfaceConfig.OFMEET_ENABLE_BREAKOUT && APP.conference._room.isModerator() && !breakoutIconVisible)
-            {
-                breakoutRooms();
-                breakoutIconVisible = true;
-            }
-       });
-
-        if (interfaceConfig.OFMEET_ENABLE_BREAKOUT && APP.conference._room.isModerator())
-        {
-            breakoutRooms();
-            breakoutIconVisible= true;
-        }
-        else {
-            APP.conference.commands.sendCommandOnce("___FAKE_INTERACTION", {value: !0});
-        }
-
-        if (interfaceConfig.OFMEET_ENABLE_MOUSE_SHARING)
-        {
-            collab.init();
-
-            const cursorButton = addToolbarItem('ofmeet-cursor', '<div id="ofmeet-cursor" class="toolbox-icon"><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.cursor + '</div></div>', i18n('toolbar.shareCursorMousePointer'), ".button-group-right");
-
-            if (cursorButton) cursorButton.addEventListener("click", function(evt)
-            {
-                evt.stopPropagation();
-
-                if (!cursorShared) {
-					$('#ofmeet-cursor').addClass('toggled');
-                    collab.startSharing(Object.values(nickColors)[0]);
-                } else {
-					$('#ofmeet-cursor').removeClass('toggled');
-                    collab.stopSharing();
-                }
-                cursorShared = !cursorShared;
-            });
-
-            // Observe tile view status.
-            // TODO: When the tile view change event is implemented in Jitsi Meet, it will be replaced with it.
-            const localVideoTileViewContainer = document.getElementById('localVideoTileViewContainer')
-
-			const observer = new MutationObserver(mutations => {
-				APP.UI.emitEvent('UI.tile_view_changed', APP.store.getState()['features/video-layout'].tileViewEnabled);
-			})
-
-			observer.observe(localVideoTileViewContainer, {
-				childList: true
-			})
-        }
-
-        if (interfaceConfig.OFMEET_ENABLE_CRYPTPAD)
-        {
-            createPadsButton();
-        }
-
-        if (interfaceConfig.OFMEET_ENABLE_WHITEBOARD && interfaceConfig.OFMEET_WHITEBOARD_URL && interfaceConfig.OFMEET_WHITEBOARD_URL != "")
-        {
-            APP.conference.commands.addCommandListener("WHITEBOARD", function()
-            {
-                const url = interfaceConfig.OFMEET_WHITEBOARD_URL.endsWith("/") ? interfaceConfig.OFMEET_WHITEBOARD_URL + APP.conference.roomName : interfaceConfig.OFMEET_WHITEBOARD_URL + "/" + APP.conference.roomName;
-                window.open(url, 'ofmeet-whiteboard');
-           });
-
-            const whiteboardButton = addToolbarItem('ofmeet-whiteboard', '<div id="ofmeet-whiteboard" class="toolbox-icon"><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.whiteboard + '</div></div>', i18n('toolbar.shareaWhiteboard'), ".button-group-right");
-
-            if (whiteboardButton) whiteboardButton.addEventListener("click", function(evt)
-            {
-                evt.stopPropagation();
-                APP.conference.commands.sendCommandOnce("WHITEBOARD", {value: !0})
-            });
-        }
-
-        if (interfaceConfig.OFMEET_ENABLE_CONFETTI)
-        {
-            APP.conference.commands.addCommandListener("CONFETTI", function()
-            {
-                var options = {particleCount: 100, spread: 70, origin: {y: .6}};
-                const today = new Date();
-                if ( today.getMonth() == 11 )
-                {
-                    options = Object.assign({shapes: [
-                        "text:\u2744", "text:\u2744", "text:\u2744", "text:\u2744", "text:\u2744", "text:\u2744", "text:\u2744", // snow flake
-                        "text:"+String.fromCodePoint(0x1F381), // :gift:
-                        "text:"+String.fromCodePoint(0x1F384), // :christmas_tree:
-                        "text:"+String.fromCodePoint(0x1F385), // :santa:
-                        "text:"+String.fromCodePoint(0x1F31F), // :star2:
-                        "text:"+String.fromCodePoint(0x1F56F), // :candle:
-                        "text:"+String.fromCodePoint(0x1F98C), // :deer:
-                        "text:"+String.fromCodePoint(0x1F514)  // :bell:
-                    ]});
-                }
-                window.confetti(options);
-           });
-
-            const confettiButton = addToolbarItem('ofmeet-confetti', '<div id="ofmeet-confetti" class="toolbox-icon"><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.confetti + '</div></div>', i18n('toolbar.shareSomeConfetti'), ".button-group-right");
-
-            if (confettiButton) confettiButton.addEventListener("click", function(evt)
-            {
-                evt.stopPropagation();
-                APP.conference.commands.sendCommandOnce("CONFETTI", {value: !0})
-            });
-        }
-    }
 
     function doAvatar()
     {
@@ -2670,17 +2833,6 @@ var ofmeet = (function(of)
                 })
             }
         }
-    }
-
-    function createContactsButton()
-    {
-        const contactsButton = addToolbarItem('ofmeet-contacts', '<div id="ofmeet-contacts" class="toolbox-icon "><div class="jitsi-icon" style="font-size: 12px;">' + IMAGES.contact + '</div></div>', i18n('toolbar.contactsManager'));
-
-        if (contactsButton) contactsButton.addEventListener("click", function(evt)
-        {
-            evt.stopPropagation();
-            doContacts();
-        });
     }
 
     function doContacts()

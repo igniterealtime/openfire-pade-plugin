@@ -19,6 +19,7 @@ var ofmeet = (function(of)
         mic: '<svg width="24" height="24" viewBox="0 0 32 32"><path d="M14 25.808V30h-3a1 1 0 000 2h10a1 1 0 000-2h-3v-4.204c4.166-.822 8-4.194 8-9.796v-3a1 1 0 00-2 0v3c0 5.252-4.026 8-8 8-3.854 0-8-2.504-8-8v-3a1 1 0 00-2 0v3c0 5.68 3.766 9.012 8 9.808zM16 20c2.21 0 4-1.79 4-4V4c0-2.21-1.79-4-4-4s-4 1.79-4 4v12c0 2.21 1.79 4 4 4z"/></svg>',
         mail: '<svg width="32" height="32" viewBox="0 0 32 32"><path d="M30 8H2a2 2 0 00-2 2v3.358l16 6.4 16-6.4V10a2 2 0 00-2-2zM0 16.624V30a2 2 0 002 2h28a2 2 0 002-2V16.624l-16 6.4-16-6.4z"/></svg>',
         tags: '<svg width="24" height="24" viewBox="0 0 32 32"><path d="M26.667 14.251v-1.833a1.705 1.705 0 00-1.748-1.749h-5.334c-1.001 0-1.833.75-1.833 1.749v7.165c0 1.002.833 1.75 1.833 1.75h5.334a1.706 1.706 0 001.748-1.75v-1.832H24v.918h-3.583v-5.334H24v.918h2.667zm-12.416 0v-1.833c0-1.001-.834-1.749-1.832-1.749H7.085a1.706 1.706 0 00-1.749 1.749v7.165a1.707 1.707 0 001.749 1.75h5.334c1.001 0 1.832-.75 1.832-1.75v-1.832h-2.666v.918H8.001v-5.334h3.584v.918h2.666zM28.416 1.75C30.332 1.75 32 3.418 32 5.334v21.332c0 1.916-1.668 3.584-3.584 3.584H3.584c-2 0-3.584-1.668-3.584-3.584V5.334C0 3.418 1.584 1.75 3.584 1.75h24.832z"/></svg>',
+        record: '<svg width="24" height="24" viewBox="0 0 32 32"><path d="M29.999 14l-6.001 3.999a3.961 3.961 0 00-1.408-3.02c2.034-1.224 3.406-3.431 3.406-5.978a7 7 0 00-14.001 0A6.97 6.97 0 0014.108 14h-3.667c.957-1.061 1.558-2.455 1.558-4A6 6 0 100 10c0 1.809.816 3.409 2.083 4.509A3.977 3.977 0 000 17.999v8a4.001 4.001 0 004 3.999h15.998c2.207 0 4-1.792 4-3.999v-1l6.001 4.999A2.001 2.001 0 0032 27.997V15.998A2.002 2.002 0 0029.999 14zM2.001 10a4 4 0 118 .002A4 4 0 012 10zm19.998 15.999A2.001 2.001 0 0119.998 28H4a2.002 2.002 0 01-2.002-2.001v-8c0-1.103.895-2.001 2.002-2.001h15.998c1.104 0 2.001.895 2.001 2.001v8zm-3-11.989a5.01 5.01 0 01-5.012-5.012 5.01 5.01 0 015.012-5.012 5.01 5.01 0 015.012 5.012 5.013 5.013 0 01-5.012 5.012zm11 3.487v10.496l-6.001-4.995v-3l6.001-4v1.499z"/></svg>',
         photo: '<svg width="24" height="24" viewBox="0 0 32 32"><path d="M6.667 5.667h-4V4.333h4v1.334zm10.666 6.666c-2.205 0-4 1.795-4 4 0 2.206 1.795 4 4 4 2.206 0 4-1.794 4-4 0-2.205-1.794-4-4-4zM32 7v20H0V7h7.907c.892 0 1.724-.445 2.218-1.188L12 3h10.667l1.874 2.812A2.665 2.665 0 0026.76 7H32zM6.667 12.333a1.333 1.333 0 10-2.667 0 1.333 1.333 0 102.667 0zm17.333 4c-.001-5.132-5.557-8.339-10.002-5.773a6.67 6.67 0 00-3.333 5.775c.001 5.132 5.557 8.339 10.002 5.773A6.668 6.668 0 0024 16.333z"/></svg>',
         desktop: '<svg width="24" height="24" viewBox="0 0 32 32"><path d="M30 2H2a2 2 0 00-2 2v18a2 2 0 002 2h9.998c-.004 1.446-.062 3.324-.61 4h-.404A.992.992 0 0010 29c0 .552.44 1 .984 1h10.03A.992.992 0 0022 29c0-.552-.44-1-.984-1h-.404c-.55-.676-.606-2.554-.61-4H30a2 2 0 002-2V4a2 2 0 00-2-2zM14 24l-.002.004L14 24zm4.002.004L18 24h.002v.004zM30 20H2V4h28v16z"/><path d="M19.231 11.918a3.305 3.305 0 01-3.305 3.305 3.305 3.305 0 01-3.305-3.305 3.305 3.305 0 013.305-3.305 3.305 3.305 0 013.305 3.305z"/><path d="M16 5.33A6.677 6.677 0 009.33 12 6.677 6.677 0 0016 18.67 6.677 6.677 0 0022.67 12 6.677 6.677 0 0016 5.33zm0 1A5.662 5.662 0 0121.67 12 5.662 5.662 0 0116 17.67 5.662 5.662 0 0110.33 12 5.662 5.662 0 0116 6.33z"/></svg>',
         picture: '<svg width="24" height="24" viewBox="0 0 32 32"><path d="M17.228 11.688a2.782 2.782 1080 105.564 0 2.782 2.782 1080 10-5.564 0zM26 28h2V16l-8 6-10-8-6 6v8h2zm4-24H2a2 2 0 00-2 2v24a2 2 0 002 2h28a2 2 0 002-2V6a2 2 0 00-2-2zm0 26H2V6h28v24z"/></svg>',
@@ -839,7 +840,7 @@ var ofmeet = (function(of)
                     { icon: '&#x2b50;' },
                     { icon: '&#x1f338;' },
                     { icon: '&#x1f37a;' },
-                    { icon: '&#x1f44d;' },
+                    { icon: '&#x1f44d;' }
                 ],
                 callback: (evt) => { sendConfettiCommand($(evt.target).text()) }
             }
@@ -1659,8 +1660,8 @@ var ofmeet = (function(of)
     {
         console.debug("ofmeet.js stopRecorder");
 
-        document.getElementById("ofmeet-record").style.fill = "white";
-        document.getElementById("ofmeet-desktop").style.fill = "white";
+        $('#ofmeet-record svg').css('fill', '#fff');
+        $('#ofmeet-desktop svg').css('fill', '#fff');
         APP.UI.messageHandler.notify("Recording", "Conference Recording Stopped");
 
         clockTrack.stop = (new Date()).getTime();
@@ -1823,8 +1824,7 @@ var ofmeet = (function(of)
     {
         console.debug("ofmeet.js startMeetingRecorder");
 
-        const icon = document.getElementById("ofmeet-record");
-        icon.style.fill = "red";
+        $('#ofmeet-record svg').css('fill', '#f00');
         APP.UI.messageHandler.notify("Recording", "Conference Recording Started");
 
         captions.msgs = [];
@@ -1930,8 +1930,7 @@ var ofmeet = (function(of)
 
         navigator.mediaDevices.getDisplayMedia({video: true, audio: {autoGainControl: false, echoCancellation: false, googAutoGainControl: false, noiseSuppression: false}}).then(stream =>
         {
-            const icon = document.getElementById("ofmeet-desktop");
-            icon.style.fill = "red";
+            $('#ofmeet-desktop svg').css('fill', '#f00');
             APP.UI.messageHandler.notify("Recording", "Conference Recording Started");
 
             captions.msgs = [];

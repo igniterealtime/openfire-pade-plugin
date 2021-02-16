@@ -32,6 +32,10 @@
     padding: 16px 20px;
 }
 
+.speaker-room-button svg {
+    fill: #fff;
+}
+
 
 /*
  * 20200522/G.Jaekel@DNB.DE     On small browser windows, the left toolbar renders to wide. Make it wrapping around.

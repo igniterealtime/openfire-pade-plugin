@@ -814,36 +814,29 @@ var ofmeet = (function(of)
             APP.conference.commands.sendCommandOnce("CONFETTI", { value: JSON.stringify(options) })
         };
 
+        let menu = undefined;
+        if (interfaceConfig.OFMEET_CONFETTI_EMOTICON_ENABLED) {
+            menu = {
+                type: 'tile',
+                items: [],
+                closeOnClick: interfaceConfig.OFMEET_CONFETTI_EMOTICON_CLOSE_MENU,
+                callback: (evt) => { sendConfettiCommand($(evt.target).text()) }
+            };
+
+            // unescape HTML entities 
+            let emoticonList = $('<textarea />').html(interfaceConfig.OFMEET_CONFETTI_EMOTICON_LIST).text();
+            for ( let emotiocon of Array.from(emoticonList)) {
+                menu.items.push({icon: emotiocon});
+            }
+        }
+
         addToolbarItem({
             id: 'ofmeet-confetti',
             icon: IMAGES.confetti,
             label: i18n('toolbar.shareSomeConfetti'),
             group: '.button-group-right',
             callback: (evt) => { sendConfettiCommand() },
-            menu: {
-                type: 'tile',
-                items: [
-                    { icon: '&#x1f600;', text: 'aijdfsalsdf' },
-                    { icon: '&#x1f604;' },
-                    { icon: '&#x1f605;' },
-                    { icon: '&#x1f602;' },
-                    { icon: '&#x1f642;', text: 'aijdfsalsds ssf' },
-                    { icon: '&#x1f643;' },
-                    { icon: '&#x1f60a;' },
-                    { icon: '&#x1f607;' },
-                    { icon: '&#x1f61b;' },
-                    { icon: '&#x1f60d;' },
-                    { icon: '&#x1f618;' },
-                    { icon: '&#x1f61b;' },
-                    { icon: '&#x1f914;' },
-                    { icon: '&#x2764;' },
-                    { icon: '&#x2b50;' },
-                    { icon: '&#x1f338;' },
-                    { icon: '&#x1f37a;' },
-                    { icon: '&#x1f44d;' }
-                ],
-                callback: (evt) => { sendConfettiCommand($(evt.target).text()) }
-            }
+            menu: menu,
         });
     }
 
@@ -854,11 +847,7 @@ var ofmeet = (function(of)
             label: undefined,
             group: '.button-group-left',
             callback: undefined,
-            menu: {
-                type: 'list',
-                items: [],
-                callback: undefined
-            },
+            menu: {},
             ...option
         };
 
@@ -888,6 +877,14 @@ var ofmeet = (function(of)
     }
     
     function appendMenuToToolbarButton($button, option) {
+        option = {
+            type: 'list',
+            items: [],
+            closeOnClick: true,
+            callback: undefined,
+            ...option
+        };
+        
         let menuClass = undefined;
         switch (option.type) {
             case 'list':
@@ -919,7 +916,7 @@ var ofmeet = (function(of)
                 }
                 $menu.append($item);
             }
-            $menu.on('click.ofmeet-toolbox-menu', 'li', option.callback);
+            $menu.on('click.ofmeet-toolbox-menu', 'li', (e) => {option.callback(e); return option.closeOnClick; });
             $menuContainer.children('.ofmeet-toolbox-menu').append($menu);
 
             $smallIcon = $('<div class="ofmeet-toolbox-small-icon"><svg fill="none" height="9" width="9" viewBox="0 0 10 6"><path clip-rule="evenodd" d="M8.07.248a.75.75 0 111.115 1.004L5.656 5.193a.75.75 0 01-1.115 0L1.068 1.252A.75.75 0 012.182.248L5.1 3.571 8.07.248z"></path></svg></div>');

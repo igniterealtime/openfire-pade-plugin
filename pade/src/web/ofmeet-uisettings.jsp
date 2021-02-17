@@ -157,6 +157,10 @@
         final boolean randomRoomNames = ParamUtils.getBooleanParameter( request, "randomRoomNames" );
         final boolean lipSync = ParamUtils.getBooleanParameter( request, "lipSync" );
 
+        final boolean enableEmoticonConfetti = ParamUtils.getBooleanParameter( request, "enableEmoticonConfetti" );
+        final boolean closeEmoticonConfettiMenu = ParamUtils.getBooleanParameter( request, "closeEmoticonConfettiMenu" );
+        final String emoticonConfettiList = ParamUtils.getParameter( request, "emoticonConfettiList" ); 
+
         final boolean showWatermark = ParamUtils.getBooleanParameter( request, "showWatermark" );
         final String watermarkLogoUrlValue = request.getParameter( "watermarkLogoUrl" );
         URL watermarkLogoUrl = null;
@@ -244,14 +248,17 @@
             JiveGlobals.setProperty( "ofmeet.feedback.success", successMessage );
             JiveGlobals.setProperty( "ofmeet.feedback.error", errorMessage );
 
-            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.languagedetection", Boolean.toString( enableLanguageDetection ) );            
-            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.default.language", language );             
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.languagedetection", Boolean.toString( enableLanguageDetection ) );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.default.language", language );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.confetti.emoticon.enabled", Boolean.toString( enableEmoticonConfetti ) );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.confetti.emoticon.closemenu", Boolean.toString( closeEmoticonConfettiMenu ) );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.confetti.emoticon.list", emoticonConfettiList );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.watermark.link", watermarkLink );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.show.watermark", Boolean.toString( showWatermark ) );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.brand.watermark.link", brandWatermarkLink );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.brand.show.watermark", Boolean.toString( brandShowWatermark ) );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.cryptpad.url", cryptpadurl );
-            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.whiteboard.url", whiteboardurl );            
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.whiteboard.url", whiteboardurl );
 
             ofmeetConfig.setWebappContextPath( webappContextPath );
             ofmeetConfig.setFilmstripMaxHeight( filmstripMaxHeight );
@@ -657,6 +664,37 @@
                     </td>
                 </tr>
             </c:forEach>
+        </table>
+    </admin:contentBox>
+
+    <fmt:message key="ofmeet.confetti.title" var="boxtitleConfetti"/>
+    <admin:contentBox title="${boxtitleConfetti}">
+        <p>
+            <fmt:message key="ofmeet.confetti.description" />
+        </p>
+        <table cellpadding="3" cellspacing="0" border="0" width="100%">
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="enableEmoticonConfetti"
+                        ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.confetti.emoticon.enabled" , true) ? "checked" : "" }>
+                    <fmt:message key="ofmeet.confetti.emoticon.enabled" />
+                </td>
+            </tr>
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="closeEmoticonConfettiMenu"
+                        ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.confetti.emoticon.closemenu" , true) ? "checked" : "" }>
+                    <fmt:message key="ofmeet.confetti.emoticon.closemenu" />
+                </td>
+            </tr>
+            <tr>
+                <td width="200">
+                    <fmt:message key="ofmeet.confetti.emoticon.list" />:
+                </td>
+                <td>
+                    <textarea cols="60" rows="5" name="emoticonConfettiList">${admin:getProperty( "org.jitsi.videobridge.ofmeet.confetti.emoticon.list", "&#x1f600;&#x1f604;&#x1f605;&#x1f602;&#x1f642;&#x1f643;&#x1f60a;&#x1f607;&#x1f61b;&#x1f60d;&#x1f618;&#x1f61b;&#x1f914;&#x2764;&#x2b50;&#x1f338;&#x1f37a;&#x1f44d;")}</textarea>
+                </td>
+            </tr>
         </table>
     </admin:contentBox>
 

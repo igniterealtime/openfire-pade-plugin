@@ -107,6 +107,9 @@ public class InterfaceConfigServlet extends HttpServlet
             config.put( "OFMEET_WELCOME_PAGE_TOOLBARCONTENT",    JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.welcome.toolbarcontent",        ""                  ) );
             config.put( "OFMEET_CRYPTPAD_URL",                   JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.cryptpad.url", "https://cryptpad.fr"                ) );
             config.put( "OFMEET_WHITEBOARD_URL",                 JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.whiteboard.url", "https://wbo.ophir.dev/boards/"    ) );
+            config.put( "OFMEET_CONFETTI_EMOTICON_ENABLED",      JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.confetti.emoticon.enabled",     true                ) );
+            config.put( "OFMEET_CONFETTI_EMOTICON_CLOSE_MENU",   JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.confetti.emoticon.closemenu",   true                ) );
+            config.put( "OFMEET_CONFETTI_EMOTICON_LIST",         JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.confetti.emoticon.list", "&#x1f600;&#x1f604;&#x1f605;&#x1f602;&#x1f642;&#x1f643;&#x1f60a;&#x1f607;&#x1f61b;&#x1f60d;&#x1f618;&#x1f61b;&#x1f914;&#x2764;&#x2b50;&#x1f338;&#x1f37a;&#x1f44d;" ) );
 
             config.put( "RECENT_LIST_ENABLED",                   JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.recentlist",        true                ) );
             config.put( "IN_PROGRESS_LIST_ENABLED",              JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist",    false               ) );

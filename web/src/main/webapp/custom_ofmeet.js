@@ -246,6 +246,16 @@ var ofmeet = (function(of)
                     });
                 }
             });
+			
+			APP.conference._room.on(JitsiMeetJS.events.conference.USER_ROLE_CHANGED, function(user, role) 
+			{
+                console.debug("ofmeet.js participant role change", user, role);
+				
+				if (interfaceConfig.OFMEET_ENABLE_BREAKOUT && role == "moderator" && !breakoutIconVisible && user == APP.conference.getMyUserId()) {
+					createBreakoutRoomsButton();
+					breakoutIconVisible = true;
+				}				
+			});			
 
             APP.conference._room.on(JitsiMeetJS.events.conference.TRACK_REMOVED, function(track)
             {

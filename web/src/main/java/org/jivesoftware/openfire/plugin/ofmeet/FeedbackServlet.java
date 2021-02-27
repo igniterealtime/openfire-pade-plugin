@@ -105,7 +105,9 @@ public class FeedbackServlet extends HttpServlet
                 feedback.put(partName, writer.toString());
             }
             LOG.info(feedback.toString());
+            final String room = feedback.optString("room","").toLowerCase();
             final String comment = feedback.optString("comment","");
+			final String duration = feedback.optString("duration","");	
             final String audioRating = feedback.optString("audio","-");
             final String videoRating = feedback.optString("video","-");
             if ( ! audioRating.equals("-") || ! videoRating.equals("-") || ! comment.isEmpty() )
@@ -113,7 +115,7 @@ public class FeedbackServlet extends HttpServlet
                 securityAuditManager.logEvent
                 (
                     feedback.getString("callStatsUserName")
-                    , "pade feedback A/V-rating: " + audioRating +"/" + videoRating + ( ! comment.isEmpty() ? ", comment: " + Integer.toString(comment.length()) + "c" : "" )
+                    , "meeting - " + room + (duration.isEmpty() ? "" : " duration: " + duration + " mins") + " feedback A/V-rating: " + audioRating + "/" + videoRating + ( ! comment.isEmpty() ? ", comment: " + Integer.toString(comment.length()) + "c" : "" )
                     , comment
                 );
             }

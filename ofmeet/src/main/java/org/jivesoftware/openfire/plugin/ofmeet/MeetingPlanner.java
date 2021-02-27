@@ -216,7 +216,8 @@ public class MeetingPlanner implements Job
         String url = null;
 
         try {
-            url = rootUrl + "/ofmeet/" + bookmark.getValue().split("@")[0];
+			JSONObject json = new JSONObject(JiveGlobals.getProperty("pade.branding.ofmeetUrl", "{\"value\":\"" + rootUrl + "/ofmeet/\"}"));			
+            url = json.getString("value") + bookmark.getValue().split("@")[0];
         } catch (Exception e) {
             Log.error("bookmark ignored, url missing or bad " + bookmark.getValue());
             return;

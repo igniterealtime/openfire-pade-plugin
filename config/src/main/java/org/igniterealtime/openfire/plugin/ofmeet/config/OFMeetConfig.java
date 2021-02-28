@@ -768,6 +768,9 @@ public class OFMeetConfig
 
     public final StringProperty jigasiXmppRoomName = new StringProperty( "ofmeet.jigasi.xmpp.room-name", "siptest" );
     public StringProperty getJigasiXmppRoomName() { return jigasiXmppRoomName; }
+	
+    public final StringProperty jigasiSipHeaderRoomName = new StringProperty( "ofmeet.jigasi.room.header.name", "Jitsi-Conference-Room" );
+    public StringProperty getJigasiSipHeaderRoomName() { return jigasiSipHeaderRoomName; }	
 
     public final StringProperty jigasiXmppPassword = new StringProperty( "ofmeet.jigasi.xmpp.password", null );
     public StringProperty getJigasiXmppPassword() { return jigasiXmppPassword; }

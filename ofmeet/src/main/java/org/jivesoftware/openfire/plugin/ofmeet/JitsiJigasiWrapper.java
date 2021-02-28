@@ -31,6 +31,7 @@ import java.net.*;
 import java.util.*;
 import org.jitsi.util.OSUtils;
 import java.util.Properties;
+import org.jitsi.videobridge.openfire.PluginImpl;
 
 /**
  * A wrapper object for the Jitsi Gateway to SIP (jigasi) component.
@@ -47,7 +48,7 @@ public class JitsiJigasiWrapper implements ProcessListener
         System.setProperty("ofmeet.jigasi.started", "false");
 
         final OFMeetConfig config = new OFMeetConfig();
-        final String IPADDR = getIpAddress();
+        final String IPADDR = JiveGlobals.getProperty( PluginImpl.MANUAL_HARVESTER_LOCAL_PROPERTY_NAME, getIpAddress() );
         final String DOMAIN = XMPPServer.getInstance().getServerInfo().getXMPPDomain();
         final String MAIN_MUC = JiveGlobals.getProperty( "ofmeet.main.muc", "conference." + DOMAIN);
 
@@ -77,6 +78,7 @@ public class JitsiJigasiWrapper implements ProcessListener
         props.setProperty("net.java.sip.communicator.packetlogging.PACKET_LOGGING_ENABLED", "false");
 
         props.setProperty("net.java.sip.communicator.impl.protocol.sip.acc1403273890647", "acc1403273890647");
+        props.setProperty("net.java.sip.communicator.impl.protocol.sip.acc1403273890647.JITSI_MEET_ROOM_HEADER_NAME", config.jigasiSipHeaderRoomName.get());				
         props.setProperty("net.java.sip.communicator.impl.protocol.sip.acc1403273890647.ACCOUNT_UID", "SIP:" + config.jigasiSipUserId.get());
         props.setProperty("net.java.sip.communicator.impl.protocol.sip.acc1403273890647.PASSWORD", Base64.getEncoder().encodeToString( config.jigasiSipPassword.get().getBytes() ) );
         props.setProperty("net.java.sip.communicator.impl.protocol.sip.acc1403273890647.PROTOCOL_NAME", "SIP");

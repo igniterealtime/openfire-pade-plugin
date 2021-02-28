@@ -525,19 +525,14 @@ var ofmeet = (function(of)
         }
 
         if (interfaceConfig.OFMEET_RECORD_CONFERENCE && !config.webinar) {
-            navigator.mediaDevices.getUserMedia({ audio: true, video: true }).then(function (stream) {
-                recordingVideoTrack[APP.conference.getMyUserId()] = stream;
-                recordingAudioTrack[APP.conference.getMyUserId()] = stream;
+			createRecordButton();
+			createPhotoButton();
+			createDesktopButton();
 
-                createRecordButton();
-                createPhotoButton();
-                createDesktopButton();
-
-                if (APP.conference.getMyUserId()) {
-                    showClock();
-                    clockTrack.joins = (new Date()).getTime();
-                }
-            });
+			if (APP.conference.getMyUserId()) {
+				showClock();
+				clockTrack.joins = (new Date()).getTime();
+            }
         }
 
         if (interfaceConfig.OFMEET_TAG_CONFERENCE && !config.webinar) {
@@ -601,7 +596,7 @@ var ofmeet = (function(of)
                     evt.stopPropagation();
 
                     if (!of.recording) {
-                        startMeetingRecorder();
+                        startRecorder(startMeetingRecorder);
                     } else {
                         stopRecorder();
                     }
@@ -662,7 +657,7 @@ var ofmeet = (function(of)
                     evt.stopPropagation();
 
                     if (!of.recording) {
-                        startDesktopRecorder();
+                        startRecorder(startDesktopRecorder);
                     } else {
                         stopRecorder();
                     }
@@ -1827,6 +1822,15 @@ var ofmeet = (function(of)
         createAnchor(htmlFile, blob);
     }
 
+    function startRecorder(recorder)
+    {
+		navigator.mediaDevices.getUserMedia({ audio: true, video: true }).then(function (stream) {
+			recordingVideoTrack[APP.conference.getMyUserId()] = stream;
+			recordingAudioTrack[APP.conference.getMyUserId()] = stream;
+			recorder();
+		});		
+	}
+	
     function startMeetingRecorder()
     {
         console.debug("ofmeet.js startMeetingRecorder");

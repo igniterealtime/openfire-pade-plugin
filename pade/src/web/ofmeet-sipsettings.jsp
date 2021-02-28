@@ -171,7 +171,11 @@
             <tr>
                 <td width="200"><label for="jigasiProxyPort"><fmt:message key="sipsettings.sip.account.proxy.port"/>:</label></td>
                 <td><input type="text" size="60" maxlength="100" name="jigasiProxyPort" id="jigasiProxyPort" value="${ofmeetConfig.jigasiProxyPort.get() == null ? '' : ofmeetConfig.jigasiProxyPort.get()}"></td>
-            </tr>                
+            </tr> 
+            <tr>
+                <td width="200"><label for="jigasiSipHeaderRoomName"><fmt:message key="sipsettings.sip.header.room.name"/>:</label></td>
+                <td><input type="text" size="60" maxlength="100" name="jigasiSipHeaderRoomName" id="jigasiSipHeaderRoomName" value="${ofmeetConfig.jigasiSipHeaderRoomName.get() == null ? 'Jitsi-Conference-Room' : ofmeetConfig.jigasiSipHeaderRoomName.get()}"></td>
+            </tr> 			
         </table>
     </admin:contentBox>
 
@@ -213,11 +217,7 @@
             <tr>
                 <td width="200"><label for="jigasiXmppRoomName"><fmt:message key="sipsettings.xmpp.room.name"/>:</label></td>
                 <td><input type="text" size="60" maxlength="100" name="jigasiXmppRoomName" id="jigasiXmppRoomName" value="${ofmeetConfig.jigasiXmppRoomName.get() == null ? 'siptest' : ofmeetConfig.jigasiXmppRoomName.get()}"></td>
-            </tr>   
-            <tr>
-                <td width="200"><label for="jigasiSipHeaderRoomName"><fmt:message key="sipsettings.sip.header.room.name"/>:</label></td>
-                <td><input type="text" size="60" maxlength="100" name="jigasiSipHeaderRoomName" id="jigasiSipHeaderRoomName" value="${ofmeetConfig.jigasiSipHeaderRoomName.get() == null ? 'Jitsi-Conference-Room' : ofmeetConfig.jigasiSipHeaderRoomName.get()}"></td>
-            </tr> 			
+            </tr>   			
         </table>
     </admin:contentBox>
     

@@ -66,23 +66,17 @@ import org.xmpp.packet.IQ;
 import org.xmpp.packet.JID;
 import org.xmpp.packet.Message;
 
-import java.io.File;
-import java.io.FilenameFilter;
-import java.net.InetAddress;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Security;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.net.*;
+import java.util.*;
 import java.util.stream.Stream;
+import java.util.zip.*;
 
 import org.ifsoft.websockets.*;
 import java.util.concurrent.*;
@@ -96,11 +90,13 @@ import org.freeswitch.esl.client.transport.event.EslEvent;
 
 import org.jboss.netty.channel.ExceptionEvent;
 import org.json.JSONObject;
+import org.jitsi.util.OSUtils;
+import de.mxro.process.*;
 
 /**
  * Bundles various Jitsi components into one, standalone Openfire plugin.
  */
-public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventListener, PropertyEventListener, IEslEventListener, MUCEventListener
+public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventListener, PropertyEventListener, IEslEventListener, MUCEventListener, ProcessListener
 {
     private static final Logger Log = LoggerFactory.getLogger(OfMeetPlugin.class);
     private static final ScheduledExecutorService connExec = Executors.newSingleThreadScheduledExecutor();
@@ -128,6 +124,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     private final MeetingPlanner meetingPlanner;
     private final LobbyMuc lobbyMuc;
     private final SecurityAuditManager securityAuditManager = SecurityAuditManager.getInstance();
+    private XProcess pxyThread = null;	
 
     public OfMeetPlugin()
     {
@@ -190,7 +187,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
             ensureFocusUser();
             jitsiJicofoWrapper.initialize(pluginDirectory);
-            loadBranding();
+            loadBranding();			
         }
         catch ( Exception ex )
         {
@@ -259,7 +256,11 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         {
             Log.error( "An exception occurred while attempting to connect to FreeSWITCH", ex );
         }
-
+					
+		if (config.getLiveStreamEnabled())
+		{
+			setupPxy(pluginDirectory);
+		}		
     }
 
     public void destroyPlugin()
@@ -318,6 +319,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
         if (connectTask != null) connectTask.cancel(true);
         if (managerConnection != null) managerConnection.disconnect();
+        if (pxyThread != null) pxyThread.destory();		
     }
 
     protected void loadPublicWebApp() throws Exception
@@ -610,6 +612,146 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
         return contentBuilder.toString();
     }
+
+    //-------------------------------------------------------
+    //
+    //      pxy live streaming
+    //
+    //-------------------------------------------------------
+	
+	private void setupPxy(File pluginDirectory)
+	{
+		final String path = pluginDirectory.getPath() + File.separator + "classes" + File.separator +  "pxy";
+        final File folder = new File(path);			
+		
+		if (OSUtils.IS_LINUX64 || OSUtils.IS_WINDOWS64)
+		{
+			if (!folder.exists())
+			{						
+				new Thread()
+				{
+					@Override public void run()
+					{
+						try
+						{
+							folder.mkdir();
+							
+							String jarFileSuffix = null;
+
+							if (OSUtils.IS_LINUX64) 	jarFileSuffix = "linux64/pxy.zip?raw=true";
+							if (OSUtils.IS_WINDOWS64) 	jarFileSuffix = "win64/pxy.zip?raw=true";						
+
+							InputStream inputStream = new URL("https://github.com/deleolajide/binaries/blob/main/" + jarFileSuffix).openStream();
+							ZipInputStream zipIn = new ZipInputStream(inputStream);
+							ZipEntry entry = zipIn.getNextEntry();
+
+							while (entry != null)
+							{
+								try
+								{
+									String filePath = path + File.separator + entry.getName();
+
+									Log.info("pxy writing file..." + filePath);
+
+									if (!entry.isDirectory())
+									{
+										File file = new File(filePath);
+										file.setReadable(true, true);
+										file.setWritable(true, true);
+										file.setExecutable(true, true);
+
+										new File(file.getParent()).mkdirs();
+										extractFile(zipIn, filePath);
+									}
+									zipIn.closeEntry();
+									entry = zipIn.getNextEntry();
+								}
+								catch(Exception e) {
+									Log.error("Error", e);
+								}
+							}
+							zipIn.close();
+
+							Log.info("pxy binaries extracted ok");
+							startPxy(path);						
+							
+						}						
+						catch (Exception e)
+						{
+							Log.error(e.getMessage(), e);
+						}						
+						
+					}
+
+				}.start();
+			}
+			else {
+				Log.warn("pxy folder already exist.");
+				startPxy(path);
+			}						
+		}
+		else {
+			Log.error("O/S platform not supported.");
+		}		
+	}
+	
+	private void startPxy(String path)
+	{
+		String pxyName = null;
+		if (OSUtils.IS_LINUX64) 	pxyName = "main";
+		if (OSUtils.IS_WINDOWS64) 	pxyName = "main.exe";	
+		
+		final String port = config.getLiveStreamPort().get();
+		final String url = config.getLiveStreamUrl().get();			
+		final String pxyExec = path + File.separator + pxyName;	
+		final String cmdLine = pxyExec + " --port=" + port + " --url=" + url;
+		pxyThread = Spawn.startProcess(cmdLine, new File(path), this);
+		Log.info( "pxy rtmp streamer staring with "  + cmdLine);		
+	}
+	
+    private void extractFile(ZipInputStream zipIn, String filePath) throws IOException
+    {
+        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath));
+        byte[] bytesIn = new byte[4096];
+        int read;
+
+        while ((read = zipIn.read(bytesIn)) != -1)
+        {
+            bos.write(bytesIn, 0, read);
+        }
+        bos.close();
+    }	
+	
+    public void onOutputLine(final String line)
+    {
+        Log.info("onOutputLine " + line);
+    }
+
+    public void onProcessQuit(int code)
+    {
+        Log.info("onProcessQuit " + code);
+        System.setProperty("ofmeet.pxy.started", "false");
+    }
+
+    public void onOutputClosed() {
+        Log.error("onOutputClosed");
+    }
+
+    public void onErrorLine(final String line)
+    {
+        Log.info(line);
+		
+        if (line.contains("Server is running ")) 
+		{
+			System.setProperty("ofmeet.pxy.started", "true");
+			Log.info( "pxy rtmp streamer started");			
+		}
+    }
+
+    public void onError(final Throwable t)
+    {
+        Log.error("Thread error", t);
+    }	
 
     //-------------------------------------------------------
     //

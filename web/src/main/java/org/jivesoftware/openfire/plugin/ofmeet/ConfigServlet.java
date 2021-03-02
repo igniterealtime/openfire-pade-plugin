@@ -128,6 +128,10 @@ public class ConfigServlet extends HttpServlet
             String minHeightForQualityLvlHigh = JiveGlobals.getProperty( "ofmeet.min.height.for.quality.level.high", "720" );
 
             String displayNotice = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.display.notice", "");
+			String ofmeetStreamKey = JiveGlobals.getProperty( "ofmeet.live.stream.key", "");
+			String ofmeetStreamPort = JiveGlobals.getProperty( "ofmeet.live.stream.port", "8080");			
+            boolean ofmeetLiveStream = JiveGlobals.getBooleanProperty( "ofmeet.live.stream.enabled", false);			
+			
             boolean wsBridgeChannel = JiveGlobals.getBooleanProperty( "ofmeet.bridge.ws.channel", org.jitsi.util.OSUtils.IS_WINDOWS);
 
             if ( xirsysUrl != null )
@@ -285,6 +289,9 @@ public class ConfigServlet extends HttpServlet
             config.put( "useRoomAsSharedDocumentName", false );
             config.put( "logStats", logStats );
             config.put( "ofmeetWinSSOEnabled", ofmeetWinSSOEnabled );
+            config.put( "ofmeetStreamKey", ofmeetStreamKey );
+			config.put( "ofmeetLiveStream", ofmeetLiveStream );
+			config.put( "ofmeetStreamPort", ofmeetStreamPort );
 
             config.put( "conferences", conferences );
 

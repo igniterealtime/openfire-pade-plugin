@@ -182,6 +182,7 @@
     String jicofo = System.getProperty("ofmeet.jicofo.started", "false");
     String jigasi = System.getProperty("ofmeet.jigasi.started", "false");
     String freesw = System.getProperty("ofmeet.freeswitch.started", "false");    
+    String pxy = System.getProperty("ofmeet.pxy.started", "false");   	
 %>    
     <tr>
         <td width="1%">1</td>    
@@ -214,6 +215,16 @@
     </tr>
 <%
     }
+    if (ofmeetConfig.getLiveStreamEnabled()) 
+    {
+%>    
+    <tr>   
+        <td width="1%">4</td>        
+        <td align="left" width="29%"><fmt:message key="ofmeet.summary.pxy" /></td>   
+        <td align="left" width="70%"><img src="<%= pxy.equals("true")  ? "images/success-16x16.gif" : "images/error-16x16.gif" %>"/></td>          
+    </tr>
+<%
+    }	
 %>     
     </tbody>    
     </table>   

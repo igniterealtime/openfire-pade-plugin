@@ -5,7 +5,8 @@
     },
     "toolbar": {
         "recordMeeting": "Record Meeting",
-        "recordDesktopApp": "Record Desktop App (Including Meeting Browser Tab)",
+		"enterStreamKey": "Please enter a valid stream key!",
+        "recordDesktopApp": "Record/Stream Meeting Browser Tab",
         "enableConferenceTags": "Enable Conference Captions/Subtitles",
         "launchCryptPadApplication": "Launch CryptPad Application",
         "changePersonalAvatar": "Change personal avatar",

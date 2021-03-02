@@ -1674,7 +1674,7 @@ var ofmeet = (function(of)
             if (videoRecorder[id]) videoRecorder[id].stop();
         });
 
-        createVideoViewerHTML();
+        if (!config.ofmeetLiveStream) createVideoViewerHTML();
         of.recording = false;
     }
 
@@ -1934,12 +1934,41 @@ var ofmeet = (function(of)
 
         return (hasDesktop || hasVoice) ? destination.stream.getAudioTracks() : [];
     }
+	
+	function connectLiveStream (url, streamKey)
+	{
+		const ws = new WebSocket(url, ['streamKey', streamKey]);
+
+		ws.onopen = (event) => {
+		  console.log(`Connection opened: ${JSON.stringify(event)}`);
+		};
+
+		ws.onclose = (event) => {
+		  console.log(`Connection closed: ${JSON.stringify(event)}`);
+		};
+
+		ws.onerror = (event) => {
+		  console.log(`An error occurred with websockets: ${JSON.stringify(event)}`);
+		};
+		return ws;
+	}	
 
     function startDesktopRecorder()
     {
         console.debug("ofmeet.js startDesktopRecorder");
-
-        navigator.mediaDevices.getDisplayMedia({video: true, audio: {autoGainControl: false, echoCancellation: false, googAutoGainControl: false, noiseSuppression: false}}).then(stream =>
+		
+		const recConstraints = {video: true, audio: {autoGainControl: false, echoCancellation: false, googAutoGainControl: false, noiseSuppression: false}};
+		const streamConstraints = {video: true, audio: true};
+		
+		if (config.ofmeetLiveStream)
+		{
+			if (config.ofmeetStreamKey.trim() === '') {
+				config.ofmeetStreamKey = prompt(i18n('enterStreamKey'));
+				if (!config.ofmeetStreamKey || config.ofmeetStreamKey.trim() === '') config.ofmeetLiveStream = false;
+			}
+		}			
+		
+        navigator.mediaDevices.getDisplayMedia(config.ofmeetLiveStream ? streamConstraints : recConstraints).then(stream =>
         {
             $('#ofmeet-desktop svg').css('fill', '#f00');
             APP.UI.messageHandler.notify("Recording", "Conference Recording Started");
@@ -1955,54 +1984,72 @@ var ofmeet = (function(of)
 
             console.log('ofmeet.js startDesktopRecorder tracks', tracks);
             recorderStreams[id] =  new MediaStream(tracks);
-            filenames[id] = getFilename("ofmeet-video-" + id, ".webm");
+			
+			if (config.ofmeetLiveStream)
+			{
+				let websocket = connectLiveStream("ws://" + location.hostname + ":" + config.ofmeetStreamPort + "/api/v0/stream", config.ofmeetStreamKey);
+				videoRecorder[id] = new MediaRecorder(recorderStreams[id], {mimeType: 'video/webm;codecs=h264', bitsPerSecond: 256 * 8 * 1024});
 
-            console.debug("ofmeet.js startDesktopRecorder stream", id, recorderStreams[id], recorderStreams[id].getVideoTracks()[0].getSettings());
-            const dbname = 'ofmeet-db-' + id;
-            dbnames.push(dbname);
+				videoRecorder[id].ondataavailable = function(e)
+				{
+					websocket.send(e.data);
+				}
 
-            customStore[id] = new idbKeyval.Store(dbname, dbname);
-            videoRecorder[id] = new MediaRecorder(recorderStreams[id], { mimeType: 'video/webm'});
+				videoRecorder[id].onstop = function(e)
+				{
+					websocket.close();
+					websocket = null;
+				}			
+			} else {
+				filenames[id] = getFilename("ofmeet-video-" + id, ".webm");
 
-            videoRecorder[id].ondataavailable = function(e)
-            {
-                if (e.data.size > 0)
-                {
-                    const key = "video-chunk-" + (new Date()).getTime();
+				console.debug("ofmeet.js startDesktopRecorder stream", id, recorderStreams[id], recorderStreams[id].getVideoTracks()[0].getSettings());
+				const dbname = 'ofmeet-db-' + id;
+				dbnames.push(dbname);
 
-                    idbKeyval.set(key, e.data, customStore[id]).then(function()
-                    {
-                        console.debug("ofmeet.js startDesktopRecorder - ondataavailable", id, key, e.data);
+				customStore[id] = new idbKeyval.Store(dbname, dbname);
+				videoRecorder[id] = new MediaRecorder(recorderStreams[id], { mimeType: 'video/webm'});
 
-                    }).catch(function(err) {
-                        console.error('ofmeet.js startDesktopRecorder - ondataavailable failed!', err)
-                    });
-                }
-            }
+				videoRecorder[id].ondataavailable = function(e)
+				{
+					if (e.data.size > 0)
+					{
+						const key = "video-chunk-" + (new Date()).getTime();
 
-            videoRecorder[id].onstop = function(e)
-            {
-                recorderStreams[id].getTracks().forEach(track => track.stop());
-                stream.getTracks().forEach(track => track.stop());
+						idbKeyval.set(key, e.data, customStore[id]).then(function()
+						{
+							console.debug("ofmeet.js startDesktopRecorder - ondataavailable", id, key, e.data);
 
-                idbKeyval.keys(customStore[id]).then(function(data)
-                {
-                    const duration = Date.now() - startTime;
-                    const blob = new Blob(data, {type: 'video/webm'});
+						}).catch(function(err) {
+							console.error('ofmeet.js startDesktopRecorder - ondataavailable failed!', err)
+						});
+					}
+				}
 
-                   console.debug("ofmeet.js startDesktopRecorder - onstop", id, filenames[id], duration, data, blob);
+				videoRecorder[id].onstop = function(e)
+				{
+					recorderStreams[id].getTracks().forEach(track => track.stop());
+					stream.getTracks().forEach(track => track.stop());
 
-                    ysFixWebmDuration(blob, duration, function(fixedBlob) {
-                        createAnchor(filenames[id], fixedBlob);
-                        idbKeyval.clear(customStore[id]);
+					idbKeyval.keys(customStore[id]).then(function(data)
+					{
+						const duration = Date.now() - startTime;
+						const blob = new Blob(data, {type: 'video/webm'});
 
-                        delete filenames[id];
-                        delete videoRecorder[id];
-                        delete recorderStreams[id];
-                        delete customStore[id];
-                    });
-                });
-            }
+					   console.debug("ofmeet.js startDesktopRecorder - onstop", id, filenames[id], duration, data, blob);
+
+						ysFixWebmDuration(blob, duration, function(fixedBlob) {
+							createAnchor(filenames[id], fixedBlob);
+							idbKeyval.clear(customStore[id]);
+
+							delete filenames[id];
+							delete videoRecorder[id];
+							delete recorderStreams[id];
+							delete customStore[id];
+						});
+					});
+				}
+			}
             videoRecorder[id].start(1000);
             const startTime = Date.now();
             of.recording = true;

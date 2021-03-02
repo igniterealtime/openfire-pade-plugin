@@ -55,7 +55,11 @@
         final boolean p2pEnabled = ParamUtils.getBooleanParameter( request, "p2pEnabled" );        
         final boolean p2pUseStunTurn = ParamUtils.getBooleanParameter( request, "p2pUseStunTurn" );   
         final boolean p2pDisableH264 = ParamUtils.getBooleanParameter( request, "p2pDisableH264" );   
-        final boolean p2pPreferH264 = ParamUtils.getBooleanParameter( request, "p2pPreferH264" );           
+        final boolean p2pPreferH264 = ParamUtils.getBooleanParameter( request, "p2pPreferH264" ); 
+        final String liveStreamPort = request.getParameter( "liveStreamPort" );  
+        final String liveStreamUrl = request.getParameter( "liveStreamUrl" );  
+        final String liveStreamKey = request.getParameter( "liveStreamKey" );            
+        final boolean liveStreamEnabled = ParamUtils.getBooleanParameter( request, "liveStreamEnabled" ); 		
 
         final boolean startaudioonly = ParamUtils.getBooleanParameter( request, "startaudioonly" );
 
@@ -237,7 +241,12 @@
             ofmeetConfig.setP2pEnabled( p2pEnabled );
             ofmeetConfig.setP2pPreferH264( p2pPreferH264 );
             ofmeetConfig.setP2pDisableH264( p2pDisableH264 );
-            ofmeetConfig.setP2pUseStunTurn( p2pUseStunTurn );            
+            ofmeetConfig.setP2pUseStunTurn( p2pUseStunTurn );    
+
+            ofmeetConfig.liveStreamPort.set( liveStreamPort );
+            ofmeetConfig.liveStreamUrl.set( liveStreamUrl );			
+            ofmeetConfig.liveStreamKey.set( liveStreamKey );
+            ofmeetConfig.liveStreamEnabled.set( Boolean.toString(liveStreamEnabled) );			
 
             container.restartNeeded = true;
 
@@ -607,6 +616,7 @@
                     <input type="checkbox" name="simulcast" ${ofmeetConfig.simulcast ? "checked" : ""}>
                     <fmt:message key="config.page.configuration.simulcast" />
                 </td>
+            </tr>>				
             </tr>
             <tr>
                 <td nowrap colspan="2">
@@ -628,6 +638,31 @@
             </tr>                 
         </table>
     </admin:contentBox>
+	
+    <fmt:message key="config.page.configuration.livestream.title" var="boxtitlelivestream"/>
+    <admin:contentBox title="${boxtitlelivestream}">
+        <p><fmt:message key="config.page.configuration.livestream.description"/></p>
+        <table cellpadding="3" cellspacing="0" border="0" width="100%">
+            <tr>			
+                <td nowrap colspan="2">
+                    <input type="checkbox" id="liveStreamEnabled" name="liveStreamEnabled" ${ofmeetConfig.getLiveStreamEnabled() ? "checked" : ""}>
+                    <fmt:message key="config.page.configuration.livestream.enabled" />
+                </td>				
+            </tr>
+            <tr>
+                <td width="200"><label for="liveStreamPort"><fmt:message key="config.page.configuration.livestream.port"/>:</label></td>
+                <td><input type="text" size="60" maxlength="100" name="liveStreamPort" id="liveStreamPort" value="${ofmeetConfig.liveStreamPort.get()}"></td>
+            </tr>		
+            <tr>
+                <td width="200"><label for="liveStreamUrl"><fmt:message key="config.page.configuration.livestream.url"/>:</label></td>
+                <td><input type="text" size="60" maxlength="100" name="liveStreamUrl" id="liveStreamUrl" value="${ofmeetConfig.liveStreamUrl.get()}"></td>
+            </tr>	
+            <tr>
+                <td width="200"><label for="liveStreamKey"><fmt:message key="config.page.configuration.livestream.key"/>:</label></td>
+                <td><input type="text" size="60" maxlength="100" name="liveStreamKey" id="liveStreamKey" value="${ofmeetConfig.liveStreamKey.get()}"></td>
+            </tr>				
+        </table>
+    </admin:contentBox>	
 
     <input type="hidden" name="csrf" value="${csrf}">
 

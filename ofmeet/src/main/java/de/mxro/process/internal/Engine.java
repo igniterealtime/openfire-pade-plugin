@@ -155,6 +155,15 @@ public class Engine {
                 }
             }
 
+            @Override			
+			public void sendByte(byte[] b, int off, int length) {				
+                try {
+					outputStream.write(b, off, length);
+                } catch (final IOException e) {
+                    listener.onError(e);
+                }				
+			}							
+
             @Override
             public void destory() {
                 process.destroy();

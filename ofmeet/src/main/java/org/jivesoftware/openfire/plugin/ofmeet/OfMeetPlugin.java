@@ -91,12 +91,12 @@ import org.freeswitch.esl.client.transport.event.EslEvent;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.json.JSONObject;
 import org.jitsi.util.OSUtils;
-import de.mxro.process.*;
+
 
 /**
  * Bundles various Jitsi components into one, standalone Openfire plugin.
  */
-public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventListener, PropertyEventListener, IEslEventListener, MUCEventListener, ProcessListener
+public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventListener, PropertyEventListener, IEslEventListener, MUCEventListener
 {
     private static final Logger Log = LoggerFactory.getLogger(OfMeetPlugin.class);
     private static final ScheduledExecutorService connExec = Executors.newSingleThreadScheduledExecutor();
@@ -115,6 +115,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     private OfMeetIQHandler ofmeetIQHandler;
     private WebAppContext publicWebApp;
     private ServletContextHandler jvbWsContext = null;
+    private ServletContextHandler streamWsContext = null;	
     private BookmarkInterceptor bookmarkInterceptor;
 
     private final OFMeetConfig config;
@@ -124,7 +125,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     private final MeetingPlanner meetingPlanner;
     private final LobbyMuc lobbyMuc;
     private final SecurityAuditManager securityAuditManager = SecurityAuditManager.getInstance();
-    private XProcess pxyThread = null;	
 
     public OfMeetPlugin()
     {
@@ -259,7 +259,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 					
 		if (config.getLiveStreamEnabled())
 		{
-			setupPxy(pluginDirectory);
+			setupFFMPEG(pluginDirectory);
 		}		
     }
 
@@ -318,8 +318,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         }
 
         if (connectTask != null) connectTask.cancel(true);
-        if (managerConnection != null) managerConnection.disconnect();
-        if (pxyThread != null) pxyThread.destory();		
+        if (managerConnection != null) managerConnection.disconnect();	
     }
 
     protected void loadPublicWebApp() throws Exception
@@ -332,13 +331,13 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
             WebSocketUpgradeFilter wsfilter = WebSocketUpgradeFilter.configureContext(jvbWsContext);
             wsfilter.getFactory().getPolicy().setIdleTimeout(60 * 60 * 1000);
             wsfilter.getFactory().getPolicy().setMaxTextMessageSize(64000000);
-            wsfilter.addMapping(new ServletPathSpec("/*"), new JvbSocketCreator());
+            wsfilter.addMapping(new ServletPathSpec("/*"), new JvbSocketCreator());					
 
         } catch (Exception e) {
             Log.error("loadPublicWebApp", e);
         }
 
-        HttpBindManager.getInstance().addJettyHandler(jvbWsContext);
+        HttpBindManager.getInstance().addJettyHandler(jvbWsContext);	
 
         publicWebApp = new WebAppContext(null, pluginDirectory.getPath() + "/classes/jitsi-meet",  new OFMeetConfig().getWebappContextPath());
         publicWebApp.setClassLoader(this.getClass().getClassLoader());
@@ -353,7 +352,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         Log.debug( "Initialized public web application", publicWebApp.toString() );
     }
 
-
+	
     public static class JvbSocketCreator implements WebSocketCreator
     {
         @Override public Object createWebSocket(ServletUpgradeRequest req, ServletUpgradeResponse resp)
@@ -386,7 +385,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
             socket.setProxyConnection(proxyConnection);
             return socket;
         }
-    }
+    }	
 
 
     public void unloadPublicWebApp() throws Exception
@@ -403,6 +402,12 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
                     HttpBindManager.getInstance().removeJettyHandler(jvbWsContext);
                     jvbWsContext.destroy();
                 }
+				
+                if (streamWsContext != null)
+                {
+                    HttpBindManager.getInstance().removeJettyHandler(streamWsContext);
+                    streamWsContext.destroy();
+                }				
             }
             finally
             {
@@ -615,13 +620,13 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
     //-------------------------------------------------------
     //
-    //      pxy live streaming
+    //      ffmpeg live streaming
     //
     //-------------------------------------------------------
 	
-	private void setupPxy(File pluginDirectory)
+	private void setupFFMPEG(File pluginDirectory)
 	{
-		final String path = pluginDirectory.getPath() + File.separator + "classes" + File.separator +  "pxy";
+		final String path = pluginDirectory.getPath() + File.separator + "classes" + File.separator +  "ffmpeg";
         final File folder = new File(path);			
 		
 		if (OSUtils.IS_LINUX64 || OSUtils.IS_WINDOWS64)
@@ -638,10 +643,10 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 							
 							String jarFileSuffix = null;
 
-							if (OSUtils.IS_LINUX64) 	jarFileSuffix = "linux64/pxy.zip?raw=true";
-							if (OSUtils.IS_WINDOWS64) 	jarFileSuffix = "win64/pxy.zip?raw=true";						
+							if (OSUtils.IS_LINUX64) 	jarFileSuffix = "ffmpeg-linux64.zip";
+							if (OSUtils.IS_WINDOWS64) 	jarFileSuffix = "ffmpeg-win64.zip";						
 
-							InputStream inputStream = new URL("https://github.com/deleolajide/binaries/blob/main/" + jarFileSuffix).openStream();
+							InputStream inputStream = new URL("https://github.com/deleolajide/binaries/releases/download/v0.0.1/" + jarFileSuffix).openStream();
 							ZipInputStream zipIn = new ZipInputStream(inputStream);
 							ZipEntry entry = zipIn.getNextEntry();
 
@@ -651,7 +656,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 								{
 									String filePath = path + File.separator + entry.getName();
 
-									Log.info("pxy writing file..." + filePath);
+									Log.info("ffmpeg writing file..." + filePath);
 
 									if (!entry.isDirectory())
 									{
@@ -672,8 +677,8 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 							}
 							zipIn.close();
 
-							Log.info("pxy binaries extracted ok");
-							startPxy(path);						
+							Log.info("ffmpeg binaries extracted ok");
+							startFFMPEG(path);						
 							
 						}						
 						catch (Exception e)
@@ -686,8 +691,8 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 				}.start();
 			}
 			else {
-				Log.warn("pxy folder already exist.");
-				startPxy(path);
+				Log.warn("ffmpeg folder already exist.");
+				startFFMPEG(path);
 			}						
 		}
 		else {
@@ -695,18 +700,24 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 		}		
 	}
 	
-	private void startPxy(String path)
-	{
-		String pxyName = null;
-		if (OSUtils.IS_LINUX64) 	pxyName = "main";
-		if (OSUtils.IS_WINDOWS64) 	pxyName = "main.exe";	
+	private void startFFMPEG(String path)
+	{	
+        streamWsContext = new ServletContextHandler(null, "/livestream-ws", ServletContextHandler.SESSIONS);		
+
+        try {			
+            WebSocketUpgradeFilter wsfilter2 = WebSocketUpgradeFilter.configureContext(streamWsContext);
+            wsfilter2.getFactory().getPolicy().setIdleTimeout(60 * 60 * 1000);
+            wsfilter2.getFactory().getPolicy().setMaxTextMessageSize(64000000);
+            wsfilter2.getFactory().getPolicy().setMaxBinaryMessageSize(64000000);			
+			
+            wsfilter2.addMapping(new ServletPathSpec("/*"), new StreamSocketCreator());						
+
+        } catch (Exception e) {
+            Log.error("loadPublicWebApp", e);
+        }
 		
-		final String port = config.getLiveStreamPort().get();
-		final String url = config.getLiveStreamUrl().get();			
-		final String pxyExec = path + File.separator + pxyName;	
-		final String cmdLine = pxyExec + " --port=" + port + " --url=" + url;
-		pxyThread = Spawn.startProcess(cmdLine, new File(path), this);
-		Log.info( "pxy rtmp streamer staring with "  + cmdLine);		
+        HttpBindManager.getInstance().addJettyHandler(streamWsContext);	
+		Log.info( "ffmpeg websocket proxy ready");
 	}
 	
     private void extractFile(ZipInputStream zipIn, String filePath) throws IOException
@@ -722,36 +733,23 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         bos.close();
     }	
 	
-    public void onOutputLine(final String line)
+    public static class StreamSocketCreator implements WebSocketCreator
     {
-        Log.info("onOutputLine " + line);
-    }
+        @Override public Object createWebSocket(ServletUpgradeRequest req, ServletUpgradeResponse resp)
+        {
+			String streamKey = null;
+			
+            for (String subprotocol : req.getSubProtocols())
+            {
+                Log.info("WSocketCreator found protocol " + subprotocol);
+                resp.setAcceptedSubProtocol(subprotocol);
+				streamKey = subprotocol;
+            }
 
-    public void onProcessQuit(int code)
-    {
-        Log.info("onProcessQuit " + code);
-        System.setProperty("ofmeet.pxy.started", "false");
+            return new LiveStreamSocket(streamKey);
+        }
     }
-
-    public void onOutputClosed() {
-        Log.error("onOutputClosed");
-    }
-
-    public void onErrorLine(final String line)
-    {
-        Log.info(line);
-		
-        if (line.contains("Server is running ")) 
-		{
-			System.setProperty("ofmeet.pxy.started", "true");
-			Log.info( "pxy rtmp streamer started");			
-		}
-    }
-
-    public void onError(final Throwable t)
-    {
-        Log.error("Thread error", t);
-    }	
+	
 
     //-------------------------------------------------------
     //

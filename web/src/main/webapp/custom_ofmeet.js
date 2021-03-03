@@ -271,9 +271,10 @@ var ofmeet = (function(of)
                         of.recognitionActive = false;
                         of.recognition.stop();
                     }
+					
+					if (of.recording) stopRecorder();					
                 }
 
-                if (of.recording) stopRecorder();
             });
 
             APP.conference._room.on(JitsiMeetJS.events.conference.USER_JOINED, function (id)
@@ -1937,7 +1938,7 @@ var ofmeet = (function(of)
 	
 	function connectLiveStream (url, streamKey)
 	{
-		const ws = new WebSocket(url, ['streamKey', streamKey]);
+		const ws = new WebSocket(url, [streamKey]);
 
 		ws.onopen = (event) => {
 		  console.log(`Connection opened: ${JSON.stringify(event)}`);
@@ -1962,9 +1963,19 @@ var ofmeet = (function(of)
 		
 		if (config.ofmeetLiveStream)
 		{
-			if (config.ofmeetStreamKey.trim() === '') {
-				config.ofmeetStreamKey = prompt(i18n('enterStreamKey'));
-				if (!config.ofmeetStreamKey || config.ofmeetStreamKey.trim() === '') config.ofmeetLiveStream = false;
+			if (!config.ofmeetStreamKey || config.ofmeetStreamKey.trim() === '') 
+			{
+				config.ofmeetStreamKey = localStorage.getItem("ofmeet.live.stream.key");
+				
+				if (!config.ofmeetStreamKey || config.ofmeetStreamKey.trim() === '') 
+				{				
+					config.ofmeetStreamKey = prompt(i18n('enterStreamKey'));
+
+					if (!config.ofmeetStreamKey || config.ofmeetStreamKey.trim() === '')
+						config.ofmeetLiveStream = false;
+					else
+						localStorage.setItem("ofmeet.live.stream.key", config.ofmeetStreamKey);							
+				}
 			}
 		}			
 		
@@ -1987,7 +1998,7 @@ var ofmeet = (function(of)
 			
 			if (config.ofmeetLiveStream && APP.conference._room.isModerator())
 			{
-				let websocket = connectLiveStream("ws://" + location.hostname + ":" + config.ofmeetStreamPort + "/api/v0/stream", config.ofmeetStreamKey);
+				let websocket = connectLiveStream("wss://" + location.host + "/livestream-ws/", config.ofmeetStreamKey);
 				videoRecorder[id] = new MediaRecorder(recorderStreams[id], {mimeType: 'video/webm;codecs=h264', bitsPerSecond: 256 * 8 * 1024});
 
 				videoRecorder[id].ondataavailable = function(e)

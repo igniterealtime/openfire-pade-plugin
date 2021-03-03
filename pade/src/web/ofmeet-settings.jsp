@@ -56,7 +56,7 @@
         final boolean p2pUseStunTurn = ParamUtils.getBooleanParameter( request, "p2pUseStunTurn" );   
         final boolean p2pDisableH264 = ParamUtils.getBooleanParameter( request, "p2pDisableH264" );   
         final boolean p2pPreferH264 = ParamUtils.getBooleanParameter( request, "p2pPreferH264" ); 
-        final String liveStreamPort = request.getParameter( "liveStreamPort" );  
+
         final String liveStreamUrl = request.getParameter( "liveStreamUrl" );  
         final String liveStreamKey = request.getParameter( "liveStreamKey" );            
         final boolean liveStreamEnabled = ParamUtils.getBooleanParameter( request, "liveStreamEnabled" ); 		
@@ -243,7 +243,6 @@
             ofmeetConfig.setP2pDisableH264( p2pDisableH264 );
             ofmeetConfig.setP2pUseStunTurn( p2pUseStunTurn );    
 
-            ofmeetConfig.liveStreamPort.set( liveStreamPort );
             ofmeetConfig.liveStreamUrl.set( liveStreamUrl );			
             ofmeetConfig.liveStreamKey.set( liveStreamKey );
             ofmeetConfig.liveStreamEnabled.set( Boolean.toString(liveStreamEnabled) );			
@@ -649,10 +648,6 @@
                     <fmt:message key="config.page.configuration.livestream.enabled" />
                 </td>				
             </tr>
-            <tr>
-                <td width="200"><label for="liveStreamPort"><fmt:message key="config.page.configuration.livestream.port"/>:</label></td>
-                <td><input type="text" size="60" maxlength="100" name="liveStreamPort" id="liveStreamPort" value="${ofmeetConfig.liveStreamPort.get()}"></td>
-            </tr>		
             <tr>
                 <td width="200"><label for="liveStreamUrl"><fmt:message key="config.page.configuration.livestream.url"/>:</label></td>
                 <td><input type="text" size="60" maxlength="100" name="liveStreamUrl" id="liveStreamUrl" value="${ofmeetConfig.liveStreamUrl.get()}"></td>

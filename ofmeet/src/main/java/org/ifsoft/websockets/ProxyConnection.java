@@ -224,9 +224,14 @@ public class ProxyConnection
 
         @OnWebSocketMessage public void onMessage(String msg)
         {
-            Log.debug("ProxySocket onMessage \n" + msg);
+            Log.debug("ProxySocket onMessage text \n" + msg);
             if (proxyConnection != null) proxyConnection.onMessage(msg);
         }
+		
+		@OnWebSocketMessage public void onMessage(byte[] data, int offset, int length)  
+		{
+            Log.debug("ProxySocket onMessage binary \n" + data);
+		}		
 
         public void deliver(String text)
         {

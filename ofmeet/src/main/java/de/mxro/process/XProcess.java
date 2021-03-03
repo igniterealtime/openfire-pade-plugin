@@ -15,6 +15,8 @@ public interface XProcess {
 	 * @param line
 	 */
 	public void sendLine(String line);
+	
+	public void sendByte(byte[] b, int off, int length);
 
 	/**
 	 * Try to destroy the process

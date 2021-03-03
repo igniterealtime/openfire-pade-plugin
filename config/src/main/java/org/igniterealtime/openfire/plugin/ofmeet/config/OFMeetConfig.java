@@ -791,8 +791,6 @@ public class OFMeetConfig
     public final StringProperty liveStreamEnabled = new StringProperty( "ofmeet.live.stream.enabled", "false" );
     public boolean getLiveStreamEnabled() { return liveStreamEnabled.get().equals("true"); }
 	
-    public final StringProperty liveStreamPort = new StringProperty( "ofmeet.live.stream.port", "8080" );
-    public StringProperty getLiveStreamPort() { return liveStreamPort; }
 
 	public final StringProperty liveStreamUrl = new StringProperty( "ofmeet.live.stream.url", "rtmp://a.rtmp.youtube.com/live2" );
     public StringProperty getLiveStreamUrl() { return liveStreamUrl; }

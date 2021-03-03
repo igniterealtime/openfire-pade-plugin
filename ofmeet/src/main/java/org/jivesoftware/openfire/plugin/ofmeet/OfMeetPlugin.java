@@ -626,7 +626,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 	
 	private void setupFFMPEG(File pluginDirectory)
 	{
-		final String path = pluginDirectory.getPath() + File.separator + "classes" + File.separator +  "ffmpeg";
+		final String path = pluginDirectory.getAbsolutePath() + File.separator + "classes" + File.separator +  "ffmpeg";
         final File folder = new File(path);			
 		
 		if (OSUtils.IS_LINUX64 || OSUtils.IS_WINDOWS64)
@@ -656,17 +656,19 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 								{
 									String filePath = path + File.separator + entry.getName();
 
-									Log.info("ffmpeg writing file..." + filePath);
-
 									if (!entry.isDirectory())
-									{
+									{	
 										File file = new File(filePath);
-										file.setReadable(true, true);
-										file.setWritable(true, true);
-										file.setExecutable(true, true);
-
+										
 										new File(file.getParent()).mkdirs();
 										extractFile(zipIn, filePath);
+										
+										file.setReadable(true, true);
+										file.setWritable(true, true);
+										file.setExecutable(true, true);		
+
+										Log.info("ffmpeg writing file..." + filePath);
+
 									}
 									zipIn.closeEntry();
 									entry = zipIn.getNextEntry();

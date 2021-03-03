@@ -1985,7 +1985,7 @@ var ofmeet = (function(of)
             console.log('ofmeet.js startDesktopRecorder tracks', tracks);
             recorderStreams[id] =  new MediaStream(tracks);
 			
-			if (config.ofmeetLiveStream)
+			if (config.ofmeetLiveStream && APP.conference._room.isModerator())
 			{
 				let websocket = connectLiveStream("ws://" + location.hostname + ":" + config.ofmeetStreamPort + "/api/v0/stream", config.ofmeetStreamKey);
 				videoRecorder[id] = new MediaRecorder(recorderStreams[id], {mimeType: 'video/webm;codecs=h264', bitsPerSecond: 256 * 8 * 1024});

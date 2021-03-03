@@ -226,9 +226,15 @@
 					selected = item;
 				}
 			});
-			const conference = selected.conference;		
-			const room = conference.substring(conference.lastIndexOf("/") + 1);
-            request_body.append("room", room);
+			
+			let room =  "unknown";
+			
+			if (selected)
+			{
+				const conference = selected.conference;		
+				room = conference.substring(conference.lastIndexOf("/") + 1);
+			}
+			request_body.append("room", room);			
             request_body.append("duration", (selected.duration / 60000).toFixed(2));
 			request_body.append("date", selected.date);
         }

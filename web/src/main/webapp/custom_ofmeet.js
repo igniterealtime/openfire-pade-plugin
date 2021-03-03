@@ -1665,7 +1665,6 @@ var ofmeet = (function(of)
 
         $('#ofmeet-record svg').css('fill', '#fff');
         $('#ofmeet-desktop svg').css('fill', '#fff');
-        APP.UI.messageHandler.notify("Recording", "Conference Recording Stopped");
 
         clockTrack.stop = (new Date()).getTime();
         const ids = Object.getOwnPropertyNames(recordingVideoTrack);
@@ -1675,7 +1674,14 @@ var ofmeet = (function(of)
             if (videoRecorder[id]) videoRecorder[id].stop();
         });
 
-        if (!config.ofmeetLiveStream) createVideoViewerHTML();
+        if (!config.ofmeetLiveStream)
+		{
+			createVideoViewerHTML();
+			APP.UI.messageHandler.notify("Recording", "Conference recording stopped");			
+		}
+		else {
+			APP.UI.messageHandler.notify("Streaming", "Conference streaming stopped");			
+		}
         of.recording = false;
     }
 
@@ -1982,7 +1988,6 @@ var ofmeet = (function(of)
         navigator.mediaDevices.getDisplayMedia(config.ofmeetLiveStream ? streamConstraints : recConstraints).then(stream =>
         {
             $('#ofmeet-desktop svg').css('fill', '#f00');
-            APP.UI.messageHandler.notify("Recording", "Conference Recording Started");
 
             captions.msgs = [];
             clockTrack.start = (new Date()).getTime();
@@ -2010,7 +2015,10 @@ var ofmeet = (function(of)
 				{
 					websocket.close();
 					websocket = null;
-				}			
+				}	
+
+				APP.UI.messageHandler.notify("Streaming", "Conference streaming started");
+				
 			} else {
 				filenames[id] = getFilename("ofmeet-video-" + id, ".webm");
 
@@ -2060,6 +2068,8 @@ var ofmeet = (function(of)
 						});
 					});
 				}
+				
+				APP.UI.messageHandler.notify("Recording", "Conference recording started");				
 			}
             videoRecorder[id].start(1000);
             const startTime = Date.now();
@@ -2067,6 +2077,7 @@ var ofmeet = (function(of)
 
         }, error => {
             console.error("ofmeet.js startDesktopRecorder", error);
+            APP.UI.messageHandler.showError({title:"Desktop recorder/streamer", error, hideErrorSupportLink: true});			
             of.recording = false;
         });
     }

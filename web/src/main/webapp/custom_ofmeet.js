@@ -1998,12 +1998,14 @@ var ofmeet = (function(of)
               ...mergeAudioStreams(stream, recordingAudioTrack[id].clone())
             ];
 
-            console.log('ofmeet.js startDesktopRecorder tracks', tracks);
             recorderStreams[id] =  new MediaStream(tracks);
 			
 			if (config.ofmeetLiveStream && APP.conference._room.isModerator())
 			{
-				let websocket = connectLiveStream("wss://" + location.host + "/livestream-ws/", config.ofmeetStreamKey);
+				const ws_url = config.websocket.split("/");
+				console.debug('ofmeet.js startDesktopRecorder - live streaming', tracks, ws_url);
+			
+				let websocket = connectLiveStream("wss://" + ws_url[2] + "/livestream-ws/", config.ofmeetStreamKey);
 				videoRecorder[id] = new MediaRecorder(recorderStreams[id], {mimeType: 'video/webm;codecs=h264', bitsPerSecond: 256 * 8 * 1024});
 
 				videoRecorder[id].ondataavailable = function(e)

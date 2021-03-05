@@ -5,6 +5,7 @@
                  java.io.*,
                  java.util.*,                 
                  net.sf.json.*,
+				 org.ifsoft.oju.openfire.MUCRoomProperties,
                  java.net.URLEncoder"                 
     errorPage="error.jsp"
 %>
@@ -99,7 +100,8 @@
                 <th nowrap><fmt:message key="ofmeet.summary.conference" /></th>
                 <th nowrap><fmt:message key="ofmeet.summary.participants" /></th>                    
                 <th nowrap><fmt:message key="ofmeet.summary.focus" /></th>     
-                <th nowrap><fmt:message key="ofmeet.summary.freeswitch" /></th>                   
+				<th nowrap><fmt:message key="ofmeet.summary.ffmpeg" /></th> 
+                <th nowrap><fmt:message key="ofmeet.summary.freeswitch" /></th>     				
             </tr>
         </thead>
         <tbody>  
@@ -144,7 +146,16 @@
         
         if (!roomName.equals("ofmeet") && !roomName.equals("ofgasi") && focus != null)
         {
-            String freeswitch = System.getProperty("ofmeet.freeswitch." + roomName, "false");
+            String freeswitch = System.getProperty("ofmeet.freeswitch." + roomName, "false");			
+			String json2 = MUCRoomProperties.get("conference", roomName, "ofmeet.livestream.metadata", null);
+			String livestream = "";
+			String liveStreamUrl = JiveGlobals.getProperty( "ofmeet.live.stream.url", "rtmp://a.rtmp.youtube.com/live2");				
+			
+			if (json2 != null)
+			{
+				JSONObject metadata = new JSONObject(json2);
+				livestream = liveStreamUrl + "/" + metadata.getString("key");
+			}			
         
             i++;            
 %>
@@ -153,9 +164,10 @@
                     <%= i %>
                 </td>
                 <td align="left" width="9%" valign="middle"><%= "<a href=\"/muc-room-occupants.jsp?roomJID=" + chatRoom.getJID().toBareJID() + "\">" + chatRoom.getName() + "</a>" %></td>
-                <td align="left" width="70%"><%= occupants %></td>   
+                <td align="left" width="50%"><%= occupants %></td>   
                 <td align="left" width="10%"><%= focus %></td>  
-                <td align="left" width="10%"><img src="<%= freeswitch.equals("true") ? "images/success-16x16.gif" : "images/error-16x16.gif" %>"/></th>                                  
+                <td align="left" width="25%"><%= livestream %></td>  								
+                <td align="left" width="5%"><img src="<%= freeswitch.equals("true") ? "images/success-16x16.gif" : "images/error-16x16.gif" %>"/></th>                                  
             </tr>
 <%
         }
@@ -182,7 +194,7 @@
     String jicofo = System.getProperty("ofmeet.jicofo.started", "false");
     String jigasi = System.getProperty("ofmeet.jigasi.started", "false");
     String freesw = System.getProperty("ofmeet.freeswitch.started", "false");    
-    String ffmpeg = System.getProperty("ofmeet.ffmpeg.started", "false");   	
+    String ffmpeg = System.getProperty("ofmeet.ffmpeg.installed", "false");   	
 %>    
     <tr>
         <td width="1%">1</td>    
@@ -219,7 +231,7 @@
     {
 %>    
     <tr>   
-        <td width="1%">4</td>        
+        <td width="1%">5</td>        
         <td align="left" width="29%"><fmt:message key="ofmeet.summary.ffmpeg" /></td>   
         <td align="left" width="70%"><img src="images/success-16x16.gif"/></td>          
     </tr>

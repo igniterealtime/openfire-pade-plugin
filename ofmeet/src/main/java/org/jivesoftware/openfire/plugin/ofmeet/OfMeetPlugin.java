@@ -91,12 +91,14 @@ import org.freeswitch.esl.client.transport.event.EslEvent;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.json.JSONObject;
 import org.jitsi.util.OSUtils;
+import de.mxro.process.*;
+import javax.xml.bind.DatatypeConverter;
 
 
 /**
  * Bundles various Jitsi components into one, standalone Openfire plugin.
  */
-public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventListener, PropertyEventListener, IEslEventListener, MUCEventListener
+public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventListener, PropertyEventListener, IEslEventListener, MUCEventListener, ProcessListener
 {
     private static final Logger Log = LoggerFactory.getLogger(OfMeetPlugin.class);
     private static final ScheduledExecutorService connExec = Executors.newSingleThreadScheduledExecutor();
@@ -716,7 +718,21 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
         } catch (Exception e) {
             Log.error("loadPublicWebApp", e);
-        }
+        }			
+
+        try {
+			String ffmpegName = null;
+			if (OSUtils.IS_LINUX64) 	ffmpegName = "ffmpeg";
+			if (OSUtils.IS_WINDOWS64) 	ffmpegName = "ffmpeg.exe";									
+					
+			final String ffmpeg = path + File.separator + ffmpegName;	
+			final String cmdLine = ffmpeg + " -h";
+			Spawn.startProcess(cmdLine, new File(path), this);
+			Log.info( "ffmpeg testing with "  + cmdLine);	
+
+        } catch ( Exception e ) {
+            Log.error( "An error occurred while testing ffmpeg", e );
+        }		
 		
         HttpBindManager.getInstance().addJettyHandler(streamWsContext);	
 		Log.info( "ffmpeg websocket proxy ready");
@@ -751,8 +767,36 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
             return new LiveStreamSocket(streamKey);
         }
     }
-	
 
+    public void onOutputLine(final String line)
+    {
+        Log.info("onOutputLine " + line);
+    }
+
+    public void onProcessQuit(int code)
+    {
+        Log.info("onProcessQuit " + code);
+    }
+
+    public void onOutputClosed() {
+        Log.error("onOutputClosed");
+    }
+
+    public void onErrorLine(final String line)
+    {
+        Log.info(line);
+		
+        if (line.contains("ffmpeg version")) 
+		{
+			System.setProperty("ofmeet.ffmpeg.installed", "true");
+			Log.info( "ffmpeg rtmp streamer installed");			
+		}
+    }	
+
+    public void onError(Throwable error)
+    {
+        Log.error("onError", error);
+    }
     //-------------------------------------------------------
     //
     //      clustering

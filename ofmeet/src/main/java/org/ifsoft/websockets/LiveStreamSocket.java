@@ -28,21 +28,26 @@ import org.jivesoftware.util.ParamUtils;
 
 import org.jivesoftware.util.JiveGlobals;
 import org.jivesoftware.openfire.XMPPServer;
+import org.jivesoftware.openfire.security.SecurityAuditManager;
 import de.mxro.process.*;
 import org.jitsi.util.OSUtils;
+import net.sf.json.JSONObject;
 import org.jivesoftware.openfire.plugin.ofmeet.OfMeetPlugin;
+import org.ifsoft.oju.openfire.MUCRoomProperties;
 
 
 @WebSocket public class LiveStreamSocket implements ProcessListener
 {
     private static Logger Log = LoggerFactory.getLogger( "LiveStreamSocket" );
     private Session wsSession;
-	private String liveStreamKey;
-    private XProcess ffmpegThread = null;		
+	private JSONObject metadata = null;
+	private String streamKey = null;	
+    private XProcess ffmpegThread = null;	
+	private final SecurityAuditManager securityAuditManager = SecurityAuditManager.getInstance();
 
-	public LiveStreamSocket(String liveStreamKey)
+	public LiveStreamSocket(String streamKey)
 	{
-		this.liveStreamKey = liveStreamKey;
+		this.streamKey = streamKey;		
 	}
 		
     public boolean isOpen() {
@@ -52,31 +57,14 @@ import org.jivesoftware.openfire.plugin.ofmeet.OfMeetPlugin;
     @OnWebSocketConnect public void onConnect(Session wsSession)
     {
         this.wsSession = wsSession;
-        Log.debug("onConnect");
-		
-        final String liveStreamUrl = JiveGlobals.getProperty( "ofmeet.live.stream.url", "rtmp://a.rtmp.youtube.com/live2");		
-		final String path = OfMeetPlugin.webRoot + File.separator +  "ffmpeg";		
-
-        try {
-			String ffmpegName = null;
-			if (OSUtils.IS_LINUX64) 	ffmpegName = "ffmpeg";
-			if (OSUtils.IS_WINDOWS64) 	ffmpegName = "ffmpeg.exe";									
-					
-			final String ffmpeg = path + File.separator + ffmpegName;	
-			final String cmdLine = ffmpeg + " -i - -vcodec copy -f flv " + liveStreamUrl + "/" + liveStreamKey;
-			ffmpegThread = Spawn.startProcess(cmdLine, new File(path), this);
-			Log.info( "ffmpeg staring with "  + cmdLine);	
-
-        } catch ( Exception e ) {
-            Log.error( "An error occurred while starting ffmpeg", e );
-			disconnect();
-        }			
+        Log.debug("onConnect");			
     }
 
     @OnWebSocketClose public void onClose(int statusCode, String reason)
     {
         try {
 			if (ffmpegThread != null) ffmpegThread.destory();	
+			if (metadata != null) MUCRoomProperties.remove("conference", metadata.getString("room"), "ofmeet.livestream.metadata");			
 
         } catch ( Exception e ) {
             Log.error( "An error occurred while attempting to remove the socket", e );
@@ -93,11 +81,35 @@ import org.jivesoftware.openfire.plugin.ofmeet.OfMeetPlugin;
     @OnWebSocketMessage public void onTextMethod(String data)
     {
 		Log.debug("onTextMethod \n" + data);
+				
+        final String liveStreamUrl = JiveGlobals.getProperty( "ofmeet.live.stream.url", "rtmp://a.rtmp.youtube.com/live2");		
+		final String path = OfMeetPlugin.webRoot + File.separator +  "ffmpeg";		
+
+        try {
+			metadata = new JSONObject(data);
+			
+			String ffmpegName = null;
+			if (OSUtils.IS_LINUX64) 	ffmpegName = "ffmpeg";
+			if (OSUtils.IS_WINDOWS64) 	ffmpegName = "ffmpeg.exe";									
+					
+			final String ffmpeg = path + File.separator + ffmpegName;	
+			final String url = liveStreamUrl + "/" + metadata.getString("key");
+			final String cmdLine = ffmpeg + " -i - -vcodec copy -f flv " + url;
+			ffmpegThread = Spawn.startProcess(cmdLine, new File(path), this);
+            
+			securityAuditManager.logEvent("pade", "meeting - " + metadata.getString("room") + " live stream by " + metadata.getString("user"), url);
+			MUCRoomProperties.put("conference", metadata.getString("room"), "ofmeet.livestream.metadata", metadata.toString());
+		
+			Log.info( "ffmpeg staring with "  + cmdLine);	
+
+        } catch ( Exception e ) {
+            Log.error( "An error occurred while starting ffmpeg", e );
+			disconnect();
+        }		
     }
 
     @OnWebSocketMessage public void onBinaryMethod(byte data[], int offset, int length)
     {
-		//Log.debug("onBinaryMethod \n" + data);
 		ffmpegThread.sendByte(data, offset, length);
     }
 
@@ -139,11 +151,5 @@ import org.jivesoftware.openfire.plugin.ofmeet.OfMeetPlugin;
     public void onErrorLine(final String line)
     {
         Log.info(line);
-		
-        if (line.contains("Server is running ")) 
-		{
-			System.setProperty("ofmeet.ffmpeg.started", "true");
-			Log.info( "ffmpeg rtmp streamer started");			
-		}
     }	
 }

@@ -37,24 +37,46 @@ public class MUCRoomProperties implements Map<String, String>, Serializable {
 
     private static Cache muc_properties = CacheFactory.createLocalCache("MUC Room Properties");
 
-    public static String get(MUCRoom room, String propName, String defaultValue)
+    public static String get(String service, String roomName, String propName, String defaultValue)
     {
-        Map<String, String> props = (Map<String, String>) muc_properties.get(room.getJID().toString());
-        if (props == null) return defaultValue;
-        return props.get(propName);
+		MUCRoom room = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(service).getChatRoom(roomName);
+
+		if (room != null)
+		{		
+			Map<String, String> props = (Map<String, String>) muc_properties.get(room.getJID().toString());
+			if (props == null) return defaultValue;
+			return props.get(propName);
+		}
+		return defaultValue;
     }
 
-    public static void put(MUCRoom room, String propName, String propValue)
+    public static void put(String service, String roomName, String propName, String propValue)
     {
-        Map<String, String> props = (Map<String, String>) muc_properties.get(room.getJID().toString());
+		MUCRoom room = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(service).getChatRoom(roomName);
 
-        if (props == null)
-        {
-            props = new MUCRoomProperties(room.getID());
-            muc_properties.put(room.getJID().toString(), props);
-        }
-        props.put(propName, propValue);
+		if (room != null)
+		{
+			Map<String, String> props = (Map<String, String>) muc_properties.get(room.getJID().toString());
+
+			if (props == null)
+			{
+				props = new MUCRoomProperties(room.getID());
+				muc_properties.put(room.getJID().toString(), props);
+			}
+			props.put(propName, propValue);
+		}
     }
+	
+    public static void remove(String service, String roomName, String propName)
+    {
+		MUCRoom room = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(service).getChatRoom(roomName);
+
+		if (room != null)
+		{		
+			Map<String, String> props = (Map<String, String>) muc_properties.get(room.getJID().toString());
+			if (props != null) props.remove(propName);
+		}
+    }	
 
     private Long roomID;
     private Map<String, String> properties;

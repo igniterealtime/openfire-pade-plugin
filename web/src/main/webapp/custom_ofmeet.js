@@ -1944,10 +1944,12 @@ var ofmeet = (function(of)
 	
 	function connectLiveStream (url, streamKey)
 	{
+		const metadata = {user: APP.conference.getLocalDisplayName(), room: APP.conference.roomName, key: streamKey};		
 		const ws = new WebSocket(url, [streamKey]);
 
 		ws.onopen = (event) => {
 		  console.log(`Connection opened: ${JSON.stringify(event)}`);
+		  ws.send(JSON.stringify(metadata));		  
 		};
 
 		ws.onclose = (event) => {
@@ -2002,7 +2004,7 @@ var ofmeet = (function(of)
 			
 			if (config.ofmeetLiveStream && APP.conference._room.isModerator())
 			{
-				const ws_url = config.websocket.split("/");
+				const ws_url = config.bosh.split("/");
 				console.debug('ofmeet.js startDesktopRecorder - live streaming', tracks, ws_url);
 			
 				let websocket = connectLiveStream("wss://" + ws_url[2] + "/livestream-ws/", config.ofmeetStreamKey);

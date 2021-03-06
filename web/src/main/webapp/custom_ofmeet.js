@@ -324,8 +324,8 @@ var ofmeet = (function(of)
 
                 if (interfaceConfig.OFMEET_RECORD_CONFERENCE)
                 {
-                    if (track.getType() == "audio") recordingAudioTrack[id].getAudioTracks()[0].enabled = !track.isMuted();
-                    if (track.getType() == "video") recordingVideoTrack[id].getVideoTracks()[0].enabled = !track.isMuted();
+                    if (track.getType() == "audio" && recordingAudioTrack[id]) recordingAudioTrack[id].getAudioTracks()[0].enabled = !track.isMuted();
+                    if (track.getType() == "video" && recordingVideoTrack[id]) recordingVideoTrack[id].getVideoTracks()[0].enabled = !track.isMuted();
 
                     const recordingStream = recorderStreams[id];
 

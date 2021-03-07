@@ -2150,6 +2150,12 @@ var ofmeet = (function(of)
         }
     }
 
+    function getAllParticipants()
+    {
+        const state = APP.store.getState();
+        return (state["features/base/participants"] || []);
+    }
+
     function handlePresence(presence)
     {
         //console.debug("handlePresence", presence);
@@ -2160,14 +2166,12 @@ var ofmeet = (function(of)
 
         if (raisedHand)
         {
-            const ofHandRaised = raisedHand.innerHTML == "true";
-            if (participants[id]) participants[id].ofHandRaised = ofHandRaised;
-            handsRaised = handsRaised + (ofHandRaised ? +1 : ( handsRaised > 0 ? -1 : 0));
-            const handsTotal = 1 + APP.conference.listMembers().length;
-            const handsPercentage = Math.round(100*handsRaised/handsTotal);
-            const label = handsRaised > 0 ? i18n('handsRaised.handsRaised', {raised: handsRaised, total: handsTotal, percentage: handsPercentage}) : "";
+            handsRaised = getAllParticipants().filter(p => p.raisedHand).length;            
+            const handsTotal = APP.conference.membersCount;
+            const handsPercentage = Math.round(100 * handsRaised / handsTotal);
+            const label = handsRaised > 0 ? i18n('handsRaised.handsRaised', { raised: handsRaised, total: handsTotal, percentage: handsPercentage }) : "";
             if (captions.ele) captions.ele.innerHTML = label;
-            captions.msgs.push({text: label, stamp: (new Date()).getTime()});
+            captions.msgs.push({ text: label, stamp: (new Date()).getTime() });
         }
 
         if (email)

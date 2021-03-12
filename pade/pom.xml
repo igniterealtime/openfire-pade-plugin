@@ -33,7 +33,7 @@
                     <configuration>
                         <url>https://download.jitsi.org/jitsi-meet/src/jitsi-meet-1.0.4641.tar.bz2</url>
                         <unpack>true</unpack>
-                        <outputDirectory>classes</outputDirectory>
+                        <outputDirectory>${project.build.outputDirectory}</outputDirectory>
                     </configuration>
                     </execution>
                     <execution>
@@ -45,7 +45,7 @@
                     <configuration>
                         <url>https://github.com/igniterealtime/pade/raw/master/docs-1.6.13.4.zip</url>
                         <unpack>true</unpack>
-                        <outputDirectory>classes</outputDirectory>
+                        <outputDirectory>${project.build.outputDirectory}</outputDirectory>
                     </configuration>
                     </execution>                    
                 </executions>
@@ -63,10 +63,10 @@
 
                     <configuration>
                     <overwrite>true</overwrite>                 
-                    <outputDirectory>classes/jitsi-meet</outputDirectory>
+                    <outputDirectory>${project.build.outputDirectory}/jitsi-meet</outputDirectory>
                     <resources>
                         <resource>
-                        <directory>../web/src/main/webapp</directory>
+                        <directory>${project.basedir}/../web/src/main/webapp</directory>
                         </resource>
                     </resources>
                     </configuration>
@@ -79,9 +79,9 @@
                     </goals>
                     <configuration>
                     <overwrite>true</overwrite>                 
-                    <outputDirectory>classes/docs</outputDirectory>
+                    <outputDirectory>${project.build.outputDirectory}/docs</outputDirectory>
                     <resources>                         
-                        <resource><directory>src/public</directory></resource>                                                
+                        <resource><directory>${project.basedir}/src/public</directory></resource>                                                
                     </resources>
                     </configuration>
                 </execution>                

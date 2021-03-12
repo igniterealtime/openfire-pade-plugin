@@ -109,7 +109,7 @@ public class LobbyMuc implements ServerIdentitiesProvider, ServerFeaturesProvide
         jsonMsg.put("event", NOTIFY_LOBBY_ENABLED);
         jsonMsg.put("value", value);
         broadcast_json_msg(to, from, jsonMsg);
-        if (value) notify_configuration_change(from, to.toBareJID());
+        notify_configuration_change(from, to.toBareJID());
    }
 
     private void notify_lobby_access(JID room, JID from, String to, boolean granted)

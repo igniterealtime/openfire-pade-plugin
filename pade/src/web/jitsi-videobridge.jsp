@@ -281,9 +281,11 @@
         minPort = Integer.toString( RuntimeConfiguration.getMinPort() );
         maxPort = Integer.toString( RuntimeConfiguration.getMaxPort() );
         plainPort = Integer.toString( RuntimeConfiguration.getPlainPort() );     
-        publicPort = Integer.toString( RuntimeConfiguration.getPublicPort() );          
-        tcpPort = RuntimeConfiguration.getTcpPort() == null ? null : RuntimeConfiguration.getTcpPort().toString();
-        mappedTcpPort = RuntimeConfiguration.getTcpMappedPort() == null ? null : RuntimeConfiguration.getTcpMappedPort().toString();
+        publicPort = Integer.toString( RuntimeConfiguration.getPublicPort() ); 
+
+        tcpPort = JiveGlobals.getProperty( PluginImpl.TCP_PORT_PROPERTY_NAME, RuntimeConfiguration.getTcpPort().toString() );
+		mappedTcpPort = JiveGlobals.getProperty( PluginImpl.TCP_MAPPED_PORT_PROPERTY_NAME, RuntimeConfiguration.getTcpMappedPort().toString() );
+		
         tcpEnabled = RuntimeConfiguration.isTcpEnabled();
         sslTcpEnabled = RuntimeConfiguration.isSslTcpEnabled();
         wsChannelEnabled = JiveGlobals.getBooleanProperty( "ofmeet.bridge.ws.channel", OSUtils.IS_WINDOWS);

@@ -181,6 +181,10 @@
         final boolean simulcast = ParamUtils.getBooleanParameter( request, "simulcast" );
         final boolean adaptivesimulcast = ParamUtils.getBooleanParameter( request, "adaptivesimulcast" );
         final boolean enableStereo = ParamUtils.getBooleanParameter( request, "enableStereo" );
+		
+		if (jvmJvb.isEmpty()) errors.put( "jvmJvb", "Cannot be empty" );
+		if (jvmJicofo.isEmpty()) errors.put( "jvmJicofo", "Cannot be empty" );
+		if (jvmJigasi.isEmpty()) errors.put( "jvmJigasi", "Cannot be empty" );
 
         if ( errors.isEmpty() )
         {
@@ -306,7 +310,7 @@
                     <label class="jive-label" for="jvmJvb"><fmt:message key="config.page.configuration.ofmeet.jvm.jvb"/></label>
                 </td>
                 <td>
-                    <input type="text" size="80" maxlength="255" name="jvmJvb" id="jvmJvb" value="${admin:getProperty( "org.jitsi.videobridge.ofmeet.jvb.jvm.customOptions", "")}" placeholder="-Xmx3072m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp">
+                    <input type="text" size="80" maxlength="255" name="jvmJvb" id="jvmJvb" value="${admin:getProperty( "org.jitsi.videobridge.ofmeet.jvb.jvm.customOptions", "-Xmx1024m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp")}" placeholder="-Xmx1024m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp">
                 </td>
             </tr>  
             <tr>
@@ -314,7 +318,7 @@
                     <label class="jive-label" for="jvmJicofo"><fmt:message key="config.page.configuration.ofmeet.jvm.jicofo"/></label>
                 </td>
                 <td>
-                    <input type="text" size="80" maxlength="255" name="jvmJicofo" id="jvmJicofo" value="${admin:getProperty( "org.jitsi.videobridge.ofmeet.focus.jvm.customOptions", "")}" placeholder="-Xmx3072m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp">
+                    <input type="text" size="80" maxlength="255" name="jvmJicofo" id="jvmJicofo" value="${admin:getProperty( "org.jitsi.videobridge.ofmeet.focus.jvm.customOptions", "-Xmx1024m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp")}" placeholder="-Xmx1024m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp">
                 </td>
             </tr>     
             <tr>
@@ -322,7 +326,7 @@
                     <label class="jive-label" for="jvmJigasi"><fmt:message key="config.page.configuration.ofmeet.jvm.jigasi"/></label>
                 </td>
                 <td>
-                    <input type="text" size="80" maxlength="255" name="jvmJigasi" id="jvmJigasi" value="${admin:getProperty( "org.jitsi.videobridge.ofmeet.jigasi.jvm.customOptions", "")}" placeholder="-Xmx3072m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp">
+                    <input type="text" size="80" maxlength="255" name="jvmJigasi" id="jvmJigasi" value="${admin:getProperty( "org.jitsi.videobridge.ofmeet.jigasi.jvm.customOptions", "-Xmx1024m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp")}" placeholder="-Xmx1024m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp">
                 </td>
             </tr>               
         </table>        

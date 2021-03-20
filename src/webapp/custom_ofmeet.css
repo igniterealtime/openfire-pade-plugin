@@ -1,0 +1,267 @@
+/*
+	Fix issue #195 - Room "In Progress..." does not show up on Android 
+*/
+
+@media only screen and (max-width:500px){
+    .welcome .welcome-tabs{
+        display:unset
+    }
+}
+/*
+ * 20200427/G.Jaekel@DNB.DE   make raisehand more noticeable
+ * 20200512/G.Jaekel@DNB.DE   make it even a bit more noticeable, humans seems more sensible to motion ...
+ */
+
+@keyframes raisehand {
+    from {
+        background-color: #165ecc;
+    }
+
+    to {
+        background-color: red;
+        transform: scale(1.1);
+    }
+}
+
+.raisehandindicator {
+    animation-name: raisehand;
+    animation-duration: 2s;
+    animation-direction: alternate;
+    animation-delay: 5s;
+    animation-iteration-count: infinite;
+}
+
+.speaker-room-button {
+    border: 0;
+    font-size: 14px;
+    background: #0074e0;
+    border-radius: 3px;
+    color: #fff;
+    cursor: pointer;
+    padding: 16px 20px;
+}
+
+.speaker-room-button svg {
+    fill: #fff;
+}
+
+
+/*
+ * 20200522/G.Jaekel@DNB.DE     On small browser windows, the left toolbar renders to wide. Make it wrapping around.
+ * 20210109/G.Jaekel@DNB.DE     The same issue rises for the right toolbar, meanwhile
+ */
+
+.new-toolbox {
+    bottom: calc((40px * 3) * -1);
+    /* was: calc((40px * 2) * -1); */
+}
+
+.button-group-left {
+    flex-wrap: wrap;
+}
+
+.button-group-right {
+    flex-wrap: wrap;
+}
+
+
+/*
+ * 20210102/G.Jaekel@DNB.DE     make "green" (good) connection state indicator hidden after a while to keep display clean
+ *
+ * to restart an animation on hover, use two exact clones with a different name,  see https://css-tricks.com/restart-css-animation/
+ */
+
+@keyframes status-high-1 {
+    from {}
+
+    to {
+        opacity: 0%;
+        filter: opacity(0%);
+    }
+}
+
+@keyframes status-high-2 {
+    from {}
+
+    to {
+        opacity: 0%;
+        filter: opacity(0%);
+    }
+}
+
+.connection-indicator.status-high {
+    animation-name: status-high-1;
+    animation-delay: 20s;
+    animation-duration: 2s;
+    animation-fill-mode: forwards;
+}
+
+.connection-indicator.status-high:hover {
+    animation-name: status-high-2;
+    animation-delay: 20s;
+    animation-duration: 2s;
+    animation-fill-mode: forwards;
+}
+
+
+/*
+ * 20210104/gj  Allow the Conferences Display at the Welcome Page to show more entires
+ */
+
+.welcome .tab-container .tab-content {
+    height: unset;
+    max-height: 500pt;
+}
+
+.new-toolbox .toolbox-content .toolbox-button .toolbox-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.ofmeet-tooltip {
+    position: relative;
+}
+
+.ofmeet-tooltip::after {
+    background-color: rgb(13, 20, 36);
+    border-radius: 3px;
+    color: rgb(184, 199, 224);
+    content: attr(aria-label);
+    display: block;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 15.6px;
+    margin: 0;
+    max-width: 240px;
+    overflow-wrap: break-word;
+    opacity: 0;
+    padding: 2px 6px;
+    position: absolute;
+    pointer-events: none;
+    top: 0;
+    left: 0;
+    transform: translate(calc(-50% + 20px), calc(-100% - 8px));
+    transition-delay: 0.5s;
+    transition-duration: 0.3s;
+    transition-property: opacity;
+    transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1), linear;
+    white-space: nowrap;
+    user-select: none;
+    z-index: 800;
+}
+
+.ofmeet-tooltip:hover {
+    cursor: pointer;
+}
+
+.ofmeet-tooltip:hover::after {
+    opacity: 1;
+    visibility: visible;
+}
+
+.ofmeet-toolbox-small-icon {
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, .2);
+    border-radius: 50%;
+    bottom: 0;
+    box-shadow: 0 1px 4px rgb(0 0 0 / 25%);
+    cursor: pointer;
+    height: 16px;
+    position: absolute;
+    text-align: center;
+    right: -2px;
+    width: 16px;
+}
+
+@media only screen and (max-width: 500px) {
+    .ofmeet-toolbox-small-icon {
+        display: none;
+    }
+}
+
+.ofmeet-toolbox-small-icon:hover {
+    bottom: -1px;
+    height: 20px;
+    right: -4px;
+    width: 20px;
+}
+
+.ofmeet-toolbox-small-icon>svg {
+    fill: #5e6d7a;
+    margin-top: 5px;
+}
+
+.ofmeet-toolbox-small-icon:hover>svg {
+    height: 11px;
+    width: 11px;
+    margin-top: 6px;
+}
+
+.ofmeet-toolbox-menu-container {
+    position: relative
+}
+
+.ofmeet-toolbox-menu {
+    background: rgb(40, 52, 71);
+    border-radius: 3px;
+    box-sizing: content-box;
+    color: rgb(184, 199, 224);
+    max-height: 448px;
+    max-width: 448px;
+    padding: 16px 24px;
+    position: absolute;
+    bottom: 48px;
+    z-index: 300;
+    box-shadow: rgb(13 20 36 / 85%) 0px 4px 8px -2px, rgb(13 20 36 / 81%) 0px 0px 1px;
+}
+
+.button-group-left .ofmeet-toolbox-menu {
+    left: 0;
+}
+
+.button-group-right .ofmeet-toolbox-menu {
+    right: 0;
+}
+
+.ofmeet-toolbox-tile-menu ul {
+    display: flex;
+    flex-wrap: wrap;
+    width: 230px;
+}
+
+.ofmeet-toolbox-menu-item {
+    align-items: center;
+    color: #b8c7e0;
+    cursor: pointer;
+    display: block;
+    padding: 5px;
+    text-align: center;
+}
+
+.ofmeet-toolbox-list-menu .ofmeet-toolbox-menu-item {
+    display: flex;
+    font-size: 14px;
+    height: 22px;
+    text-align: left;
+}
+
+.ofmeet-toolbox-tile-menu .ofmeet-toolbox-menu-item {
+    height: 36px;
+    width: 36px;
+}
+
+.ofmeet-toolbox-menu-item:hover {
+    background-color: #313d52;
+}
+
+.ofmeet-toolbox-menu-item svg {
+    fill: #b8c7e0 !important;
+}
+
+.ofmeet-toolbox-menu-item .jitsi-icon {
+    font-size: 24px;
+    margin: auto;
+    height: 24px;
+    width: 24px;
+    text-align: center;
+}

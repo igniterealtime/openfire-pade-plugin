@@ -3,7 +3,7 @@ Pàdé for Openfire
 This project provides a web-based unified communication solution for Openfire.
 - peer to peer based chat, 
 - persistent groupchat, 
-- audio and video conferencing,
+- audio, video conferencing and live streaming,
 - telephone access to conferences, 
 
 It includes third-party products, notably:
@@ -12,6 +12,7 @@ It includes third-party products, notably:
 - [Jitsi Meet](https://github.com/jitsi/jitsi-meet) web client.
 - [Jitsi SIP Gateway](https://github.com/jitsi/jigasi) project.
 - [Pàdé](https://github.com/igniterealtime/pade) web desktop client based on the [ConverseJS](https://github.com/conversejs/converse.js) project.
+- [ffmpeg](https://www.ffmpeg.org/) live streaming to rtmp server like you-tube.
 
 Pade works with Firefox. It however works best with Chromium based apps like Chrome, Edge, Electron and Opera. 
 

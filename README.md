@@ -6,6 +6,9 @@ Pàdé for Openfire
 
 [![Build Status](https://github.com/igniterealtime/openfire-pade-plugin/workflows/Java%20CI/badge.svg)](https://github.com/igniterealtime/openfire-pade-plugin/actions)
 
+<img src=https://user-images.githubusercontent.com/110731/111887976-8a371280-89d0-11eb-97d7-e566fbb2c8b3.png />
+<img src=https://user-images.githubusercontent.com/110731/101295751-7ac3fd00-3817-11eb-839d-b9727c50da6a.png />
+
 ## Reporting Issues
 
 Issues may be reported to the [forums](https://discourse.igniterealtime.org) or via this repo's [Github Issues](https://github.com/igniterealtime/openfire-pade-plugin).

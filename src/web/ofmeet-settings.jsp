@@ -87,7 +87,9 @@
         final boolean useIPv6 = ParamUtils.getBooleanParameter( request, "useipv6" );
         final boolean useNicks = ParamUtils.getBooleanParameter( request, "usenicks" );
 
-        final String maxFullResolutionParticipants = request.getParameter( "maxFullResolutionParticipants" );        
+        final String maxFullResolutionParticipants = request.getParameter( "maxFullResolutionParticipants" );  
+		final String desktopSharingFrameRateMin = request.getParameter( "desktopSharingFrameRateMin" ); 
+		final String desktopSharingFrameRateMax = request.getParameter( "desktopSharingFrameRateMax" ); 		
         final String minHeightForQualityLow = request.getParameter( "minHeightForQualityLow" );  
         final String minHeightForQualityStd = request.getParameter( "minHeightForQualityStd" );         
         final String minHeightForQualityHigh = request.getParameter( "minHeightForQualityHigh" );           
@@ -214,7 +216,9 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.focus.jvm.customOptions", jvmJicofo ); 
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.jigasi.jvm.customOptions", jvmJigasi ); 
 
-            JiveGlobals.setProperty( "ofmeet.jicofo.force.vp9", Boolean.toString( forceVp9 ) );                          
+            JiveGlobals.setProperty( "ofmeet.jicofo.force.vp9", Boolean.toString( forceVp9 ) );  
+            JiveGlobals.setProperty( "ofmeet.desktop.sharing.framerate.min", desktopSharingFrameRateMin);			
+            JiveGlobals.setProperty( "ofmeet.desktop.sharing.framerate.max", desktopSharingFrameRateMax);
             JiveGlobals.setProperty( "ofmeet.max.full.resolution.participants", maxFullResolutionParticipants );            
             JiveGlobals.setProperty( "ofmeet.min.height.for.quality.level.low", minHeightForQualityLow );  
             JiveGlobals.setProperty( "ofmeet.min.height.for.quality.level.std", minHeightForQualityStd );  
@@ -557,6 +561,18 @@
                 <td><input type="text" size="10" maxlength="5" name="startaudiomuted" value="${ofmeetConfig.startAudioMuted}"></td>
             </tr>
         </table>
+		
+        <p style="margin-top: 2em"><fmt:message key="config.page.configuration.ofmeet.desktop.sharing.framerate.desc"/></p>
+        <table cellpadding="3" cellspacing="0" border="0" width="100%">
+            <tr>
+                <td align="left" width="300"><fmt:message key="config.page.configuration.ofmeet.desktop.sharing.framerate.min"/>:</td>
+                <td><input type="text" size="10" maxlength="5" name="desktopSharingFrameRateMin" value="${admin:getProperty( "ofmeet.desktop.sharing.framerate.min", "5")}"></td>
+            </tr>
+            <tr>
+                <td align="left" width="300"><fmt:message key="config.page.configuration.ofmeet.desktop.sharing.framerate.max"/>:</td>
+                <td><input type="text" size="10" maxlength="5" name="desktopSharingFrameRateMax" value="${admin:getProperty( "ofmeet.desktop.sharing.framerate.max", "25")}"></td>
+            </tr>			
+        </table>		
     </admin:contentBox>
 
     <fmt:message key="config.page.configuration.security.title" var="boxtitlesecurity"/>

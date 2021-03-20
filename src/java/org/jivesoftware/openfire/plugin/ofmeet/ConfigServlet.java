@@ -84,6 +84,8 @@ public class ConfigServlet extends HttpServlet
             String recordingKey = null;
 
             int minHDHeight = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.min.hdheight", 540 );
+            int desktopSharingFrameRateMin = JiveGlobals.getIntProperty( "ofmeet.desktop.sharing.framerate.min", 5);			
+            int desktopSharingFrameRateMax = JiveGlobals.getIntProperty( "ofmeet.desktop.sharing.framerate.max", 25);					
             String defaultLanguage = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.default.language", null );
             boolean useNicks = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.usenicks", false );
             boolean websockets = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.websockets", true );
@@ -256,7 +258,11 @@ public class ConfigServlet extends HttpServlet
                 config.put( "startVideoMuted", ofMeetConfig.getStartVideoMuted() );
             }
             
-                        
+            final JSONObject desktopSharingFrameRate = new JSONObject();
+            desktopSharingFrameRate.put( "min", desktopSharingFrameRateMin );
+            desktopSharingFrameRate.put( "max", desktopSharingFrameRateMax );			
+            config.put( "desktopSharingFrameRate", desktopSharingFrameRate );
+			
 
             // 'resolution' is used in some cases (chrome <61), newer versions use 'constraints'.
             config.put( "resolution", ofMeetConfig.getResolution() );

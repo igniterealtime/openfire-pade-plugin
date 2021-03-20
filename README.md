@@ -10,6 +10,9 @@ Pàdé for Openfire
 
 Issues may be reported to the [forums](https://discourse.igniterealtime.org) or via this repo's [Github Issues](https://github.com/igniterealtime/openfire-pade-plugin).
 
+Overview
+------------
+
 This project provides a web-based unified communication solution for Openfire.
 - peer to peer based chat, 
 - persistent groupchat, 

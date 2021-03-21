@@ -51,6 +51,8 @@ public class JitsiJigasiWrapper implements ProcessListener
         final String IPADDR = JiveGlobals.getProperty( PluginImpl.MANUAL_HARVESTER_LOCAL_PROPERTY_NAME, getIpAddress() );
         final String DOMAIN = XMPPServer.getInstance().getServerInfo().getXMPPDomain();
         final String MAIN_MUC = JiveGlobals.getProperty( "ofmeet.main.muc", "conference." + DOMAIN);
+        final String PUBLIC_PORT = JiveGlobals.getProperty( "httpbind.port.secure", "7443");
+		final String HOSTNAME = XMPPServer.getInstance().getServerInfo().getHostname();
 
         final String jigasiHomePath = pluginDirectory.getPath() + File.separator + "classes" + File.separator + "jigasi";
         final File props_file = new File(jigasiHomePath + File.separator + "sip-communicator.properties");
@@ -60,9 +62,9 @@ public class JitsiJigasiWrapper implements ProcessListener
 
         props.setProperty("org.jitsi.jigasi.DEFAULT_JVB_ROOM_NAME", JiveGlobals.getProperty("ofmeet.jigasi.xmpp.room-name", "siptest") + "@" + MAIN_MUC);
         props.setProperty("org.jitsi.jigasi.MUC_SERVICE_ADDRESS", MAIN_MUC);
-        props.setProperty("org.jitsi.jigasi.ALLOWED_JID", "ofgasi@" + MAIN_MUC);
         props.setProperty("org.jitsi.jigasi.BREWERY_ENABLED", "true");
 
+        props.setProperty("org.jitsi.jigasi.xmpp.acc.ANONYMOUS_AUTH", "true");
         props.setProperty("org.jitsi.jigasi.xmpp.acc.IS_SERVER_OVERRIDDEN", "true");
         props.setProperty("org.jitsi.jigasi.xmpp.acc.SERVER_ADDRESS", IPADDR);
         props.setProperty("org.jitsi.jigasi.xmpp.acc.VIDEO_CALLING_DISABLED", "true");
@@ -72,6 +74,7 @@ public class JitsiJigasiWrapper implements ProcessListener
         props.setProperty("org.jitsi.jigasi.xmpp.acc.SERVER_STORED_INFO_DISABLED", "true");
         props.setProperty("org.jitsi.jigasi.xmpp.acc.IS_FILE_TRANSFER_DISABLED", "true");
 
+        props.setProperty("net.java.sip.communicator.service.gui.ALWAYS_TRUST_MODE_ENABLED", "true");
         props.setProperty("net.java.sip.communicator.impl.protocol.SingleCallInProgressPolicy.enabled", "false");
         props.setProperty("net.java.sip.communicator.impl.neomedia.codec.audio.opus.encoder.COMPLEXITY", "10");
         props.setProperty("org.jitsi.impl.neomedia.transform.csrc.CsrcTransformEngine.DISCARD_CONTRIBUTING_SOURCES", "true");
@@ -173,7 +176,7 @@ public class JitsiJigasiWrapper implements ProcessListener
         props.setProperty("net.java.sip.communicator.impl.protocol.jabber.acc-xmpp-1.Encodings.speex/32000", "0");
         props.setProperty("net.java.sip.communicator.impl.protocol.jabber.acc-xmpp-1.Encodings.speex/8000", "0");
         props.setProperty("net.java.sip.communicator.impl.protocol.jabber.acc-xmpp-1.BREWERY", "ofgasi@" + MAIN_MUC);
-        props.setProperty("net.java.sip.communicator.impl.protocol.jabber.acc-xmpp-1.BOSH_URL_PATTERN", "https://{host}{subdomain}/http-bind?room={roomName}");
+        props.setProperty("net.java.sip.communicator.impl.protocol.jabber.acc-xmpp-1.BOSH_URL_PATTERN", "https://" + HOSTNAME + ":" + PUBLIC_PORT + "/http-bind?room={roomName}");
         props.setProperty("net.java.sip.communicator.impl.protocol.jabber.acc-xmpp-1.DOMAIN_BASE", DOMAIN);
 
         Log.debug("sip-communicator.properties");

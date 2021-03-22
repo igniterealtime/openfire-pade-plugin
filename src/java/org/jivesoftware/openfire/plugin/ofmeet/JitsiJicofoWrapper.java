@@ -92,9 +92,13 @@ public class JitsiJicofoWrapper implements ProcessListener
         final File props_file = new File(jicofoHomePath + File.separator + "config" + File.separator + "sip-communicator.properties");
         Properties props = new Properties();
         props.load(new FileInputStream(props_file));
+		
+		if (config.getJigasiSipEnabled() && config.getJigasiSipUserId() != null)
+		{
+			props.setProperty("org.jitsi.jicofo.jigasi.BREWERY", "ofgasi@" + MAIN_MUC);
+		}				
 
         props.setProperty("org.jitsi.jicofo.BRIDGE_MUC", "ofmeet@" + MAIN_MUC);
-        props.setProperty("org.jitsi.jicofo.jigasi.BREWERY", "ofgasi@" + MAIN_MUC);
         props.setProperty( "org.jitsi.jicofo.ALWAYS_TRUST_MODE_ENABLED", "true" );
         props.setProperty( "org.jitsi.jicofo.PING_INTERVAL", "-1" );
         props.setProperty( "org.jitsi.jicofo.SERVICE_REDISCOVERY_INTERVAL", "60000" );

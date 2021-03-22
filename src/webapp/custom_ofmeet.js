@@ -36,7 +36,7 @@ var ofmeet = (function(of)
     let padsModalOpened = false, contactsModalOpened = false, swRegistration = null, participants = {}, recordingAudioTrack = {}, recordingVideoTrack = {}, videoRecorder = {}, recorderStreams = {}, customStore = {}, filenames = {}, dbnames = [];
     let clockTrack = {start: 0, stop: 0, joins: 0, leaves: 0}, handsRaised = 0;
     let tags = {location: "", date: localizedDate(new Date()).format('LL'), subject: "", host: "", activity: ""};
-    let audioTemporaryUnmuted = false,  cursorShared = false;
+    let audioTemporaryUnmuted = false,  cursorShared = false, inviteByPhone = false;
     let breakoutIconVisible = false;
     //-------------------------------------------------------
     //
@@ -2993,7 +2993,8 @@ var ofmeet = (function(of)
                         addContact(n[0],contacts[n[0]])
                     });
                 }
-            });
+            });		
+			
             contactsModal.addFooterBtn('Invite Selected', 'btn btn-danger tingle-btn tingle-btn--primary', function() {
                 const container = document.querySelector(".meeting-contacts");
 
@@ -3024,14 +3025,14 @@ var ofmeet = (function(of)
                     window.open(encodeURI(mailto));
                 }
             });
-
+			
             contactsModal.addFooterBtn('Reset Selected', 'btn btn-success tingle-btn tingle-btn--primary', function() {
                 const container = document.querySelector(".meeting-contacts");
 
                 container.querySelectorAll(".meeting-icon > img").forEach(function(icon) {
                     icon.outerHTML = IMAGES.contact;
                 });
-            });
+            });			
 
             contactsModal.addFooterBtn('Close', 'btn btn-success tingle-btn tingle-btn--primary', function() {
                 contactsModal.close();
@@ -3040,6 +3041,21 @@ var ofmeet = (function(of)
             contactsModal.setContent(template);
         }
 
+		if (APP.conference._room.isSIPCallingSupported() && !inviteByPhone)
+		{
+			inviteByPhone = true;
+			
+			contactsModal.addFooterBtn('Invite by Phone', 'btn btn-danger tingle-btn tingle-btn--primary', function() {
+				const phoneNumber = prompt("Please enter phone number");
+				
+				if (phoneNumber && phoneNumber != "")
+				{
+					contactsModal.close();
+					APP.conference._room.dial(phoneNumber);
+				}
+				
+			});
+		}
         contactsModal.open();
     }
 

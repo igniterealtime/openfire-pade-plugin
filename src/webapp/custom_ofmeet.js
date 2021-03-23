@@ -51,7 +51,7 @@ var ofmeet = (function(of)
 
     window.addEventListener("DOMContentLoaded", function()
     {
-        console.debug("ofmeet.js DOMContentLoaded");
+        console.debug("custom_ofmeet.js DOMContentLoaded");
 
         setTimeout(setup);
 
@@ -61,7 +61,7 @@ var ofmeet = (function(of)
             {
                 indexedDB.databases().then(function(databases)
                 {
-                    console.debug("ofmeet.js found databases", databases);
+                    console.debug("custom_ofmeet.js found databases", databases);
 
                     databases.forEach(function(db)
                     {
@@ -97,7 +97,7 @@ var ofmeet = (function(of)
 
     window.addEventListener("beforeunload", function(event)
     {
-        console.debug("ofmeet.js beforeunload");
+        console.debug("custom_ofmeet.js beforeunload");
 
         // TODO - remove this to use credential api instead of keeping in localstorage
         //localStorage.removeItem("xmpp_username_override");
@@ -118,7 +118,7 @@ var ofmeet = (function(of)
                 const deleteRequest = indexedDB.deleteDatabase(dbname)
 
                 deleteRequest.onsuccess = function(event) {
-                  console.debug("ofmeet.js me database deleted successfully", dbname);
+                  console.debug("custom_ofmeet.js me database deleted successfully", dbname);
                 };
             });
 
@@ -254,7 +254,7 @@ var ofmeet = (function(of)
 
             APP.conference._room.on(JitsiMeetJS.events.conference.CONFERENCE_LEFT, function()
             {
-                console.debug("ofmeet.js me left");
+                console.debug("custom_ofmeet.js me left");
 
                 if (interfaceConfig.OFMEET_RECORD_CONFERENCE)
                 {
@@ -272,7 +272,7 @@ var ofmeet = (function(of)
             
             APP.conference._room.on(JitsiMeetJS.events.conference.USER_ROLE_CHANGED, function(user, role) 
             {
-                console.debug("ofmeet.js participant role change", user, role);
+                console.debug("custom_ofmeet.js participant role change", user, role);
                 
                 if (interfaceConfig.OFMEET_ENABLE_BREAKOUT && role == "moderator" && !breakoutIconVisible && user == APP.conference.getMyUserId()) {
                     createBreakoutRoomsButton();
@@ -282,7 +282,7 @@ var ofmeet = (function(of)
 
             APP.conference._room.on(JitsiMeetJS.events.conference.TRACK_REMOVED, function(track)
             {
-                console.debug("ofmeet.js track removed", track.getParticipantId());
+                console.debug("custom_ofmeet.js track removed", track.getParticipantId());
 
                 if (track.getParticipantId() == APP.conference.getMyUserId())
                 {
@@ -321,7 +321,7 @@ var ofmeet = (function(of)
             APP.conference._room.on(JitsiMeetJS.events.conference.TRACK_ADDED, function(track)
             {
                 const id = track.getParticipantId();
-                console.debug("ofmeet.js track added", id, track.getType());
+                console.debug("custom_ofmeet.js track added", id, track.getType());
 
                 if (interfaceConfig.OFMEET_RECORD_CONFERENCE)
                 {
@@ -337,13 +337,13 @@ var ofmeet = (function(of)
 
             APP.conference._room.on(JitsiMeetJS.events.conference.PARTICIPANT_PROPERTY_CHANGED, function(e, t, n, r)
             {
-                console.debug("ofmeet.js property changed", e, t, n, r);
+                console.debug("custom_ofmeet.js property changed", e, t, n, r);
             });
 
             APP.conference._room.on(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, function(track)
             {
                 const id = track.getParticipantId();
-                console.debug("ofmeet.js track muted", id, track.getType(), track.isMuted());
+                console.debug("custom_ofmeet.js track muted", id, track.getType(), track.isMuted());
 
                 if (interfaceConfig.OFMEET_RECORD_CONFERENCE)
                 {
@@ -383,7 +383,7 @@ var ofmeet = (function(of)
                 var participant = APP.conference.getParticipantById(id);
                 var displayName = participant ? (participant._displayName || 'Anonymous-' + id) : (APP.conference.getLocalDisplayName() || "Me");
 
-                console.debug("ofmeet.js private message", id, text, ts, displayName);
+                console.debug("custom_ofmeet.js private message", id, text, ts, displayName);
 
                 const pretty_time = dayjs().format('MMM DD HH:mm:ss');
                 pdf_body.push([pretty_time, displayName, text]);
@@ -394,7 +394,7 @@ var ofmeet = (function(of)
                 var participant = APP.conference.getParticipantById(id);
                 var displayName = participant ? (participant._displayName || 'Anonymous-' + id) : (APP.conference.getLocalDisplayName() || "Me");
 
-                console.debug("ofmeet.js message", id, text, ts, displayName, participant, padsModalOpened);
+                console.debug("custom_ofmeet.js message", id, text, ts, displayName, participant, padsModalOpened);
 
                 if (text.indexOf(interfaceConfig.OFMEET_CRYPTPAD_URL) == 0)
                 {
@@ -434,7 +434,7 @@ var ofmeet = (function(of)
         if (window.localStorage["ofmeet.settings.avatar"])
         {
             const dataUri = JSON.parse(window.localStorage["ofmeet.settings.avatar"]);
-            console.log("ofmeet.js found avatar", dataUri);
+            console.log("custom_ofmeet.js found avatar", dataUri);
             APP.conference.changeLocalAvatarUrl(dataUri);
         }
 
@@ -488,7 +488,7 @@ var ofmeet = (function(of)
         setTimeout(postLoadSetup);
         setTimeout(postJoinSetup);
 
-        console.log("ofmeet.js setup", APP.connection, captions);
+        console.log("custom_ofmeet.js setup", APP.connection, captions);
 
         setTimeout(lostAudioWorkaround, 5000);
     }
@@ -1642,7 +1642,7 @@ var ofmeet = (function(of)
 
     function createPhotoViewerHTML()
     {
-        console.debug("ofmeet.js createPhotoViewerHTML");
+        console.debug("custom_ofmeet.js createPhotoViewerHTML");
 
         let imagenames = {};
         const me = APP.conference.getMyUserId();
@@ -1669,7 +1669,7 @@ var ofmeet = (function(of)
         const ids = Object.getOwnPropertyNames(recordingVideoTrack);
         const imagenames = createPhotoViewerHTML();
 
-        console.debug("ofmeet.js takePhoto", ids, imagenames);
+        console.debug("custom_ofmeet.js takePhoto", ids, imagenames);
 
         ids.forEach(function(id)
         {
@@ -1680,7 +1680,7 @@ var ofmeet = (function(of)
             {
                 addTagsToImage(bitmap, function(blob)
                 {
-                    console.debug("ofmeet.js takePhoto with tags", blob);
+                    console.debug("custom_ofmeet.js takePhoto with tags", blob);
                     createAnchor(imagenames[id], blob);
                 });
             })
@@ -1689,7 +1689,7 @@ var ofmeet = (function(of)
 
     function stopRecorder()
     {
-        console.debug("ofmeet.js stopRecorder");
+        console.debug("custom_ofmeet.js stopRecorder");
 
         $('#ofmeet-record svg').css('fill', '#fff');
         $('#ofmeet-desktop svg').css('fill', '#fff');
@@ -1726,7 +1726,7 @@ var ofmeet = (function(of)
 
     function createVttDataUrl()
     {
-        console.debug("ofmeet.js createVttDataUrl");
+        console.debug("custom_ofmeet.js createVttDataUrl");
 
         function pad(val) {
           return (10 > val ? "0" : "") + val;
@@ -1778,14 +1778,14 @@ var ofmeet = (function(of)
             }
         });
 
-        console.debug("ofmeet.js createVttDataUrl", vtt);
+        console.debug("custom_ofmeet.js createVttDataUrl", vtt);
         const url = "data:application/json;base64," + btoa(vtt.join('\n'))
         return url
     }
 
     function createVideoViewerHTML()
     {
-        console.debug("ofmeet.js createVideoViewerHTML");
+        console.debug("custom_ofmeet.js createVideoViewerHTML");
 
         const vttUrl = createVttDataUrl();
         const html = ['<html><head><style> video { float: left; } video::cue {font-size: 20px; color: #FFF; opacity: 1;} video:first-child:nth-last-child(1) { width: 100%; height: 100%; } video:first-child:nth-last-child(2), video:first-child:nth-last-child(2) ~ video { width: 50%; height: 100%; } video:first-child:nth-last-child(3), video:first-child:nth-last-child(3) ~ video, video:first-child:nth-last-child(4), video:first-child:nth-last-child(4) ~ video { width: 50%; height: 50%; } video:first-child:nth-last-child(5), video:first-child:nth-last-child(5) ~ video, video:first-child:nth-last-child(6), video:first-child:nth-last-child(6) ~ video, video:first-child:nth-last-child(7), video:first-child:nth-last-child(7) ~ video, video:first-child:nth-last-child(8), video:first-child:nth-last-child(8) ~ video, video:first-child:nth-last-child(9), video:first-child:nth-last-child(9) ~ video { width: 33.33%; height: 33.33%; } </style></head><body>'];
@@ -1868,7 +1868,7 @@ var ofmeet = (function(of)
     
     function startMeetingRecorder()
     {
-        console.debug("ofmeet.js startMeetingRecorder");
+        console.debug("custom_ofmeet.js startMeetingRecorder");
 
         $('#ofmeet-record svg').css('fill', '#f00');
         APP.UI.messageHandler.notify("Recording", "Conference Recording Started");
@@ -1890,7 +1890,7 @@ var ofmeet = (function(of)
             recorderStreams[id].addTrack(recordingVideoTrack[id].clone().getVideoTracks()[0]);
             recorderStreams[id].addTrack(recordingAudioTrack[id].clone().getAudioTracks()[0]);
 
-            console.debug("ofmeet.js startMeetingRecorder stream", id, recorderStreams[id], recorderStreams[id].getVideoTracks()[0].getSettings());
+            console.debug("custom_ofmeet.js startMeetingRecorder stream", id, recorderStreams[id], recorderStreams[id].getVideoTracks()[0].getSettings());
 
             const dbname = 'ofmeet-db-' + id;
             dbnames.push(dbname);
@@ -1906,7 +1906,7 @@ var ofmeet = (function(of)
 
                     idbKeyval.set(key, e.data, customStore[id]).then(function()
                     {
-                        console.debug("ofmeet.js startMeetingRecorder - ondataavailable", id, key, e.data);
+                        console.debug("custom_ofmeet.js startMeetingRecorder - ondataavailable", id, key, e.data);
 
                     }).catch(function(err) {
                         console.error('ofmeet.js startMeetingRecorder - ondataavailable failed!', err)
@@ -1923,7 +1923,7 @@ var ofmeet = (function(of)
                     const duration = Date.now() - startTime;
                     const blob = new Blob(data, {type: 'video/webm'});
 
-                   console.debug("ofmeet.js startMeetingRecorder - onstop", id, filenames[id], duration, data, blob);
+                   console.debug("custom_ofmeet.js startMeetingRecorder - onstop", id, filenames[id], duration, data, blob);
 
                     ysFixWebmDuration(blob, duration, function(fixedBlob) {
                         createAnchor(filenames[id], fixedBlob);
@@ -1992,7 +1992,7 @@ var ofmeet = (function(of)
 
     function startDesktopRecorder()
     {
-        console.debug("ofmeet.js startDesktopRecorder");
+        console.debug("custom_ofmeet.js startDesktopRecorder");
         
         const recConstraints = {video: true, audio: {autoGainControl: false, echoCancellation: false, googAutoGainControl: false, noiseSuppression: false}};
         const streamConstraints = {video: true, audio: true};
@@ -2054,7 +2054,7 @@ var ofmeet = (function(of)
             } else {
                 filenames[id] = getFilename("ofmeet-video-" + id, ".webm");
 
-                console.debug("ofmeet.js startDesktopRecorder stream", id, recorderStreams[id], recorderStreams[id].getVideoTracks()[0].getSettings());
+                console.debug("custom_ofmeet.js startDesktopRecorder stream", id, recorderStreams[id], recorderStreams[id].getVideoTracks()[0].getSettings());
                 const dbname = 'ofmeet-db-' + id;
                 dbnames.push(dbname);
 
@@ -2069,7 +2069,7 @@ var ofmeet = (function(of)
 
                         idbKeyval.set(key, e.data, customStore[id]).then(function()
                         {
-                            console.debug("ofmeet.js startDesktopRecorder - ondataavailable", id, key, e.data);
+                            console.debug("custom_ofmeet.js startDesktopRecorder - ondataavailable", id, key, e.data);
 
                         }).catch(function(err) {
                             console.error('ofmeet.js startDesktopRecorder - ondataavailable failed!', err)
@@ -2087,7 +2087,7 @@ var ofmeet = (function(of)
                         const duration = Date.now() - startTime;
                         const blob = new Blob(data, {type: 'video/webm'});
 
-                       console.debug("ofmeet.js startDesktopRecorder - onstop", id, filenames[id], duration, data, blob);
+                       console.debug("custom_ofmeet.js startDesktopRecorder - onstop", id, filenames[id], duration, data, blob);
 
                         ysFixWebmDuration(blob, duration, function(fixedBlob) {
                             createAnchor(filenames[id], fixedBlob);
@@ -2108,7 +2108,7 @@ var ofmeet = (function(of)
             of.recording = true;
 
         }, error => {
-            console.error("ofmeet.js startDesktopRecorder", error);
+            console.error("custom_ofmeet.js startDesktopRecorder", error);
             APP.UI.messageHandler.showError({title:"Desktop recorder/streamer", error, hideErrorSupportLink: true});            
             of.recording = false;
         });
@@ -2124,7 +2124,7 @@ var ofmeet = (function(of)
 
         idbKeyval.keys(store).then(function(data)
         {
-            console.debug("ofmeet.js recoverRecording", filename, data);
+            console.debug("custom_ofmeet.js recoverRecording", filename, data);
 
             const blob = new Blob(data, {type: 'video/webm'});
             createAnchor(filename, blob);

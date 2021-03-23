@@ -88,10 +88,9 @@ This project is a Apache Maven project.
 Build using the standard Maven invocation:
 
     mvn clean package
-    
-After a successful execution, a plugin should be available in this locations:
-
-    pade/target/pade.jar       
+	cd target
+	rename pade-openfire-plugin-assembly.jar pade.jar	
+         
     
 Pade Chat (Converse) will be available as a web page and progressive web application from /pade
 

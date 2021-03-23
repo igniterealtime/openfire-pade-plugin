@@ -44,6 +44,7 @@ import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.user.UserManager;
 import org.jivesoftware.openfire.muc.MultiUserChatService;
 import org.jivesoftware.openfire.muc.MUCEventListener;
+import org.jivesoftware.openfire.muc.MUCRole;
 import org.jivesoftware.openfire.muc.MUCRoom;
 import org.jivesoftware.openfire.muc.MUCEventDispatcher;
 import org.jivesoftware.openfire.cluster.ClusterEventListener;
@@ -971,15 +972,17 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
                         .getChatRoom(roomJID.getNode());
 
                 if (room.getOwners().stream().anyMatch(o -> o.getNode().equals("focus"))) {
-                    // Remove the user from the allowed list
-                    IQ iq = new IQ(IQ.Type.set);
-                    Element frag = iq.setChildElement("query", "http://jabber.org/protocol/muc#admin");
-                    Element item = frag.addElement("item");
-                    item.addAttribute("affiliation", "none");
-                    item.addAttribute("jid", user.toFullJID());
+                    if (room.getAffiliation(user) == MUCRole.Affiliation.owner) {
+                        // Remove the user from the allowed list
+                        IQ iq = new IQ(IQ.Type.set);
+                        Element frag = iq.setChildElement("query", "http://jabber.org/protocol/muc#admin");
+                        Element item = frag.addElement("item");
+                        item.addAttribute("affiliation", room.isMembersOnly() ? "member" : "none");
+                        item.addAttribute("jid", user.toFullJID());
 
-                    // Send the IQ packet that will modify the room's configuration
-                    room.getIQAdminHandler().handleIQ(iq, room.getRole());
+                        // Send the IQ packet that will modify the room's configuration
+                        room.getIQAdminHandler().handleIQ(iq, room.getRole());
+                    }
                 }
             }
         } catch ( Exception e ) {

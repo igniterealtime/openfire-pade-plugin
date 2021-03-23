@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <link id="favicon" rel="shortcut icon" href="../icon.png" type="image/png" />
+  <title>Feedback</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport">
+  <style>
+    * {
+      line-height: 1.2;
+      margin: 0;
+    }
+
+    html {
+      color: #ffffff;
+      display: table;
+      font-family: sans-serif;
+      height: 100%;
+      text-align: center;
+      width: 100%;
+    }
+
+    body {
+      display: table-cell;
+      vertical-align: middle;
+      margin: 2em auto;
+      background-color: #364258;
+    }
+
+    h1 {
+      color: #ffffff;
+      font-size: 2em;
+      font-weight: 400;
+    }
+
+    p {
+      margin: 0 auto;
+      max-width: 480px;
+      font-size: 1.25em;
+    }
+
+    textarea {
+      width: 50%;
+      height: 7em;
+      font-family: inherit;
+      font-size: inherit;
+    }
+
+    button {
+      padding: 16px 32px;
+    }
+
+    #error-message {
+      border: 1px solid azure;
+      margin: 0 auto;
+      width: 50%;
+    }
+
+    @media only screen and (max-width: 280px) {
+
+      body,
+      p {
+        width: 95%;
+      }
+
+      h1 {
+        font-size: 1.5em;
+        margin: 0 0 0.3em;
+      }
+
+    }
+
+    .rating {
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: center
+    }
+
+    .rating > input {
+      display: none
+    }
+
+    .rating > label {
+      position: relative;
+      width: 1em;
+      font-size: 5vw;
+      color: lightgray;
+      cursor: pointer
+    }
+
+    .rating > label::before {
+      content: "\2605";
+      position: absolute;
+      color: gold;
+      opacity: 0
+    }
+
+    .rating > label:hover:before,
+    .rating > label:hover ~ label:before {
+      opacity: 1 !important
+    }
+
+    .rating > input:checked ~ label:before {
+      opacity: 1
+    }
+
+    .rating:hover > input:checked ~ label:before {
+      opacity: 0.4
+    }
+  </style>
+</head>
+
+<body>
+
+
+<div class="center" id="step1">
+  ${description-message}
+  <!--
+  <h1>Danke, dass Sie DNBmeetings benutzt haben!</h1>
+  <br/>
+  <p>Bitte beurteilen Sie die erzielte Qualit&auml;t.</p>
+  <p>Teilen Sie Ihre Anregungen oder Wünsch mit.</p>
+  <p>Sie tragen damit aktiv zur Verbesserung bei!</p>
+  <p>Die Daten werden anonym erfasst, nennen Sie ggf. Ihren Namen.</p>
+  -->
+
+  <br/>
+  <form>
+    <!-- Source: https://bbbootstrap.com/snippets/star-rating-pure-css-19646372 -->
+    Audio:
+    <div class="rating">
+      <input id="a5" name="audio" type="radio" value="5"><label for="a5">☆</label>
+      <input id="a4" name="audio" type="radio" value="4"><label for="a4">☆</label>
+      <input id="a3" name="audio" type="radio" value="3"><label for="a3">☆</label>
+      <input id="a2" name="audio" type="radio" value="2"><label for="a2">☆</label>
+      <input id="a1" name="audio" type="radio" value="1"><label for="a1">☆</label>
+    </div>
+    Video:
+    <div class="rating">
+      <input id="v5" name="video" type="radio" value="5"><label for="v5">☆</label>
+      <input id="v4" name="video" type="radio" value="4"><label for="v4">☆</label>
+      <input id="v3" name="video" type="radio" value="3"><label for="v3">☆</label>
+      <input id="v2" name="video" type="radio" value="2"><label for="v2">☆</label>
+      <input id="v1" name="video" type="radio" value="1"><label for="v1">☆</label>
+    </div>
+    <br/>
+    <div>
+      <textarea id="comment" name="comment" placeholder="${placeholder-text}"></textarea>
+      <!-- textarea id="comment" name="comment" placeholder="Falls etwas nicht so gut lief: Wann? Wo? Was? Und optional Wer? "></textarea -->
+    </div>
+    <br/>
+    <button name="" value="" type="submit" autofocus>${submit-text}</button>
+    <!-- button name="" value="" type="submit">Weiter</button -->
+  </form>
+</div>
+
+<div class="center" id="step2" style="display: none">
+  ${success-message}
+  <!--
+  <h1>Vielen Dank!</h1>
+  -->
+</div>
+
+<div class="center" id="error-page" style="display: none">
+  ${error-message}
+  <!--
+  <h1>Upps, da ist beim Senden was schiefgegangen 😓</h1>
+  <br/>
+  <p>Wenn du uns trotzdem helfen möchtest, kannst du uns aber auch eine Mail an <a
+    href="mailto:insert@mail-address.here">insert@mail-address.here</a> schicken.</p>
+  <br/>
+  <p>Hier ist was du im Textfeld eingegeben hattest zusammen mit einem Fehlercode:</p>
+  <br/>
+  -->
+  <pre id="error-message"></pre>
+</div>
+
+<script>
+  let form = document.querySelector("form");
+
+  function handleFeedbackError(error) {
+    document.querySelector("#step1").style = "display: none";
+    document.querySelector("#step2").style = "display: none";
+    document.querySelector("#error-page").style = "display: block";
+    document.querySelector("#error-message").innerText = document.querySelector("#comment").value + "\n\nHTTP-RC: " + error;
+  }
+
+  // User clicked button to send feedback
+  form.addEventListener("submit", function (event) {
+    sendFeedback();
+    event.preventDefault();
+  }, false);
+
+  function sendFeedback() {
+    // build request body
+    let request_body = new FormData(form);
+
+    // fetch statsID
+    let statsID = localStorage.getItem("callStatsUserName");
+    request_body.append("callStatsUserName", statsID);
+
+    if (localStorage["features/base/settings"])     // fetch displayName	
+    {
+        const json = JSON.parse(localStorage.getItem("features/base/settings"));
+		
+        if (json && json.displayName)
+        {
+            request_body.append("displayName", json.displayName);
+        }
+    }
+	
+    if (localStorage["features/recent-list"]) 	// fetch recent-list
+    {
+        const recent_list = JSON.parse(localStorage.getItem("features/recent-list"));
+
+        if (recent_list)
+        {
+			let selected = recent_list[0];
+			let latest = 0;			
+			
+			recent_list.forEach(function (item)
+			{
+				if (item.date > latest) 
+				{
+					latest = item.date;
+					selected = item;
+				}
+			});
+			
+			if (selected)
+			{
+				const conference = selected.conference;		
+				const room = conference.substring(conference.lastIndexOf("/") + 1);
+				request_body.append("room", room);			
+				request_body.append("duration", (selected.duration / 60000).toFixed(2));
+				request_body.append("date", selected.date);				
+			}
+
+        }
+    }	
+
+    // POST form
+    fetch(window.location.href, {
+      method: "POST",
+      body: request_body
+    })
+      .then(function (response) {
+        if (!response.ok) {
+          handleFeedbackError(response.statusText);
+        } else {
+          console.info("success:" + response);
+
+          // Show thanks screen
+          document.querySelector("#step1").style = "display: none";
+          document.querySelector("#step2").style = "display: block";
+
+          // Set timeout to move to start page after 3 secs
+          setTimeout(function () {
+            window.location.href = window.location.href.replace(/(.*)\/static\/.*/, "$1");
+          }, 3000);
+        }
+      })
+      .catch(function (error) {
+        handleFeedbackError(error);
+      });
+  }
+</script>
+</body>
+</html>

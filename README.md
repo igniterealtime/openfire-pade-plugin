@@ -1,9 +1,25 @@
+
 Pàdé for Openfire
 =========================
+
+## CI Build Status
+
+[![Build Status](https://github.com/igniterealtime/openfire-pade-plugin/workflows/Java%20CI/badge.svg)](https://github.com/igniterealtime/openfire-pade-plugin/actions)
+
+<img src=https://user-images.githubusercontent.com/110731/111887976-8a371280-89d0-11eb-97d7-e566fbb2c8b3.png />
+<img src=https://user-images.githubusercontent.com/110731/101295751-7ac3fd00-3817-11eb-839d-b9727c50da6a.png />
+
+## Reporting Issues
+
+Issues may be reported to the [forums](https://discourse.igniterealtime.org) or via this repo's [Github Issues](https://github.com/igniterealtime/openfire-pade-plugin).
+
+Overview
+------------
+
 This project provides a web-based unified communication solution for Openfire.
 - peer to peer based chat, 
 - persistent groupchat, 
-- audio and video conferencing,
+- audio, video conferencing and live streaming,
 - telephone access to conferences, 
 
 It includes third-party products, notably:
@@ -12,6 +28,7 @@ It includes third-party products, notably:
 - [Jitsi Meet](https://github.com/jitsi/jitsi-meet) web client.
 - [Jitsi SIP Gateway](https://github.com/jitsi/jigasi) project.
 - [Pàdé](https://github.com/igniterealtime/pade) web desktop client based on the [ConverseJS](https://github.com/conversejs/converse.js) project.
+- [ffmpeg](https://www.ffmpeg.org/) live streaming to rtmp server like you-tube.
 
 Pade works with Firefox. It however works best with Chromium based apps like Chrome, Edge, Electron and Opera. 
 

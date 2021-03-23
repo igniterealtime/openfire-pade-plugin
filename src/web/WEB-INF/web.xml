@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+         version="3.1">
+
+    <!-- Typically, the Openfire build process will pre-compile all admin console JSP pages and automatically add
+         a generated block of resulting servlets here. For this plugin, we'd like to add a servlet that finds it origin
+         in a precompiled JSP page that is part of one of the dependencies. As that won't be picked up by the build
+         process of this plugin, it's added here manually. -->
+
+</web-app>

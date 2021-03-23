@@ -115,7 +115,7 @@ public class FeedbackServlet extends HttpServlet
                 securityAuditManager.logEvent
                 (
                     feedback.getString("callStatsUserName")
-                    , "meeting - " + room + (duration.isEmpty() ? "" : " duration: " + duration + " hours") + " feedback A/V-rating: " + audioRating + "/" + videoRating + ( ! comment.isEmpty() ? ", comment: " + Integer.toString(comment.length()) + "c" : "" )
+                    , "meeting - " + room + (duration.isEmpty() ? "" : " duration: " + duration + " mins") + " feedback A/V-rating: " + audioRating + "/" + videoRating + ( ! comment.isEmpty() ? ", comment: " + Integer.toString(comment.length()) + "c" : "" )
                     , comment
                 );
             }

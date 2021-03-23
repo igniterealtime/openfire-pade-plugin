@@ -44,6 +44,7 @@ import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.user.UserManager;
 import org.jivesoftware.openfire.muc.MultiUserChatService;
 import org.jivesoftware.openfire.muc.MUCEventListener;
+import org.jivesoftware.openfire.muc.MUCRoom;
 import org.jivesoftware.openfire.muc.MUCEventDispatcher;
 import org.jivesoftware.openfire.cluster.ClusterEventListener;
 import org.jivesoftware.openfire.cluster.ClusterManager;
@@ -126,6 +127,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     private final JitsiJigasiWrapper jitsiJigasiWrapper;
     private final MeetingPlanner meetingPlanner;
     private final LobbyMuc lobbyMuc;
+    private final OfMeetPacketInterceptor ofmeetPacketInterceptor;
     private final SecurityAuditManager securityAuditManager = SecurityAuditManager.getInstance();
 
     public OfMeetPlugin()
@@ -138,6 +140,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
         meetingPlanner = new MeetingPlanner();
         lobbyMuc = new LobbyMuc();
+        ofmeetPacketInterceptor = new OfMeetPacketInterceptor();
     }
 
     public String getName()
@@ -201,6 +204,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         {
             meetingPlanner.initialize();
             lobbyMuc.initialize();
+            ofmeetPacketInterceptor.initialize();
         }
         catch ( Exception ex )
         {
@@ -284,6 +288,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         {
             meetingPlanner.destroy();
             lobbyMuc.destroy();
+            ofmeetPacketInterceptor.destroy();
         }
         catch ( Exception ex )
         {
@@ -584,6 +589,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
         if (jsonString.indexOf("var branding = ") == 0)
         {
+            jsonString = jsonString.replaceAll("/\\*[\\s\\S]*?\\*/|//.*", "");
             jsonObject = new JSONObject( jsonString.substring(15) );
 
             for (String propertyName : jsonObject.keySet())
@@ -959,6 +965,21 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
                         Log.error("error getting jvb colibri stats");
                     }
                     securityAuditManager.logEvent("pade", "meeting - " + roomName, comment);
+                }
+            } else if (!roomName.equals("ofmeet") && !roomName.equals("ofgasi")) {
+                MUCRoom room = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(roomJID)
+                        .getChatRoom(roomJID.getNode());
+
+                if (room.getOwners().stream().anyMatch(o -> o.getNode().equals("focus"))) {
+                    // Remove the user from the allowed list
+                    IQ iq = new IQ(IQ.Type.set);
+                    Element frag = iq.setChildElement("query", "http://jabber.org/protocol/muc#admin");
+                    Element item = frag.addElement("item");
+                    item.addAttribute("affiliation", "none");
+                    item.addAttribute("jid", user.toFullJID());
+
+                    // Send the IQ packet that will modify the room's configuration
+                    room.getIQAdminHandler().handleIQ(iq, room.getRole());
                 }
             }
         } catch ( Exception e ) {

@@ -67,6 +67,7 @@ import org.slf4j.LoggerFactory;
 import org.xmpp.packet.IQ;
 import org.xmpp.packet.JID;
 import org.xmpp.packet.Message;
+import org.xmpp.packet.Presence;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -128,7 +129,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     private final JitsiJigasiWrapper jitsiJigasiWrapper;
     private final MeetingPlanner meetingPlanner;
     private final LobbyMuc lobbyMuc;
-    private final OfMeetPacketInterceptor ofmeetPacketInterceptor;
     private final SecurityAuditManager securityAuditManager = SecurityAuditManager.getInstance();
 
     public OfMeetPlugin()
@@ -141,7 +141,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
         meetingPlanner = new MeetingPlanner();
         lobbyMuc = new LobbyMuc();
-        ofmeetPacketInterceptor = new OfMeetPacketInterceptor();
     }
 
     public String getName()
@@ -205,7 +204,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         {
             meetingPlanner.initialize();
             lobbyMuc.initialize();
-            ofmeetPacketInterceptor.initialize();
         }
         catch ( Exception ex )
         {
@@ -289,7 +287,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         {
             meetingPlanner.destroy();
             lobbyMuc.destroy();
-            ofmeetPacketInterceptor.destroy();
         }
         catch ( Exception ex )
         {
@@ -973,15 +970,15 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
                 if (room.getOwners().stream().anyMatch(o -> o.getNode().equals("focus"))) {
                     if (room.getAffiliation(user) == MUCRole.Affiliation.owner) {
-                        // Remove the user from the allowed list
-                        IQ iq = new IQ(IQ.Type.set);
-                        Element frag = iq.setChildElement("query", "http://jabber.org/protocol/muc#admin");
-                        Element item = frag.addElement("item");
-                        item.addAttribute("affiliation", room.isMembersOnly() ? "member" : "none");
-                        item.addAttribute("jid", user.toFullJID());
+                        // Remove owner authority of the user
+                        List<Presence> addNonePresence = room.isMembersOnly()
+                                ? room.addMember(user, null, room.getRole())
+                                : room.addNone(user, room.getRole());
 
-                        // Send the IQ packet that will modify the room's configuration
-                        room.getIQAdminHandler().handleIQ(iq, room.getRole());
+                        // Send a presence to other room members
+                        for (Presence p : addNonePresence) {
+                            room.send(p, room.getRole());
+                        }
                     }
                 }
             }

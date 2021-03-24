@@ -587,21 +587,27 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
         if (jsonString.indexOf("var branding = ") == 0)
         {
-            jsonString = jsonString.replaceAll("/\\*[\\s\\S]*?\\*/|//.*", "");
-            jsonObject = new JSONObject( jsonString.substring(15) );
+			try
+			{	
+				// TODO this regex is not working with URLS			
+				//jsonString = jsonString.replaceAll("/\\*[\\s\\S]*?\\*/|//.*", "");
+				jsonObject = new JSONObject( jsonString.substring(15) );
 
-            for (String propertyName : jsonObject.keySet())
-            {
-                String existingValue = JiveGlobals.getProperty("pade.branding." + propertyName, null);
-                String json = jsonObject.getJSONObject(propertyName).toString();
+				for (String propertyName : jsonObject.keySet())
+				{
+					String existingValue = JiveGlobals.getProperty("pade.branding." + propertyName, null);
+					String json = jsonObject.getJSONObject(propertyName).toString();
 
-                Log.debug("loadBranding - processing " + propertyName + ", existing=" + existingValue + ", branding=" + json);
+					Log.debug("loadBranding - processing " + propertyName + ", existing=" + existingValue + ", branding=" + json);
 
-                if (existingValue == null)  // add new settings, don't overwrite existing settings
-                {
-                    JiveGlobals.setProperty("pade.branding." + propertyName, json);
-                }
-            }
+					if (existingValue == null)  // add new settings, don't overwrite existing settings
+					{
+						JiveGlobals.setProperty("pade.branding." + propertyName, json);
+					}
+				}
+			} catch (Exception e) {
+				Log.error( "[{}] Unexpected branding.js!\n" + jsonString);				
+			}
         }
         else {
             Log.error( "[{}] Unexpected branding.js!\n" + jsonString);

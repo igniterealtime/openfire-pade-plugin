@@ -44,6 +44,8 @@ import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.user.UserManager;
 import org.jivesoftware.openfire.muc.MultiUserChatService;
 import org.jivesoftware.openfire.muc.MUCEventListener;
+import org.jivesoftware.openfire.muc.MUCRole;
+import org.jivesoftware.openfire.muc.MUCRoom;
 import org.jivesoftware.openfire.muc.MUCEventDispatcher;
 import org.jivesoftware.openfire.cluster.ClusterEventListener;
 import org.jivesoftware.openfire.cluster.ClusterManager;
@@ -65,6 +67,7 @@ import org.slf4j.LoggerFactory;
 import org.xmpp.packet.IQ;
 import org.xmpp.packet.JID;
 import org.xmpp.packet.Message;
+import org.xmpp.packet.Presence;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -584,6 +587,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
         if (jsonString.indexOf("var branding = ") == 0)
         {
+            jsonString = jsonString.replaceAll("/\\*[\\s\\S]*?\\*/|//.*", "");
             jsonObject = new JSONObject( jsonString.substring(15) );
 
             for (String propertyName : jsonObject.keySet())
@@ -959,6 +963,23 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
                         Log.error("error getting jvb colibri stats");
                     }
                     securityAuditManager.logEvent("pade", "meeting - " + roomName, comment);
+                }
+            } else if (!roomName.equals("ofmeet") && !roomName.equals("ofgasi")) {
+                MUCRoom room = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(roomJID)
+                        .getChatRoom(roomJID.getNode());
+
+                if (room.getOwners().stream().anyMatch(o -> o.getNode().equals("focus"))) {
+                    if (room.getAffiliation(user) == MUCRole.Affiliation.owner) {
+                        // Remove owner authority of the user
+                        List<Presence> addNonePresence = room.isMembersOnly()
+                                ? room.addMember(user, null, room.getRole())
+                                : room.addNone(user, room.getRole());
+
+                        // Send a presence to other room members
+                        for (Presence p : addNonePresence) {
+                            room.send(p, room.getRole());
+                        }
+                    }
                 }
             }
         } catch ( Exception e ) {

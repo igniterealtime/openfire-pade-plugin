@@ -394,6 +394,16 @@
                 </td>
             </tr>
            <tr>
+                <td width="200"><fmt:message key="config.page.configuration.language.title" /></td>
+        <td>
+                    <select name="language" required>
+                        <c:forEach items="${ofmeetConfig.languages}" var="language">
+                            <option name="language" value="${language.getCode()}" id="${language.getCode()}" ${(ofmeetConfig.language == language ? "selected" : "")}>${language}</option>
+                        </c:forEach>
+                </select>
+                </td>
+            </tr>            
+           <tr>
                 <td nowrap colspan="2">
                     <input type="checkbox" name="enableLanguageDetection" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.languagedetection", false) ? "checked" : ""}>
                     <fmt:message key="ofmeet.enable.languagedetection" />
@@ -488,24 +498,6 @@
         </table>
     </admin:contentBox>      
     
-    <fmt:message key="config.page.configuration.language.title" var="boxtitleLanguage"/>
-    <admin:contentBox title="${boxtitleLanguage}">
-        <table cellpadding="3" cellspacing="0" border="0" width="100%">
-            <tbody>
-            <c:forEach items="${ofmeetConfig.languages}" var="language">
-            <tr valign="top">
-                <td width="1%" nowrap>
-                    <input type="radio" name="language" value="${language.getCode()}" id="${language.getCode()}" ${(ofmeetConfig.language == language ? "checked" : "")}>
-                </td>
-                <td width="99%">
-                    <label for="${language.getCode()}">${language}</label>
-                </td>
-            </tr>
-            </c:forEach>
-            </tbody>
-        </table>
-    </admin:contentBox>
-
     <fmt:message key="ofmeet.welcome.title" var="boxtitleWelcome"/>
     <admin:contentBox title="${boxtitleWelcome}">
         <p><fmt:message key="ofmeet.welcome.description"/></p><br/>

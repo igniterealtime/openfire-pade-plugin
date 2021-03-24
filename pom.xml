@@ -345,12 +345,14 @@
             <artifactId>xpp3</artifactId>
             <version>1.1.4c</version>
         </dependency> 
+		
 		<!-- https://mvnrepository.com/artifact/org.jitsi/ice4j -->
 		<dependency>
 			<groupId>org.jitsi</groupId>
 			<artifactId>ice4j</artifactId>
-            <version>2.0.0-20190607.184546-36</version>
+			<version>3.0-24-g34c2ce5</version>
 		</dependency>
+
 
         <dependency>
             <groupId>org.jboss.netty</groupId>

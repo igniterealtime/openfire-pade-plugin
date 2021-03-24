@@ -257,12 +257,12 @@ public class PluginImpl
         final String stunAddress = JiveGlobals.getProperty( STUN_HARVESTER_ADDRESS_PROPERTY_NAME );
         final String stunPort = JiveGlobals.getProperty( STUN_HARVESTER_PORT_PROPERTY_NAME );
         if ( stunAddress != null && !stunAddress.isEmpty() && stunPort != null && !stunPort.isEmpty() ) {
-            System.setProperty( MappingCandidateHarvesters.STUN_MAPPING_HARVESTER_ADDRESSES_PNAME, stunAddress + ":" + stunPort );
+            System.setProperty( "org.jitsi.videobridge.STUN_MAPPING_HARVESTER_ADDRESSES", stunAddress + ":" + stunPort );
         } else {
-            System.clearProperty( MappingCandidateHarvesters.STUN_MAPPING_HARVESTER_ADDRESSES_PNAME );
+            System.clearProperty( "org.jitsi.videobridge.STUN_MAPPING_HARVESTER_ADDRESSES" );
         }
 
-        System.setProperty( StackProperties.USE_DYNAMIC_HOST_HARVESTER, String.valueOf(JiveGlobals.getBooleanProperty( MINMAX_PORT_ENABLED_PROPERTY_NAME, false) ) );
+        System.setProperty( "org.jitsi.videobridge.media.USE_DYNAMIC_HOST_HARVESTER", String.valueOf(JiveGlobals.getBooleanProperty( MINMAX_PORT_ENABLED_PROPERTY_NAME, false) ) );
 
         try
         {
@@ -380,7 +380,7 @@ public class PluginImpl
                 // Only set when both address and port are defined.
                 if ( stunAddress != null && !stunAddress.isEmpty() && stunPort != null && !stunPort.isEmpty() )
                 {
-                    System.setProperty( MappingCandidateHarvesters.STUN_MAPPING_HARVESTER_ADDRESSES_PNAME, stunAddress + ":" + stunPort );
+                    System.setProperty( "org.jitsi.videobridge.STUN_MAPPING_HARVESTER_ADDRESSES", stunAddress + ":" + stunPort );
                 }
                 break;
 
@@ -403,7 +403,7 @@ public class PluginImpl
                 break;
 
             case MINMAX_PORT_ENABLED_PROPERTY_NAME:
-                System.setProperty( StackProperties.USE_DYNAMIC_HOST_HARVESTER, Boolean.toString( JiveGlobals.getBooleanProperty( MINMAX_PORT_ENABLED_PROPERTY_NAME, false ) ) );
+                System.setProperty( "org.jitsi.videobridge.media.USE_DYNAMIC_HOST_HARVESTER", Boolean.toString( JiveGlobals.getBooleanProperty( MINMAX_PORT_ENABLED_PROPERTY_NAME, false ) ) );
                 break;
 
             case MAX_PORT_NUMBER_PROPERTY_NAME:
@@ -502,7 +502,7 @@ public class PluginImpl
                 // Only delete when both address and port are gone.
                 if ( stunAddress == null && stunPort == null )
                 {
-                    System.clearProperty( MappingCandidateHarvesters.STUN_MAPPING_HARVESTER_ADDRESSES_PNAME );
+                    System.clearProperty( "org.jitsi.videobridge.STUN_MAPPING_HARVESTER_ADDRESSES" );
                 }
                 break;
 
@@ -525,7 +525,7 @@ public class PluginImpl
                 break;
 
             case MINMAX_PORT_ENABLED_PROPERTY_NAME:
-                System.setProperty( StackProperties.USE_DYNAMIC_HOST_HARVESTER, Boolean.toString( JiveGlobals.getBooleanProperty( MINMAX_PORT_ENABLED_PROPERTY_NAME, false ) ) );
+                System.setProperty( "org.jitsi.videobridge.media.USE_DYNAMIC_HOST_HARVESTER", Boolean.toString( JiveGlobals.getBooleanProperty( MINMAX_PORT_ENABLED_PROPERTY_NAME, false ) ) );
                 break;
 
             case MAX_PORT_NUMBER_PROPERTY_NAME:

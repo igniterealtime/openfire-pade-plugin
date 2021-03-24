@@ -330,7 +330,7 @@ public class RuntimeConfiguration
      */
     public static boolean isMinMaxPortEnabled()
     {
-        return StackProperties.getBoolean( StackProperties.USE_DYNAMIC_HOST_HARVESTER, false );
+        return StackProperties.getBoolean( "org.jitsi.videobridge.media.USE_DYNAMIC_HOST_HARVESTER", false );
     }
 
     /**
@@ -451,7 +451,7 @@ public class RuntimeConfiguration
      */
     public static boolean isAWSMappingHarvesterEnabled()
     {
-        final boolean disabled = StackProperties.getBoolean( MappingCandidateHarvesters.DISABLE_AWS_HARVESTER_PNAME, false );
+        final boolean disabled = StackProperties.getBoolean( "org.jitsi.videobridge.DISABLE_AWS_HARVESTER", false );
         return !disabled;
     }
 
@@ -468,7 +468,7 @@ public class RuntimeConfiguration
     {
         if ( isAWSMappingHarvesterEnabled() )
         {
-            return StackProperties.getBoolean( MappingCandidateHarvesters.FORCE_AWS_HARVESTER_PNAME, false );
+            return StackProperties.getBoolean( "org.jitsi.videobridge.FORCE_AWS_HARVESTER", false );
         }
         else
         {
@@ -487,7 +487,7 @@ public class RuntimeConfiguration
     public static List<InetSocketAddress> getSTUNMappingHarvesterAddresses()
     {
         final List<InetSocketAddress> results = new ArrayList<>();
-        final String[] addresses = StackProperties.getStringArray( MappingCandidateHarvesters.STUN_MAPPING_HARVESTER_ADDRESSES_PNAME, "," );
+        final String[] addresses = StackProperties.getStringArray( "org.jitsi.videobridge.STUN_MAPPING_HARVESTER_ADDRESSES", "," );
         if( addresses == null )
         {
             return results;

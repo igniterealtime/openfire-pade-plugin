@@ -36,6 +36,7 @@ import org.jivesoftware.openfire.plugin.rest.service.JerseyWrapper;
 import org.jivesoftware.openfire.plugin.rest.OpenfireLoginService;
 import org.jivesoftware.util.*;
 
+import java.security.SecureRandom;
 import java.io.File;
 import java.util.*;
 import java.nio.charset.Charset;
@@ -52,6 +53,17 @@ import org.dom4j.Element;
 import org.igniterealtime.openfire.plugins.pushnotification.PushInterceptor;
 import org.jivesoftware.openfire.plugin.ofmeet.OfMeetPlugin;
 
+import com.yubico.webauthn.*;
+import com.yubico.webauthn.data.*;
+
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+
+import org.ifsoft.webauthn.UserRegistrationStorage;
+
+
 public class PadePlugin implements Plugin, MUCEventListener
 {
     private static final Logger Log = LoggerFactory.getLogger( PadePlugin.class );
@@ -65,6 +77,11 @@ public class PadePlugin implements Plugin, MUCEventListener
     private WebAppContext contextWellKnown;
     private PushInterceptor interceptor;
     private OfMeetPlugin ofMeetPlugin;
+	private RelyingParty relyingParty;
+	private RelyingPartyIdentity rpIdentity;
+    private String server;
+	private HashMap<String, Object> requests = new HashMap<>();
+	
 
     /**
      * Initializes the plugin.
@@ -77,8 +94,9 @@ public class PadePlugin implements Plugin, MUCEventListener
     {
         self = this;
         webRoot = pluginDirectory.getPath() + "/classes";
+		server = XMPPServer.getInstance().getServerInfo().getHostname() + ":" + JiveGlobals.getProperty("httpbind.port.secure", "7443");		
 
-        Log.info("start pade server");
+        Log.info("start pade server " + server);
 
         interceptor = new PushInterceptor();
         InterceptorManager.getInstance().addInterceptor( interceptor );
@@ -163,7 +181,91 @@ public class PadePlugin implements Plugin, MUCEventListener
         Log.info("Starting Openfire Meetings");
         ofMeetPlugin = new OfMeetPlugin();
         ofMeetPlugin.initializePlugin( manager, pluginDirectory );
+		
+		Log.info("Creating webauthn RelyingParty");
+		String hostname = XMPPServer.getInstance().getServerInfo().getHostname();
+		rpIdentity = RelyingPartyIdentity.builder().id(hostname).name("Pade").build();
+		relyingParty = RelyingParty.builder().identity(rpIdentity).credentialRepository(new UserRegistrationStorage()).build();		
     }
+	
+	public String startRegisterWebAuthn(String username, String name)
+	{
+		SecureRandom random = new SecureRandom();
+		byte[] userHandle = new byte[64];
+		random.nextBytes(userHandle);
+
+		PublicKeyCredentialCreationOptions request = relyingParty.startRegistration(StartRegistrationOptions.builder()
+			.user(UserIdentity.builder()
+			.name(username).displayName(name).id(new ByteArray(userHandle)).build())
+			.build());		
+
+		return requestToJson((PublicKeyCredentialCreationOptions) request, username);		
+	}
+	
+	public RegistrationResult finishRegisterWebAuthn(String responseJson, String username)
+	{	
+		PublicKeyCredentialCreationOptions request = (PublicKeyCredentialCreationOptions) requests.get(username);
+		RegistrationResult result = null;	
+		
+		try {
+			PublicKeyCredential<AuthenticatorAttestationResponse, ClientRegistrationExtensionOutputs> pkc = PublicKeyCredential.parseRegistrationResponseJson(responseJson);			
+			result = relyingParty.finishRegistration(FinishRegistrationOptions.builder().request(request).response(pkc).build());
+			
+		} catch (Exception e) {
+            Log.error( "finishRegisterWebAuthn exception occurred", e );			
+		}
+        UserIdentity userIdentity = request.getUser();	
+		long userId = BytesUtil.bytesToLong(userIdentity.getId().getBytes());
+		long keyId =  BytesUtil.bytesToLong(result.getKeyId().getId().getBytes());
+		long keyCose = BytesUtil.bytesToLong(result.getPublicKeyCose().getBytes());
+
+		return result;
+	}	
+
+	public String startAuthentication(String username)
+	{
+		AssertionRequest request = relyingParty.startAssertion(StartAssertionOptions.builder()
+			.username(Optional.of(username))
+			.build());
+		
+		return requestToJson((AssertionRequest) request, username);		
+	}
+	
+	public boolean finishAuthentication(String responseJson, String username)
+	{	
+		AssertionRequest request = (AssertionRequest) requests.get(username);
+		boolean response = false;
+		
+		try {
+			PublicKeyCredential<AuthenticatorAssertionResponse, ClientAssertionExtensionOutputs> pkc = PublicKeyCredential.parseAssertionResponseJson(responseJson);
+			AssertionResult result = relyingParty.finishAssertion(FinishAssertionOptions.builder().request(request).response(pkc).build());						
+			response = result.isSuccess();
+			
+		} catch (Exception e) {
+           Log.error( "finishAuthentication exception occurred", e );						
+		}
+		return response;
+	}	
+	
+	private String requestToJson(Object request, String username)
+	{				
+		ObjectMapper jsonMapper = new ObjectMapper()
+			.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+			.setSerializationInclusion(Include.NON_ABSENT)
+			.registerModule(new Jdk8Module());
+		
+		String json = "{}";
+        try
+        {
+			json = jsonMapper.writeValueAsString(request);
+        }
+        catch ( Exception ex )
+        {
+            Log.error( "registerWebAuthn exception occurred", ex );
+        }
+		requests.put(username, request);
+		return json;		
+	}
 
     /**
      * Destroys the plugin.<p>
@@ -265,7 +367,6 @@ public class PadePlugin implements Plugin, MUCEventListener
                 wellknownFolder.mkdirs();
             }
 
-            String server = XMPPServer.getInstance().getServerInfo().getHostname() + ":" + JiveGlobals.getProperty("httpbind.port.secure", "7443");
             List<String> lines = Arrays.asList("<XRD xmlns=\"http://docs.oasis-open.org/ns/xri/xrd-1.0\">", "<Link rel=\"urn:xmpp:alt-connections:xbosh\" href=\"https://" + server + "/http-bind/\"/>", "<Link rel=\"urn:xmpp:alt-connections:websocket\" href=\"wss://" + server + "/ws/\"/>", "</XRD>");
             Path file = Paths.get(wellknownFolder + File.separator + "host-meta");
             Files.write(file, lines, Charset.forName("UTF-8"));

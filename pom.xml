@@ -180,6 +180,14 @@
             <version>1.9.13</version>
         </dependency>
 
+		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.datatype/jackson-datatype-jdk8 -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-jdk8</artifactId>
+			<version>2.12.2</version>
+		</dependency>
+
+
         <!-- https://mvnrepository.com/artifact/org.codehaus.jettison/jettison -->
         <dependency>
             <groupId>org.codehaus.jettison</groupId>
@@ -366,7 +374,12 @@
 			<artifactId>jetty-util</artifactId>
 			<version>9.4.35.v20201120</version>
 		</dependency>
-		
+
+		<dependency>
+		  <groupId>com.yubico</groupId>
+		  <artifactId>webauthn-server-core</artifactId>
+		  <version>1.8.0</version>
+		</dependency>		
     </dependencies>
 	
     <repositories>

@@ -46,6 +46,7 @@
         }
         final boolean conferenceadmin = ParamUtils.getBooleanParameter( request, "conferenceadmin" );
         final boolean securityenabled = ParamUtils.getBooleanParameter( request, "securityenabled" );
+        final boolean webauthn_enabled = ParamUtils.getBooleanParameter( request, "webauthn_enabled" );
         final boolean disableRtx = !ParamUtils.getBooleanParameter( request, "enableRtx" );
         final boolean forceVp9 = ParamUtils.getBooleanParameter( request, "forceVp9" );        
         final String authusername = request.getParameter( "authusername" );
@@ -192,6 +193,7 @@
         {
             JiveGlobals.setProperty( "ofmeet.stereo.enabled", Boolean.toString(enableStereo) );        
             JiveGlobals.setProperty( "ofmeet.winsso.enabled", Boolean.toString( securityenabled ) );
+            JiveGlobals.setProperty( "ofmeet.webauthn.enabled", Boolean.toString( webauthn_enabled ) );			
             JiveGlobals.setProperty( "ofmeet.conference.admin", Boolean.toString( conferenceadmin ) );            
             JiveGlobals.setProperty( "voicebridge.default.proxy.sipauthuser", authusername );
             JiveGlobals.setProperty( "voicebridge.default.proxy.sippassword", sippassword );
@@ -600,6 +602,12 @@
                     <fmt:message key="config.page.configuration.winsso.enabled_description" />
                 </td>
             </tr>
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="webauthn_enabled" ${admin:getBooleanProperty( "ofmeet.webauthn.enabled", false) ? "checked" : ""}>
+                    <fmt:message key="config.page.configuration.webauthn.enabled_description" />
+                </td>
+            </tr>			
             <tr>
                 <td nowrap colspan="2">
                     <input type="checkbox" name="conferenceadmin" ${admin:getBooleanProperty( "ofmeet.conference.admin", true) ? "checked" : ""}>

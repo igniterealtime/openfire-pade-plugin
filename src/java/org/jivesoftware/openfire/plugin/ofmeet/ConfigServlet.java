@@ -108,8 +108,9 @@ public class ConfigServlet extends HttpServlet
             int startBitrate = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.start.bitrate", 800 );
             boolean logStats = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.stats.logging", false );
             String iceServers = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.iceservers", "" );
-            String xirsysUrl = JiveGlobals.getProperty( "ofmeet.xirsys.url", null );
+            String xirsysUrl = JiveGlobals.getProperty( "ofmeet.xirsys.url", null ); 
             boolean ofmeetWinSSOEnabled = JiveGlobals.getBooleanProperty( "ofmeet.winsso.enabled", false );
+            boolean ofmeetWebAuthnEnabled = JiveGlobals.getBooleanProperty( "ofmeet.webauthn.enabled", false );			
             boolean enablePreJoinPage = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.prejoin.page", false );
             boolean enableStereo = JiveGlobals.getBooleanProperty( "ofmeet.stereo.enabled", false );
             boolean enableAudioLevels = JiveGlobals.getBooleanProperty( "ofmeet.audioLevels.enabled", false );
@@ -295,6 +296,7 @@ public class ConfigServlet extends HttpServlet
             config.put( "useRoomAsSharedDocumentName", false );
             config.put( "logStats", logStats );
             config.put( "ofmeetWinSSOEnabled", ofmeetWinSSOEnabled );
+			config.put( "ofmeetWebAuthnEnabled", ofmeetWebAuthnEnabled );
             config.put( "ofmeetStreamKey", ofmeetStreamKey );
 			config.put( "ofmeetLiveStream", ofmeetLiveStream );
 			config.put( "ofmeetStreamPort", ofmeetStreamPort );

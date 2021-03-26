@@ -211,11 +211,11 @@ public class PadePlugin implements Plugin, MUCEventListener
 		try {
 			PublicKeyCredential<AuthenticatorAttestationResponse, ClientRegistrationExtensionOutputs> pkc = PublicKeyCredential.parseRegistrationResponseJson(responseJson);			
 			result = relyingParty.finishRegistration(FinishRegistrationOptions.builder().request(request).response(pkc).build());
+			userRegistrationStorage.addCredential(username, request.getUser().getId().getBytes(), result.getKeyId().getId().getBytes(), result.getPublicKeyCose().getBytes());			
 			
 		} catch (Exception e) {
             Log.error( "finishRegisterWebAuthn exception occurred", e );			
 		}
-		userRegistrationStorage.addCredential(username, request.getUser().getId().getBytes(), result.getKeyId().getId().getBytes(), result.getPublicKeyCose().getBytes());
 
 		return result;
 	}	

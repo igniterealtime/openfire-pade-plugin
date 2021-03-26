@@ -41,6 +41,7 @@ import org.jivesoftware.openfire.plugin.rest.BasicAuth;
 import org.xmpp.packet.JID;
 import net.sf.json.*;
 import org.igniterealtime.openfire.plugins.pushnotification.PushInterceptor;
+import uk.ifsoft.openfire.plugins.pade.PadePlugin;
 
 
 @Path("restapi/v1/meet")
@@ -181,6 +182,88 @@ public class MeetService {
         return Response.status(Response.Status.BAD_REQUEST).build();
     }
 
+    //-------------------------------------------------------
+    //
+    //  Web Authentication
+    //
+    //-------------------------------------------------------
+
+    @POST
+    @Path("/webauthn/register/start/{username}")
+    public String webauthnRegisterStart(@PathParam("username") String username, String name) throws ServiceException
+    {
+        Log.debug("webauthnRegisterStart " + username + " " + name);
+		String json = "{}";
+			
+        try {
+			json = PadePlugin.self.startRegisterWebAuthn(username, name);			
+
+        } catch (Exception e) {
+            Log.error("webauthnRegisterStart", e);
+            throw new ServiceException("Exception", e.getMessage(), ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
+        }
+        
+		return json;
+    }	
+	
+    @POST
+    @Path("/webauthn/register/finish/{username}")
+    public Response webauthnRegisterFinish(@PathParam("username") String username, String json) throws ServiceException
+    {
+        Log.debug("webauthnRegisterFinish " + username + "\n" + json);
+			
+        try {
+			if (PadePlugin.self.finishRegisterWebAuthn(json, username) != null)
+			{
+				return Response.status(Response.Status.OK).build();
+			}			
+
+        } catch (Exception e) {
+            Log.error("webauthnRegisterFinish", e);
+            throw new ServiceException("Exception", e.getMessage(), ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
+        }
+        
+        return Response.status(Response.Status.BAD_REQUEST).build();
+    }	
+	
+    @POST
+    @Path("/webauthn/authenticate/start/{username}")
+    public String webauthnAuthenticateStart(@PathParam("username") String username) throws ServiceException
+    {
+        Log.debug("webauthnAuthenticateStart " + username);
+		String json = "{}";
+			
+        try {
+			json = PadePlugin.self.startAuthentication(username);			
+
+        } catch (Exception e) {
+            Log.error("webauthnAuthenticateStart", e);
+            throw new ServiceException("Exception", e.getMessage(), ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
+        }
+        
+		return json;
+    }	
+	
+    @POST
+    @Path("/webauthn/register/finish/{username}")
+    public Response webauthnAuthenticateFinish(@PathParam("username") String username, String json) throws ServiceException
+    {
+        Log.debug("webauthnAuthenticateFinish " + username + "\n" + json);
+			
+        try {
+			if (PadePlugin.self.finishAuthentication(json, username))
+			{
+				return Response.status(Response.Status.OK).build();
+			}			
+
+        } catch (Exception e) {
+            Log.error("webauthnAuthenticateFinish", e);
+            throw new ServiceException("Exception", e.getMessage(), ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
+        }
+        
+        return Response.status(Response.Status.BAD_REQUEST).build();
+    }	
+	
     //-------------------------------------------------------
     //
     //  Custom Profile update/delete. Use chat/users to fetch

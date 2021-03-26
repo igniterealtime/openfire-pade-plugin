@@ -35,6 +35,11 @@ public class AuthFilter implements ContainerRequestFilter {
         if ("OPTIONS".equals(containerRequest.getMethod())) {
             return containerRequest;
         }
+		
+        // Let web authn through
+        if (containerRequest.getPath().startsWith("restapi/v1/meet/webauthn/")) {
+            return containerRequest;
+        }		
 
         // Get the authentification passed in HTTP headers parameters
         String auth = containerRequest.getHeaderValue("authorization");

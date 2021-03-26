@@ -825,8 +825,10 @@ var ofmeet = (function(of)
             };
 
             if (text) {
+                const color = getRandomColor(APP.conference.getLocalDisplayName());
                 options = {
                     ...options,
+                    particleCount: 1, scalar: 5.0, colors: [ color ],
                     shapes: ['text:' + text]
                 };
             } else if ((new Date()).getMonth() == 11) {

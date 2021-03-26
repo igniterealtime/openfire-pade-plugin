@@ -78,7 +78,7 @@ public class PadePlugin implements Plugin, MUCEventListener
     private PushInterceptor interceptor;
     private OfMeetPlugin ofMeetPlugin;
 	private RelyingParty relyingParty;
-	private RelyingPartyIdentity rpIdentity;
+	private UserRegistrationStorage userRegistrationStorage;
     private String server;
 	private HashMap<String, Object> requests = new HashMap<>();
 	
@@ -184,8 +184,9 @@ public class PadePlugin implements Plugin, MUCEventListener
 		
 		Log.info("Creating webauthn RelyingParty");
 		String hostname = XMPPServer.getInstance().getServerInfo().getHostname();
-		rpIdentity = RelyingPartyIdentity.builder().id(hostname).name("Pade").build();
-		relyingParty = RelyingParty.builder().identity(rpIdentity).credentialRepository(new UserRegistrationStorage()).build();		
+		RelyingPartyIdentity rpIdentity = RelyingPartyIdentity.builder().id(hostname).name("Pade").build();
+		UserRegistrationStorage userRegistrationStorage = new UserRegistrationStorage();
+		relyingParty = RelyingParty.builder().identity(rpIdentity).credentialRepository(userRegistrationStorage).build();		
     }
 	
 	public String startRegisterWebAuthn(String username, String name)
@@ -214,10 +215,7 @@ public class PadePlugin implements Plugin, MUCEventListener
 		} catch (Exception e) {
             Log.error( "finishRegisterWebAuthn exception occurred", e );			
 		}
-        UserIdentity userIdentity = request.getUser();	
-		long userId = BytesUtil.bytesToLong(userIdentity.getId().getBytes());
-		long keyId =  BytesUtil.bytesToLong(result.getKeyId().getId().getBytes());
-		long keyCose = BytesUtil.bytesToLong(result.getPublicKeyCose().getBytes());
+		userRegistrationStorage.addCredential(username, request.getUser().getId().getBytes(), result.getKeyId().getId().getBytes(), result.getPublicKeyCose().getBytes());
 
 		return result;
 	}	

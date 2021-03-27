@@ -858,7 +858,6 @@ var ofmeet = (function(of)
                 };
             }
 
-
             APP.conference.commands.sendCommandOnce("CONFETTI", { value: JSON.stringify(options) })
         };
 
@@ -886,6 +885,11 @@ var ofmeet = (function(of)
             callback: (evt) => { sendConfettiCommand() },
             menu: menu,
         });
+
+        APP.keyboardshortcut.registerShortcut('E', null, () => {
+          sendConfettiCommand()
+        }, i18n('toolbar.shareSomeConfetti'));
+
     }
 
     function addToolbarItem(option) {

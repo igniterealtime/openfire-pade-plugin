@@ -245,7 +245,7 @@ public class MeetService {
     }	
 	
     @POST
-    @Path("/webauthn/register/finish/{username}")
+    @Path("/webauthn/authenticate/finish/{username}")
     public Response webauthnAuthenticateFinish(@PathParam("username") String username, String json) throws ServiceException
     {
         Log.debug("webauthnAuthenticateFinish " + username + "\n" + json);

@@ -823,6 +823,7 @@ var ofmeet = (function(of)
                 dispersion: 0.6
             };
 
+            const now = new Date();
             if (text) {
                 const color = getRandomColor(APP.conference.getLocalDisplayName());
                 options = {
@@ -842,6 +843,18 @@ var ofmeet = (function(of)
                         'text:' + String.fromCodePoint(0x1F56F), // :candle:
                         'text:' + String.fromCodePoint(0x1F98C), // :deer:
                         'text:' + String.fromCodePoint(0x1F514)  // :bell:
+                    ]
+                };
+            } else if ((now.getMonth() == 2 && now.getDate() >= 27) || (now.getMonth() == 3 && now.getDate() <= 5)) { // week of Easter 2021
+                options = {
+                    ...options,
+                    shapes: [
+                        'text:' + String.fromCodePoint(0x26EA),  // :church:
+                        'text:' + String.fromCodePoint(0x1F423), // :chicken:
+                        'text:' + String.fromCodePoint(0x1F426), // :bird:
+                        'text:' + String.fromCodePoint(0x1F430), // :rabbit:
+                        'text:' + String.fromCodePoint(0x1F337), // :tulip:
+                        'text:' + String.fromCodePoint(0x1F95A)  // :egg:
                     ]
                 };
             }
@@ -873,6 +886,11 @@ var ofmeet = (function(of)
             callback: (evt) => { sendConfettiCommand() },
             menu: menu,
         });
+
+        APP.keyboardshortcut.registerShortcut('E', null, () => {
+          sendConfettiCommand()
+        }, i18n('toolbar.shareSomeConfetti'));
+
     }
 
     function addToolbarItem(option) {

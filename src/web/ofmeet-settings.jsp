@@ -643,7 +643,7 @@
                     <input type="checkbox" name="simulcast" ${ofmeetConfig.simulcast ? "checked" : ""}>
                     <fmt:message key="config.page.configuration.simulcast" />
                 </td>
-            </tr>>				
+            </tr>
             </tr>
             <tr>
                 <td nowrap colspan="2">

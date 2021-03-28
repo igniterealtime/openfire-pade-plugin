@@ -84,8 +84,8 @@ public class ConfigServlet extends HttpServlet
             String recordingKey = null;
 
             int minHDHeight = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.min.hdheight", 540 );
-            int desktopSharingFrameRateMin = JiveGlobals.getIntProperty( "ofmeet.desktop.sharing.framerate.min", 5);			
-            int desktopSharingFrameRateMax = JiveGlobals.getIntProperty( "ofmeet.desktop.sharing.framerate.max", 25);					
+            int desktopSharingFrameRateMin = JiveGlobals.getIntProperty( "ofmeet.desktop.sharing.framerate.min", 5);            
+            int desktopSharingFrameRateMax = JiveGlobals.getIntProperty( "ofmeet.desktop.sharing.framerate.max", 25);                   
             String defaultLanguage = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.default.language", null );
             boolean useNicks = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.usenicks", false );
             boolean websockets = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.websockets", true );
@@ -108,9 +108,9 @@ public class ConfigServlet extends HttpServlet
             int startBitrate = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.start.bitrate", 800 );
             boolean logStats = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.stats.logging", false );
             String iceServers = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.iceservers", "" );
-            String xirsysUrl = JiveGlobals.getProperty( "ofmeet.xirsys.url", null ); 
+            String xirsysUrl = JiveGlobals.getProperty( "ofmeet.xirsys.url", null );
+            String etherpadBase = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.etherpad.url", null );
             boolean ofmeetWinSSOEnabled = JiveGlobals.getBooleanProperty( "ofmeet.winsso.enabled", false );
-            boolean ofmeetWebAuthnEnabled = JiveGlobals.getBooleanProperty( "ofmeet.webauthn.enabled", false );			
             boolean enablePreJoinPage = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.prejoin.page", false );
             boolean enableStereo = JiveGlobals.getBooleanProperty( "ofmeet.stereo.enabled", false );
             boolean enableAudioLevels = JiveGlobals.getBooleanProperty( "ofmeet.audioLevels.enabled", false );
@@ -131,10 +131,10 @@ public class ConfigServlet extends HttpServlet
             String minHeightForQualityLvlHigh = JiveGlobals.getProperty( "ofmeet.min.height.for.quality.level.high", "720" );
 
             String displayNotice = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.display.notice", "");
-			String ofmeetStreamKey = JiveGlobals.getProperty( "ofmeet.live.stream.key", "");
-			String ofmeetStreamPort = JiveGlobals.getProperty( "ofmeet.live.stream.port", "8080");			
-            boolean ofmeetLiveStream = JiveGlobals.getBooleanProperty( "ofmeet.live.stream.enabled", false);			
-			
+            String ofmeetStreamKey = JiveGlobals.getProperty( "ofmeet.live.stream.key", "");
+            String ofmeetStreamPort = JiveGlobals.getProperty( "ofmeet.live.stream.port", "8080");          
+            boolean ofmeetLiveStream = JiveGlobals.getBooleanProperty( "ofmeet.live.stream.enabled", false);            
+            
             boolean wsBridgeChannel = JiveGlobals.getBooleanProperty( "ofmeet.bridge.ws.channel", org.jitsi.util.OSUtils.IS_WINDOWS);
 
             if ( xirsysUrl != null )
@@ -261,9 +261,9 @@ public class ConfigServlet extends HttpServlet
             
             final JSONObject desktopSharingFrameRate = new JSONObject();
             desktopSharingFrameRate.put( "min", desktopSharingFrameRateMin );
-            desktopSharingFrameRate.put( "max", desktopSharingFrameRateMax );			
+            desktopSharingFrameRate.put( "max", desktopSharingFrameRateMax );           
             config.put( "desktopSharingFrameRate", desktopSharingFrameRate );
-			
+            
 
             // 'resolution' is used in some cases (chrome <61), newer versions use 'constraints'.
             config.put( "resolution", ofMeetConfig.getResolution() );
@@ -296,10 +296,9 @@ public class ConfigServlet extends HttpServlet
             config.put( "useRoomAsSharedDocumentName", false );
             config.put( "logStats", logStats );
             config.put( "ofmeetWinSSOEnabled", ofmeetWinSSOEnabled );
-			config.put( "ofmeetWebAuthnEnabled", ofmeetWebAuthnEnabled );
             config.put( "ofmeetStreamKey", ofmeetStreamKey );
-			config.put( "ofmeetLiveStream", ofmeetLiveStream );
-			config.put( "ofmeetStreamPort", ofmeetStreamPort );
+            config.put( "ofmeetLiveStream", ofmeetLiveStream );
+            config.put( "ofmeetStreamPort", ofmeetStreamPort );
 
             config.put( "conferences", conferences );
 
@@ -341,6 +340,11 @@ public class ConfigServlet extends HttpServlet
             config.put( "enableNoAudioDetection", true );
 
             config.put( "noticeMessage", displayNotice);
+
+            if ( etherpadBase != null && !etherpadBase.trim().isEmpty() )
+            {
+                config.put( "etherpad_base", etherpadBase.trim() );
+            }
 
             out.println( "var config = " + config.toString( 2 ) + ";" );
         }

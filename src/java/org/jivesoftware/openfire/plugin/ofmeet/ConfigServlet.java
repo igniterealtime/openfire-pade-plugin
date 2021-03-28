@@ -110,6 +110,7 @@ public class ConfigServlet extends HttpServlet
             String iceServers = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.iceservers", "" );
             String xirsysUrl = JiveGlobals.getProperty( "ofmeet.xirsys.url", null );
             String etherpadBase = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.etherpad.url", null );
+            boolean enableEtherpad = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.etherpad", false );
             boolean ofmeetWinSSOEnabled = JiveGlobals.getBooleanProperty( "ofmeet.winsso.enabled", false );
             boolean enablePreJoinPage = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.prejoin.page", false );
             boolean enableStereo = JiveGlobals.getBooleanProperty( "ofmeet.stereo.enabled", false );
@@ -341,7 +342,7 @@ public class ConfigServlet extends HttpServlet
 
             config.put( "noticeMessage", displayNotice);
 
-            if ( etherpadBase != null && !etherpadBase.trim().isEmpty() )
+            if ( enableEtherpad && etherpadBase != null && !etherpadBase.trim().isEmpty() )
             {
                 config.put( "etherpad_base", etherpadBase.trim() );
             }

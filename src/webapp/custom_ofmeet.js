@@ -133,9 +133,9 @@ var ofmeet = (function(of)
     //  Auto-hide Mouse
     //-------------------------------------------------------
 
-    if (!interfaceConfig.OFMEET_ENABLE_MOUSE_SHARING)
+    if (interfaceConfig.OFMEET_MOUSECURSOR_TIMEOUT && interfaceConfig.OFMEET_MOUSECURSOR_TIMEOUT > 0)
     {
-        const mouseIdleTimeout = 10000 // msec
+        console.debug("mousecursor timeout: " + interfaceConfig.OFMEET_MOUSECURSOR_TIMEOUT);
         let mouseIdleTimer;
         let mouseIsHidden = false;
         document.addEventListener("mousemove", function()
@@ -151,7 +151,7 @@ var ofmeet = (function(of)
                     document.querySelector("body").style.cursor = "none";
                     mouseIsHidden = true;
                 }
-            }, mouseIdleTimeout);
+            }, interfaceConfig.OFMEET_MOUSECURSOR_TIMEOUT);
             if (mouseIsHidden)
             {
                 document.querySelector("body").style.cursor = "auto";

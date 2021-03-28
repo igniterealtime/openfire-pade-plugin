@@ -95,6 +95,13 @@
             errors.put( "toolbarTimeout", "Cannot parse value as long value." );
         }
 
+        final String mousecursorTimeout = request.getParameter( "mousecursorTimeout" );
+        try {
+            Long.parseLong( mousecursorTimeout );
+        } catch (NumberFormatException ex ) {
+            errors.put( "mousecursorTimeout", "Cannot parse value as long value." );
+        }
+
         int filmstripMaxHeight = ofmeetConfig.getFilmstripMaxHeight();
         try {
             filmstripMaxHeight = Integer.parseInt( request.getParameter( "filmstripMaxHeight" ) );
@@ -208,6 +215,7 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.shadow.color", shadowColor );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.initial.toolbar.timeout", initialToolbarTimeout );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.toolbar.timeout", toolbarTimeout );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.mousecursor.timeout", mousecursorTimeout );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.default.remote.displayname", defRemoteDisplName );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.default.speaker.displayname", defDomSpkrDisplName );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.default.local.displayname", defLocalDisplName );
@@ -414,6 +422,10 @@
                     <input type="checkbox" name="lipSync" ${ofmeetConfig.lipSync ? "checked" : ""}>
                     <fmt:message key="ofmeet.lipSync.enabled" />
                 </td>
+            </tr>
+            <tr>
+                <td width="200"><fmt:message key="ofmeet.mousecursor.timeout"/>:</td>
+                <td><input type="text" size="10" maxlength="20" name="mousecursorTimeout" value="${admin:getLongProperty("org.jitsi.videobridge.ofmeet.mousecursor.timeout", 10000)}"></td>
             </tr>
         </table>
     </admin:contentBox>

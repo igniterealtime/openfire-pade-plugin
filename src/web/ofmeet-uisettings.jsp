@@ -447,7 +447,7 @@
             </tr>   
             <tr>
                 <td width="200"><fmt:message key="ofmeet.etherpad.url"/>:</td>
-                <td><input type="text" size="60" maxlength="100" name="etherpadurl" value="${admin:getProperty("org.jitsi.videobridge.ofmeet.etherpad.url", "https://etherpad.wikimedia.org/p/")}"></td>
+                <td><input type="text" size="60" maxlength="100" name="etherpadurl" value="${admin:getProperty("org.jitsi.videobridge.ofmeet.etherpad.url", "https://board.net/p/")}"></td>
             </tr>   
             <tr>
                 <td nowrap colspan="2">

@@ -44,6 +44,7 @@
 
         final String cryptpadurl = request.getParameter( "cryptpadurl" );
         final String whiteboardurl = request.getParameter( "whiteboardurl" );                
+        final String etherpadurl = request.getParameter( "etherpadurl" );                
 
         final String webappContextPath = request.getParameter( "webappcontextpath" );
         if ( webappContextPath != null && !StringUtils.escapeHTMLTags( webappContextPath ).equals( webappContextPath ) )
@@ -123,6 +124,7 @@
         final boolean conferenceTags = ParamUtils.getBooleanParameter( request, "conferenceTags" );
         final boolean enableCryptPad = ParamUtils.getBooleanParameter( request, "enableCryptPad" );    
         final boolean enableWhiteboard = ParamUtils.getBooleanParameter( request, "enableWhiteboard" );          
+        final boolean enableEtherpad = ParamUtils.getBooleanParameter( request, "enableEtherpad" );          
         final boolean enableConfetti = ParamUtils.getBooleanParameter( request, "enableConfetti" );          
         final boolean cachePassword = ParamUtils.getBooleanParameter( request, "cachePassword" );     
         final boolean showCaptions = ParamUtils.getBooleanParameter( request, "showCaptions" );        
@@ -226,6 +228,7 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.conference.tags", Boolean.toString( conferenceTags ) );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.cryptpad", Boolean.toString( enableCryptPad ) ); 
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.whiteboard", Boolean.toString( enableWhiteboard ) );             
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.etherpad", Boolean.toString( enableEtherpad ) );             
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.confetti", Boolean.toString( enableConfetti ) );             
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.cache.password", Boolean.toString( cachePassword ) ); 
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.show.captions", Boolean.toString( showCaptions ) ); 
@@ -267,6 +270,7 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.brand.show.watermark", Boolean.toString( brandShowWatermark ) );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.cryptpad.url", cryptpadurl );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.whiteboard.url", whiteboardurl );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.etherpad.url", etherpadurl );
 
             ofmeetConfig.setWebappContextPath( webappContextPath );
             ofmeetConfig.setFilmstripMaxHeight( filmstripMaxHeight );
@@ -442,6 +446,10 @@
                 <td><input type="text" size="60" maxlength="100" name="whiteboardurl" value="${admin:getProperty("org.jitsi.videobridge.ofmeet.whiteboard.url", "https://wbo.ophir.dev/boards/")}"></td>
             </tr>   
             <tr>
+                <td width="200"><fmt:message key="ofmeet.etherpad.url"/>:</td>
+                <td><input type="text" size="60" maxlength="100" name="etherpadurl" value="${admin:getProperty("org.jitsi.videobridge.ofmeet.etherpad.url", "https://etherpad.wikimedia.org/p/")}"></td>
+            </tr>   
+            <tr>
                 <td nowrap colspan="2">
                     <input type="checkbox" name="enableCryptPad" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.cryptpad", true) ? "checked" : ""}>
                     <fmt:message key="ofmeet.enable.cryptpad" />
@@ -451,6 +459,12 @@
                 <td nowrap colspan="2">
                     <input type="checkbox" name="enableWhiteboard" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.whiteboard", true) ? "checked" : ""}>
                     <fmt:message key="ofmeet.enable.whiteboard" />
+                </td>
+            </tr>    
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="enableEtherpad" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.etherpad", true) ? "checked" : ""}>
+                    <fmt:message key="ofmeet.enable.etherpad" />
                 </td>
             </tr>    
             <tr>

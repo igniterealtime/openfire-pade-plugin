@@ -1,23 +1,3 @@
-/* TODO - use this to set localstorage instead of keeping in localstorage
-
-if (navigator.credentials)
-{
-    navigator.credentials.get({password: true, federated: {providers: [ 'https://accounts.google.com' ]}, mediation: "silent"}).then(function(credential)
-    {
-        console.log("credential management api get", credential);
-
-        if (credential)
-        {
-            localStorage.setItem("xmpp_username_override", credential.id);
-            localStorage.setItem("xmpp_password_override", credential.password);
-        }
-
-    }).catch(function(err){
-        console.error ("credential management api get error", err);
-    });
-}
-*/
-
 const welcomeEle = document.getElementById("welcome-page-additional-content-template");
 if (welcomeEle) welcomeEle.innerHTML = interfaceConfig.OFMEET_WELCOME_PAGE_CONTENT;
 

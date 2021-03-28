@@ -180,6 +180,14 @@
             <version>1.9.13</version>
         </dependency>
 
+		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.datatype/jackson-datatype-jdk8 -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-jdk8</artifactId>
+			<version>2.12.2</version>
+		</dependency>
+
+
         <!-- https://mvnrepository.com/artifact/org.codehaus.jettison/jettison -->
         <dependency>
             <groupId>org.codehaus.jettison</groupId>
@@ -207,7 +215,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>24.1.1-jre</version>
+            <version>29.0-jre</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.bitbucket.b_c/jose4j -->
@@ -345,12 +353,14 @@
             <artifactId>xpp3</artifactId>
             <version>1.1.4c</version>
         </dependency> 
+		
 		<!-- https://mvnrepository.com/artifact/org.jitsi/ice4j -->
 		<dependency>
 			<groupId>org.jitsi</groupId>
 			<artifactId>ice4j</artifactId>
-            <version>2.0.0-20190607.184546-36</version>
+			<version>3.0-24-g34c2ce5</version>
 		</dependency>
+
 
         <dependency>
             <groupId>org.jboss.netty</groupId>
@@ -364,7 +374,12 @@
 			<artifactId>jetty-util</artifactId>
 			<version>9.4.35.v20201120</version>
 		</dependency>
-		
+
+		<dependency>
+		  <groupId>com.yubico</groupId>
+		  <artifactId>webauthn-server-core</artifactId>
+		  <version>1.8.0</version>
+		</dependency>		
     </dependencies>
 	
     <repositories>

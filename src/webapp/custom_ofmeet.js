@@ -27,7 +27,6 @@ var ofmeet = (function(of)
         cryptpad: '<svg width="24" height="24" viewBox="0 0 32 32"><path d="M16.057 0l-9.9 1.824a2.129 2.129 0 10-2.26 3.583v14.257c0 1.351.607 2.803 1.789 4.292a22.185 22.185 0 004.425 4.087 43.451 43.451 0 003.85 2.441c.148.492.462.938.966 1.229 1.201.694 2.646.058 3.063-1.145a43.4 43.4 0 003.982-2.525 21.993 21.993 0 004.426-4.087c1.184-1.52 1.791-2.977 1.791-4.292V5.407c1.431-.798 1.457-2.846.053-3.685a2.096 2.096 0 00-2.319.102L16.057 0zm-.031 2.096l9.02 1.652c.011.128.035.255.071.376l-5.306 3.479a5.172 5.172 0 00-7.639.033l-5.238-3.38c.051-.153.089-.309.102-.47l8.99-1.69zm9.732 3.04c.18.154.385.282.608.37v13.855c.004.195-.009.385-.037.574a7.22 7.22 0 01-1.382 2.634 19.059 19.059 0 01-3.819 3.516 36.8 36.8 0 01-3.628 2.287 2.127 2.127 0 00-2.575-.346c-.147.084-.27.189-.387.297a37.297 37.297 0 01-3.546-2.239 18.816 18.816 0 01-3.785-3.514 6.668 6.668 0 01-1.488-3.14V5.54c.209-.08.403-.193.574-.336l6.692 4.288a3.413 3.413 0 013.041-1.823 3.39 3.39 0 013.038 1.824l6.694-4.357zM11.024 9.628a5.042 5.042 0 001.421 5.204l-1.819 3.683h-.04a1.573 1.573 0 101.188 2.603h2.7v-1.757h-2.302l2.162-4.327a.905.905 0 00-.27-1.113 3.282 3.282 0 01-1.45-3.245l-1.591-1.048zm9.969.034l-1.587 1.049c.018.134.027.269.032.405a3.377 3.377 0 01-1.452 2.805.91.91 0 00-.269 1.113l2.126 4.327h-2.297v1.757h2.772c.298.344.731.541 1.186.541a1.572 1.572 0 10-.111-3.138l-1.82-3.688a5.133 5.133 0 001.42-5.171zm-5 .17a1.422 1.422 0 00-.714 2.651 1.421 1.421 0 002.134-1.228v-.005c0-.785-.637-1.418-1.42-1.418z"/></svg>',
         confetti: '<svg width="24" height="24" viewBox="0 0 32 32"><path d="M30 8H18.084v6H32v-4a2 2 0 00-2-2zM2 8a2 2 0 00-2 2v4h14V8H2zm0 8v14a2 2 0 002 2h10V16H2zm26 16a2 2 0 002-2V16H18.084v16H28zM15.998 5.984h.006A.047.047 0 0016 6h8c2.762 0 4-1.344 4-3s-1.238-3-4-3c-2.586 0-4.622 1.164-6 2.514a4.018 4.018 0 00-2.058-.576c-.724 0-1.394.204-1.982.536C12.584 1.14 10.56 0 8 0 5.238 0 4 1.344 4 3s1.238 3 4 3h8l-.002-.016zM26 3c0 .826-1.088 1-2 1h-4.542c-.016-.028-.03-.058-.046-.084C20.428 2.928 21.968 2 24 2c.912 0 2 .174 2 1zM6 3c0-.826 1.088-1 2-1 1.988 0 3.496.89 4.512 1.844-.032.05-.056.104-.086.156H8c-.912 0-2-.174-2-1z"/></svg>',
     };
-    const SMILIES = [":)", ":(", ":D", ":+1:", ":P", ":wave:", ":blush:", ":slightly_smiling_face:", ":scream:", ":*", ":-1:", ":mag:", ":heart:", ":innocent:", ":angry:", ":angel:", ";(", ":clap:", ";)", ":beer:"];
     const nickColors = {}, padsList = [], captions = {msgsDisabled: true, msgs: []}, breakout = {rooms: [], duration: 60, roomCount: 10, wait: 10}, pdf_body = [];
     const lostAudioWorkaroundInterval = 300000; // 5min
     const i18n = i18next.getFixedT(null, 'ofmeet');
@@ -99,10 +98,6 @@ var ofmeet = (function(of)
     {
         console.debug("custom_ofmeet.js beforeunload");
 
-        // TODO - remove this to use credential api instead of keeping in localstorage
-        //localStorage.removeItem("xmpp_username_override");
-        //localStorage.removeItem("xmpp_password_override");
-
         if (APP.connection && !config.webinar)
         {
             if (dbnames.length > 0 || of.recording)
@@ -134,9 +129,9 @@ var ofmeet = (function(of)
     //  Auto-hide Mouse
     //-------------------------------------------------------
 
-    if (!interfaceConfig.OFMEET_ENABLE_MOUSE_SHARING)
+    if (interfaceConfig.OFMEET_MOUSECURSOR_TIMEOUT && interfaceConfig.OFMEET_MOUSECURSOR_TIMEOUT > 0)
     {
-        const mouseIdleTimeout = 10000 // msec
+        console.debug("mousecursor timeout: " + interfaceConfig.OFMEET_MOUSECURSOR_TIMEOUT);
         let mouseIdleTimer;
         let mouseIsHidden = false;
         document.addEventListener("mousemove", function()
@@ -152,7 +147,7 @@ var ofmeet = (function(of)
                     document.querySelector("body").style.cursor = "none";
                     mouseIsHidden = true;
                 }
-            }, mouseIdleTimeout);
+            }, interfaceConfig.OFMEET_MOUSECURSOR_TIMEOUT);
             if (mouseIsHidden)
             {
                 document.querySelector("body").style.cursor = "auto";
@@ -465,12 +460,26 @@ var ofmeet = (function(of)
                     });
                 } else {
                     const jid = APP.connection.xmpp.connection._stropheConn.authzid;
-                    const pass = APP.connection.xmpp.connection._stropheConn.pass;
+                    const pass = APP.connection.xmpp.connection._stropheConn.pass;					
                     localStorage.setItem("xmpp_username_override", jid);
                     localStorage.setItem("xmpp_password_override", pass);
                     console.debug("credentials local store " + jid);
                 }
             }
+
+			if (config.ofmeetWebAuthnEnabled)
+			{ 				
+				localStorage.removeItem("ofmeet.webauthn.disable");			// reset user disable
+				
+				if (!localStorage.getItem("ofmeet.webauthn.username"))
+				{
+					registerWebAuthn();
+				}
+
+				const Strophe = APP.connection.xmpp.connection.Strophe;			
+				const username = Strophe.getNodeFromJid(APP.connection.xmpp.connection._stropheConn.authzid);				
+				localStorage.setItem("ofmeet.webauthn.username", username); 				
+			}
 
             getVCard();
             getBookmarks();
@@ -824,9 +833,12 @@ var ofmeet = (function(of)
                 dispersion: 0.6
             };
 
+            const now = new Date();
             if (text) {
+                const color = getRandomColor(APP.conference.getLocalDisplayName());
                 options = {
                     ...options,
+                    particleCount: 1, scalar: 5.0, colors: [ color ],
                     shapes: ['text:' + text]
                 };
             } else if ((new Date()).getMonth() == 11) {
@@ -841,6 +853,18 @@ var ofmeet = (function(of)
                         'text:' + String.fromCodePoint(0x1F56F), // :candle:
                         'text:' + String.fromCodePoint(0x1F98C), // :deer:
                         'text:' + String.fromCodePoint(0x1F514)  // :bell:
+                    ]
+                };
+            } else if ((now.getMonth() == 2 && now.getDate() >= 27) || (now.getMonth() == 3 && now.getDate() <= 5)) { // week of Easter 2021
+                options = {
+                    ...options,
+                    shapes: [
+                        'text:' + String.fromCodePoint(0x26EA),  // :church:
+                        'text:' + String.fromCodePoint(0x1F423), // :chicken:
+                        'text:' + String.fromCodePoint(0x1F426), // :bird:
+                        'text:' + String.fromCodePoint(0x1F430), // :rabbit:
+                        'text:' + String.fromCodePoint(0x1F337), // :tulip:
+                        'text:' + String.fromCodePoint(0x1F95A)  // :egg:
                     ]
                 };
             }
@@ -872,6 +896,11 @@ var ofmeet = (function(of)
             callback: (evt) => { sendConfettiCommand() },
             menu: menu,
         });
+
+        APP.keyboardshortcut.registerShortcut('E', null, () => {
+          sendConfettiCommand()
+        }, i18n('toolbar.shareSomeConfetti'));
+
     }
 
     function addToolbarItem(option) {
@@ -3152,6 +3181,90 @@ var ofmeet = (function(of)
         return outputArray;
     }
 
+    //-------------------------------------------------------
+    //
+    //  Web Authentication 
+    //
+    //-------------------------------------------------------
+	
+	function registerWebAuthn()
+	{
+		console.debug("registerWebAuthn");
+		const Strophe = APP.connection.xmpp.connection.Strophe;			
+		const username = Strophe.getNodeFromJid(APP.connection.xmpp.connection._stropheConn.authzid); 
+				
+		let bufferDecode = function (e) {
+			const t = "==".slice(0, (4 - e.length % 4) % 4),
+				n = e.replace(/-/g, "+").replace(/_/g, "/") + t,
+				r = atob(n),
+				o = new ArrayBuffer(r.length),
+				c = new Uint8Array(o);
+			for (let e = 0; e < r.length; e++) c[e] = r.charCodeAt(e);
+			return o
+		}
+
+		let bufferEncode = function (e) {
+			const t = new Uint8Array(e);
+			let n = "";
+			for (const e of t) n += String.fromCharCode(e);
+			return btoa(n).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "")
+		}		
+
+		let displayName = "Unknown";
+		
+		if (localStorage["features/base/settings"]) 
+		{
+			const json = JSON.parse(localStorage.getItem("features/base/settings"));
+			
+			if (json && json.displayName)
+			{
+				displayName = json.displayName;
+			}
+		}
+					
+		fetch(location.protocol + "//" + location.host + "/rest/api/restapi/v1/meet/webauthn/register/start/" + username, {method: "POST", body: displayName}).then(function(response){ return response.json()}).then((credentialCreationOptions) => 
+		{	
+			console.debug("/webauthn/register/start", credentialCreationOptions);
+		
+			if (credentialCreationOptions.excludeCredentials) 
+			{
+				credentialCreationOptions.excludeCredentials.forEach(function (listItem) 
+				{
+					listItem.id = bufferDecode(listItem.id)
+				});
+			}
+			
+			credentialCreationOptions.challenge = bufferDecode(credentialCreationOptions.challenge);
+			credentialCreationOptions.user.id = bufferDecode(credentialCreationOptions.user.id);
+			return navigator.credentials.create({publicKey: credentialCreationOptions});
+		
+		}).then((cred) => {
+			console.debug("/webauthn/register/start - cred", cred);	
+			const credential = {};
+			credential.id =     cred.id;
+			credential.rawId =  bufferEncode(cred.rawId);
+			credential.type =   cred.type;
+
+			if (cred.response) {
+			  const clientDataJSON = bufferEncode(cred.response.clientDataJSON);
+			  const attestationObject = bufferEncode(cred.response.attestationObject);
+			  credential.response = {clientDataJSON, attestationObject};
+			  if (!credential.clientExtensionResults) credential.clientExtensionResults = {};
+			}
+			
+			fetch(location.protocol + "//" + location.host + "/rest/api/restapi/v1/meet/webauthn/register/finish/" + username, {method: "POST", body: JSON.stringify(credential)}).then((success) => 
+			{
+				console.debug("webauthn/register/finish ok");				
+				
+			}).catch((error) => {
+				console.error("webauthn/register/finish error", error);					
+			})
+			
+		}).catch((error) => {
+			console.error("webauthn/register/start error", error);					
+		})		
+	}
+	
     //-------------------------------------------------------
     //
     //  idbKeyval

@@ -157,20 +157,28 @@ public class LobbyMuc implements ServerIdentitiesProvider, ServerFeaturesProvide
         return false;
     }
 
-    public void interceptPacket(Packet packet, Session session, boolean incoming, boolean processed) throws PacketRejectedException
-    {
-        if (!processed && packet instanceof IQ && lobbyService != null) {
-            IQ iq = (IQ)packet;
-            Element childElement = iq.getChildElement();
-            if (childElement == null) return;
 
+    public void interceptPacket(Packet packet, Session session, boolean incoming, boolean processed)
+            throws PacketRejectedException {
+        if (!processed && lobbyService != null) {
+            if (packet instanceof IQ) {
+                interceptIQ((IQ) packet, session, incoming, processed);
+            } else if (packet instanceof Presence) {
+                interceptPresence((Presence) packet, session, incoming, processed);
+            } else if (packet instanceof Message) {
+                interceptMessage((Message) packet, session, incoming, processed);
+            }
+        }
+    }
+
+    protected void interceptIQ(IQ iq, Session session, boolean incoming, boolean processed)
+            throws PacketRejectedException {
+        Element childElement = iq.getChildElement();
+        if (childElement != null) {
             String namespace = childElement.getNamespaceURI();
-
-            if ("http://jabber.org/protocol/muc#owner".equals(namespace))
-            {
-                if (isMembersOnly(childElement))
-                {
-                    final String roomName = packet.getTo().getNode();
+            if ("http://jabber.org/protocol/muc#owner".equals(namespace)) {
+                if (isMembersOnly(childElement)) {
+                    final String roomName = iq.getTo().getNode();
                     Log.debug("lobbyroom creating room " + roomName);
 
                     MUCRoom lobbyRoom, mucRoom;
@@ -181,99 +189,107 @@ public class LobbyMuc implements ServerIdentitiesProvider, ServerFeaturesProvide
                         lobbyRoom.setPublicRoom(true);
                         lobbyRoom.setPassword(mucRoom.getPassword());
                         lobbyRoom.unlock(lobbyRoom.getRole());
-                        notify_lobby_enabled(packet.getTo(), packet.getFrom(), true);
-                    }
-                    catch (Exception e) {
+                        notify_lobby_enabled(iq.getTo(), iq.getFrom(), true);
+                    } catch (Exception e) {
                         Log.error("Cannot create MUC room", e);
                         return;
                     }
+                } else {
+                    notify_lobby_enabled(iq.getTo(), iq.getFrom(), false);
                 }
-                else {
-                    notify_lobby_enabled(packet.getTo(), packet.getFrom(), false);
-                }
-            }
-            else
-
-            if ("http://jabber.org/protocol/disco#info".equals(namespace))
-            {
-                if (featureExists(childElement, "muc_membersonly") && iq.getType() == IQ.Type.result && !incoming && MAIN_MUC.equals(iq.getFrom().getDomain()))
-                {
+            } else if ("http://jabber.org/protocol/disco#info".equals(namespace)) {
+                if (featureExists(childElement, "muc_membersonly") && iq.getType() == IQ.Type.result && !incoming
+                        && MAIN_MUC.equals(iq.getFrom().getDomain())) {
                     Element formElement = childElement.element(QName.get("x", "jabber:x:data"));
 
                     if (formElement != null) {
                         Log.debug("lobbyroom updating room " + iq.getFrom() + " config with muc#roominfo_lobbyroom");
                         DataForm form = new DataForm(formElement);
-                        form.addField("muc#roominfo_lobbyroom", "Lobby room jid", FormField.Type.hidden ).addValue(iq.getFrom().getNode() + "@" + LOBBY_MUC);
+                        form.addField("muc#roominfo_lobbyroom", "Lobby room jid", FormField.Type.hidden)
+                                .addValue(iq.getFrom().getNode() + "@" + LOBBY_MUC);
                     }
-                }
-                else
-
-                if (iq.getType() == IQ.Type.get && LOBBY_MUC.equals(iq.getTo().toString()) && childElement.attribute("node") != null)
-                {
-                    if (childElement.attribute("node").getStringValue().equals(LOBBY_IDENTITY_TYPE))
-                    {
+                } else if (iq.getType() == IQ.Type.get && LOBBY_MUC.equals(iq.getTo().toString())
+                        && childElement.attribute("node") != null) {
+                    if (childElement.attribute("node").getStringValue().equals(LOBBY_IDENTITY_TYPE)) {
                         Log.debug("lobbyroom remove node attribute from disco#info for " + LOBBY_MUC);
                         childElement.remove(childElement.attribute("node"));
                     }
                 }
             }
         }
-        else
+    }
 
-        if (!processed && packet instanceof Presence && lobbyService != null) {
-            Presence presence = (Presence)packet;
-            Element childElement = presence.getChildElement("x", "http://jabber.org/protocol/muc");
-
-            if (presence.getError() != null && presence.getError().getElement() != null && childElement != null && presence.getType() == Presence.Type.error && !incoming)
-            {
+    protected void interceptPresence(Presence presence, Session session, boolean incoming, boolean processed)
+            throws PacketRejectedException {
+        Element childElement;
+        if (presence.getError() != null && presence.getError().getElement() != null
+                && presence.getType() == Presence.Type.error && !incoming) {
+            childElement = presence.getChildElement("x", "http://jabber.org/protocol/muc");
+            if (childElement != null) {
                 String lobbyRoom = presence.getFrom().getNode() + "@" + LOBBY_MUC;
-                Log.debug("lobbyroom add  room to disco#info for " + lobbyRoom);
+                Log.debug("lobbyroom add room to disco#info for " + lobbyRoom);
                 childElement.addElement("lobbyroom").setText(lobbyRoom);
             }
-            else
+        } else if (presence.getType() == Presence.Type.unavailable) {
+            childElement = presence.getChildElement("x", "http://jabber.org/protocol/muc#user");
+            if (childElement != null) {
+                Element status = childElement.element("status");
+                if (status != null && status.attribute("code").getStringValue().equals("307")) {
+                    // Processes in a normal room
+                    try {
+                        JID kicked = new JID(childElement.element("item").attribute("jid").getStringValue());
+                        if (presence.getTo().compareTo(kicked) == 0) {
+                            // Add self-presence code (110) to kick presence
+                            childElement.addElement("status").addAttribute("code", "110");
 
-            if (LOBBY_MUC.equals(presence.getFrom().getDomain()) && presence.getType() == Presence.Type.unavailable)
-            {
-                childElement = presence.getChildElement("x", "http://jabber.org/protocol/muc#user");
-                Element nickElement = presence.getChildElement("nick", "http://jabber.org/protocol/nick");
+                            // Remove the user from the allowed list                            
+                            JID roomJID = presence.getFrom();
+                            MUCRoom room = XMPPServer.getInstance().getMultiUserChatManager()
+                                    .getMultiUserChatService(roomJID).getChatRoom(roomJID.getNode());
 
-                if (childElement != null && nickElement != null)
-                {
-                    Element status = childElement.element("status");
+                            List<Presence> addNonePresence = room.addNone(kicked, room.getRole());
 
-                    if (status != null && status.attribute("code").getStringValue().equals("307"))
-                    {
-                        try {
-                            Element actor = childElement.element("item").element("actor");
-                            JID room = new JID(presence.getFrom().getNode() + "@" + MAIN_MUC);
-                            JID from = new JID(actor.attribute("jid").getStringValue());
-                            String invitee = presence.getFrom().toString();
-                            Log.debug("lobbyroom participant refused for " + room + " by " + from);
-                            notify_lobby_access(room, from, invitee, false);
+                            // Send a presence to other room members
+                            for (Presence p : addNonePresence) {
+                                room.send(p, room.getRole());
+                            }
+                        }
+                    } catch (Exception e) {
+                        Log.error("kick failure", e);
+                    }
 
-                        } catch (Exception e) {
-                            Log.error("loobyroom kick failure", e);
+                    // Processes only in lobby
+                    if (LOBBY_MUC.equals(presence.getFrom().getDomain())) {
+                        Element nickElement = presence.getChildElement("nick", "http://jabber.org/protocol/nick");
+                        if (nickElement != null) {
+                            try {
+                                Element actor = childElement.element("item").element("actor");
+                                JID room = new JID(presence.getFrom().getNode() + "@" + MAIN_MUC);
+                                JID from = new JID(actor.attribute("jid").getStringValue());
+                                String invitee = presence.getFrom().toString();
+                                Log.debug("lobbyroom participant refused for " + room + " by " + from);
+                                notify_lobby_access(room, from, invitee, false);
+                            } catch (Exception e) {
+                                Log.error("loobyroom kick failure", e);
+                            }
                         }
                     }
                 }
             }
-
         }
-        else
+    }
 
-        if (!processed && packet instanceof Message && lobbyService != null) {
-            Message message = (Message)packet;
-            Element childElement = message.getChildElement("x", "http://jabber.org/protocol/muc#user");
+    protected void interceptMessage(Message message, Session session, boolean incoming, boolean processed)
+            throws PacketRejectedException {
+        Element childElement = message.getChildElement("x", "http://jabber.org/protocol/muc#user");
 
-            if (childElement != null && MAIN_MUC.equals(message.getTo().getDomain()))
-            {
-                Element inviteElement = childElement.element("invite");
+        if (childElement != null && MAIN_MUC.equals(message.getTo().getDomain())) {
+            Element inviteElement = childElement.element("invite");
 
-                if (inviteElement != null) {
-                    Log.debug("lobbyroom participant accepted for " + message.getTo() + " by " + message.getFrom());
-                    String invitee = inviteElement.attribute("to").getStringValue();
-                    notify_lobby_access(message.getTo(), message.getFrom(), invitee, true);
-                }
+            if (inviteElement != null) {
+                Log.debug("lobbyroom participant accepted for " + message.getTo() + " by " + message.getFrom());
+                String invitee = inviteElement.attribute("to").getStringValue();
+                notify_lobby_access(message.getTo(), message.getFrom(), invitee, true);
             }
         }
     }

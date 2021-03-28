@@ -89,6 +89,7 @@ public class InterfaceConfigServlet extends HttpServlet
             config.put( "DISABLE_VIDEO_BACKGROUND",              JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.disable.video_background",      false               ) );
             config.put( "ACTIVE_SPEAKER_AVATAR_SIZE",            JiveGlobals.getIntProperty(     "org.jitsi.videobridge.ofmeet.active.speaker.avatarsize",     100                 ) );
 
+            config.put( "OFMEET_MOUSECURSOR_TIMEOUT",            JiveGlobals.getIntProperty(     "org.jitsi.videobridge.ofmeet.mousecursor.timeout",           10000               ) );
             config.put( "OFMEET_ENABLE_MOUSE_SHARING",           JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.mouse.sharing",          true                ) );
             config.put( "OFMEET_RECORD_CONFERENCE",              JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.conference.recording",          true                ) );
             config.put( "OFMEET_TAG_CONFERENCE",                 JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.conference.tags",               true                ) );

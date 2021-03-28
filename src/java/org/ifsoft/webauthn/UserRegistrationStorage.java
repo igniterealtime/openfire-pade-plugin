@@ -22,18 +22,19 @@ public class UserRegistrationStorage implements CredentialRepository {
   private Logger Log = LoggerFactory.getLogger(UserRegistrationStorage.class);
   private UserManager userManager = XMPPServer.getInstance().getUserManager(); 
 
-  public void addCredential(String username, byte[] userId, byte[] credentialId, byte[] publicKeyCose) {
+  public void addCredential(String username, byte[] id, byte[] credentialId, byte[] publicKeyCose) {
 	Map<String, String> properties = getUserProperties(username);
 
 	if (properties != null)
 	{
 		JSONObject json = new JSONObject();
 		String keyId = (new ByteArray(credentialId)).getBase64Url();
-		json.put("userId", BytesUtil.bytesToLong(userId));
+		long userId = BytesUtil.bytesToLong(id);
+		json.put("userId", userId);
 		json.put("credentialId", keyId);		
 		json.put("publicKeyCose", (new ByteArray(publicKeyCose)).getBase64Url());			
-		properties.put("webauthn-" + userId, json.toString());
-		properties.put("webauthn-" + keyId, json.toString());		
+		properties.put("webauthn-user-" + userId, json.toString());
+		properties.put("webauthn-key-" + keyId, json.toString());		
 	}
   }  
 
@@ -46,7 +47,7 @@ public class UserRegistrationStorage implements CredentialRepository {
 	{
 		for (String key : properties.keySet())
 		{
-			if (key.startsWith("webauthn-"))
+			if (key.startsWith("webauthn-user-"))
 			{
 				try {
 					JSONObject json = new JSONObject(properties.get(key));
@@ -68,7 +69,7 @@ public class UserRegistrationStorage implements CredentialRepository {
     long userId = BytesUtil.bytesToLong(userHandle.getBytes());	  
 
 	try {	
-		List<String> usernames = PropertyDAO.getUsernameByProperty("webauthn-" + userId, null);	
+		List<String> usernames = PropertyDAO.getUsernameByProperty("webauthn-user-" + userId, null);	
 		
 		if (usernames.size() > 0)
 		{
@@ -91,7 +92,7 @@ public class UserRegistrationStorage implements CredentialRepository {
 	{
 		for (String key : properties.keySet())
 		{
-			if (key.startsWith("webauthn-"))
+			if (key.startsWith("webauthn-user-"))
 			{
 				try {
 					JSONObject json = new JSONObject(properties.get(key));
@@ -111,7 +112,8 @@ public class UserRegistrationStorage implements CredentialRepository {
   @Override
   public Optional<RegisteredCredential> lookup(ByteArray credentialId, ByteArray userHandle) {
     long userId = BytesUtil.bytesToLong(userHandle.getBytes());	  
-	String key = "webauthn-" + credentialId.getBase64Url();	
+	String key = "webauthn-key-" + credentialId.getBase64Url();	
+	Log.debug("lookup " + userId + " " + key);
 	
 	try {	
 		List<String> usernames = PropertyDAO.getUsernameByProperty(key, null);	
@@ -119,23 +121,21 @@ public class UserRegistrationStorage implements CredentialRepository {
 		if (usernames.size() > 0)
 		{
 			for (String username : usernames) {
+				Log.debug("lookup user " + username);				
 				Map<String, String> properties = getUserProperties(username);
 
 				if (properties != null)
 				{
 					JSONObject json = new JSONObject(properties.get(key));	
-					Long userId2 = json.getLong("userId");
+					long userId2 = json.getLong("userId");
+					Log.debug("lookup user webauthn\n" + json);						
 					
-					if (userId2.equals(userId))
-					{
-						ByteArray id = new ByteArray(BytesUtil.longToBytes(userId2));
-						ByteArray keyId = ByteArray.fromBase64Url(json.getString("credentialId"));
-						ByteArray publicKeyCose = ByteArray.fromBase64Url(json.getString("publicKeyCose"));					
-						
+					if (userId2 == userId)
+					{						
 						return Optional.of(RegisteredCredential.builder()
-						  .credentialId(keyId)
-						  .userHandle(id)
-						  .publicKeyCose(publicKeyCose)
+						  .credentialId(credentialId)
+						  .userHandle(userHandle)
+						  .publicKeyCose(ByteArray.fromBase64Url(json.getString("publicKeyCose")))
 						  .signatureCount(1).build());
 					}
 				}
@@ -151,7 +151,7 @@ public class UserRegistrationStorage implements CredentialRepository {
   @Override
   public Set<RegisteredCredential> lookupAll(ByteArray credentialId) {
     Set<RegisteredCredential> result = new HashSet<>();
-	String key = "webauthn-" + credentialId.getBase64Url();	
+	String key = "webauthn-key-" + credentialId.getBase64Url();	
 	
 	try {	
 		List<String> usernames = PropertyDAO.getUsernameByProperty(key, null);	

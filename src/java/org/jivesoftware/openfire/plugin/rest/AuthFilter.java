@@ -37,7 +37,7 @@ public class AuthFilter implements ContainerRequestFilter {
         }
 		
         // Let web authn through
-        if (containerRequest.getPath().startsWith("restapi/v1/meet/webauthn/")) {
+        if (containerRequest.getPath().contains("/meet/webauthn")) {
             return containerRequest;
         }		
 

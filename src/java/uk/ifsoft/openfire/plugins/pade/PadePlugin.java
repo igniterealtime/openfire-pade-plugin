@@ -62,7 +62,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 
 import org.ifsoft.webauthn.UserRegistrationStorage;
-
+import org.ifsoft.sso.Password;
 
 public class PadePlugin implements Plugin, MUCEventListener
 {
@@ -184,13 +184,16 @@ public class PadePlugin implements Plugin, MUCEventListener
 		
 		Log.info("Creating webauthn RelyingParty");
 		String hostname = XMPPServer.getInstance().getServerInfo().getHostname();
+		Set<String> origins = new HashSet<>();		
+		origins.add("https://" + server);
 		RelyingPartyIdentity rpIdentity = RelyingPartyIdentity.builder().id(hostname).name("Pade").build();
-		UserRegistrationStorage userRegistrationStorage = new UserRegistrationStorage();
-		relyingParty = RelyingParty.builder().identity(rpIdentity).credentialRepository(userRegistrationStorage).build();		
+		userRegistrationStorage = new UserRegistrationStorage();
+		relyingParty = RelyingParty.builder().identity(rpIdentity).credentialRepository(userRegistrationStorage).origins(origins).build();		
     }
 	
 	public String startRegisterWebAuthn(String username, String name)
 	{
+        Log.debug("startRegisterWebAuthn " + username + " " + name);		
 		SecureRandom random = new SecureRandom();
 		byte[] userHandle = new byte[64];
 		random.nextBytes(userHandle);
@@ -205,6 +208,7 @@ public class PadePlugin implements Plugin, MUCEventListener
 	
 	public RegistrationResult finishRegisterWebAuthn(String responseJson, String username)
 	{	
+        Log.debug("finishRegisterWebAuthn " + username + "\n" + responseJson);	
 		PublicKeyCredentialCreationOptions request = (PublicKeyCredentialCreationOptions) requests.get(username);
 		RegistrationResult result = null;	
 		
@@ -222,6 +226,8 @@ public class PadePlugin implements Plugin, MUCEventListener
 
 	public String startAuthentication(String username)
 	{
+        Log.debug("startAuthentication " + username);				
+		
 		AssertionRequest request = relyingParty.startAssertion(StartAssertionOptions.builder()
 			.username(Optional.of(username))
 			.build());
@@ -231,6 +237,7 @@ public class PadePlugin implements Plugin, MUCEventListener
 	
 	public boolean finishAuthentication(String responseJson, String username)
 	{	
+        Log.debug("finishAuthentication " + username + "\n" + responseJson);		
 		AssertionRequest request = (AssertionRequest) requests.get(username);
 		boolean response = false;
 		
@@ -240,7 +247,7 @@ public class PadePlugin implements Plugin, MUCEventListener
 			response = result.isSuccess();
 			
 		} catch (Exception e) {
-           Log.error( "finishAuthentication exception occurred", e );						
+           Log.error( "finishAuthentication exception occurred", e );	
 		}
 		return response;
 	}	

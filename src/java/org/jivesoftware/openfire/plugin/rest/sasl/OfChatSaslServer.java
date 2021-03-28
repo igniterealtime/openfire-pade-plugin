@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.SessionManager;
 import org.jivesoftware.openfire.user.*;
+import org.jivesoftware.util.*;
 
 import javax.security.sasl.Sasl;
 import javax.security.sasl.SaslException;
@@ -42,13 +43,15 @@ public class OfChatSaslServer implements SaslServer
     @Override
     public byte[] evaluateResponse( byte[] response ) throws SaslException
     {
+		authorizationID = null;
+		
         if ( response == null )
         {
             throw new IllegalArgumentException( "Argument 'response' cannot be null." );
         }
 
         Log.debug( "Parsing data from client response..." );
-
+				
         final String data = new String( response, StandardCharsets.UTF_8);
         final StringTokenizer tokens = new StringTokenizer( data, ":");
 
@@ -63,6 +66,7 @@ public class OfChatSaslServer implements SaslServer
         Log.debug("OFCHAT authentication " + username + ":" + token);
 
         try {
+			boolean ofmeetWebAuthnEnabled = JiveGlobals.getBooleanProperty( "ofmeet.webauthn.enabled", false );					
             User user = XMPPServer.getInstance().getUserManager().getUser(username);
 
             String base32Secret = user.getProperties().get("ofchat.totp.secret");
@@ -87,7 +91,16 @@ public class OfChatSaslServer implements SaslServer
 
                 Log.debug( "Authentication successful for user " + username + ", code=" + code + ", token=" + token);
                 user.getProperties().put("ofchat.totp.passcode", token);
+				
+			} else if (ofmeetWebAuthnEnabled) {
 
+                Log.debug("OFCHAT web authentication " + user.getProperties().get("webauthn-key-" + token));
+					
+                if (!user.getProperties().containsKey("webauthn-key-" + token))
+                {
+					throw new SaslException("Web authentication failure");
+                }
+					
             } else {
 
                 if (Password.passwords.containsKey(username))     // SSO
@@ -104,7 +117,7 @@ public class OfChatSaslServer implements SaslServer
                     // TODO - can I keep this here for convienience?
                     //Password.passwords.remove(username);
                 }
-                else throw new SaslException("OFCHAT authentication failure");
+                else throw new SaslException("OFCHAT authentication failure");				
             }
 
             authorizationID = username;
@@ -112,7 +125,7 @@ public class OfChatSaslServer implements SaslServer
 
         } catch (Exception e) {
             Log.error("OFCHAT authentication failure", e);
-            throw new SaslException("OFCHAT authentication failure - " + e.toString());
+			throw new SaslException("OFCHAT authentication failure");		
         }
     }
 

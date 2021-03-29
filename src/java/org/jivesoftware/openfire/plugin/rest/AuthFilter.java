@@ -6,6 +6,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response.Status;
 
 import org.jivesoftware.openfire.XMPPServer;
+import org.jivesoftware.openfire.user.*;
 import org.jivesoftware.openfire.admin.AdminManager;
 import org.jivesoftware.openfire.auth.AuthFactory;
 import org.jivesoftware.openfire.auth.ConnectionException;
@@ -20,6 +21,7 @@ import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerRequestFilter;
 
 import org.igniterealtime.openfire.plugins.pushnotification.PushInterceptor;
+import org.ifsoft.sso.Password;
 
 /**
  * The Class AuthFilter.
@@ -70,14 +72,32 @@ public class AuthFilter implements ContainerRequestFilter {
         }
 */
         try {
+			boolean ofmeetWebAuthnEnabled = JiveGlobals.getBooleanProperty( "ofmeet.webauthn.enabled", false );	
+
+			if (ofmeetWebAuthnEnabled)
+			{
+				User user = XMPPServer.getInstance().getUserManager().getUser(usernameAndPassword[0]);
+				
+                if (user.getProperties().containsKey("webauthn-key-" + usernameAndPassword[1]))
+                {
+					return containerRequest;
+                }				
+			}
+			else
+				
+			if (Password.passwords.containsKey(usernameAndPassword[0]))
+			{
+				String passkey = Password.passwords.get(usernameAndPassword[0]).trim();	
+
+				if (passkey.equals(usernameAndPassword[1]))
+				{
+					return containerRequest;
+				}				
+			}				
+				
             AuthFactory.authenticate(usernameAndPassword[0], usernameAndPassword[1]);
-        } catch (UnauthorizedException e) {
-            LOG.warn("Wrong HTTP Basic Auth authorization", e);
-            throw new WebApplicationException(Status.UNAUTHORIZED);
-        } catch (ConnectionException e) {
-            throw new WebApplicationException(Status.UNAUTHORIZED);
-        } catch (InternalUnauthenticatedException e) {
-            throw new WebApplicationException(Status.UNAUTHORIZED);
+        } catch (Exception e) {
+            LOG.error("Wrong HTTP Basic Auth authorization", e);
         }
 
         return containerRequest;

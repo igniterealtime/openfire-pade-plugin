@@ -474,11 +474,7 @@ var ofmeet = (function(of)
 				if (!localStorage.getItem("ofmeet.webauthn.username"))
 				{
 					registerWebAuthn();
-				}
-
-				const Strophe = APP.connection.xmpp.connection.Strophe;			
-				const username = Strophe.getNodeFromJid(APP.connection.xmpp.connection._stropheConn.authzid);				
-				localStorage.setItem("ofmeet.webauthn.username", username); 				
+				}				
 			}
 
             getVCard();
@@ -3198,7 +3194,7 @@ var ofmeet = (function(of)
 	{
 		console.debug("registerWebAuthn");
 		const Strophe = APP.connection.xmpp.connection.Strophe;			
-		const username = Strophe.getNodeFromJid(APP.connection.xmpp.connection._stropheConn.authzid); 
+		const username = Strophe.getNodeFromJid(APP.connection.xmpp.connection._stropheConn.authzid); 						
 				
 		let bufferDecode = function (e) {
 			const t = "==".slice(0, (4 - e.length % 4) % 4),
@@ -3232,6 +3228,9 @@ var ofmeet = (function(of)
 		fetch(location.protocol + "//" + location.host + "/rest/api/restapi/v1/meet/webauthn/register/start/" + username, {method: "POST", body: displayName}).then(function(response){ return response.json()}).then((credentialCreationOptions) => 
 		{	
 			console.debug("/webauthn/register/start", credentialCreationOptions);
+			
+			// confirm webauthn register after first step because second step fails with a re-register
+			localStorage.setItem("ofmeet.webauthn.username", username); 			
 		
 			if (credentialCreationOptions.excludeCredentials) 
 			{

@@ -463,7 +463,7 @@
             </tr>    
             <tr>
                 <td nowrap colspan="2">
-                    <input type="checkbox" name="enableEtherpad" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.etherpad", true) ? "checked" : ""}>
+                    <input type="checkbox" name="enableEtherpad" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.etherpad", false) ? "checked" : ""}>
                     <fmt:message key="ofmeet.enable.etherpad" />
                 </td>
             </tr>    

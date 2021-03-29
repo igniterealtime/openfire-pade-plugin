@@ -71,8 +71,19 @@ public class OfChatSaslServer implements SaslServer
 
             String base32Secret = user.getProperties().get("ofchat.totp.secret");
             String passcode = user.getProperties().get("ofchat.totp.passcode");
+				
+			if (ofmeetWebAuthnEnabled) {
 
-            if (base32Secret != null)
+                Log.debug("OFCHAT web authentication " + user.getProperties().get("webauthn-key-" + token));
+					
+                if (!user.getProperties().containsKey("webauthn-key-" + token))
+                {
+					throw new SaslException("Web authentication failure");
+                }				
+            }
+			else 
+				
+			if (base32Secret != null)
             {
                 String code = TimeBasedOneTimePasswordUtil.generateCurrentNumberString(base32Secret);
 
@@ -90,16 +101,7 @@ public class OfChatSaslServer implements SaslServer
                 }
 
                 Log.debug( "Authentication successful for user " + username + ", code=" + code + ", token=" + token);
-                user.getProperties().put("ofchat.totp.passcode", token);
-				
-			} else if (ofmeetWebAuthnEnabled) {
-
-                Log.debug("OFCHAT web authentication " + user.getProperties().get("webauthn-key-" + token));
-					
-                if (!user.getProperties().containsKey("webauthn-key-" + token))
-                {
-					throw new SaslException("Web authentication failure");
-                }
+                user.getProperties().put("ofchat.totp.passcode", token);				
 					
             } else {
 

@@ -855,6 +855,13 @@ var ofmeet = (function(of)
                         'text:' + String.fromCodePoint(0x1F514)  // :bell:
                     ]
                 };
+            } else if ((now.getTimezoneOffset() == 9*60) && (now.getMonth() == 2 && now.getDate() >= 25) || (now.getMonth() == 3 && now.getDate() <= 15)) { // Hanami
+                options = {
+                    ...options,
+                    shapes: [
+                        'text:' + String.fromCodePoint(0x1F338)  // :sakura:
+                    ]
+                };
             } else if ((now.getMonth() == 2 && now.getDate() >= 27) || (now.getMonth() == 3 && now.getDate() <= 5)) { // week of Easter 2021
                 options = {
                     ...options,

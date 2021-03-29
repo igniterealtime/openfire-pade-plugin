@@ -110,7 +110,7 @@ public class ConfigServlet extends HttpServlet
             String iceServers = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.iceservers", "" );
             String xirsysUrl = JiveGlobals.getProperty( "ofmeet.xirsys.url", null );
             String etherpadBase = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.etherpad.url", null );
-            boolean enableEtherpad = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.etherpad", false );
+            boolean enableEtherpad = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.etherpad", true );
             boolean ofmeetWinSSOEnabled = JiveGlobals.getBooleanProperty( "ofmeet.winsso.enabled", false );
             boolean ofmeetWebAuthnEnabled = JiveGlobals.getBooleanProperty( "ofmeet.webauthn.enabled", false );			
             boolean enablePreJoinPage = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.prejoin.page", false );

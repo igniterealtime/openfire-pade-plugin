@@ -5,7 +5,7 @@
     },
     "toolbar": {
         "recordMeeting": "Record Meeting",
-		"enterStreamKey": "Please enter a valid stream key!",
+        "enterStreamKey": "Please enter a valid stream key!",
         "recordDesktopApp": "Record/Stream Meeting Browser Tab",
         "enableConferenceTags": "Enable Conference Captions/Subtitles",
         "launchCryptPadApplication": "Launch CryptPad Application",
@@ -39,28 +39,35 @@
         "leaving": "Leaving breakout in {{sec}} seconds"
     },
     "takePhoto": {
-	    "handsRaised": "Hands Raised",
-	    "location": "Location",
-	    "date": "Date",
-	    "subject": "Subject",
-	    "host": "Host",
-	    "activity": "Activity"
-	},
-	"handsRaised": {
-		"handsRaised": "Hands Raised: {{raised}} of {{total}} ({{percentage}}%)"
-	},
-	"tag": {
-		"conferenceCaptionsSubTitles": "Conference Captions/Sub Titles",
-		"location": "Location",
-		"date": "Date",
-		"subject": "Subject",
-		"host": "Host",
-		"activity": "Activity",
-		"enableMessageCaptions": "Enable Message Captions",
-		"disableMessageCaptions": "Disable Message Captions",
-		"enableVoiceTranscription": "Enable Voice Transcription",
-		"disableVoiceTranscription": "Disable Voice Transcription",
-		"save": "Save",
-		"cancel": "Cancel"
-	}
+        "handsRaised": "Hands Raised",
+        "location": "Location",
+        "date": "Date",
+        "subject": "Subject",
+        "host": "Host",
+        "activity": "Activity"
+    },
+    "handsRaised": {
+        "handsRaised": "Hands Raised: {{raised}} of {{total}} ({{percentage}}%)"
+    },
+    "tag": {
+        "conferenceCaptionsSubTitles": "Conference Captions/Sub Titles",
+        "location": "Location",
+        "date": "Date",
+        "subject": "Subject",
+        "host": "Host",
+        "activity": "Activity",
+        "enableMessageCaptions": "Enable Message Captions",
+        "disableMessageCaptions": "Disable Message Captions",
+        "enableVoiceTranscription": "Enable Voice Transcription",
+        "disableVoiceTranscription": "Disable Voice Transcription",
+        "save": "Save",
+        "cancel": "Cancel"
+    },
+    "avatar": {
+        "deletePersonalAvatar": "Delete personal avatar",
+        "changeInitialsAvatarColor": "Change initials avatar colour",
+        "avatarUpload": "Avatar Upload",
+        "imageFileTypeError": "Image file must be a png or jpg file",
+        "imageFileError ": "Image file error "
+    }
 }

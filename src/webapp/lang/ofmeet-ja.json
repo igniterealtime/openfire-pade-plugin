@@ -38,28 +38,35 @@
         "leaving": "あと{{sec}}秒でブレイクアウトから退出します。"
     },
     "takePhoto": {
-	    "handsRaised": "挙手",
-	    "location": "場所",
-	    "date": "日付",
-	    "subject": "会議名",
-	    "host": "開催者",
-	    "activity": "内容"
-	},
-	"handsRaised": {
-		"handsRaised": "挙手: {{total}}人中{{raised}}人 ({{percentage}}%)"
-	},
-	"tag": {
-		"conferenceCaptionsSubTitles": "会議の追加情報",
-		"location": "場所",
-		"date": "日付",
-		"subject": "会議名",
-		"host": "開催者",
-		"activity": "内容",
-		"enableMessageCaptions": "メッセージの字幕表示を有効化",
-		"disableMessageCaptions": "メッセージの字幕表示を無効化",
-		"enableVoiceTranscription": "音声認識を有効化",
-		"disableVoiceTranscription": "音声認識を無効化",
-		"save": "保存",
-		"cancel": "キャンセル"
-	}
+        "handsRaised": "挙手",
+        "location": "場所",
+        "date": "日付",
+        "subject": "会議名",
+        "host": "開催者",
+        "activity": "内容"
+    },
+    "handsRaised": {
+        "handsRaised": "挙手: {{total}}人中{{raised}}人 ({{percentage}}%)"
+    },
+    "tag": {
+        "conferenceCaptionsSubTitles": "会議の追加情報",
+        "location": "場所",
+        "date": "日付",
+        "subject": "会議名",
+        "host": "開催者",
+        "activity": "内容",
+        "enableMessageCaptions": "メッセージの字幕表示を有効化",
+        "disableMessageCaptions": "メッセージの字幕表示を無効化",
+        "enableVoiceTranscription": "音声認識を有効化",
+        "disableVoiceTranscription": "音声認識を無効化",
+        "save": "保存",
+        "cancel": "キャンセル"
+    },
+    "avatar": {
+        "deletePersonalAvatar": "アバターを削除",
+        "changeInitialsAvatarColor": "頭文字アバターの色を変更",
+        "avatarUpload": "アバターのアップロード",
+        "imageFileTypeError": "画像はPNGかJPEGファイルの必要があります。",
+        "imageFileError ": "画像ファイルエラー "
+    }
 }

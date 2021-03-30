@@ -254,6 +254,10 @@
     background-color: #313d52;
 }
 
+.ofmeet-toolbox-menu-item * {
+    pointer-events: none
+}
+
 .ofmeet-toolbox-menu-item svg {
     fill: #b8c7e0 !important;
 }
@@ -264,4 +268,13 @@
     height: 24px;
     width: 24px;
     text-align: center;
+}
+
+.new-toolbox .toolbox-content .overflow-menu .profile-text {
+    max-width: 250px;
+}
+
+.popupmenu {
+    width: auto;
+    max-width: 250px;
 }

@@ -165,7 +165,6 @@
         final boolean enableLanguageDetection = ParamUtils.getBooleanParameter( request, "enableLanguageDetection" );  
         
         final boolean randomRoomNames = ParamUtils.getBooleanParameter( request, "randomRoomNames" );
-        final boolean lipSync = ParamUtils.getBooleanParameter( request, "lipSync" );
 
         final boolean enableEmoticonConfetti = ParamUtils.getBooleanParameter( request, "enableEmoticonConfetti" );
         final boolean closeEmoticonConfettiMenu = ParamUtils.getBooleanParameter( request, "closeEmoticonConfettiMenu" );
@@ -279,7 +278,6 @@
             ofmeetConfig.setVerticalFilmstrip( verticalFilmstrip );
             ofmeetConfig.setFilmstripOnly( filmstripOnly );
 
-            ofmeetConfig.setLipSync( lipSync );
             ofmeetConfig.setWatermarkLogoUrl( watermarkLogoUrl );
             ofmeetConfig.setBrandWatermarkLogoUrl( brandWatermarkLogoUrl );
 
@@ -423,12 +421,6 @@
                     <fmt:message key="ofmeet.enable.languagedetection" />
                 </td>
             </tr>            
-            <tr>
-                <td nowrap colspan="2">
-                    <input type="checkbox" name="lipSync" ${ofmeetConfig.lipSync ? "checked" : ""}>
-                    <fmt:message key="ofmeet.lipSync.enabled" />
-                </td>
-            </tr>
             <tr>
                 <td width="200"><fmt:message key="ofmeet.mousecursor.timeout"/>:</td>
                 <td><input type="text" size="10" maxlength="20" name="mousecursorTimeout" value="${admin:getLongProperty("org.jitsi.videobridge.ofmeet.mousecursor.timeout", 10000)}"></td>

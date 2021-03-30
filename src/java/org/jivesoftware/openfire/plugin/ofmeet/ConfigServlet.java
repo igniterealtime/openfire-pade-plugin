@@ -111,8 +111,9 @@ public class ConfigServlet extends HttpServlet
             String xirsysUrl = JiveGlobals.getProperty( "ofmeet.xirsys.url", null );
             String etherpadBase = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.etherpad.url", null );
             boolean enableEtherpad = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.etherpad", true );
+            boolean startEtherpad = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.start.etherpad", false );
             boolean ofmeetWinSSOEnabled = JiveGlobals.getBooleanProperty( "ofmeet.winsso.enabled", false );
-            boolean ofmeetWebAuthnEnabled = JiveGlobals.getBooleanProperty( "ofmeet.webauthn.enabled", false );			
+            boolean ofmeetWebAuthnEnabled = JiveGlobals.getBooleanProperty( "ofmeet.webauthn.enabled", false );
             boolean enablePreJoinPage = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.prejoin.page", false );
             boolean enableStereo = JiveGlobals.getBooleanProperty( "ofmeet.stereo.enabled", false );
             boolean enableAudioLevels = JiveGlobals.getBooleanProperty( "ofmeet.audioLevels.enabled", false );
@@ -298,7 +299,7 @@ public class ConfigServlet extends HttpServlet
             config.put( "useRoomAsSharedDocumentName", false );
             config.put( "logStats", logStats );
             config.put( "ofmeetWinSSOEnabled", ofmeetWinSSOEnabled );
-            config.put( "ofmeetWebAuthnEnabled", ofmeetWebAuthnEnabled );						
+            config.put( "ofmeetWebAuthnEnabled", ofmeetWebAuthnEnabled );
             config.put( "ofmeetStreamKey", ofmeetStreamKey );
             config.put( "ofmeetLiveStream", ofmeetLiveStream );
             config.put( "ofmeetStreamPort", ofmeetStreamPort );
@@ -347,6 +348,7 @@ public class ConfigServlet extends HttpServlet
             if ( enableEtherpad && etherpadBase != null && !etherpadBase.trim().isEmpty() )
             {
                 config.put( "etherpad_base", etherpadBase.trim() );
+                config.put( "openSharedDocumentOnJoin", startEtherpad );
             }
 
             out.println( "var config = " + config.toString( 2 ) + ";" );

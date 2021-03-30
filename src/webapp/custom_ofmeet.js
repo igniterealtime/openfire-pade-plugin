@@ -912,7 +912,7 @@ var ofmeet = (function(of)
 
             const now = new Date();
             if (text) {
-                const color = getRandomColor(APP.conference.getLocalDisplayName());
+                const color = getNickColor();
                 options = {
                     ...options,
                     particleCount: 1, scalar: 5.0, colors: [ color ],

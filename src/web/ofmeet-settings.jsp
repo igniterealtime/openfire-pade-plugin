@@ -60,7 +60,7 @@
 
         final String liveStreamUrl = request.getParameter( "liveStreamUrl" );  
         final String liveStreamKey = request.getParameter( "liveStreamKey" );            
-        final boolean liveStreamEnabled = ParamUtils.getBooleanParameter( request, "liveStreamEnabled" ); 		
+        final boolean liveStreamEnabled = ParamUtils.getBooleanParameter( request, "liveStreamEnabled" );       
 
         final boolean startaudioonly = ParamUtils.getBooleanParameter( request, "startaudioonly" );
 
@@ -89,8 +89,8 @@
         final boolean useNicks = ParamUtils.getBooleanParameter( request, "usenicks" );
 
         final String maxFullResolutionParticipants = request.getParameter( "maxFullResolutionParticipants" );  
-		final String desktopSharingFrameRateMin = request.getParameter( "desktopSharingFrameRateMin" ); 
-		final String desktopSharingFrameRateMax = request.getParameter( "desktopSharingFrameRateMax" ); 		
+        final String desktopSharingFrameRateMin = request.getParameter( "desktopSharingFrameRateMin" ); 
+        final String desktopSharingFrameRateMax = request.getParameter( "desktopSharingFrameRateMax" );         
         final String minHeightForQualityLow = request.getParameter( "minHeightForQualityLow" );  
         final String minHeightForQualityStd = request.getParameter( "minHeightForQualityStd" );         
         final String minHeightForQualityHigh = request.getParameter( "minHeightForQualityHigh" );           
@@ -184,16 +184,16 @@
         final boolean simulcast = ParamUtils.getBooleanParameter( request, "simulcast" );
         final boolean adaptivesimulcast = ParamUtils.getBooleanParameter( request, "adaptivesimulcast" );
         final boolean enableStereo = ParamUtils.getBooleanParameter( request, "enableStereo" );
-		
-		if (jvmJvb.isEmpty()) errors.put( "jvmJvb", "Cannot be empty" );
-		if (jvmJicofo.isEmpty()) errors.put( "jvmJicofo", "Cannot be empty" );
-		if (jvmJigasi.isEmpty()) errors.put( "jvmJigasi", "Cannot be empty" );
+        
+        if (jvmJvb.isEmpty()) errors.put( "jvmJvb", "Cannot be empty" );
+        if (jvmJicofo.isEmpty()) errors.put( "jvmJicofo", "Cannot be empty" );
+        if (jvmJigasi.isEmpty()) errors.put( "jvmJigasi", "Cannot be empty" );
 
         if ( errors.isEmpty() )
         {
             JiveGlobals.setProperty( "ofmeet.stereo.enabled", Boolean.toString(enableStereo) );        
             JiveGlobals.setProperty( "ofmeet.winsso.enabled", Boolean.toString( securityenabled ) );
-            JiveGlobals.setProperty( "ofmeet.webauthn.enabled", Boolean.toString( webauthn_enabled ) );			
+            JiveGlobals.setProperty( "ofmeet.webauthn.enabled", Boolean.toString( webauthn_enabled ) );         
             JiveGlobals.setProperty( "ofmeet.conference.admin", Boolean.toString( conferenceadmin ) );            
             JiveGlobals.setProperty( "voicebridge.default.proxy.sipauthuser", authusername );
             JiveGlobals.setProperty( "voicebridge.default.proxy.sippassword", sippassword );
@@ -219,7 +219,7 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.jigasi.jvm.customOptions", jvmJigasi ); 
 
             JiveGlobals.setProperty( "ofmeet.jicofo.force.vp9", Boolean.toString( forceVp9 ) );  
-            JiveGlobals.setProperty( "ofmeet.desktop.sharing.framerate.min", desktopSharingFrameRateMin);			
+            JiveGlobals.setProperty( "ofmeet.desktop.sharing.framerate.min", desktopSharingFrameRateMin);           
             JiveGlobals.setProperty( "ofmeet.desktop.sharing.framerate.max", desktopSharingFrameRateMax);
             JiveGlobals.setProperty( "ofmeet.max.full.resolution.participants", maxFullResolutionParticipants );            
             JiveGlobals.setProperty( "ofmeet.min.height.for.quality.level.low", minHeightForQualityLow );  
@@ -253,9 +253,9 @@
             ofmeetConfig.setP2pDisableH264( p2pDisableH264 );
             ofmeetConfig.setP2pUseStunTurn( p2pUseStunTurn );    
 
-            ofmeetConfig.liveStreamUrl.set( liveStreamUrl );			
+            ofmeetConfig.liveStreamUrl.set( liveStreamUrl );            
             ofmeetConfig.liveStreamKey.set( liveStreamKey );
-            ofmeetConfig.liveStreamEnabled.set( Boolean.toString(liveStreamEnabled) );			
+            ofmeetConfig.liveStreamEnabled.set( Boolean.toString(liveStreamEnabled) );          
 
             container.restartNeeded = true;
 
@@ -563,7 +563,7 @@
                 <td><input type="text" size="10" maxlength="5" name="startaudiomuted" value="${ofmeetConfig.startAudioMuted}"></td>
             </tr>
         </table>
-		
+        
         <p style="margin-top: 2em"><fmt:message key="config.page.configuration.ofmeet.desktop.sharing.framerate.desc"/></p>
         <table cellpadding="3" cellspacing="0" border="0" width="100%">
             <tr>
@@ -573,8 +573,8 @@
             <tr>
                 <td align="left" width="300"><fmt:message key="config.page.configuration.ofmeet.desktop.sharing.framerate.max"/>:</td>
                 <td><input type="text" size="10" maxlength="5" name="desktopSharingFrameRateMax" value="${admin:getProperty( "ofmeet.desktop.sharing.framerate.max", "25")}"></td>
-            </tr>			
-        </table>		
+            </tr>           
+        </table>        
     </admin:contentBox>
 
     <fmt:message key="config.page.configuration.security.title" var="boxtitlesecurity"/>
@@ -607,7 +607,7 @@
                     <input type="checkbox" name="webauthn_enabled" ${admin:getBooleanProperty( "ofmeet.webauthn.enabled", false) ? "checked" : ""}>
                     <fmt:message key="config.page.configuration.webauthn.enabled_description" />
                 </td>
-            </tr>			
+            </tr>           
             <tr>
                 <td nowrap colspan="2">
                     <input type="checkbox" name="conferenceadmin" ${admin:getBooleanProperty( "ofmeet.conference.admin", true) ? "checked" : ""}>
@@ -665,27 +665,27 @@
             </tr>                 
         </table>
     </admin:contentBox>
-	
+    
     <fmt:message key="config.page.configuration.livestream.title" var="boxtitlelivestream"/>
     <admin:contentBox title="${boxtitlelivestream}">
         <p><fmt:message key="config.page.configuration.livestream.description"/></p>
         <table cellpadding="3" cellspacing="0" border="0" width="100%">
-            <tr>			
+            <tr>            
                 <td nowrap colspan="2">
                     <input type="checkbox" id="liveStreamEnabled" name="liveStreamEnabled" ${ofmeetConfig.getLiveStreamEnabled() ? "checked" : ""}>
                     <fmt:message key="config.page.configuration.livestream.enabled" />
-                </td>				
+                </td>               
             </tr>
             <tr>
                 <td width="200"><label for="liveStreamUrl"><fmt:message key="config.page.configuration.livestream.url"/>:</label></td>
                 <td><input type="text" size="60" maxlength="100" name="liveStreamUrl" id="liveStreamUrl" value="${ofmeetConfig.liveStreamUrl.get()}"></td>
-            </tr>	
+            </tr>   
             <tr>
                 <td width="200"><label for="liveStreamKey"><fmt:message key="config.page.configuration.livestream.key"/>:</label></td>
                 <td><input type="text" size="60" maxlength="100" name="liveStreamKey" id="liveStreamKey" value="${ofmeetConfig.liveStreamKey.get()}"></td>
-            </tr>				
+            </tr>               
         </table>
-    </admin:contentBox>	
+    </admin:contentBox> 
 
     <input type="hidden" name="csrf" value="${csrf}">
 

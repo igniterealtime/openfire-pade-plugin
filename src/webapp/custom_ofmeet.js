@@ -32,6 +32,7 @@ var ofmeet = (function(of)
     const padsList = [], captions = {msgsDisabled: true, msgs: []}, breakout = {rooms: [], duration: 60, roomCount: 10, wait: 10}, pdf_body = [];
     const lostAudioWorkaroundInterval = 300000; // 5min
     const i18n = i18next.getFixedT(null, 'ofmeet');
+    const avatarFileSizeLimit = 1024 * 1024 * 2; //2MiB
     const AvatarType = {
         UPLOAD: 'avatar.upload',
         VCARD: 'avatar.vcard',
@@ -2904,25 +2905,31 @@ var ofmeet = (function(of)
     {
         var files = event.target.files;
 
-        for (var i = 0, file; file = files[i]; i++)
+        for (const file of files)
         {
             if (file.name.toLowerCase().endsWith(".png") || file.name.toLowerCase().endsWith(".jpg") || file.type == 'image/png' || file.type == 'image/jpeg' )
             {
-                var reader = new FileReader();
-
-                reader.onload = function(event)
+                if (file.size <= avatarFileSizeLimit)
                 {
-                    console.debug('uploadAvatar');
-                    changeAvatar(event.target.result, AvatarType.UPLOAD);
-                };
+                    var reader = new FileReader();
 
-                reader.onerror = function(event) {
-                    console.error("uploadAvatar - error", event);
-                    APP.UI.messageHandler.notify(i18n('avatar.avatarUpload'), i18n('avatar.imageFileError') + event);
-                };
+                    reader.onload = function(event)
+                    {
+                        console.debug('uploadAvatar');
+                        changeAvatar(event.target.result, AvatarType.UPLOAD);
+                    };
 
-                reader.readAsDataURL(file);
+                    reader.onerror = function(event) {
+                        console.error("uploadAvatar - error", event);
+                        APP.UI.messageHandler.notify(i18n('avatar.avatarUpload'), i18n('avatar.imageFileError') + event);
+                    };
 
+                    reader.readAsDataURL(file);
+                }
+                else
+                {
+                    APP.UI.messageHandler.notify(i18n('avatar.avatarUpload'), i18n('avatar.imageFileSizeError', {size: (avatarFileSizeLimit / 1024 / 1024)}));
+                }
             } else {
                 APP.UI.messageHandler.notify(i18n('avatar.avatarUpload'), i18n('avatar.imageFileTypeError'));
             }

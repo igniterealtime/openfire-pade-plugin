@@ -67,6 +67,7 @@
         "changeInitialsAvatarColor": "頭文字アバターの色を変更",
         "avatarUpload": "アバターのアップロード",
         "imageFileTypeError": "画像はPNGかJPEGファイルの必要があります。",
+        "imageFileSizeError": "画像のサイズはは{{size}}MB以下の必要があります。",
         "imageFileError ": "画像ファイルエラー "
     }
 }

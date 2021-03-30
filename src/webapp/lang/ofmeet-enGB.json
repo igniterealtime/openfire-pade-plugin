@@ -68,6 +68,7 @@
         "changeInitialsAvatarColor": "Change initials avatar colour",
         "avatarUpload": "Avatar Upload",
         "imageFileTypeError": "Image file must be a png or jpg file",
+        "imageFileSizeError": "Image file size must be less than {{size}}MB",
         "imageFileError ": "Image file error "
     }
 }

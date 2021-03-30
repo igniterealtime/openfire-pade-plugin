@@ -125,6 +125,7 @@
         final boolean enableCryptPad = ParamUtils.getBooleanParameter( request, "enableCryptPad" );    
         final boolean enableWhiteboard = ParamUtils.getBooleanParameter( request, "enableWhiteboard" );          
         final boolean enableEtherpad = ParamUtils.getBooleanParameter( request, "enableEtherpad" );          
+        final boolean startEtherpad = ParamUtils.getBooleanParameter( request, "startEtherpad" );          
         final boolean enableConfetti = ParamUtils.getBooleanParameter( request, "enableConfetti" );          
         final boolean cachePassword = ParamUtils.getBooleanParameter( request, "cachePassword" );     
         final boolean showCaptions = ParamUtils.getBooleanParameter( request, "showCaptions" );        
@@ -229,6 +230,7 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.cryptpad", Boolean.toString( enableCryptPad ) ); 
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.whiteboard", Boolean.toString( enableWhiteboard ) );             
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.etherpad", Boolean.toString( enableEtherpad ) );             
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.start.etherpad", Boolean.toString( startEtherpad ) );             
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.confetti", Boolean.toString( enableConfetti ) );             
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.cache.password", Boolean.toString( cachePassword ) ); 
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.show.captions", Boolean.toString( showCaptions ) ); 
@@ -462,9 +464,13 @@
                 </td>
             </tr>    
             <tr>
-                <td nowrap colspan="2">
+                <td nowrap>
                     <input type="checkbox" name="enableEtherpad" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.etherpad", true) ? "checked" : ""}>
                     <fmt:message key="ofmeet.enable.etherpad" />
+                </td>
+                <td nowrap>
+                    <input type="checkbox" name="startEtherpad" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.start.etherpad", false) ? "checked" : ""}>
+                    <fmt:message key="ofmeet.start.etherpad" />
                 </td>
             </tr>    
             <tr>

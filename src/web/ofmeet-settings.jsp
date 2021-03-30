@@ -184,6 +184,7 @@
         final boolean simulcast = ParamUtils.getBooleanParameter( request, "simulcast" );
         final boolean adaptivesimulcast = ParamUtils.getBooleanParameter( request, "adaptivesimulcast" );
         final boolean enableStereo = ParamUtils.getBooleanParameter( request, "enableStereo" );
+        final boolean lipSync = ParamUtils.getBooleanParameter( request, "lipSync" );
         
         if (jvmJvb.isEmpty()) errors.put( "jvmJvb", "Cannot be empty" );
         if (jvmJicofo.isEmpty()) errors.put( "jvmJicofo", "Cannot be empty" );
@@ -191,7 +192,7 @@
 
         if ( errors.isEmpty() )
         {
-            JiveGlobals.setProperty( "ofmeet.stereo.enabled", Boolean.toString(enableStereo) );        
+            JiveGlobals.setProperty( "ofmeet.stereo.enabled", Boolean.toString(enableStereo) );
             JiveGlobals.setProperty( "ofmeet.winsso.enabled", Boolean.toString( securityenabled ) );
             JiveGlobals.setProperty( "ofmeet.webauthn.enabled", Boolean.toString( webauthn_enabled ) );         
             JiveGlobals.setProperty( "ofmeet.conference.admin", Boolean.toString( conferenceadmin ) );            
@@ -232,6 +233,7 @@
             ofmeetConfig.setStartAudioOnly( startaudioonly );
             ofmeetConfig.setStartAudioMuted( startaudiomuted == null || startaudiomuted.isEmpty() ? null : Integer.parseInt( startaudiomuted ));
             ofmeetConfig.setStartVideoMuted( startvideomuted == null || startvideomuted.isEmpty() ? null : Integer.parseInt( startvideomuted ));
+            ofmeetConfig.setLipSync( lipSync );
 
             ofmeetConfig.setVideoConstraintsIdealAspectRatio( videoConstraintsIdealAspectRatio );
             ofmeetConfig.setVideoConstraintsMinHeight( Integer.parseInt( videoConstraintsMinHeight ) );
@@ -522,6 +524,12 @@
                     <fmt:message key="config.page.configuration.ofmeet.stereo.enabled"/>
                 </td>
             </tr>            
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="lipSync" ${ofmeetConfig.lipSync ? "checked" : ""}>
+                    <fmt:message key="ofmeet.lipSync.enabled" />
+                </td>
+            </tr>
         </table>
         
        <p style="margin-top: 2em"><fmt:message key="config.page.configuration.ofmeet.min.height.for.quality.level"/></p>

@@ -527,22 +527,22 @@ var ofmeet = (function(of)
                     });
                 } else {
                     const jid = APP.connection.xmpp.connection._stropheConn.authzid;
-                    const pass = APP.connection.xmpp.connection._stropheConn.pass;					
+                    const pass = APP.connection.xmpp.connection._stropheConn.pass;                  
                     storage.setItem("xmpp_username_override", jid);
                     storage.setItem("xmpp_password_override", pass);
                     console.debug("credentials local store " + jid);
                 }
             }
 
-			if (config.ofmeetWebAuthnEnabled)
-			{ 				
-				storage.removeItem("ofmeet.webauthn.disable");			// reset user disable
-				
-				if (!storage.getItem("ofmeet.webauthn.username"))
-				{
-					registerWebAuthn();
-				}				
-			}
+            if (config.ofmeetWebAuthnEnabled)
+            {               
+                storage.removeItem("ofmeet.webauthn.disable");          // reset user disable
+                
+                if (!storage.getItem("ofmeet.webauthn.username"))
+                {
+                    registerWebAuthn();
+                }               
+            }
 
             getVCard();
             getBookmarks();
@@ -679,6 +679,7 @@ var ofmeet = (function(of)
             id: 'ofmeet-contacts',
             icon: IMAGES.contact,
             label: i18n('toolbar.contactsManager'),
+            shortcut: 'O',
             callback:
                 (evt) => {
                     evt.stopPropagation();
@@ -772,6 +773,7 @@ var ofmeet = (function(of)
             id: 'ofmeet-breakout',
             icon: IMAGES.person,
             label: i18n('toolbar.createBreakoutRooms'),
+            shortcut: 'B',
             callback:
                 (evt) => {
                     evt.stopPropagation();
@@ -844,6 +846,7 @@ var ofmeet = (function(of)
             icon: IMAGES.cursor,
             label: i18n('toolbar.shareCursorMousePointer'),
             group: '.button-group-right',
+            shortcut: 'P',
             callback:
                 (evt) => {
                     evt.stopPropagation();
@@ -3369,88 +3372,88 @@ var ofmeet = (function(of)
     //  Web Authentication 
     //
     //-------------------------------------------------------
-	
-	function registerWebAuthn()
-	{
-		console.debug("registerWebAuthn");
-		const Strophe = APP.connection.xmpp.connection.Strophe;			
-		const username = Strophe.getNodeFromJid(APP.connection.xmpp.connection._stropheConn.authzid); 						
-				
-		let bufferDecode = function (e) {
-			const t = "==".slice(0, (4 - e.length % 4) % 4),
-				n = e.replace(/-/g, "+").replace(/_/g, "/") + t,
-				r = atob(n),
-				o = new ArrayBuffer(r.length),
-				c = new Uint8Array(o);
-			for (let e = 0; e < r.length; e++) c[e] = r.charCodeAt(e);
-			return o
-		}
+    
+    function registerWebAuthn()
+    {
+        console.debug("registerWebAuthn");
+        const Strophe = APP.connection.xmpp.connection.Strophe;         
+        const username = Strophe.getNodeFromJid(APP.connection.xmpp.connection._stropheConn.authzid);                       
+                
+        let bufferDecode = function (e) {
+            const t = "==".slice(0, (4 - e.length % 4) % 4),
+                n = e.replace(/-/g, "+").replace(/_/g, "/") + t,
+                r = atob(n),
+                o = new ArrayBuffer(r.length),
+                c = new Uint8Array(o);
+            for (let e = 0; e < r.length; e++) c[e] = r.charCodeAt(e);
+            return o
+        }
 
-		let bufferEncode = function (e) {
-			const t = new Uint8Array(e);
-			let n = "";
-			for (const e of t) n += String.fromCharCode(e);
-			return btoa(n).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "")
-		}		
+        let bufferEncode = function (e) {
+            const t = new Uint8Array(e);
+            let n = "";
+            for (const e of t) n += String.fromCharCode(e);
+            return btoa(n).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "")
+        }       
 
-		let displayName = "Unknown";
-		
-		if (storage.getItem('features/base/settings')) 
-		{
-			const json = JSON.parse(storage.getItem("features/base/settings"));
-			
-			if (json && json.displayName)
-			{
-				displayName = json.displayName;
-			}
-		}
-					
-		fetch(location.protocol + "//" + location.host + "/rest/api/restapi/v1/meet/webauthn/register/start/" + username, {method: "POST", body: displayName}).then(function(response){ return response.json()}).then((credentialCreationOptions) => 
-		{	
-			console.debug("/webauthn/register/start", credentialCreationOptions);
-			
-			// confirm webauthn register after first step because second step fails with a re-register
-			localStorage.setItem("ofmeet.webauthn.username", username); 			
-		
-			if (credentialCreationOptions.excludeCredentials) 
-			{
-				credentialCreationOptions.excludeCredentials.forEach(function (listItem) 
-				{
-					listItem.id = bufferDecode(listItem.id)
-				});
-			}
-			
-			credentialCreationOptions.challenge = bufferDecode(credentialCreationOptions.challenge);
-			credentialCreationOptions.user.id = bufferDecode(credentialCreationOptions.user.id);
-			return navigator.credentials.create({publicKey: credentialCreationOptions});
-		
-		}).then((cred) => {
-			console.debug("/webauthn/register/start - cred", cred);	
-			const credential = {};
-			credential.id =     cred.id;
-			credential.rawId =  bufferEncode(cred.rawId);
-			credential.type =   cred.type;
+        let displayName = "Unknown";
+        
+        if (storage.getItem('features/base/settings')) 
+        {
+            const json = JSON.parse(storage.getItem("features/base/settings"));
+            
+            if (json && json.displayName)
+            {
+                displayName = json.displayName;
+            }
+        }
+                    
+        fetch(location.protocol + "//" + location.host + "/rest/api/restapi/v1/meet/webauthn/register/start/" + username, {method: "POST", body: displayName}).then(function(response){ return response.json()}).then((credentialCreationOptions) => 
+        {   
+            console.debug("/webauthn/register/start", credentialCreationOptions);
+            
+            // confirm webauthn register after first step because second step fails with a re-register
+            localStorage.setItem("ofmeet.webauthn.username", username);             
+        
+            if (credentialCreationOptions.excludeCredentials) 
+            {
+                credentialCreationOptions.excludeCredentials.forEach(function (listItem) 
+                {
+                    listItem.id = bufferDecode(listItem.id)
+                });
+            }
+            
+            credentialCreationOptions.challenge = bufferDecode(credentialCreationOptions.challenge);
+            credentialCreationOptions.user.id = bufferDecode(credentialCreationOptions.user.id);
+            return navigator.credentials.create({publicKey: credentialCreationOptions});
+        
+        }).then((cred) => {
+            console.debug("/webauthn/register/start - cred", cred); 
+            const credential = {};
+            credential.id =     cred.id;
+            credential.rawId =  bufferEncode(cred.rawId);
+            credential.type =   cred.type;
 
-			if (cred.response) {
-			  const clientDataJSON = bufferEncode(cred.response.clientDataJSON);
-			  const attestationObject = bufferEncode(cred.response.attestationObject);
-			  credential.response = {clientDataJSON, attestationObject};
-			  if (!credential.clientExtensionResults) credential.clientExtensionResults = {};
-			}
-			
-			fetch(location.protocol + "//" + location.host + "/rest/api/restapi/v1/meet/webauthn/register/finish/" + username, {method: "POST", body: JSON.stringify(credential)}).then((success) => 
-			{
-				console.debug("webauthn/register/finish ok");				
-				
-			}).catch((error) => {
-				console.error("webauthn/register/finish error", error);					
-			})
-			
-		}).catch((error) => {
-			console.error("webauthn/register/start error", error);					
-		})		
-	}
-	
+            if (cred.response) {
+              const clientDataJSON = bufferEncode(cred.response.clientDataJSON);
+              const attestationObject = bufferEncode(cred.response.attestationObject);
+              credential.response = {clientDataJSON, attestationObject};
+              if (!credential.clientExtensionResults) credential.clientExtensionResults = {};
+            }
+            
+            fetch(location.protocol + "//" + location.host + "/rest/api/restapi/v1/meet/webauthn/register/finish/" + username, {method: "POST", body: JSON.stringify(credential)}).then((success) => 
+            {
+                console.debug("webauthn/register/finish ok");               
+                
+            }).catch((error) => {
+                console.error("webauthn/register/finish error", error);                 
+            })
+            
+        }).catch((error) => {
+            console.error("webauthn/register/start error", error);                  
+        })      
+    }
+    
     //-------------------------------------------------------
     //
     //  idbKeyval

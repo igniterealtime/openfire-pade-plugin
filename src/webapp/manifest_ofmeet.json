@@ -1,7 +1,7 @@
 {
     "short_name": "Pade Meetings",
     "name": "Pade Meetings",
-    "description": "High quality, secured and scalable video conferences with Jitsi and Openfire",    
+    "description": "High quality, secured and scalable video conferences with Jitsi and Openfire",
     "icons": [
         {
             "src": "image_192.png",

@@ -8,7 +8,7 @@
     "brace_style": "collapse,preserve-inline",
     "keep_array_indentation": true,
     "keep_function_indentation": true,
-    "space_before_conditional": false,
+    "space_before_conditional": true,
     "break_chained_methods": false,
     "indent_empty_lines": false,
     "eval_code": false,

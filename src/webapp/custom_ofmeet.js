@@ -108,6 +108,12 @@ var ofmeet = (function(of)
     {
         console.debug("custom_ofmeet.js DOMContentLoaded");
 
+        if (storageAvailable('localStorage')) {
+            storage = window.localStorage;
+        } else {
+            storage = new DummyStorage();
+        }
+		
         setTimeout(setup);
 
         if (!config.webinar)
@@ -299,12 +305,6 @@ var ofmeet = (function(of)
         }
         
         console.debug("custom_ofmeet.js setup");
-
-        if (storageAvailable('localStorage')) {
-            storage = window.localStorage;
-        } else {
-            storage = new DummyStorage();
-        }
 
         if (!config.webinar)
         {

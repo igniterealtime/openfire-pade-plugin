@@ -1,4 +1,4 @@
-var ofmeet = (function(of)
+var ofmeet = (function(ofm)
 {
     //-------------------------------------------------------
     //
@@ -156,13 +156,13 @@ var ofmeet = (function(of)
 
         if (APP.connection && !config.webinar)
         {
-            if (dbnames.length > 0 || of.recording)
+            if (dbnames.length > 0 || ofm.recording)
             {
                 event.preventDefault();
                 event.returnValue = '';
             }
 
-            if (of.recording) stopRecorder();
+            if (ofm.recording) stopRecorder();
 
             dbnames.forEach(function(dbname)
             {
@@ -173,7 +173,7 @@ var ofmeet = (function(of)
                 };
             });
 
-            if (dbnames.length > 0 || of.recording)
+            if (dbnames.length > 0 || ofm.recording)
             {
                 return event.returnValue;
             }
@@ -316,7 +316,7 @@ var ofmeet = (function(of)
 
                 if (interfaceConfig.OFMEET_RECORD_CONFERENCE)
                 {
-                    if (of.recording) stopRecorder();
+                    if (ofm.recording) stopRecorder();
 
                     const ids = Object.getOwnPropertyNames(recordingVideoTrack);
 
@@ -347,13 +347,13 @@ var ofmeet = (function(of)
                     clockTrack.leaves = (new Date()).getTime();
                     hideClock();
 
-                    if (of.recognition)
+                    if (ofm.recognition)
                     {
-                        of.recognitionActive = false;
-                        of.recognition.stop();
+                        ofm.recognitionActive = false;
+                        ofm.recognition.stop();
                     }
                     
-                    if (of.recording) stopRecorder();                   
+                    if (ofm.recording) stopRecorder();                   
                 }
 
             });
@@ -419,18 +419,18 @@ var ofmeet = (function(of)
 
                 if (APP.conference.getMyUserId() == id)
                 {
-                    if (of.recognition)
+                    if (ofm.recognition)
                     {
                         if (track.isMuted())    // speech recog synch
                         {
                             console.debug("muted, stopping speech transcription");
 
-                            of.recognitionActive = false;
-                            of.recognition.stop();
+                            ofm.recognitionActive = false;
+                            ofm.recognition.stop();
 
                         } else {
                             console.debug("unmuted, starting speech transcription");
-                            of.recognition.start();
+                            ofm.recognition.start();
                         }
                     }
                 }
@@ -696,7 +696,7 @@ var ofmeet = (function(of)
                 (evt) => {
                     evt.stopPropagation();
 
-                    if (!of.recording) {
+                    if (!ofm.recording) {
                         startRecorder(startMeetingRecorder);
                     } else {
                         stopRecorder();
@@ -707,7 +707,7 @@ var ofmeet = (function(of)
         const leaveButton = document.querySelector('div[aria-label="Leave the call"]');
 
         if (leaveButton) leaveButton.addEventListener("click", function (evt) {
-            if (of.recording) stopRecorder();
+            if (ofm.recording) stopRecorder();
 
             if (pdf_body.length > 0) {
                 const margins = {
@@ -757,7 +757,7 @@ var ofmeet = (function(of)
                 (evt) => {
                     evt.stopPropagation();
 
-                    if (!of.recording) {
+                    if (!ofm.recording) {
                         startRecorder(startDesktopRecorder);
                     } else {
                         stopRecorder();
@@ -1770,7 +1770,7 @@ var ofmeet = (function(of)
                 });
             }
 
-            if (of.recognition)
+            if (ofm.recognition)
             {
                 const transcriptCaptions = (captions.transcriptDisabled ? i18n('tag.enableVoiceTranscription') : i18n('tag.disableVoiceTranscription'));
                 const transcriptClass = (captions.transcriptDisabled ? 'btn-secondary' : 'btn-success') + ' btn tingle-btn tingle-btn--pull-right';
@@ -1778,13 +1778,13 @@ var ofmeet = (function(of)
                 tagsModal.addFooterBtn(transcriptCaptions, transcriptClass, function(evt)
                 {
                     captions.transcriptDisabled = !captions.transcriptDisabled;
-                    of.recognitionActive = !captions.transcriptDisabled;
+                    ofm.recognitionActive = !captions.transcriptDisabled;
                     evt.target.classList.remove(captions.transcriptDisabled ? 'btn-success' : 'btn-secondary');
                     evt.target.classList.add(captions.transcriptDisabled ? 'btn-secondary' : 'btn-success');
                     evt.target.innerHTML = (captions.transcriptDisabled ? i18n('tag.enableVoiceTranscription') : i18n('tag.disableVoiceTranscription'));
 
-                    if (captions.transcriptDisabled) of.recognition.stop();
-                    if (!captions.transcriptDisabled) of.recognition.start();
+                    if (captions.transcriptDisabled) ofm.recognition.stop();
+                    if (!captions.transcriptDisabled) ofm.recognition.start();
                     if (captions.ele) captions.ele.innerHTML = "";
                 });
             }
@@ -1908,7 +1908,7 @@ var ofmeet = (function(of)
         else {
             APP.UI.messageHandler.notify("Streaming", "Conference streaming stopped");          
         }
-        of.recording = false;
+        ofm.recording = false;
     }
 
     function createAnchor(filename, blob)
@@ -2138,7 +2138,7 @@ var ofmeet = (function(of)
             const startTime = Date.now();
         });
 
-        of.recording = true;
+        ofm.recording = true;
     }
 
     function mergeAudioStreams(desktopStream, voiceStream)
@@ -2303,12 +2303,12 @@ var ofmeet = (function(of)
             }
             videoRecorder[id].start(1000);
             const startTime = Date.now();
-            of.recording = true;
+            ofm.recording = true;
 
         }, error => {
             console.error("custom_ofmeet.js startDesktopRecorder", error);
             APP.UI.messageHandler.showError({title:"Desktop recorder/streamer", error, hideErrorSupportLink: true});            
-            of.recording = false;
+            ofm.recording = false;
         });
     }
 
@@ -2829,7 +2829,7 @@ var ofmeet = (function(of)
             console.debug("Speech recog result", APP.conference._room, message);
 
             APP.conference._room.sendTextMessage(message);
-            of.currentTranslation = [];
+            ofm.currentTranslation = [];
         }
     }
 
@@ -2837,12 +2837,12 @@ var ofmeet = (function(of)
     {
         console.debug("setupSpeechRecognition");
 
-        of.recognition = new webkitSpeechRecognition();
-        of.recognition.lang = config.defaultLanguage;
-        of.recognition.continuous = true;
-        of.recognition.interimResults = false;
+        ofm.recognition = new webkitSpeechRecognition();
+        ofm.recognition.lang = config.defaultLanguage;
+        ofm.recognition.continuous = true;
+        ofm.recognition.interimResults = false;
 
-        of.recognition.onresult = function(event)
+        ofm.recognition.onresult = function(event)
         {
             console.debug("Speech recog event", event)
 
@@ -2854,34 +2854,34 @@ var ofmeet = (function(of)
             }
         }
 
-        of.recognition.onspeechend  = function(event)
+        ofm.recognition.onspeechend  = function(event)
         {
             console.debug("Speech recog onspeechend", event);
         }
 
-        of.recognition.onstart = function(event)
+        ofm.recognition.onstart = function(event)
         {
             console.debug("Speech to text started", event);
-            of.recognitionActive = true;
+            ofm.recognitionActive = true;
         }
 
-        of.recognition.onend = function(event)
+        ofm.recognition.onend = function(event)
         {
             console.debug("Speech to text ended", event);
 
-            if (of.recognitionActive)
+            if (ofm.recognitionActive)
             {
                 console.debug("Speech to text restarted");
-                setTimeout(function() {of.recognition.start()}, 1000);
+                setTimeout(function() {ofm.recognition.start()}, 1000);
             }
         }
 
-        of.recognition.onerror = function(event)
+        ofm.recognition.onerror = function(event)
         {
             console.debug("Speech to text error", event);
         }
 
-        of.recognition.start();
+        ofm.recognition.start();
     }
 
     //-------------------------------------------------------
@@ -3527,8 +3527,8 @@ var ofmeet = (function(of)
 
     }({}));
 
-    of.recording = false;
+    ofm.recording = false;
 
-    return of;
+    return ofm;
 
 }(ofmeet || {}));

@@ -19,14 +19,14 @@ import org.jitsi.util.OSUtils;
 import org.ifsoft.sso.Password;
 
 /**
- * A SaslServer implementation that is specific to OfChat.
+ * A SaslServer implementation that is specific to PADE.
  *
  * @author Guus der Kinderen, guus.der.kinderen@gmail.com
  */
 public class OfChatSaslServer implements SaslServer
 {
     private final static Logger Log = LoggerFactory.getLogger( OfChatSaslServer.class );
-    public static final String MECHANISM_NAME = "OFCHAT";
+    public static final String MECHANISM_NAME = "PADE";
     private String authorizationID = null;
 
     public OfChatSaslServer()
@@ -63,7 +63,7 @@ public class OfChatSaslServer implements SaslServer
         final String username = tokens.nextToken();
         final String token = tokens.nextToken().trim();
 
-        Log.debug("OFCHAT authentication " + username + ":" + token);
+        Log.debug("PADE authentication " + username + ":" + token);
 
         try {
 			boolean ofmeetWebAuthnEnabled = JiveGlobals.getBooleanProperty( "ofmeet.webauthn.enabled", false );					
@@ -74,7 +74,7 @@ public class OfChatSaslServer implements SaslServer
 				
 			if (ofmeetWebAuthnEnabled) {
 
-                Log.debug("OFCHAT web authentication " + user.getProperties().get("webauthn-key-" + token));
+                Log.debug("PADE web authentication " + user.getProperties().get("webauthn-key-" + token));
 					
                 if (!user.getProperties().containsKey("webauthn-key-" + token))
                 {
@@ -109,7 +109,7 @@ public class OfChatSaslServer implements SaslServer
                 {
                     String passkey = Password.passwords.get(username).trim();
 
-                    Log.debug("OFCHAT winsso authentication " + token + " " + passkey);
+                    Log.debug("PADE winsso authentication " + token + " " + passkey);
 
                     if (!token.equals(passkey))
                     {
@@ -119,15 +119,15 @@ public class OfChatSaslServer implements SaslServer
                     // TODO - can I keep this here for convienience?
                     //Password.passwords.remove(username);
                 }
-                else throw new SaslException("OFCHAT authentication failure");				
+                else throw new SaslException("PADE authentication failure");				
             }
 
             authorizationID = username;
             return null;
 
         } catch (Exception e) {
-            Log.error("OFCHAT authentication failure", e);
-			throw new SaslException("OFCHAT authentication failure");		
+            Log.error("PADE authentication failure", e);
+			throw new SaslException("PADE authentication failure");		
         }
     }
 

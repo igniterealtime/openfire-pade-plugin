@@ -188,7 +188,8 @@
         
         if (jvmJvb.isEmpty()) errors.put( "jvmJvb", "Cannot be empty" );
         if (jvmJicofo.isEmpty()) errors.put( "jvmJicofo", "Cannot be empty" );
-        if (jvmJigasi.isEmpty()) errors.put( "jvmJigasi", "Cannot be empty" );
+        final boolean jigasiSipEnabled = JiveGlobals.getBooleanProperty( "ofmeet.jigasi.enabled" );
+        if (jigasiSipEnabled && jvmJigasi.isEmpty()) errors.put( "jvmJigasi", "Cannot be empty" );
 
         if ( errors.isEmpty() )
         {

@@ -62,6 +62,9 @@
         final boolean jigasiSipEnabled = ParamUtils.getBooleanParameter( request, "jigasiSipEnabled" );         
         final boolean jigasiFreeSwitchEnabled = ParamUtils.getBooleanParameter( request, "jigasiFreeSwitchEnabled" );                 
 
+        final String jvmJigasi = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.jigasi.jvm.customOptions" );
+        if (jigasiSipEnabled && jvmJigasi.isEmpty()) errors.put( "JVM settings for Jigasi", "Cannot be empty" );
+
         if ( errors.isEmpty() )
         {
             ofmeetConfig.jigasiSipServerAddress.set( jigasiSipServerAddress );

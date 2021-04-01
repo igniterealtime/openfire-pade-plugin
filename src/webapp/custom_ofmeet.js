@@ -124,6 +124,12 @@ var ofmeet = (function (ofm) {
     window.addEventListener("DOMContentLoaded", function () {
         console.debug("custom_ofmeet.js DOMContentLoaded");
 
+        if (storageAvailable('localStorage')) {
+            storage = window.localStorage;
+        } else {
+            storage = new DummyStorage();
+        }
+      
         setTimeout(setup);
 
         if (!config.webinar) {
@@ -284,13 +290,8 @@ var ofmeet = (function (ofm) {
 
         console.debug("custom_ofmeet.js setup");
 
-        if (storageAvailable('localStorage')) {
-            storage = window.localStorage;
-        } else {
-            storage = new DummyStorage();
-        }
-
-        if (!config.webinar) {
+        if (!config.webinar)
+        {
             listenWebPushEvents();
 
             APP.conference._room.on(JitsiMeetJS.events.conference.CONFERENCE_LEFT, function () {

@@ -18,6 +18,8 @@ out/
 .settings
 .project
 .classpath
+.factorypath
+.theia
 
 # Ignore MacOSX files
 .DS_Store

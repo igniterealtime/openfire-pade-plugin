@@ -11,7 +11,7 @@
             global.URL &&
             global.URL.createObjectURL);
 
-        function noop() { }
+        function noop() {}
 
         // create a promise if it exists, otherwise, just
         // call the function directly

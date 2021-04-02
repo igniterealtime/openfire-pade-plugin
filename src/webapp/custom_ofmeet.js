@@ -873,7 +873,7 @@ var ofmeet = (function (ofm) {
                         'text:' + String.fromCodePoint(0x1F514) // :bell:
                     ]
                 };
-            } else if ((now.getTimezoneOffset() == 9 * 60) && (now.getMonth() == 2 && now.getDate() >= 25) || (now.getMonth() == 3 && now.getDate() <= 15)) { // Hanami
+            } else if ((now.getTimezoneOffset() == 9 * 60) && ((now.getMonth() == 2 && now.getDate() >= 25) || (now.getMonth() == 3 && now.getDate() <= 15))) { // Hanami
                 options = {
                     ...options,
                     shapes: [

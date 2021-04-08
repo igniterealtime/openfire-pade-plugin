@@ -271,3 +271,13 @@
   width: auto;
   max-width: 250px;
 }
+
+.breakout-modal .participants .kanban-title-button {
+  display: none;
+}
+
+#breakout-status {
+  color: #ff5983;
+  width: 30%;
+  line-height: 36px;
+}

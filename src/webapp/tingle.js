@@ -117,6 +117,7 @@
 
         // show modal
         this.modal.classList.add('tingle-modal--visible')
+        this.modal.classList.remove('tingle-modal--invisible')
 
         // onOpen callback
         if (typeof self.opts.onOpen === 'function') {
@@ -153,6 +154,7 @@
         document.body.style.top = null
 
         this.modal.classList.remove('tingle-modal--visible')
+        this.modal.classList.add('tingle-modal--invisible')
 
         // using similar setup as onOpen
         var self = this
@@ -352,7 +354,7 @@
         this.modalBox.appendChild(this.modalBoxContent)
 
         if (this.opts.closeMethods.indexOf('button') !== -1) {
-            this.modal.appendChild(this.modalCloseBtn)
+            this.modalBox.appendChild(this.modalCloseBtn)
         }
 
         this.modal.appendChild(this.modalBox)

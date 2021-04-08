@@ -30,7 +30,7 @@ var ofmeet = (function (ofm) {
     };
     const padsList = [],
         captions = { msgsDisabled: true, msgs: [] },
-        breakout = { rooms: [], duration: 60, roomCount: 10, wait: 10 },
+        //breakout = { rooms: [], duration: 60, roomCount: 10, wait: 10 },
         pdf_body = [];
     const lostAudioWorkaroundInterval = 300000; // 5min
     const i18n = i18next.getFixedT(null, 'ofmeet');
@@ -67,6 +67,7 @@ var ofmeet = (function (ofm) {
     let localDisplayName = null;
     let vcardAvatar = null;
     let storage = null;
+    let breakout = null;
 
     class DummyStorage {
         constructor() {
@@ -129,7 +130,7 @@ var ofmeet = (function (ofm) {
         } else {
             storage = new DummyStorage();
         }
-      
+
         setTimeout(setup);
 
         if (!config.webinar) {
@@ -290,8 +291,7 @@ var ofmeet = (function (ofm) {
 
         console.debug("custom_ofmeet.js setup");
 
-        if (!config.webinar)
-        {
+        if (!config.webinar) {
             listenWebPushEvents();
 
             APP.conference._room.on(JitsiMeetJS.events.conference.CONFERENCE_LEFT, function () {
@@ -342,12 +342,7 @@ var ofmeet = (function (ofm) {
 
             APP.conference._room.on(JitsiMeetJS.events.conference.USER_LEFT, function (id) {
                 console.debug("user left", id);
-
-                if (breakout.kanban) {
-                    breakout.kanban.removeElement(id);
-                }
-
-                delete participants[id];
+                removeParticipant(id);
             });
 
             APP.conference._room.on(JitsiMeetJS.events.conference.TRACK_ADDED, function (track) {
@@ -439,8 +434,8 @@ var ofmeet = (function (ofm) {
                     pdf_body.push([pretty_time, displayName, text]);
                 }
 
-                if (breakout.started) {
-                    messageBreakoutRooms(text);
+                if (breakout && breakout.started) {
+                    breakout.broadcastMessage(text);
                 }
             });
 
@@ -1070,29 +1065,17 @@ var ofmeet = (function (ofm) {
     //-------------------------------------------------------
 
     function addParticipant(id) {
-        const Strophe = APP.connection.xmpp.connection.Strophe;
         const participant = APP.conference.getParticipantById(id);
 
         console.debug("addParticipant", id, participant);
 
-        if (participant && !participants[id] && breakout.kanban) {
+        if (participant && !participants[id]) {
             participants[id] = participant;
-            const jid = participants[id]._jid;
-            const label = participants[id]._displayName || 'Anonymous-' + id;
 
-            breakout.kanban.addElement("participants", {
-                id: id,
-                title: label,
-                drop: function (el) {
-                    breakoutDragAndDrop(el);
-                }
-            });
+            if (breakout) {
+                breakout.addParticipant(id);
+            }
 
-            const ids = Object.getOwnPropertyNames(participants);
-            document.getElementById('breakout-rooms').value = Math.round(ids.length / 2)
-        }
-
-        if (participant && id) {
             addParticipantDragDropHandlers(document.getElementById("participant_" + id));
         }
     }
@@ -1140,30 +1123,33 @@ var ofmeet = (function (ofm) {
         }
     }
 
+    function removeParticipant() {
+        console.debug("removeParticipant", id);
+
+        if (breakout) {
+            breakout.removeParticipant(id);
+        }
+
+        delete participants[id];
+    }
+
     function setOwnPresence() {
         const connection = APP.connection.xmpp.connection;
-        const $pres = APP.connection.xmpp.connection.$pres;
-        const Strophe = APP.connection.xmpp.connection.Strophe;
-
         connection.send($pres());
     }
 
     function getOccupants() {
         const connection = APP.connection.xmpp.connection;
-        const $iq = APP.connection.xmpp.connection.$iq;
-        const Strophe = APP.connection.xmpp.connection.Strophe;
         const thisRoom = APP.conference._room.room.roomjid;
 
         const stanza = $iq({ 'to': thisRoom, 'type': 'get' }).c('query', { 'xmlns': "http://jabber.org/protocol/disco#items" });
 
         connection.sendIQ(stanza, function (iq) {
-
             iq.querySelectorAll('item').forEach(function (item) {
                 console.debug("getOccupants", item);
                 const id = Strophe.getResourceFromJid(item.getAttribute("jid"));
                 addParticipant(id);
             });
-
         }, function (error) {
             console.error("get occupants error", error);
         });
@@ -1171,8 +1157,6 @@ var ofmeet = (function (ofm) {
 
     function getBookmarks() {
         const connection = APP.connection.xmpp.connection;
-        const $iq = APP.connection.xmpp.connection.$iq;
-        const Strophe = APP.connection.xmpp.connection.Strophe;
         const thisRoom = APP.conference._room.room.roomjid;
 
         const stanza = $iq({ 'from': connection.jid, 'type': 'get' }).c('query', { 'xmlns': "jabber:iq:private" }).c('storage', { 'xmlns': 'storage:bookmarks' });
@@ -1200,8 +1184,6 @@ var ofmeet = (function (ofm) {
 
     function getVCard() {
         const connection = APP.connection.xmpp.connection;
-        const $iq = APP.connection.xmpp.connection.$iq;
-        const Strophe = APP.connection.xmpp.connection.Strophe;
         const username = Strophe.getNodeFromJid(APP.connection.xmpp.connection.jid);
 
         const iq = $iq({ type: 'get', to: Strophe.getBareJidFromJid(APP.connection.xmpp.connection.jid) }).c('vCard', { xmlns: 'vcard-temp' });
@@ -1482,7 +1464,7 @@ var ofmeet = (function (ofm) {
                     }
                 }
             });
-            padsModal.addFooterBtn('Share Clipboard', 'btn btn-success tingle-btn tingle-btn--primary', function () {
+            padsModal.addFooterBtn('Share Clipboard', 'btn btn-primary', function () {
                 navigator.clipboard.readText().then(function (clipText) {
                     console.debug("doPads", clipText);
 
@@ -1494,11 +1476,11 @@ var ofmeet = (function (ofm) {
                 });
             });
 
-            padsModal.addFooterBtn('Close', 'btn btn-success tingle-btn tingle-btn--primary', function () {
+            padsModal.addFooterBtn('Close', 'btn btn-secondary', function () {
                 padsModal.close();
             });
 
-            padsModal.addFooterBtn('Quit', 'btn btn-danger tingle-btn tingle-btn--danger', function () {
+            padsModal.addFooterBtn('Quit', 'btn btn-secondary', function () {
                 event.preventDefault();
                 padsModal.close();
 
@@ -1565,27 +1547,37 @@ var ofmeet = (function (ofm) {
     }
 
     function doTags() {
-        const template =
-            '    <!-- Modal Header -->' +
-            '    <div class="modal-header">' +
-            '      <h4 class="modal-title">' + i18n('tag.conferenceCaptionsSubTitles') + '</h4>' +
-            '    </div>' +
+        const template = `
+<!-- Modal Header -->
+<div class="modal-header">
+    <h4 class="modal-title">${i18n('tag.conferenceCaptionsSubTitles')}</h4>
+</div>
 
-            '    <!-- Modal body -->' +
-            '    <div class="modal-body">' +
-            '       <div class="form-group">' +
-            '       <label for="tags-location" class="col-form-label">' + i18n('tag.location') + ':</label>' +
-            '       <input id="tags-location" type="text" class="form-control" name="tag-location" value="' + tags.location + '"/>' +
-            '       <label for="tags-date" class="col-form-label">' + i18n('tag.date') + ':</label>' +
-            '       <input id="tags-date" type="text" class="form-control" name="tags-date"/>' +
-            '       <label for="tags-subject" class="col-form-label">' + i18n('tag.subject') + ':</label>' +
-            '       <input id="tags-subject" type="text" class="form-control" name="tags-subject" value="' + tags.subject + '"/>' +
-            '       <label for="tags-host" class="col-form-label">' + i18n('tag.host') + ':</label>' +
-            '       <input id="tags-host" type="text" class="form-control" name="tags-host" value="' + tags.host + '"/>' +
-            '       <label for="tags-activity" class="col-form-label">' + i18n('tag.activity') + ':</label>' +
-            '       <input id="tags-activity" type="text" class="form-control" name="tags-activity" value="' + tags.activity + '"/>' +
-            '       </div>' +
-            '    </div>'
+<!-- Modal body -->
+<div class="modal-body">
+    <form>
+        <div class="form-group">
+            <label for="tags-location" class="col-form-label"> ${i18n('tag.location')}:</label>
+            <input id="tags-location" type="text" class="form-control" name="tag-location" value="${tags.location}"/>
+        </div>
+        <div class="form-group">
+            <label for="tags-date" class="col-form-label"> ${i18n('tag.date')}:</label>
+            <input id="tags-date" type="text" class="form-control" name="tags-date"/>
+        </div>
+        <div class="form-group">
+            <label for="tags-subject" class="col-form-label"> ${i18n('tag.subject')}:</label>
+            <input id="tags-subject" type="text" class="form-control" name="tags-subject" value="${tags.subject}"/>
+        </div>
+        <div class="form-group">
+            <label for="tags-host" class="col-form-label"> ${i18n('tag.host')}:</label>
+            <input id="tags-host" type="text" class="form-control" name="tags-host" value="${tags.host}"/>
+        </div>
+        <div class="form-group">
+            <label for="tags-activity" class="col-form-label"> ${i18n('tag.activity')}:</label>
+            <input id="tags-activity" type="text" class="form-control" name="tags-activity" value="${tags.activity}"/>
+        </div>
+    </form>
+</div>`;
 
         if (!tagsModal) {
             tagsModal = new tingle.modal({
@@ -1623,12 +1615,12 @@ var ofmeet = (function (ofm) {
             });
             tagsModal.setContent(template);
 
-            tagsModal.addFooterBtn(i18n('tag.save'), 'btn btn-success tingle-btn tingle-btn--primary', function () {
+            tagsModal.addFooterBtn(i18n('tag.save'), 'btn btn-primary', function () {
                 // here goes some logic
                 tagsModal.close();
             });
 
-            tagsModal.addFooterBtn(i18n('tag.cancel'), 'btn btn-danger tingle-btn tingle-btn--danger', function () {
+            tagsModal.addFooterBtn(i18n('tag.cancel'), 'btn btn-secondary', function () {
                 event.preventDefault();
                 tags = { location: "", date: localizedDate(new Date()).format('LL'), subject: "", host: "", activity: "" };
 
@@ -1643,7 +1635,7 @@ var ofmeet = (function (ofm) {
             });
 
             const msgCaptions = (captions.msgsDisabled ? i18n('tag.enableMessageCaptions') : i18n('tag.disableMessageCaptions'));
-            const msgClass = (captions.msgsDisabled ? 'btn-secondary' : 'btn-success') + ' btn tingle-btn tingle-btn--pull-right';
+            const msgClass = (captions.msgsDisabled ? 'btn-secondary' : 'btn-success') + ' btn';
 
             if (interfaceConfig.OFMEET_SHOW_CAPTIONS) {
                 tagsModal.addFooterBtn(msgCaptions, msgClass, function (evt) {
@@ -1657,7 +1649,7 @@ var ofmeet = (function (ofm) {
 
             if (ofm.recognition) {
                 const transcriptCaptions = (captions.transcriptDisabled ? i18n('tag.enableVoiceTranscription') : i18n('tag.disableVoiceTranscription'));
-                const transcriptClass = (captions.transcriptDisabled ? 'btn-secondary' : 'btn-success') + ' btn tingle-btn tingle-btn--pull-right';
+                const transcriptClass = (captions.transcriptDisabled ? 'btn-secondary' : 'btn-success') + ' btn';
 
                 tagsModal.addFooterBtn(transcriptCaptions, transcriptClass, function (evt) {
                     captions.transcriptDisabled = !captions.transcriptDisabled;
@@ -2161,41 +2153,6 @@ var ofmeet = (function (ofm) {
     //
     //-------------------------------------------------------
 
-    function breakoutDragAndDrop(el) {
-        if (!el.dataset.eid) return;
-
-        const id = el.dataset.eid;
-        const label = participants[id]._displayName || i18n('breakout.anonymous', { id: id });
-        const jid = participants[id]._jid;
-        const webinar = participants[id]._tracks.length > 0 ? "false" : "true";
-
-        const boardId = breakout.kanban.getParentBoardID(id);
-
-        if (boardId && jid) {
-            if (boardId == "participants") return;
-
-            const roomindex = boardId.substring(5);
-            const roomid = breakout.rooms[parseInt(roomindex)]
-
-            console.debug("breakoutDragAndDrop", id, roomindex, roomid, label, jid, webinar);
-
-            el.setAttribute('data-jid', jid);
-            el.setAttribute('data-label', label);
-            el.setAttribute('data-roomid', roomid);
-            el.setAttribute('data-roomindex', roomindex);
-            el.setAttribute('data-webinar', webinar);
-        } else {
-            breakout.kanban.removeElement(id);
-            breakout.kanban.addElement("participants", {
-                id: id,
-                title: label,
-                drop: function (el) {
-                    breakoutDragAndDrop(el);
-                }
-            });
-        }
-    }
-
     function getAllParticipants() {
         const state = APP.store.getState();
         return (state["features/base/participants"] || []);
@@ -2203,7 +2160,6 @@ var ofmeet = (function (ofm) {
 
     function handlePresence(presence) {
         //console.debug("handlePresence", presence);
-        const Strophe = APP.connection.xmpp.connection.Strophe;
         const id = Strophe.getResourceFromJid(presence.getAttribute("from"));
         const raisedHand = presence.querySelector("jitsi_participant_raisedHand");
         const email = presence.querySelector("email");
@@ -2250,7 +2206,6 @@ var ofmeet = (function (ofm) {
     }
 
     function handleMucMessage(msg) {
-        const Strophe = APP.connection.xmpp.connection.Strophe;
         const participant = Strophe.getResourceFromJid(msg.getAttribute("from"));
 
         if (msg.getAttribute("type") == "error") {
@@ -2263,321 +2218,434 @@ var ofmeet = (function (ofm) {
         if (payload) {
             const json = JSON.parse(payload.innerHTML);
             console.debug("handleMucMessage", participant, json);
-            const label = json.action == 'breakout' ? 'breakout.joining' : 'breakout.leaving';
 
-            APP.UI.messageHandler.notify(i18n('breakout.breakoutRooms'), i18n(label, { sec: breakout.wait }));
-            setTimeout(function () { location.href = json.url }, breakout.wait * 1000);
+            let label;
+            switch (json.action) {
+                case 'start-breakout':
+                    label = 'breakout.joining';
+                    break;
+                case 'stop-breakout':
+                    label = 'breakout.leaving';
+                    break;
+                default:
+                    console.error("unknown MUC message");
+                    return;
+
+            }
+            APP.UI.messageHandler.notify(i18n('breakout.breakoutRooms'), i18n(label, { sec: json.wait }));
+            setTimeout(() => { location.replace(json.url) }, json.wait * 1000);
         }
 
         return true;
     }
 
-    function broadcastBreakout(type, jid, xmpp, json) {
-        console.debug("broadcastBreakout", type, jid, xmpp, json);
-        const $msg = APP.connection.xmpp.connection.$msg;
-        xmpp.send($msg({ type: type, to: jid }).c("json", { xmlns: "urn:xmpp:json:0" }).t(JSON.stringify(json)));
-    }
+    class Breakout {
+        static defaultDuration = 60;
+        static wait = 10;
 
-    function exitRoom(jid) {
-        console.debug("exitRoom", jid);
-        const xmpp = APP.connection.xmpp.connection._stropheConn;
-        const $pres = APP.connection.xmpp.connection.$pres;
-        xmpp.send($pres({ type: 'unavailable', to: jid + '/' + APP.conference.getLocalDisplayName() }));
-    }
+        constructor() {
+            this.recallInfo = [];
+            this.$status = $('#breakout-status');
+            this.timeout = null;
 
-    function joinRoom(jid) {
-        console.debug("joinRoom", jid);
-        const xmpp = APP.connection.xmpp.connection._stropheConn;
-        const $pres = APP.connection.xmpp.connection.$pres;
-        const Strophe = APP.connection.xmpp.connection.Strophe;
-        xmpp.send($pres({ to: jid + '/' + APP.conference.getLocalDisplayName() }).c("x", { xmlns: Strophe.NS.MUC }));
-    }
-
-    function endBreakout() {
-        if (breakout.started) toggleBreakout();
-    }
-
-    function startBreakout() {
-        if (!breakout.started) toggleBreakout();
-    }
-
-    function toggleBreakout() {
-        const Strophe = APP.connection.xmpp.connection.Strophe;
-        const xmpp = APP.connection.xmpp.connection._stropheConn;
-        const pos = location.href.lastIndexOf("/");
-        const rootUrl = location.href.substring(0, pos);
-
-        console.debug("toggleBreakout", rootUrl, breakout);
-
-        if (!breakout.started) {
-            breakout.recall = [];
-
-            for (let i = 0; i < breakout.roomCount; i++) {
-                if (breakout.kanban.findBoard("room_" + i)) {
-                    const items = breakout.kanban.getBoardElements("room_" + i);
-                    let json = null;
-
-                    items.forEach(function (node) {
-                        const id = node.getAttribute("data-eid");
-                        const webinar = node.getAttribute("data-webinar");
-                        const room = node.getAttribute("data-roomid");
-                        const label = node.getAttribute("data-label");
-                        const jid = node.getAttribute("data-jid");
-                        const url = rootUrl + '/' + room;
-
-                        json = { action: 'breakout', id: id, room: room, label: label, jid: jid, url: url, return: location.href, webinar: webinar };
-                        broadcastBreakout("chat", jid, xmpp, json);
-                    });
-
-                    breakout.recall.push(json);
-                }
+            const kanbanConfig = {
+                element: ".breakout-kanban",
+                gutter: "5px",
+                widthBoard: "250px",
+                dragBoards: false,
+                buttonClick: (el, boardId) => {
+                    console.debug("Board clicked", boardId);
+                    if (boardId != "participants") this.openRoom(boardId)
+                },
+                itemAddOptions: {
+                    enabled: true,
+                    content: 'Join',
+                    class: 'kanban-title-button btn btn-default btn-sm btn-primary',
+                },
+                boards: [
+                    {
+                        id: 'participants',
+                        title: i18n('breakout.meetingParticipants'),
+                        class: 'participants',
+                        item: []
+                    }
+                ]
             }
 
-            if (breakout.duration > 0) {
-                breakout.timeout = setTimeout(toggleBreakout, 60000 * breakout.duration);
-                breakoutStatus(i18n('breakout.breakoutStartedWithDuration', { min: breakout.duration }));
-            } else {
-                breakoutStatus(i18n('breakout.breakoutStarted'));
-            }
-        } else {
-            for (let i = 0; i < breakout.recall.length; i++) {
-                const webinar = breakout.recall[i].webinar;
-                const jid = breakout.recall[i].room + "@" + Strophe.getDomainFromJid(breakout.recall[i].jid);
-                const json = { action: 'reassemble', jid: jid, url: location.href + '#config.webinar=' + webinar };
-
-                joinRoom(jid);
-
-                setTimeout(function () {
-                    broadcastBreakout("groupchat", Strophe.getBareJidFromJid(jid), xmpp, json);
-                    setTimeout(function () { exitRoom(jid) }, 1000);
-
-                }, 1000);
+            for (let id in participants) {
+                kanbanConfig.boards[0].item.push(this.elementFromParticipant(participants[id]));
             }
 
-            breakoutStatus(i18n('breakout.breakoutHasEnded'));
-            if (breakout.timeout) clearTimeout(breakout.timeout);
+            console.debug("createBreakout", kanbanConfig);
+            this.kanban = new jKanban(kanbanConfig);
         }
 
-        breakout.started = !breakout.started;
-        breakout.button.classList.remove(breakout.started ? 'btn-success' : 'btn-secondary');
-        breakout.button.classList.add(breakout.started ? 'btn-secondary' : 'btn-success');
-        breakout.button.innerHTML = breakout.started ? i18n('breakout.reassemble') : i18n('breakout.breakout');
-    }
-
-    function messageBreakoutRooms(text) {
-        console.debug("messageBreakoutRooms", text, breakout);
-
-        const xmpp = APP.connection.xmpp.connection._stropheConn;
-        const $msg = APP.connection.xmpp.connection.$msg;
-
-        for (let i = 0; i < breakout.recall.length; i++) {
-            const jid = breakout.recall[i].room + "@" + Strophe.getDomainFromJid(breakout.recall[i].jid);
-
-            joinRoom(jid);
-
-            setTimeout(function () {
-                xmpp.send($msg({ type: 'groupchat', to: jid }).c("body").t(text));
-                setTimeout(function () { exitRoom(jid) }, 1000);
-
-            }, 1000);
-        }
-    }
-
-    function allocateToRooms(roomCount) {
-        console.debug("allocateToRooms", roomCount, breakout);
-
-        for (let i = 0; i < breakout.roomCount; i++) {
-            if (breakout.kanban.findBoard("room_" + i)) {
-                breakout.kanban.removeBoard("room_" + i);
-            }
+        get roomCount() {
+            return $('.breakout-kanban .kanban-board .room').length;
         }
 
-        breakout.kanban.removeBoard("participants");
+        get started() {
+            return $('.btn-breakout').hasClass('btn-breakout-stop');
+        }
 
-        const boards = [{
-            id: "participants",
-            title: i18n('breakout.meetingParticipants'),
-            class: "participants",
-            item: []
-        }]
+        refresh() {
+            const count = Object.keys(participants).length;
 
-        const ids = Object.getOwnPropertyNames(participants);
-
-        for (let i = 0; i < roomCount; i++) {
-            boards[i + 1] = {
-                id: "room_" + i,
-                title: i18n('breakout.room', { n: (i + 1).toString() }),
-                class: "room",
-                item: []
+            if (parseInt($('#breakout-rooms').val(), 10) < 1) {    
+                $('#breakout-rooms').val(Math.round(count / 2));
+                this.resizeRoom(Math.round(count / 2));
             }
 
-            breakout.rooms[i] = APP.conference.roomName + '-' + Math.random().toString(36).substr(2, 9);
+            if (parseInt($('#breakout-duration').val(), 10) < 1) {
+                $('breakout-duration').val(Breakout.defaultDuration);
+            }
 
-            for (let j = 0; j < ids.length; j++) {
-                if (j % roomCount == i) // allocate participant j to room i
-                {
-                    console.debug("allocateToRooms - participant", j, ids[j], participants[ids[j]]);
+            $('#breakout-title').text(count);
 
-                    const label = participants[ids[j]]._displayName || i18n('breakout.anonymous', { id: id });
-                    const jid = participants[ids[j]]._jid;
-                    const webinar = participants[ids[j]]._tracks.length > 0 ? "false" : "true";
+            this.setStatusMessage('');
+        }
 
-                    boards[i + 1].item.push({
-                        id: ids[j],
-                        title: label,
-                        label: label,
-                        jid: jid,
-                        webinar: webinar,
-                        roomid: breakout.rooms[i],
-                        roomindex: i,
-                        drop: function (el) {
-                            breakoutDragAndDrop(el);
-                        }
-                    });
-                }
+        elementFromParticipant(participant) {
+            const id = participant._id;
+            const displayName = participant._displayName || i18n('breakout.anonymous', { id: id });
+            const participant2 = getAllParticipants().find(p => p.id == id);
+            const avatarURL = participant2 ? participant2.avatarURL : '/images/avatar.png';
+            return {
+                id: id,
+                title: `<div class="header-icon"><img class="avatar" src="${avatarURL}" style=""></div>${displayName}`
             };
         }
 
-        breakout.kanban.addBoards(boards);
-    }
 
-    function visitBreakoutRoom(boardId) {
-        console.debug("visitBreakoutRoom", boardId);
-        const roomindex = boardId.substring(5);
-        const roomid = breakout.rooms[parseInt(roomindex)];
-
-        if (roomid) {
-            const pos = location.href.lastIndexOf("/");
-            const rootUrl = location.href.substring(0, pos);
-            const url = rootUrl + '/' + roomid;
-
-            open(url, roomid);
-        }
-    }
-
-    function createBreakout() {
-        const kanbanConfig = {
-            element: ".breakout-kanban",
-            gutter: "5px",
-            widthBoard: "300px",
-            dragBoards: false,
-            itemHandleOptions: {
-                enabled: true,
-            },
-            buttonClick: function (el, boardId) {
-                console.debug("Board clicked", boardId);
-                if (boardId != "participants") visitBreakoutRoom(boardId)
-            },
-            click: function (el) {
-                console.debug("Trigger on all items click!");
-            },
-            dropEl: function (el, target, source, sibling) {
-                console.debug(target.parentElement.getAttribute('data-id'));
-                console.debug(el, target, source, sibling)
-            },
-            addItemButton: true,
-            boards: [
-                {
-                    id: "participants",
-                    title: i18n('breakout.meetingParticipants'),
-                    class: "participants",
-                    dragTo: [],
-                    item: []
-              }
-            ]
+        addParticipant(id) {
+            if (id in participants) {
+                this.kanban.addElement('participants', this.elementFromParticipant(participants[id]));
+            }
+            $('#breakout-title').text(participants.length);
         }
 
-        const ids = Object.getOwnPropertyNames(participants);
+        updateParticipant(id) {
+            if (id in participants) {
+                this.kanban.replaceElement(id, this.elementFromParticipant(participants[id]));
+            } else {
+                this.kanban.removeElement(id);
+            }
+        }
 
-        ids.forEach(function (id) {
-            kanbanConfig.boards[0].item.push({
-                id: id,
-                title: participants[id]._displayName || i18n('breakout.anonymous', { id: id }),
-                drop: function (el) {
-                    breakoutDragAndDrop(el);
+        removeParticipant(id) {
+            this.kanban.removeElement(id);
+            $('#breakout-title').text(participants.length);
+        }
+
+        getRoomParticipants(index) {
+            let roomParticipants = []
+            if (this.kanban.findBoard("room_" + index)) {
+                for (let elem of this.kanban.getBoardElements("room_" + index)) {
+                    let p = participants[elem.getAttribute("data-eid")];
+                    if (p) {
+                        roomParticipants.push(p);
+                    }
                 }
-            });
-        });
+            }
+            return roomParticipants;
+        }
 
-        console.debug("createBreakout", kanbanConfig);
-        breakout.kanban = new jKanban(kanbanConfig);
-    }
+        moveRoomParticipant(roomIndex, participant) {
+            if (participant) {
+                const pid = participant._id;
+                if (roomIndex != this.kanban.getParentBoardID(pid)) {
+                    this.kanban.removeElement(pid);
+                    this.kanban.addElement(roomIndex, this.elementFromParticipant(participant));
+                }
+            }
+        }
 
-    function breakoutStatus(text) {
-        document.getElementById('breakout-status').innerHTML = text;
+        resizeRoom(size) {
+            if (size > 0 && size < 50) {
+                const currentSize = this.roomCount;
+                if (currentSize < size) {
+                    const boards = [];
+                    for (let i = currentSize; i < size; i++) {
+                        boards.push({
+                            id: 'room_' + (i + 1),
+                            title: i18n('breakout.room', { n: (i + 1).toString() }),
+                            class: 'room',
+                            item: []
+                        });
+                    }
+                    this.kanban.addBoards(boards);
+
+                    for (let i = currentSize; i < size; i++) {
+                        const board = this.kanban.findBoard('room_' + (i + 1));
+                        board.setAttribute('data-room-name', APP.conference.roomName + '-room' + (i + 1) + '-' + Math.random().toString(36).substr(2, 9));
+                    }
+                } else {
+                    for (let i = currentSize - 1; i >= size; i--) {
+                        const roomParticipants = this.getRoomParticipants(i + 1);
+                        for (let p of roomParticipants) {
+                            console.log(p);
+                            this.moveRoomParticipant('participants', p);
+                        }
+                        this.kanban.removeBoard('room_' + (i + 1));
+                    }
+                }
+            }
+        }
+
+        allocateToRooms() {
+            const ids = Object.getOwnPropertyNames(participants);
+            const roomCount = this.roomCount;
+
+            console.debug("allocateToRooms", roomCount, breakout);
+
+            if (ids.length > 0 && roomCount > 0) {
+                for (let i = 0; i < roomCount; i++) {
+                    for (let j = 0; j < ids.length; j++) {
+                        // allocate participant j to room i
+                        if (j % roomCount == i) {
+                            //const participant = this.kanban.findElement);
+                            //console.debug("allocateToRooms - participant", j, ids[j], participant);
+                            this.moveRoomParticipant('room_' + (i + 1), participants[ids[j]]);
+                        }
+                    }
+                }
+                this.setStatusMessage(i18n('breakout.allocatedMessage', { participants: ids.length, rooms: roomCount }));
+            } else {
+                this.setStatusMessage(i18n('breakout.missingParticipants'));
+            }
+        }
+
+        startBreakout() {
+            if (this.started) {
+                console.error("startBreakout error. breakout has already started.");
+                return;
+            }
+
+            if (this.roomCount < 1 || $('.breakout-modal header.room+main .kanban-item').length < 1) {
+                this.setStatusMessage(i18n('breakout.allocateParticipantsFirst'));
+                return;
+            }
+
+            this.recallInfo = [];
+
+            for (let i = 0; i < this.roomCount; i++) {
+                const board = this.kanban.findBoard('room_' + (i + 1));
+                const roomParticipants = this.getRoomParticipants(i + 1);
+                for (let p of roomParticipants) {
+                    let info = null;
+
+                    const id = p._id;
+                    const webinar = p._tracks.length > 0 ? 'false' : 'true';
+                    const label = p._displayName || i18n('breakout.anonymous', { id: id });
+                    const jid = p._jid;
+                    const roomName = board.getAttribute("data-room-name");
+                    const url = location.protocol + '//' + location.host + '/' + roomName;
+
+                    info = {
+                        action: 'start-breakout',
+                        id: id,
+                        room: roomName,
+                        label: label,
+                        jid: jid,
+                        url: url,
+                        webinar: webinar,
+                        wait: Breakout.wait
+                    };
+
+                    this.broadcastBreakout('chat', jid, info);
+                    this.recallInfo.push(info);
+                }
+            }
+
+            const duration = $('#breakout-duration').val();
+            if (duration > 0) {
+                this.timeout = setTimeout(() => this.endBreakout(), 60000 * duration);
+                this.setStatusMessage(i18n('breakout.breakoutStartedWithDuration', { min: duration }));
+            } else {
+                this.setStatusMessage(i18n('breakout.breakoutStarted'));
+            }
+
+            $('.btn-breakout')
+                .removeClass('btn-primary btn-breakout-start')
+                .addClass('btn-danger btn-breakout-stop')
+                .text(i18n('breakout.reassemble'));
+        }
+
+        stopBreakout() {
+            if (!this.started) {
+                console.error("stopBreakout error. no breakout has been started.");
+                return;
+            }
+
+            for (let i = 0; i < this.recallInfo.length; i++) {
+                const webinar = this.recallInfo[i].webinar;
+                const jid = this.recallInfo[i].room + "@" + Strophe.getDomainFromJid(this.recallInfo[i].jid);
+                const json = {
+                    action: 'stop-breakout',
+                    jid: jid,
+                    url: location.href + '#config.webinar=' + webinar
+                };
+
+                this.joinRoom(jid);
+                setTimeout(() => {
+                    this.broadcastBreakout('groupchat', Strophe.getBareJidFromJid(jid), json);
+                    setTimeout(() => { this.exitRoom(jid) }, 1000);
+                }, 1000);
+            }
+
+            this.setStatusMessage(i18n('breakout.breakoutHasEnded'));
+            if (this.timeout) clearTimeout(breakout.timeout);
+
+            $('.btn-breakout')
+                .removeClass('btn-danger btn-breakout-stop')
+                .addClass('btn-primary btn-breakout-start')
+                .text(i18n('breakout.breakout'));
+        }
+
+        toggleBreakout() {
+            console.debug("toggleBreakout");
+            if (this.started) {
+                this.stopBreakout();
+            } else {
+                this.startBreakout();
+            }
+        }
+
+        setStatusMessage(message) {
+            this.$status.text(message);
+        }
+
+        exitRoom(jid) {
+            console.debug("exitRoom", jid);
+
+            const xmpp = APP.connection.xmpp.connection._stropheConn;
+
+            xmpp.send($pres({ type: 'unavailable', to: jid + '/' + APP.conference.getLocalDisplayName() }));
+        }
+
+        joinRoom(jid) {
+            console.debug("joinRoom", jid);
+
+            const xmpp = APP.connection.xmpp.connection._stropheConn;
+
+            xmpp.send($pres({ to: jid + '/' + APP.conference.getLocalDisplayName() }).c("x", { xmlns: Strophe.NS.MUC }));
+        }
+
+        broadcastBreakout(type, jid, json) {
+            console.debug("broadcastBreakout", type, jid, json);
+
+            const xmpp = APP.connection.xmpp.connection._stropheConn;
+
+            xmpp.send($msg({ type: type, to: jid }).c('json', { xmlns: 'urn:xmpp:json:0' }).t(JSON.stringify(json)));
+        }
+
+        broadcastMessage(text) {
+            console.debug("broadcastMessage", text, breakout);
+
+            const xmpp = APP.connection.xmpp.connection._stropheConn;
+
+            for (let i = 0; i < this.recall.length; i++) {
+                const jid = this.recall[i].room + "@" + Strophe.getDomainFromJid(breakout.recall[i].jid);
+
+                this.joinRoom(jid);
+
+                setTimeout(() => {
+                    xmpp.send($msg({ type: 'groupchat', to: jid }).c("body").t(text));
+                    setTimeout(() => { this.exitRoom(jid) }, 1000);
+
+                }, 1000);
+            }
+        }
+
+        openRoom(boardId) {
+            console.debug("joinRoom", boardId);
+            const board = this.kanban.findBoard(boardId);
+            const roomName = board.getAttribute("data-room-name");
+
+            if (roomName) {
+                const url = location.protocol + '//' + location.host + '/' + roomName;
+                open(url, roomName);
+            }
+        }
     }
 
     function doBreakout() {
-        const ids = Object.getOwnPropertyNames(participants);
-        const count = Math.round(ids.length / 2);
-
-        const template =
-            '<div class="modal-header">' +
-            '    <h4 class="modal-title">' + i18n('breakout.breakoutRooms') + ' - ' + i18n('breakout.participants', { title: '<span id="breakout-title">' + ids.length + '</span>' }) + '</h4>' +
-            '       <label for="breakout-duration" class="col-form-label">' + i18n('breakout.duration') + '</label>' +
-            '       <input id="breakout-duration" type="number" min="0" max="480" step="30" name="breakout-duration" value="' + breakout.duration + '"/>' +
-            '       <label for="breakout-rooms" class="col-form-label">' + i18n('breakout.rooms') + '</label>' +
-            '       <input id="breakout-rooms" type="number" min="1" max="10" name="breakout-rooms" value="' + count + '"/>' +
-            '       <div id="breakout-status" style="width:30%; color:red"></div>' +
-            '</div>' +
-            '<div class="modal-body">' +
-            '    <div class="pade-col-container breakout-kanban"></div>' +
-            '</div>'
+        const template = `
+<div class="modal-header form-inline">
+    <h4 class="modal-title">${i18n('breakout.breakoutRooms')} - ${i18n('breakout.participants', { title: '<span id="breakout-title"></span>' })}</h4>
+    <form class="form-inline">
+        <div class="form-group">
+            <label for="breakout-duration">${i18n('breakout.duration')}</label>
+            <input id="breakout-duration" class="form-control" type="number" min="0" max="480" step="30" name="breakout-duration" value="${Breakout.defaultDuration}"/>
+        </div>
+        <div class="form-group">
+            <label for="breakout-rooms">${i18n('breakout.rooms')}</label>
+            <input id="breakout-rooms" class="form-control" type="number" min="1" max="100" name="breakout-rooms" value="0"/>
+        </div>
+    </form>
+    <div id="breakout-status"></div>
+</div>
+<div class="modal-body">
+    <div class="pade-col-container breakout-kanban"></div>
+</div>`;
 
         if (!breakoutModal) {
+            for (i = 0; i < 30; i++) {
+                const id = Math.floor(Math.random() * 4294967295).toString(16);
+                participants[id] = {
+                    _connectionStatus: "active",
+                    _displayName: 'Dummy ' + ("00" + i).slice(-3),
+                    _hidden: false,
+                    _id: id,
+                    _identity: undefined,
+                    _jid: "%e3%83%86%e3%82%b9%e3%83%88@conference.mtg01/" + id,
+                    _properties: { 'e2ee.idKey': "b2J5N2BgaBvXfZRUUNCqIuxCkYPfY6LHMP0R4xcvsH0", 'features_e2ee': true },
+                    _role: "participant",
+                    _statsID: "Delores-7Qt",
+                    _status: undefined,
+                    _supportsDTMF: false,
+                    _tracks: []
+                };
+            }
+
             breakoutModal = new tingle.modal({
                 footer: true,
                 stickyFooter: false,
                 closeMethods: ['overlay', 'button', 'escape'],
-                closeLabel: "Close",
-                cssClass: ['custom-class-1', 'custom-class-2'],
+                closeLabel: 'Close',
+                cssClass: ['breakout-modal', 'modal-lg', 'modal-fix-height'],
 
                 beforeOpen: function () {
                     console.debug("beforeOpen", breakout);
 
-                    if (!breakout.created) {
-                        createBreakout();
-                        breakout.created = true;
+                    if (!breakout) {
+                        breakout = new Breakout();
                     }
+
+                    $('#breakout-rooms').on('input.breakoutroom', (evt) => {
+                        breakout.resizeRoom(evt.target.value);
+                        return false;
+                    });
+
+                    breakout.refresh();
                 }
             });
 
-            breakoutModal.addFooterBtn(i18n('breakout.close'), 'btn btn-danger tingle-btn tingle-btn--primary', function () {
+            breakoutModal.addFooterBtn(i18n('breakout.allocate'), 'btn btn-primary', () => {
+                breakout.allocateToRooms();
+            });
+
+            breakoutModal.addFooterBtn(i18n('breakout.breakout'), 'btn btn-primary btn-breakout btn-breakout-start', () => {
+                breakout.toggleBreakout();
+            });
+
+            breakoutModal.addFooterBtn(i18n('breakout.close'), 'btn btn-secondary', () => {
                 breakoutModal.close();
-            });
-
-            breakoutModal.addFooterBtn(i18n('breakout.allocate'), 'btn btn-success tingle-btn tingle-btn--primary', function () {
-                const roomCount = parseInt(document.getElementById('breakout-rooms').value);
-                const ids = Object.getOwnPropertyNames(participants);
-
-                if (ids.length > 0 && roomCount > 0) {
-                    allocateToRooms(roomCount);
-                    breakoutStatus(i18n('breakout.allocatedMessage', { participants: ids.length, rooms: roomCount }));
-                } else {
-                    breakoutStatus(i18n('breakout.missingParticipants'));
-                }
-
-                breakout.roomCount = roomCount;
-            });
-
-            const label = breakout.started ? i18n('breakout.reassemble') : i18n('breakout.breakout');
-
-            breakoutModal.addFooterBtn(label, 'btn btn-success tingle-btn tingle-btn--primary', function (evt) {
-                breakout.button = evt.target;
-                breakout.duration = parseInt(document.getElementById('breakout-duration').value);
-
-                if (breakout.roomCount > 0) {
-                    toggleBreakout();
-                } else {
-                    breakoutStatus(i18n('breakout.allocateParticipantsFirst'));
-                }
             });
 
             breakoutModal.setContent(template);
         } else {
-            document.getElementById('breakout-rooms').value = count;
-            document.getElementById('breakout-duration').innerHTML = breakout.duration;
-            document.getElementById('breakout-title').innerHTML = ids.length;
+            breakout.refresh();
         }
 
         breakoutModal.open();
@@ -2705,12 +2773,7 @@ var ofmeet = (function (ofm) {
     function uploadFile(file) {
         console.debug("uploadFile", file);
 
-        var getUrl = null;
-        var putUrl = null;
-        var errorText = null;
-
         const connection = APP.connection.xmpp.connection;
-        const $iq = APP.connection.xmpp.connection.$iq;
 
         const iq = $iq({ type: 'get', to: "httpfileupload." + connection.domain }).c('request', { xmlns: 'urn:xmpp:http:upload' }).c('filename').t(file.name).up().c('size').t(file.size);
 
@@ -2834,7 +2897,6 @@ var ofmeet = (function (ofm) {
 
     function listenWebPushEvents() {
         const connection = APP.connection.xmpp.connection;
-        const Strophe = APP.connection.xmpp.connection.Strophe;
 
         connection.addHandler(function (message) {
             console.debug('webpush handler', message);
@@ -2970,7 +3032,7 @@ var ofmeet = (function (ofm) {
                 }
             });
 
-            contactsModal.addFooterBtn('Reset Selected', 'btn btn-success tingle-btn tingle-btn--primary', function () {
+            contactsModal.addFooterBtn('Reset Selected', 'btn btn-success btn-primary', function () {
                 const container = document.querySelector(".meeting-contacts");
 
                 container.querySelectorAll(".meeting-icon > img").forEach(function (icon) {
@@ -2978,7 +3040,7 @@ var ofmeet = (function (ofm) {
                 });
             });
 
-            contactsModal.addFooterBtn('Close', 'btn btn-success tingle-btn tingle-btn--primary', function () {
+            contactsModal.addFooterBtn('Close', 'btn btn-success btn-secondary', function () {
                 contactsModal.close();
             });
 
@@ -2988,7 +3050,7 @@ var ofmeet = (function (ofm) {
         if (APP.conference._room.isSIPCallingSupported() && !inviteByPhone) {
             inviteByPhone = true;
 
-            contactsModal.addFooterBtn('Invite by Phone', 'btn btn-danger tingle-btn tingle-btn--primary', function () {
+            contactsModal.addFooterBtn('Invite by Phone', 'btn btn-primary', function () {
                 const phoneNumber = prompt("Please enter phone number");
 
                 if (phoneNumber && phoneNumber != "") {
@@ -3017,7 +3079,6 @@ var ofmeet = (function (ofm) {
 
     function publishWebPush() {
         const connection = APP.connection.xmpp.connection;
-        const $msg = APP.connection.xmpp.connection.$msg;
 
         if (window.WebPushLib && window.WebPushLib.selfSecret && APP.conference._room.room) {
             console.debug("publishWebPush", window.WebPushLib.selfSecret);
@@ -3069,7 +3130,6 @@ var ofmeet = (function (ofm) {
 
     function registerWebAuthn() {
         console.debug("registerWebAuthn");
-        const Strophe = APP.connection.xmpp.connection.Strophe;
         const username = Strophe.getNodeFromJid(APP.connection.xmpp.connection._stropheConn.authzid);
 
         let bufferDecode = function (e) {

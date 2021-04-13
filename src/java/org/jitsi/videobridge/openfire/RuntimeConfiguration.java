@@ -451,7 +451,7 @@ public class RuntimeConfiguration
      */
     public static boolean isAWSMappingHarvesterEnabled()
     {
-        final boolean disabled = StackProperties.getBoolean( "org.jitsi.videobridge.DISABLE_AWS_HARVESTER", false );
+        final boolean disabled = StackProperties.getBoolean( "org.ice4j.ice.harvest.DISABLE_AWS_HARVESTER", false );
         return !disabled;
     }
 
@@ -468,7 +468,7 @@ public class RuntimeConfiguration
     {
         if ( isAWSMappingHarvesterEnabled() )
         {
-            return StackProperties.getBoolean( "org.jitsi.videobridge.FORCE_AWS_HARVESTER", false );
+            return StackProperties.getBoolean( "org.ice4j.ice.harvest.FORCE_AWS_HARVESTER", false );
         }
         else
         {

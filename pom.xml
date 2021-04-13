@@ -98,7 +98,19 @@
         </plugins>
     </build>
 
-    <dependencies>        
+    <dependencies>   
+		<dependency>
+			<groupId>com.sun.medialib.codec</groupId>
+			<artifactId>dtmf</artifactId>
+			<version>0.0.1</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/codecLib_dtmf.jar</systemPath>
+		</dependency>	
+        <dependency>
+            <groupId>javax.sip</groupId>
+            <artifactId>jain-sip-ri</artifactId>
+            <version>1.3.0-91</version>
+        </dependency>		
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-client</artifactId>
@@ -379,7 +391,15 @@
 		  <groupId>com.yubico</groupId>
 		  <artifactId>webauthn-server-core</artifactId>
 		  <version>1.8.0</version>
-		</dependency>		
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/log4j/log4j -->
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.17</version>
+		</dependency>
+		
     </dependencies>
 	
     <repositories>
@@ -387,7 +407,7 @@
             <id>igniterealtime</id>
             <name>Ignite Realtime Repository</name>
             <url>https://igniterealtime.org/archiva/repository/maven/</url>
-        </repository>
+        </repository>		
         <repository>
             <id>jitsi-maven-repository-releases</id>
             <layout>default</layout>

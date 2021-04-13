@@ -785,16 +785,17 @@ public class OFMeetConfig
     public boolean getJigasiSipEnabled() { return jigasiSipEnabled.get().equals("true"); }
 
     public final StringProperty jigasiFreeSwitchEnabled = new StringProperty( "ofmeet.freeswitch.enabled", "false" );
-    public boolean getJigasiFreeSwitchEnabled() { return jigasiFreeSwitchEnabled.get().equals("true"); }
-	
+    public boolean getJigasiFreeSwitchEnabled() { return jigasiFreeSwitchEnabled.get().equals("true"); }	
 		
     public final StringProperty liveStreamEnabled = new StringProperty( "ofmeet.live.stream.enabled", "false" );
     public boolean getLiveStreamEnabled() { return liveStreamEnabled.get().equals("true"); }
 	
-
 	public final StringProperty liveStreamUrl = new StringProperty( "ofmeet.live.stream.url", "rtmp://a.rtmp.youtube.com/live2" );
     public StringProperty getLiveStreamUrl() { return liveStreamUrl; }
 	
     public final StringProperty liveStreamKey = new StringProperty( "ofmeet.live.stream.key", "" );
     public StringProperty getLiveStreamKey() { return liveStreamKey; }	
+
+    public final StringProperty audiobridgeEnabled = new StringProperty( "ofmeet.audiobridge.enabled", "false" );
+    public boolean getAudiobridgeEnabled() { return audiobridgeEnabled.get().equals("true"); }	
 }

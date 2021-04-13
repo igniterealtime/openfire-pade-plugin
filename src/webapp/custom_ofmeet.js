@@ -126,12 +126,27 @@ var ofmeet = (function (ofm) {
 
         if (storageAvailable('localStorage')) {
             storage = window.localStorage;
+
+            if (navigator.credentials && navigator.credentials.preventSilentAccess && typeof PasswordCredential === 'function') {
+                // Credential Management API is supported!
+                navigator.credentials.get({ password: true, mediation: "silent" }).then(function (credential) {
+                    console.debug("credential management api get", credential);
+                    if (credential) {
+                        user = credential.id;
+                        if (user.indexOf('@') == -1) {
+                            user += '@' + config.hosts["domain"];
+                        }
+                        storage.setItem("xmpp_username_override", user);
+                        storage.setItem("xmpp_password_override", credential.password);
+                    }
+                }).catch(function (err) {
+                    console.error("credential management api get error", err);
+                });
+            }
         } else {
             storage = new DummyStorage();
         }
       
-        setTimeout(setup);
-
         if (!config.webinar) {
             if (typeof indexedDB.databases == "function") {
                 indexedDB.databases().then(function (databases) {
@@ -145,22 +160,7 @@ var ofmeet = (function (ofm) {
             if (window.webkitSpeechRecognition && !isElectron()) setupVoiceCommand()
         }
 
-        if (navigator.credentials && navigator.credentials.preventSilentAccess && typeof PasswordCredential === 'function') {
-            // Credential Management API is supported!
-            navigator.credentials.get({ password: true, mediation: "silent" }).then(function (credential) {
-                console.debug("credential management api get", credential);
-                if (credential) {
-                    user = credential.id;
-                    if (user.indexOf('@') == -1) {
-                        user += '@' + config.hosts["domain"];
-                    }
-                    storage.setItem("xmpp_username_override", user);
-                    storage.setItem("xmpp_password_override", credential.password);
-                }
-            }).catch(function (err) {
-                console.error("credential management api get error", err);
-            });
-        }
+        setTimeout(setup);
     });
 
     window.addEventListener("beforeunload", function (event) {
@@ -458,7 +458,7 @@ var ofmeet = (function (ofm) {
         setOwnPresence();
 
         if (APP.connection.xmpp.connection._stropheConn.pass || config.ofmeetWinSSOEnabled) {
-            if (interfaceConfig.OFMEET_CACHE_PASSWORD) {
+            if (interfaceConfig.OFMEET_CACHE_PASSWORD && storageAvailable('localStorage')) {
                 if (navigator.credentials && navigator.credentials.preventSilentAccess && typeof PasswordCredential === 'function') {
                     storage.removeItem("xmpp_username_override");
                     storage.removeItem("xmpp_password_override");
@@ -873,7 +873,7 @@ var ofmeet = (function (ofm) {
                         'text:' + String.fromCodePoint(0x1F514) // :bell:
                     ]
                 };
-            } else if ((now.getTimezoneOffset() == 9 * 60) && (now.getMonth() == 2 && now.getDate() >= 25) || (now.getMonth() == 3 && now.getDate() <= 15)) { // Hanami
+            } else if ((now.getTimezoneOffset() == 9 * 60) && ((now.getMonth() == 2 && now.getDate() >= 25) || (now.getMonth() == 3 && now.getDate() <= 15))) { // Hanami
                 options = {
                     ...options,
                     shapes: [

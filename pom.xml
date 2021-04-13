@@ -44,7 +44,7 @@
                         <goal>wget</goal>
                     </goals>
                     <configuration>
-                        <url>https://github.com/igniterealtime/pade/raw/master/docs-1.6.13.8.zip</url>
+                        <url>https://github.com/igniterealtime/pade/raw/master/docs-1.6.14.3.zip</url>
                         <unpack>true</unpack>
                         <outputDirectory>${project.basedir}/classes</outputDirectory>
                     </configuration>
@@ -215,7 +215,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>29.0-jre</version>
+            <version>30.0-jre</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.bitbucket.b_c/jose4j -->

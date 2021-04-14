@@ -62,7 +62,8 @@
         final boolean jigasiSipEnabled = ParamUtils.getBooleanParameter( request, "jigasiSipEnabled" );         
         final boolean jigasiFreeSwitchEnabled = ParamUtils.getBooleanParameter( request, "jigasiFreeSwitchEnabled" );
 		final boolean audiobridgeEnabled = ParamUtils.getBooleanParameter( request, "audiobridgeEnabled" );
-		final boolean audiobridgeRegisterAll = ParamUtils.getBooleanParameter( request, "audiobridgeRegisterAll" );
+		final boolean audiobridgeLogging = ParamUtils.getBooleanParameter( request, "audiobridgeLogging" );
+		final boolean audiobridgeRegisterAll = ParamUtils.getBooleanParameter( request, "audiobridgeRegisterAll" );		
 		
         if (audiobridgeEnabled && jigasiFreeSwitchEnabled)
 		{
@@ -94,7 +95,9 @@
             ofmeetConfig.jigasiSipEnabled.set( Boolean.toString(jigasiSipEnabled) );            
             ofmeetConfig.jigasiFreeSwitchEnabled.set( Boolean.toString(jigasiFreeSwitchEnabled) );            
             ofmeetConfig.audiobridgeEnabled.set( Boolean.toString(audiobridgeEnabled) ); 
+			ofmeetConfig.audiobridgeLogging.set( Boolean.toString(audiobridgeLogging) ); 
 			ofmeetConfig.audiobridgeRegisterAll.set( Boolean.toString(audiobridgeRegisterAll) ); 
+			
             response.sendRedirect( "ofmeet-sipsettings.jsp?settingsSaved=true" );
             return;
         }
@@ -164,13 +167,19 @@
                     <input type="checkbox" id="audiobridgeEnabled" name="audiobridgeEnabled" ${ofmeetConfig.getAudiobridgeEnabled() ? "checked" : ""}>
                     <fmt:message key="audiobridge.enabled" />
                 </td>				
-            </tr>    
+            </tr> 			
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" id="audiobridgeLogging" name="audiobridgeLogging" ${ofmeetConfig.getAudiobridgeLogging() ? "checked" : ""}>
+                    <fmt:message key="audiobridge.logging.enabled" />
+                </td>				
+            </tr>  		
             <tr>
                 <td nowrap colspan="2">
                     <input type="checkbox" id="audiobridgeRegisterAll" name="audiobridgeRegisterAll" ${ofmeetConfig.getAudiobridgeRegisterAll() ? "checked" : ""}>
                     <fmt:message key="audiobridge.allusers.register" />
                 </td>				
-            </tr>  			
+            </tr>  		
         </table>
     </admin:contentBox>  
     

@@ -37,14 +37,11 @@ public class Application implements  CallEventListener  {
 
 			String webHome = pluginDirectory.getAbsolutePath()  + File.separator + ".." + File.separator + ".." + File.separator + "resources" + File.separator + "spank" + File.separator + "ofmeet-cdn";
 
-			System.setProperty("com.sun.voip.server.LOGLEVEL", "99");
+			System.setProperty("com.sun.voip.server.LOGLEVEL", config.getInstance().isLoggingEnabled() ? "99": "0");
 			System.setProperty("com.sun.voip.server.FIRST_RTP_PORT", "50000");
 			System.setProperty("com.sun.voip.server.LAST_RTP_PORT", "60000");
-			System.setProperty("com.sun.voip.server.FIRST_VIDEOBRIDGE_RTP_PORT", "6001");
-			System.setProperty("com.sun.voip.server.LAST_VIDEOBRIDGE_RTP_PORT", "6999");
 			System.setProperty("com.sun.voip.server.Bridge.logDirectory", logDir);
-			System.setProperty("com.sun.voip.server.BRIDGE_LOG", "bridge.log");
-			System.setProperty("com.sun.voip.server.LOGLEVEL", "99");
+			System.setProperty("com.sun.voip.server.BRIDGE_LOG", logDir + "bridge.log");
 			System.setProperty("com.sun.voip.server.PUBLIC_IP_ADDRESS", config.getPublicHost());
 			System.setProperty("com.sun.voip.server.PROTOCOL", config.getDefaultProtocol());
 			System.setProperty("com.sun.voip.server.SIP_PORT", config.getDefaultSIPPort());
@@ -52,13 +49,11 @@ public class Application implements  CallEventListener  {
 			System.setProperty("com.sun.voip.server.Bridge.soundsDirectory", webHome + File.separator + "sounds");
 			System.setProperty("com.sun.voip.server.Bridge.soundPath", "/com/sun/voip/server/sounds:" + webHome + File.separator + "sounds");
 
-			System.setProperty("freetts.voices", "com.sun.speech.freetts.en.us.cmu_us_kal.KevinVoiceDirectory");
-
 			Properties properties = new Properties();
 
 			properties.setProperty("javax.sip.STACK_NAME", "JAIN SIP 1.1");
 			properties.setProperty("javax.sip.RETRANSMISSION_FILTER", "on");
-			properties.setProperty("gov.nist.javax.sip.TRACE_LEVEL", "99");
+			properties.setProperty("gov.nist.javax.sip.TRACE_LEVEL", config.getInstance().isLoggingEnabled() ? "99": "0");
 			properties.setProperty("gov.nist.javax.sip.MIN_KEEPALIVE_TIME_SECONDS", "360");
 			properties.setProperty("gov.nist.javax.sip.SERVER_LOG", logDir + "sip_server.log");
 			properties.setProperty("gov.nist.javax.sip.DEBUG_LOG", logDir + "sip_debug.log");
@@ -288,13 +283,11 @@ public class Application implements  CallEventListener  {
     private void loginfo( String s ) {
 
         log.info( s );
-        System.out.println( s );
     }
 
     private void logerror( String s ) {
 
         log.error( s );
-        System.out.println( "[ERROR] " + s );
     }
 
     private void parseBridgeParameters(String parameter, String value)

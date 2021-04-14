@@ -983,6 +983,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 				if (config.getAudiobridgeEnabled())
 				{				
 					CallHandler.hangup(roomName, "User requested call termination");	
+					Log.info("focus left room, stopping audiobridge conference " + roomName);					
 				}					
 
                 String json = getConferenceStats();

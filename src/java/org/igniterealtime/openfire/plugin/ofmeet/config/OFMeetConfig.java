@@ -800,6 +800,9 @@ public class OFMeetConfig
 
     public final StringProperty audiobridgeEnabled = new StringProperty( "ofmeet.audiobridge.enabled", "false" );
     public boolean getAudiobridgeEnabled() { return audiobridgeEnabled.get().equals("true"); }	
+
+    public final StringProperty audiobridgeLogging = new StringProperty( "ofmeet.audiobridge.logging.enabled", "false" );
+    public boolean getAudiobridgeLogging() { return audiobridgeLogging.get().equals("true"); }	
 	
     public final StringProperty audiobridgeRegisterAll = new StringProperty( "ofmeet.audiobridge.register.all", "false" );
     public boolean getAudiobridgeRegisterAll() { return audiobridgeRegisterAll.get().equals("true"); }	

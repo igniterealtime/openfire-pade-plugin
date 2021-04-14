@@ -80,7 +80,7 @@ public class Config implements MUCEventListener {
 
 				for (MUCRoom room : rooms)
 				{
-					if (!"ofmeet".equals(room.getName()) && !"ofgasi".equals(room.getName()))
+					if (!"ofmeet".equals(room.getJID().getNode()) && !"ofgasi".equals(room.getJID().getNode()))
 					{
 						createConference(room);
 					}
@@ -344,7 +344,7 @@ public class Config implements MUCEventListener {
 	private void createConference(MUCRoom room)
 	{
 		Conference conference = new Conference();
-		conference.id = room.getName();		
+		conference.id = room.getJID().getNode();		
 		
 		Map<String, String> props = (Map<String, String>) muc_properties.get(room.getJID().toString());
 		if (props == null) props = new MUCRoomProperties(room.getID());
@@ -463,6 +463,11 @@ public class Config implements MUCEventListener {
 
 		return pin;
     }
+	
+	public boolean isLoggingEnabled()
+	{
+		return JiveGlobals.getBooleanProperty("ofmeet.audiobridge.logging.enabled", false);
+	}
 
 	public String getPrivateHost()
 	{

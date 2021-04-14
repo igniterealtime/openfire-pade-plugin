@@ -73,15 +73,6 @@ public class SipServer implements SipListener {
      * default port for SIP communication
      */
     private static final int SIP_PORT = 5060;
-
-    /*
-     * ip addresses of the SIP Proxy (NIST Proxy Server by default)
-     */
-    private static String defaultSipProxy;
-
-    /*
-     * IP address of the Cisco SIP/VoIP gateways
-     */
     private static ArrayList<String> voIPGateways = new ArrayList<String>();
     private static ArrayList<ProxyCredentials> voIPGatewayLoginInfo = new ArrayList<ProxyCredentials>();
 	private static ArrayList<RegisterProcessing> registrations = new ArrayList<RegisterProcessing>();
@@ -189,7 +180,7 @@ public class SipServer implements SipListener {
 			udpListenPort = sipStack.createListeningPoint("0.0.0.0", sipPort, "udp");
 
 
-			if ("tcp".equals(JiveGlobals.getProperty("voicebridge.default.protocol", "tcp")))
+			if ("tcp".equals(JiveGlobals.getProperty("ofmeet.jigasi.sip.transport", "tcp").toLowerCase()))
 			{
             	sipProvider = sipStack.createSipProvider(tcpListenPort);
             	sipProvider.addListeningPoint(udpListenPort);
@@ -200,16 +191,6 @@ public class SipServer implements SipListener {
 
             sipProvider.addSipListener(this);
 	   		sipAddress = new InetSocketAddress(sipStack.getIPAddress(), sipPort);
-
-            /*
-	     * get IPs of the SIP Proxy server
-	     */
-            defaultSipProxy = config.getDefaultProxy();
-
-            /*
-	     * Initialize SipUtil class.  Do this last so that
-             * the other sip stack variables are initialized
-             */
             SipUtil.initialize();
 
 			for (int i = 0; i < voIPGatewayLoginInfo.size(); i++)
@@ -250,8 +231,6 @@ public class SipServer implements SipListener {
 	    Logger.exception("InvalidArgumentException", e);
             return;
 	}
-
-        Logger.println("Default SIP Proxy:        " + defaultSipProxy);
 	Logger.println("");
     }
 
@@ -281,22 +260,6 @@ public class SipServer implements SipListener {
 
     public static boolean getSendSipUriToProxy() {
 	return sendSipUriToProxy;
-    }
-
-    /**
-     * Get the IP Address of the SIP Proxy.
-     * @return SipProxy String with dotted IP address
-     */
-    public static String getDefaultSipProxy() {
-	return defaultSipProxy;
-    }
-
-    /**
-     * Set the IP address of the SIP Proxy.
-     * @param ip String with dotted IP address
-     */
-    public static void setDefaultSipProxy(String defaultSipProxy) {
-	SipServer.defaultSipProxy = defaultSipProxy;
     }
 
     public static InetSocketAddress getSipAddress() {

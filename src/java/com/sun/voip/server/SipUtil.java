@@ -336,11 +336,6 @@ if (false) {
 		int toSipPort = 5060;
 
 		String proxy = cp.getSipProxy();
-
-		if (proxy == null) {
-			proxy = SipServer.getDefaultSipProxy();
-		}
-
 		String voipGateway = null;
 
 		if (toNumber.indexOf("sip:") == 0) {
@@ -448,7 +443,6 @@ if (false) {
 		}
 
 		ArrayList<ProxyCredentials> proxyCredentialList = SipServer.getProxyCredentials();
-		boolean gatewayRequired = false;
 
 		if (voipGateway == null)
 		{
@@ -458,99 +452,30 @@ if (false) {
 				{
 					Logger.println("Call " + cp + " no voipGateway is available!");
 					throw new SipException("No voip Gateway! " + cp);
-
-				} else gatewayRequired = true;
+				}
 
 
 			} else {
-
 				voipGateway = proxy;
-				gatewayRequired = true;
 			}
-
-		} else {
-
-			if (voipGateway.equals(proxy))
-				gatewayRequired = true;
 		}
 
-		String ucwaDomain = JiveGlobals.getProperty("ucwa.default.domain", voipGateway);
+		Logger.println("XXXX gatewayRequired 4");
 
-		if (gatewayRequired)
-		{
-			Logger.println("XXXX gatewayRequired");
-	/*
-			// SIP Registration not used by MS Lync
+		Logger.println("fromNumber " + fromNumber);
 
-			if (proxyCredentialList.size() != 0)
-			{
-				Logger.println("XXXX gatewayRequired 1");
-				int voipIndex = -1;
+		if (fromNumber.startsWith("sip:"))
+			fromAddress = (SipURI)addressFactory.createAddress(fromNumber).getURI();
+		else
+			fromAddress = addressFactory.createSipURI(fromNumber, ourIpAddress);
 
-				for (int i=0; i<proxyCredentialList.size(); i++)
-				{
-					ProxyCredentials proxyCredentials = proxyCredentialList.get(i);
+		if (toNumber.startsWith("sip:"))
+			toAddress = (SipURI)addressFactory.createAddress(toNumber).getURI();
+		else
+			toAddress = addressFactory.createSipURI(toNumber, JiveGlobals.getProperty("xmpp.domain", "localhost"));
 
-					if (voipGateway.equals(proxyCredentials.getName()))
-					{
-						voipIndex = i;
-					}
-				}
+		fromAddress.setPort(ourSipPort);
 
-				if (voipIndex > -1)
-				{
-					Logger.println("XXXX gatewayRequired 1 " + voipGateway);
-
-					ProxyCredentials proxyCredentials = proxyCredentialList.get(voipIndex);
-
-					//fromName = proxyCredentials.getUserDisplay();
-					voipGateway = proxyCredentials.getHost();
-					obProxy = proxyCredentials.getProxy();
-					//fromAddress = addressFactory.createSipURI(proxyCredentials.getUserName(), voipGateway);
-					fromAddress = addressFactory.createSipURI(fromName, voipGateway);
-
-					//cp.setProxyCredentials(proxyCredentials);				// we need this to match SIP transaction later
-					//cp.setDisplayName(proxyCredentials.getUserDisplay());	// we need this to get proxy authentication details later
-				}
-
-			} else {
-				Logger.println("XXXX gatewayRequired 2");
-			}
-	*/
-
-			obProxy = JiveGlobals.getProperty("ucwa.mediation.server", voipGateway);
-
-			if (fromNumber.startsWith("sip:"))
-				fromAddress = (SipURI)addressFactory.createAddress(fromNumber).getURI();
-			else
-				fromAddress = addressFactory.createSipURI(fromNumber, ucwaDomain);
-
-			if (toNumber.startsWith("sip:"))
-				toAddress = (SipURI)addressFactory.createAddress(toNumber).getURI();
-			else
-				toAddress = addressFactory.createSipURI(toNumber, ucwaDomain);
-
-			Logger.println("XXXX gatewayRequired 3 " + obProxy + " " + ucwaDomain);
-
-
-		} else {
-
-			Logger.println("XXXX gatewayRequired 4");
-
-			Logger.println("fromNumber " + fromNumber);
-
-			if (fromNumber.startsWith("sip:"))
-				fromAddress = (SipURI)addressFactory.createAddress(fromNumber).getURI();
-			else
-				fromAddress = addressFactory.createSipURI(fromNumber, ourIpAddress);
-
-			if (toNumber.startsWith("sip:"))
-				toAddress = (SipURI)addressFactory.createAddress(toNumber).getURI();
-			else
-				toAddress = addressFactory.createSipURI(toNumber, JiveGlobals.getProperty("xmpp.domain", "localhost"));
-
-			fromAddress.setPort(ourSipPort);
-		}
 
 		Logger.println("XXXX gatewayRequired 5");
 

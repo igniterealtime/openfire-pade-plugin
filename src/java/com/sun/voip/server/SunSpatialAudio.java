@@ -613,7 +613,7 @@ if (false) {
 
         dump(result);
 
-        System.out.println("====================");
+        Logger.println("====================");
 
         Util.dump("c echo", c, 0, c.length);
 
@@ -642,19 +642,19 @@ if (false) {
     }
 
     private void dump(int[] c) {
-        System.out.println("\nleft " + c.length);
+        Logger.println("\nleft " + c.length);
 
         for (int i = 0; i < c.length; i += 2) {
             System.out.print(Integer.toHexString(c[i] & 0xff) + " ");
         }
 
-        System.out.println("\n\nright " + c.length);
+        Logger.println("\n\nright " + c.length);
 
         for (int i = 1; i < c.length; i += 2) {
             System.out.print(Integer.toHexString(c[i] & 0xff) + " ");
         }
 
-        System.out.println("\n");
+        Logger.println("\n");
     }
 
 }

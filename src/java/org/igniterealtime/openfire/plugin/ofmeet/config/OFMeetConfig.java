@@ -16,6 +16,7 @@
 
 package org.igniterealtime.openfire.plugin.ofmeet.config;
 
+import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.util.JiveGlobals;
 
 import java.net.InetAddress;
@@ -35,6 +36,7 @@ import java.util.List;
 public class OFMeetConfig
 {
     public static final String OFMEET_WEBAPP_CONTEXTPATH_PROPERTYNAME = "ofmeet.webapp.contextpath";
+	public static final String hostname = XMPPServer.getInstance().getServerInfo().getHostname();
 
     // No static methods! Static methods are not accessible when using this class as a bean in the Admin Console JSP pages.
     public void setWebappContextPath( String contextPath )
@@ -745,22 +747,22 @@ public class OFMeetConfig
         return Language.English;
     }
 
-    public final StringProperty jigasiSipUserId = new StringProperty( "ofmeet.jigasi.sip.user-id", null );
+    public final StringProperty jigasiSipUserId = new StringProperty( "ofmeet.jigasi.sip.user-id", "jigasi@"  + hostname );
     public StringProperty getJigasiSipUserId() { return jigasiSipUserId; }
 
     public final StringProperty jigasiSipPassword = new StringProperty( "ofmeet.jigasi.sip.password", "" );
     public StringProperty getJigasiSipPassword() { return jigasiSipPassword; }
 
-    public final StringProperty jigasiSipServerAddress = new StringProperty( "ofmeet.jigasi.sip.server-address", null );
+    public final StringProperty jigasiSipServerAddress = new StringProperty( "ofmeet.jigasi.sip.server-address", hostname );
     public StringProperty getJigasiSipServerAddress() { return jigasiSipServerAddress; }
 
-    public final StringProperty jigasiSipTransport = new StringProperty( "ofmeet.jigasi.sip.transport", "UDP" );
+    public final StringProperty jigasiSipTransport = new StringProperty( "ofmeet.jigasi.sip.transport", "TCP" );
     public StringProperty getJigasiSipTransport() { return jigasiSipTransport; }
 
     public final StringProperty jigasiProxyServer = new StringProperty( "ofmeet.jigasi.proxy.server", null );
     public StringProperty getJigasiProxyServer() { return jigasiProxyServer; }
 
-    public final StringProperty jigasiProxyPort = new StringProperty( "ofmeet.jigasi.proxy.port", "5060" );
+    public final StringProperty jigasiProxyPort = new StringProperty( "ofmeet.jigasi.proxy.port", "5067");
     public StringProperty getJigasiProxyPort() { return jigasiProxyPort; }
 
     public final StringProperty jigasiXmppUserId = new StringProperty( "ofmeet.jigasi.xmpp.user-id", "jigasi" );
@@ -798,4 +800,8 @@ public class OFMeetConfig
 
     public final StringProperty audiobridgeEnabled = new StringProperty( "ofmeet.audiobridge.enabled", "false" );
     public boolean getAudiobridgeEnabled() { return audiobridgeEnabled.get().equals("true"); }	
+	
+    public final StringProperty audiobridgeRegisterAll = new StringProperty( "ofmeet.audiobridge.register.all", "false" );
+    public boolean getAudiobridgeRegisterAll() { return audiobridgeRegisterAll.get().equals("true"); }	
+	
 }

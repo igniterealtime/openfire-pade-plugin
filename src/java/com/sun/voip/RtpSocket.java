@@ -143,8 +143,7 @@ public class RtpSocket {
 	}
 
 	if (p != port) {
-	    System.out.println("RtpSocket:  Desired port " + port 
-		+ " is in use.  Using " + p + " instead.");
+	    System.out.println("RtpSocket:  Desired port " + port  + " is in use.  Using " + p + " instead.");
 	}
 
 	try {

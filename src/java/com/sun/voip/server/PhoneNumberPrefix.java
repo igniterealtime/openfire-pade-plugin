@@ -217,11 +217,9 @@ public class PhoneNumberPrefix {
 	    String prefix = getPrefix(args[i]);
 
 	    if (prefix.equals("")) {
-	        System.out.println(
-		   "no prefix needed for location " + args[i]);
+	        System.out.println("no prefix needed for location " + args[i]);
 	    } else {
-	        System.out.println(
-		    "prefix " + prefix + " needed for location " + args[i]);
+	        System.out.println("prefix " + prefix + " needed for location " + args[i]);
 	    }
 	}
     }

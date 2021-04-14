@@ -53,8 +53,7 @@ import org.voicebridge.Config;
  *
  * This is a separate thread so that it can monitor the call status.
  */
-public class IncomingCallHandler extends CallHandler
-	implements CallEventListener {
+public class IncomingCallHandler extends CallHandler implements CallEventListener {
 
     private Integer stateChangeLock = new Integer(0);
     private ConferenceManager newConferenceManager;
@@ -79,7 +78,7 @@ public class IncomingCallHandler extends CallHandler
 
     public IncomingCallHandler(CallEventListener listener, CallParticipant cp, Object requestEvent)
     {
-		System.out.println("IncomingCallHandler " + cp.getToPhoneNumber());
+		Logger.println("IncomingCallHandler " + cp.getToPhoneNumber());
 
 		if (CallHandler.enablePSTNCalls() == false) {
 			Logger.println("Ignoring incoming call " + cp.getToPhoneNumber());
@@ -99,7 +98,7 @@ public class IncomingCallHandler extends CallHandler
 		{
 			if (cp.getConferenceId() == null || cp.getConferenceId().length() == 0)
 			{
-				System.out.println("Don't have conf, using default....");
+				Logger.println("Don't have conf, using default....");
 				cp.setConferenceId(defaultIncomingConferenceId); // wait in lobby
 
 			} else {
@@ -112,14 +111,9 @@ public class IncomingCallHandler extends CallHandler
 
 		} else {
 
-			System.out.println("Incoming SIP, call " + cp);
+			Logger.println("Incoming SIP, call " + cp);
 
-			if (Config.getInstance().getConferenceExten().equals(cp.getToPhoneNumber()))
-			{
-				incomingConferenceHandler = new IncomingConferenceHandler(this, cp.getToPhoneNumber());
-				start();
-
-			} else if (Config.getInstance().getConferenceByPhone(cp.getToPhoneNumber()) != null) {
+			if (Config.getInstance().getConferenceByPhone(cp.getToPhoneNumber()) != null) {
 
 				incomingConferenceHandler = new IncomingConferenceHandler(this, cp.getToPhoneNumber());
 				start();
@@ -455,7 +449,7 @@ public class IncomingCallHandler extends CallHandler
     public ConferenceManager transferCall(String conferenceId)
 	    throws IOException {
 
-	System.out.println("transferCall " + conferenceId);
+	Logger.println("transferCall " + conferenceId);
 
 	ConferenceManager conferenceManager = transferCall(this, conferenceId);
 

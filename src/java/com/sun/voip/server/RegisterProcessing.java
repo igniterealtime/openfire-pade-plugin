@@ -231,8 +231,7 @@ class RegisterProcessing implements SipListener {
 
 
         try {
-            requestURI.setTransportParam(
-		sipProvider.getListeningPoint().getTransport());
+            requestURI.setTransportParam(sipProvider.getListeningPoint().getTransport());
         } catch (ParseException e) {
             throw new IOException(sipProvider.getListeningPoint().getTransport()
 		+ " is not a valid transport! " + e.getMessage());

@@ -30,10 +30,13 @@ import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.Calendar;
 
+import org.slf4j.LoggerFactory;
+
 /**
  * Logging utility.
  */
 public class Logger {
+    private static final org.slf4j.Logger Log = LoggerFactory.getLogger( Logger.class );	
     private static BufferedWriter bw = null;
     private static FileWriter fw = null;
 
@@ -137,7 +140,6 @@ public class Logger {
     public static synchronized void exception(String s, Exception e) {
 	error(s);
 	e.printStackTrace();
-	System.out.flush();
     }
 
     /**
@@ -153,8 +155,7 @@ public class Logger {
 	    }
 	}
 
-        System.out.println(getDate() + msg);
-        System.out.flush();
+        Log.debug(getDate() + msg);
     }
 
     /**
@@ -166,8 +167,7 @@ public class Logger {
             writeFile(msg);
         }
 
-        System.out.println(getDate() + msg);
-        System.out.flush();
+        Log.debug(getDate() + msg);
     }
 
     /**
@@ -182,7 +182,7 @@ public class Logger {
                     bw.write(getDate() + msg + "\n");
 		}
 	    } catch (IOException e) {
-		System.out.println(getDate() + "Unable to writeFile! "
+		Log.debug(getDate() + "Unable to writeFile! "
 		    + e.getMessage());
 		close();
 	    }
@@ -191,8 +191,8 @@ public class Logger {
 		flush();
 	    }
 	} else {
-            System.out.println(getDate() + msg);
-            System.out.flush();
+            // TODO change to debug when finished debugging
+            Log.info(getDate() + msg);			
 	}
     }
 
@@ -208,7 +208,7 @@ public class Logger {
 		fw.flush();
 	    }
 	} catch (IOException e) {
-            System.out.println(getDate() + "could not flush log file. "
+            Log.debug(getDate() + "could not flush log file. "
 		+ e.getMessage());
 	}
     }
@@ -223,7 +223,7 @@ public class Logger {
                 bw.close();
 	    }
         } catch (IOException e) {
-            //System.out.println(getDate() + "could not close buffered writer");
+            //Log.debug(getDate() + "could not close buffered writer");
         }
 
 	bw = null;
@@ -234,7 +234,7 @@ public class Logger {
                 fw.close();
 	    }
 	} catch (IOException e) {
-            //System.out.println(getDate() + "could not close log file");
+            //Log.debug(getDate() + "could not close log file");
 	}
 
 	fw = null;

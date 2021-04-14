@@ -18,13 +18,18 @@ import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.muc.*;
 import org.jivesoftware.database.DbConnectionManager;
 import org.jivesoftware.util.*;
+import org.jivesoftware.util.cache.Cache;
+import org.jivesoftware.util.cache.CacheFactory;
 
 import org.xmpp.packet.*;
+import org.ifsoft.oju.openfire.MUCRoomProperties;
+
 
 public class Config implements MUCEventListener {
 
     private static final Logger Log = LoggerFactory.getLogger(Config.class);
-
+    private static Cache muc_properties = CacheFactory.createLocalCache("MUC Room Properties");
+	
 	private MultiUserChatManager mucManager;
 	private HashMap<String, Conference> conferences;
 	private HashMap<String, Conference> confExtensions;
@@ -39,10 +44,8 @@ public class Config implements MUCEventListener {
 
 	private String privateHost = JiveGlobals.getProperty("org.ice4j.ice.harvest.NAT_HARVESTER_PRIVATE_ADDRESS", hostname);
 	private String publicHost = JiveGlobals.getProperty("org.ice4j.ice.harvest.NAT_HARVESTER_PUBLIC_ADDRESS", hostname);
-	private String conferenceExten = JiveGlobals.getProperty("voicebridge.default.conf.exten", "default");
-	private String defaultProxy = JiveGlobals.getProperty("voicebridge.default.proxy.name", null);
-	private String defaultProtocol = JiveGlobals.getProperty("voicebridge.default.protocol", "tcp");
-	private String defaultSIPPort = JiveGlobals.getProperty("voicebridge.default.sip.port", "5067");
+	private String defaultProtocol = JiveGlobals.getProperty("ofmeet.jigasi.sip.transport", "tcp").toLowerCase();
+	private String defaultSIPPort = JiveGlobals.getProperty("ofmeet.jigasi.proxy.port", "5067");
 
     private boolean prefixPhoneNumber = true;
     private String internationalPrefix = "00";  // for international calls
@@ -84,28 +87,17 @@ public class Config implements MUCEventListener {
 				}
 			}
 
-			String username = JiveGlobals.getProperty("voicebridge.default.proxy.username", null);
+			String username = JiveGlobals.getProperty("ofmeet.jigasi.xmpp.user-id", "jigasi");
 
-			if (defaultProxy != null)
+			if (JiveGlobals.getBooleanProperty("ofmeet.audiobridge.register.all", false))
 			{
-				if (username != null)
-				{
-					if (JiveGlobals.getBooleanProperty("voicebridge.register.all.users", false))
-					{
-						processRegistrations();
+				processRegistrations();
 
-					} else {
-						processDefaultRegistration(username);
-					}
-
-					Log.info(String.format("VoiceBridge sip plugin assumed available"));
-					sipPlugin = true;
-
-				} else {
-
-					registerWithDefaultProxy();
-				}
+			} else {
+				processDefaultRegistration(username);
 			}
+
+			Log.info(String.format("VoiceBridge sip plugin assumed available"));
 
 		} catch (Throwable t) {
 			t.printStackTrace();
@@ -126,46 +118,6 @@ public class Config implements MUCEventListener {
     // ------------------------------------------------------------------------
 
 
-	private void registerWithDefaultProxy()
-	{
-		ProxyCredentials sipAccount = new ProxyCredentials();
-
-		try {
-			String name = defaultProxy;
-			String username = JiveGlobals.getProperty("voicebridge.default.proxy.username", "admin");
-			String sipusername = JiveGlobals.getProperty("voicebridge.default.proxy.sipusername", name);
-			String authusername = JiveGlobals.getProperty("voicebridge.default.proxy.sipauthuser", null);
-			String displayname = JiveGlobals.getProperty("voicebridge.default.proxy.sipdisplayname", name);
-			String password = JiveGlobals.getProperty("voicebridge.default.proxy.sippassword", name);
-			String server = JiveGlobals.getProperty("voicebridge.default.proxy.sipserver");
-			String stunServer = JiveGlobals.getProperty("voicebridge.default.proxy.stunserver", server);
-			String stunPort = JiveGlobals.getProperty("voicebridge.default.proxy.stunport");
-            String voicemail = JiveGlobals.getProperty("voicebridge.default.proxy.voicemail", name);
-            String outboundproxy = JiveGlobals.getProperty("voicebridge.default.proxy.outboundproxy", server);
-
-            sipAccount.setName(name);
-			sipAccount.setXmppUserName(username);
-			sipAccount.setUserName(sipusername);
-			sipAccount.setAuthUserName(authusername);
-			sipAccount.setUserDisplay(displayname);
-			sipAccount.setPassword(password.toCharArray());
-			sipAccount.setHost(server);
-            sipAccount.setProxy(outboundproxy);
-            sipAccount.setRealm(server);
-
-            sipExtensions.put(username, sipAccount);
-
-			InetAddress inetAddress = InetAddress.getByName(sipAccount.getHost());
-			registrars.add(sipAccount.getHost());
-			registrations.add(sipAccount);
-
-			Log.info(String.format("VoiceBridge adding SIP registration: %s with user %s host %s", sipAccount.getXmppUserName(), sipAccount.getUserName(), sipAccount.getHost()));
-
-        } catch (Exception e) {
-			Log.info("registerWithDefaultProxy " + e);
-		}
-	}
-
 	private void processDefaultRegistration(String username)
 	{
 		String sql = "SELECT username, sipusername, sipauthuser, sipdisplayname, sippassword, sipserver, enabled, status, stunserver, stunport, usestun, voicemail, outboundproxy, promptCredentials FROM ofSipUser WHERE USERNAME = '" + username + "'";
@@ -180,8 +132,9 @@ public class Config implements MUCEventListener {
 
 			if (rs.next())
 			{
+				sipPlugin = true;				
 				ProxyCredentials credentials = read(rs);
-				credentials.setName(defaultProxy);
+				credentials.setName(username);
 
 				try {
 					InetAddress inetAddress = InetAddress.getByName(credentials.getHost());
@@ -217,6 +170,7 @@ public class Config implements MUCEventListener {
 
 			while (rs.next())
 			{
+				sipPlugin = true;				
 				ProxyCredentials credentials = read(rs);
 
 				try {
@@ -390,20 +344,16 @@ public class Config implements MUCEventListener {
 	private void createConference(MUCRoom room)
 	{
 		Conference conference = new Conference();
-		conference.id = room.getName();
-		conference.pin = room.getPassword();
-
-		if (conference.pin != null && conference.pin.length() == 0)
-			conference.pin = null;
-
-		conference.exten = room.getDescription();
-
-		int pos = conference.exten.indexOf(":");
-
-		if (pos > 0)
-			conference.exten = conference.exten.substring(0, pos);
-		else
-			conference.exten = null;
+		conference.id = room.getName();		
+		
+		Map<String, String> props = (Map<String, String>) muc_properties.get(room.getJID().toString());
+		if (props == null) props = new MUCRoomProperties(room.getID());
+		
+		if (props != null)
+		{
+			conference.pin = props.get("PIN");	
+			conference.exten = props.get("EXTEN");	
+		}
 
 		if (conference.exten != null && conference.exten.length() > 0)
 		{
@@ -524,16 +474,6 @@ public class Config implements MUCEventListener {
 		return publicHost;
 	}
 
-    public void setConferenceExten(String conferenceExten)
-    {
-		this.conferenceExten = conferenceExten;
-    }
-
-    public String getConferenceExten()
-    {
-		return conferenceExten;
-    }
-
     public void setInternalExtenLength(int internalExtenLength)
     {
 		this.internalExtenLength = internalExtenLength;
@@ -586,10 +526,6 @@ public class Config implements MUCEventListener {
 		return prefixPhoneNumber;
     }
 
-	public String getDefaultProxy()
-	{
-		return defaultProxy;
-	}
 	public String getDefaultProtocol()
 	{
 		return defaultProtocol;
@@ -808,7 +744,7 @@ public class Config implements MUCEventListener {
 
 	}
 
-	private class Conference
+	public class Conference
 	{
 		public String pin = null;
 		public String id = null;

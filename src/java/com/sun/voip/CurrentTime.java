@@ -23,6 +23,7 @@
 
 package com.sun.voip;
 
+import com.sun.voip.Logger;
 import java.lang.reflect.*;
 
 public class CurrentTime {
@@ -115,7 +116,7 @@ public class CurrentTime {
 	    try {
 		n = Integer.parseInt(args[0]);
 	    } catch (NumberFormatException e) {
-		System.out.println(
+		Logger.println(
 		    "invalid count specified.  defaulting to " + n);
 	    }
 	}
@@ -137,14 +138,14 @@ public class CurrentTime {
 	} catch (InterruptedException e) {
 	}
 
-	System.out.println("Time units:  " + getTimeUnits());
-	System.out.println("Average time to getTime():  " 
+	Logger.println("Time units:  " + getTimeUnits());
+	Logger.println("Average time to getTime():  " 
 	    + ((double)totalTime / n / getTimeUnitsPerSecond()));
 
-	System.out.println ("elapsed using getTime() " 
+	Logger.println ("elapsed using getTime() " 
 	    + CurrentTime.getElapsedSeconds(start));
 
-	System.out.println ("elapsed using currentTimeMillis() " 
+	Logger.println ("elapsed using currentTimeMillis() " 
 	    + (System.currentTimeMillis() - s));
     }
 

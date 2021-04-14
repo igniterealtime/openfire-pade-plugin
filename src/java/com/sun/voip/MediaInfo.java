@@ -104,24 +104,6 @@ if (false) {
         supportedMedia.add(new MediaInfo(
             (byte)119, RtpPacket.PCMU_ENCODING, 48000, 2, false));
 }
-
-        supportedMedia.add(new MediaInfo(
-            (byte)120, RtpPacket.SPEEX_ENCODING, 8000, 1, false));
-
-        supportedMedia.add(new MediaInfo(
-            (byte)121, RtpPacket.SPEEX_ENCODING, 8000, 2, false));
-
-        supportedMedia.add(new MediaInfo(
-            (byte)122, RtpPacket.SPEEX_ENCODING, 16000, 1, false));
-
-        supportedMedia.add(new MediaInfo(
-            (byte)123, RtpPacket.SPEEX_ENCODING, 16000, 2, false));
-
-        supportedMedia.add(new MediaInfo(
-            (byte)124, RtpPacket.SPEEX_ENCODING, 32000, 1, false));
-
-        supportedMedia.add(new MediaInfo(
-            (byte)125, RtpPacket.SPEEX_ENCODING, 32000, 2, false));
     }
 
     public MediaInfo(byte payload , int encoding, int sampleRate, int channels, boolean isTelephoneEventPayload)
@@ -182,7 +164,7 @@ if (false) {
 	    return "PCM";
 	}
 
-	return "SPEEX";
+	return "PCMU";
     }
 
     public int getSampleRate() {
@@ -206,8 +188,6 @@ if (false) {
 
 	if (encoding == RtpPacket.PCM_ENCODING) {
 	    s = "PCM";
-	} else if (encoding == RtpPacket.SPEEX_ENCODING) {
-	    s = "SPEEX";
 	}
 
 	return payload + ":" + s + "/" + sampleRate + "/" + channels;

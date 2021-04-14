@@ -191,8 +191,7 @@ public class Logger {
 		flush();
 	    }
 	} else {
-            // TODO change to debug when finished debugging
-            Log.info(getDate() + msg);			
+            Log.debug(getDate() + msg);			
 	}
     }
 

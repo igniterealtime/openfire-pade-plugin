@@ -122,8 +122,6 @@ public class RtpPacket {
      */
     public final static int PCMU_ENCODING = 0;
     public final static int PCM_ENCODING = 1;
-    public final static int SPEEX_ENCODING = 2;
-
     public final static int MAX_SAMPLE_RATE = 48000;
     public final static int MAX_CHANNELS = 2;
      
@@ -197,15 +195,12 @@ public class RtpPacket {
 
 	int samplesPerPacket = (sampleRate * channels) / PACKETS_PER_SECOND;
 
-	if (encoding == PCMU_ENCODING) {
-	    dataSize = samplesPerPacket * PCMU_SAMPLE_SIZE;
-	    e = "ULAW";
-	} else if (encoding == PCM_ENCODING) {
+	if (encoding == PCM_ENCODING) {
 	    dataSize = samplesPerPacket * PCM_SAMPLE_SIZE;
 	    e = "PCM";
 	} else {
-	    dataSize = samplesPerPacket * PCM_SAMPLE_SIZE;
-	    e = "SPEEX";
+	    dataSize = samplesPerPacket * PCMU_SAMPLE_SIZE;
+	    e = "ULAW";
 	}
 
 	if (Logger.logLevel >= Logger.LOG_DEBUG) {

@@ -363,7 +363,7 @@ class RtpmapParser {
     /*
      * An rtpmap entry looks like this:
      *
-     * a=rtpmap:<payload> <PCMU | PCM | SPEEX>/<sampleRate>/<channels>
+     * a=rtpmap:<payload> <PCMU | PCM>/<sampleRate>/<channels>
      *     or
      * a=rtpmap:<payload> telephone-event/8000/1
      */
@@ -422,20 +422,10 @@ class RtpmapParser {
 	    if (start >= 0) {
 	        s = s.substring(start + 5);
 	        encoding = RtpPacket.PCMU_ENCODING;
-	    } else {
-		start = s.indexOf("SPEEX/");
-
-		if (start < 0) {
-		    if (Logger.logLevel >= Logger.LOG_INFO) {
-		        Logger.println("Ignoring rtpmap entry: "
-			    + payload + " " + s);
-		    }
-		    return;		// ignore this entry
-		}
-
-	        s = s.substring(start + 6);
-	        encoding = RtpPacket.SPEEX_ENCODING;
 	    }
+		else {
+			return;	// ignore this entry			
+		}
 	}
 
 	finish = s.indexOf("/");

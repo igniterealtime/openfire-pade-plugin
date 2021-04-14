@@ -202,25 +202,6 @@ if (false) {
         supportedMedia.add(new MediaInfo(
             (byte)119, RtpPacket.PCMU_ENCODING, 48000, 2, false));
 }
-
-        supportedMedia.add(new MediaInfo(
-            (byte)120, RtpPacket.SPEEX_ENCODING, 8000, 1, false));
-
-        supportedMedia.add(new MediaInfo(
-            (byte)121, RtpPacket.SPEEX_ENCODING, 8000, 2, false));
-
-        supportedMedia.add(new MediaInfo(
-            (byte)122, RtpPacket.SPEEX_ENCODING, 16000, 1, false));
-
-        supportedMedia.add(new MediaInfo(
-            (byte)123, RtpPacket.SPEEX_ENCODING, 16000, 2, false));
-
-        supportedMedia.add(new MediaInfo(
-            (byte)124, RtpPacket.SPEEX_ENCODING, 32000, 1, false));
-
-        supportedMedia.add(new MediaInfo(
-            (byte)125, RtpPacket.SPEEX_ENCODING, 32000, 2, false));
-
 	SdpManager.setSupportedMedia(supportedMedia);
 
 	initialized = true;

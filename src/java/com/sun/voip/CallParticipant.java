@@ -83,7 +83,6 @@ public class CallParticipant {
     private String  protocol			   = null;
     private String  remoteCallId		   = null;
     private String  sipProxy			   = null;
-    private boolean speexEncode			   = false;
     private String  whisperGroupId		   = null;
     private String  voipGateway			   = null;
     private boolean voiceDetection       	   = false;
@@ -568,13 +567,6 @@ public class CallParticipant {
     }
 
     /**
-     * returns whether or not to Speex encode
-     */
-    public boolean speexEncode() {
-	return speexEncode;
-    }
-
-    /**
      * returns the whisper group this call is initially in
      */
     public String getWhisperGroupId() {
@@ -957,13 +949,6 @@ public class CallParticipant {
     }
 
     /**
-     * Sets speexEncode flag
-     */
-    public void setSpeexEncode(boolean speexEncode) {
-	this.speexEncode = speexEncode;
-    }
-
-    /**
      * Sets the whisperGroup this call is initially in
      */
     public void setWhisperGroupId(String whisperGroupId) {
@@ -1301,10 +1286,6 @@ public class CallParticipant {
 
 	if (sipProxy != null) {
 	    request += "sipProxy=" + sipProxy + "\r\n";
-	}
-
-	if (speexEncode == true) {
-	    request += "speexEncode=" + speexEncode + "\r\n";
 	}
 
 	if (whisperGroupId != null) {

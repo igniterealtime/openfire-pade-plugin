@@ -154,7 +154,7 @@ public class ConferenceManager {
     public void setMediaInfo(String mediaPreference) throws ParseException {
 	/*
 	 * Conference id may be qualified by the media parameters.
-	 * The syntax is <conferenceId>:<PCM[U]|SPEEX/<sampleRate>/<channels>
+	 * The syntax is <conferenceId>:<PCM[U]/<sampleRate>/<channels>
 	 */
 	mediaInfo = parseMediaPreference(mediaPreference);
 	mediaPreference = null;
@@ -194,9 +194,6 @@ public class ConferenceManager {
 	    } else if (mediaPreference.indexOf("PCM/") == 0) {
 		encoding = RtpPacket.PCM_ENCODING;
 		mediaPreference = mediaPreference.substring(4);
-	    } else if (mediaPreference.indexOf("SPEEX/") == 0) {
-		encoding = RtpPacket.SPEEX_ENCODING;
-		mediaPreference = mediaPreference.substring(6);
 	    } else if (mediaPreference.indexOf("PCM") == 0) {
 			// do nothing
 	    } else {
@@ -1340,13 +1337,6 @@ public class ConferenceManager {
 			}
 		    }
 
-    		    if (cp.speexEncode()) {
-    		        info += " SpeexEncode";
-    		    }
-
-    		    //
-    		    // For debugging
-    		    //
 		    if (memberSender.getSendAddress() != null) {
 			String gateway = "";
 

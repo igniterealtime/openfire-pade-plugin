@@ -992,8 +992,6 @@ public class SipServer implements SipListener {
 		 */
 		public boolean doAuthenticate(Request request, AuthorizationHeader authHeader, String user, String password)
 		{
-			Log.info("doAuthenticate " + user + " " + password);
-
 			String username = authHeader.getUsername();
 			if (username == null || !username.equals(user))
 				return false;

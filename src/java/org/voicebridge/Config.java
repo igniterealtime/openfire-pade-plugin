@@ -42,6 +42,8 @@ public class Config implements MUCEventListener {
 	public static boolean sipPlugin = false;
 	private String hostname = XMPPServer.getInstance().getServerInfo().getHostname();
 
+	private String minPort = JiveGlobals.getProperty("org.jitsi.videobridge.media.MIN_PORT_NUMBER", "26001");
+	private String maxPort = JiveGlobals.getProperty("org.jitsi.videobridge.media.MAX_PORT_NUMBER", "27000");	
 	private String privateHost = JiveGlobals.getProperty("org.ice4j.ice.harvest.NAT_HARVESTER_PRIVATE_ADDRESS", hostname);
 	private String publicHost = JiveGlobals.getProperty("org.ice4j.ice.harvest.NAT_HARVESTER_PUBLIC_ADDRESS", hostname);
 	private String defaultProtocol = JiveGlobals.getProperty("ofmeet.jigasi.sip.transport", "tcp").toLowerCase();
@@ -87,7 +89,8 @@ public class Config implements MUCEventListener {
 				}
 			}
 
-			String username = JiveGlobals.getProperty("ofmeet.jigasi.xmpp.user-id", "jigasi");
+			String sipUserid = JiveGlobals.getProperty("ofmeet.jigasi.sip.user-id", "jigasi@" + getPrivateHost()).split("@")[0];	
+			String username = JiveGlobals.getProperty("ofmeet.jigasi.xmpp.user-id", "jigasi");							
 
 			if (JiveGlobals.getBooleanProperty("ofmeet.audiobridge.register.all", false))
 			{
@@ -97,7 +100,7 @@ public class Config implements MUCEventListener {
 				processDefaultRegistration(username);
 			}
 
-			Log.info(String.format("VoiceBridge sip plugin assumed available"));
+			Log.info(String.format("Audiobridge is available"));
 
 		} catch (Throwable t) {
 			t.printStackTrace();
@@ -120,6 +123,8 @@ public class Config implements MUCEventListener {
 
 	private void processDefaultRegistration(String username)
 	{
+		Log.info("Audiobridge process SIP registration " + username);	
+		
 		String sql = "SELECT username, sipusername, sipauthuser, sipdisplayname, sippassword, sipserver, enabled, status, stunserver, stunport, usestun, voicemail, outboundproxy, promptCredentials FROM ofSipUser WHERE USERNAME = '" + username + "'";
 		Connection con = null;
 		PreparedStatement pstmt = null;
@@ -158,6 +163,8 @@ public class Config implements MUCEventListener {
 
 	private void processRegistrations()
 	{
+		Log.info("Audiobridge process all SIP registrations");		
+		
 		String sql = "SELECT username, sipusername, sipauthuser, sipdisplayname, sippassword, sipserver, enabled, status, stunserver, stunport, usestun, voicemail, outboundproxy, promptCredentials FROM ofSipUser ORDER BY USERNAME";
 		Connection con = null;
 		PreparedStatement pstmt = null;
@@ -178,7 +185,7 @@ public class Config implements MUCEventListener {
 					registrars.add(credentials.getHost());
 					registrations.add(credentials);
 
-					Log.info(String.format("VoiceBridge adding SIP registration: %s with user %s host %s", credentials.getXmppUserName(), credentials.getUserName(), credentials.getHost()));
+					Log.info(String.format("Audiobridge adding SIP registration: %s with user %s host %s", credentials.getXmppUserName(), credentials.getUserName(), credentials.getHost()));
 
 				} catch (Exception e) {
 					Log.info(String.format("processRegistrations Bad Address  %s ", credentials.getHost()));
@@ -362,7 +369,7 @@ public class Config implements MUCEventListener {
 
 		conferences.put(conference.id, conference);
 
-		Log.info(String.format("VoiceBridge add conference: %s with pin %s extension %s", conference.id, conference.pin, conference.exten));
+		Log.info(String.format("Audiobridge add conference: %s with pin %s extension %s", conference.id, conference.pin, conference.exten));
 	}
 
 	private void destroyConference(MUCRoom room)
@@ -375,7 +382,7 @@ public class Config implements MUCEventListener {
 			Conference conference2 = confExtensions.remove(room.getName());
 			conference2 = null;
 
-			Log.info(String.format("VoiceBridge destroy conference: %s", room.getName()));
+			Log.info(String.format("Audiobridge destroy conference: %s", room.getName()));
 		}
 	}
 
@@ -414,6 +421,8 @@ public class Config implements MUCEventListener {
 
     public Conference getConferenceByPhone(String phoneNo)
     {
+		Log.debug("getConferenceByPhone" + phoneNo + " " + conferences.keySet());
+		
 		Conference conf = null;
 
 		if (conferences.containsKey(phoneNo))
@@ -469,6 +478,16 @@ public class Config implements MUCEventListener {
 		return JiveGlobals.getBooleanProperty("ofmeet.audiobridge.logging.enabled", false);
 	}
 
+	public String getMinPort()
+	{
+		return minPort;
+	}
+	
+	public String getMaxPort()
+	{
+		return maxPort;
+	}
+	
 	public String getPrivateHost()
 	{
         try {

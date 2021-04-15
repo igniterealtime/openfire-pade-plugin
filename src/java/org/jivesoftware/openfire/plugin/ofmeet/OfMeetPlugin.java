@@ -1300,6 +1300,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
     public void callEventNotification(CallEvent callEvent)
     {
- 		Log.info( "VoiceBridge callEventNotification " + callEvent.toString());
+ 		Log.info( "Audiobridge callEventNotification " + callEvent.toString());
     }	
 }

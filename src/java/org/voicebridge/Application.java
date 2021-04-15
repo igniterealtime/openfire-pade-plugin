@@ -30,16 +30,17 @@ public class Application implements  CallEventListener  {
 
 		try{
 			String logDir = pluginDirectory.getAbsolutePath() + File.separator + ".." + File.separator + ".." + File.separator + "logs" + File.separator;
-			loginfo(String.format("VoiceBridge logs %s", logDir));
+			loginfo(String.format("Audiobridge logs %s", logDir));
 
 			config = Config.getInstance();
 			config.initialise();
 
 			String webHome = pluginDirectory.getAbsolutePath()  + File.separator + ".." + File.separator + ".." + File.separator + "resources" + File.separator + "spank" + File.separator + "ofmeet-cdn";
+			String homePath = pluginDirectory.getAbsolutePath() + File.separator + "classes" + File.separator + "audiobridge";			
 
 			System.setProperty("com.sun.voip.server.LOGLEVEL", config.getInstance().isLoggingEnabled() ? "99": "0");
-			System.setProperty("com.sun.voip.server.FIRST_RTP_PORT", "50000");
-			System.setProperty("com.sun.voip.server.LAST_RTP_PORT", "60000");
+			System.setProperty("com.sun.voip.server.FIRST_RTP_PORT", config.getInstance().getMinPort());
+			System.setProperty("com.sun.voip.server.LAST_RTP_PORT", config.getInstance().getMaxPort());
 			System.setProperty("com.sun.voip.server.Bridge.logDirectory", logDir);
 			System.setProperty("com.sun.voip.server.BRIDGE_LOG", logDir + "bridge.log");
 			System.setProperty("com.sun.voip.server.PUBLIC_IP_ADDRESS", config.getPublicHost());
@@ -47,7 +48,7 @@ public class Application implements  CallEventListener  {
 			System.setProperty("com.sun.voip.server.SIP_PORT", config.getDefaultSIPPort());
 			System.setProperty("com.sun.voip.server.Bridge.recordDirectory", webHome + File.separator + "recordings");
 			System.setProperty("com.sun.voip.server.Bridge.soundsDirectory", webHome + File.separator + "sounds");
-			System.setProperty("com.sun.voip.server.Bridge.soundPath", "/com/sun/voip/server/sounds:" + webHome + File.separator + "sounds");
+			System.setProperty("com.sun.voip.server.Bridge.soundPath", homePath + File.separator + "sounds");
 
 			Properties properties = new Properties();
 
@@ -64,19 +65,19 @@ public class Application implements  CallEventListener  {
 			Bridge.setBridgeLocation("LCL");
 
 			new SipServer(config, properties);
-			log.info("Voicebridge ready");			
+			log.info("Audiobridge ready");			
 
 		} catch (Exception e) {
 
 			e.printStackTrace();
-			log.error("Voicebridge fails", e);
+			log.error("Audiobridge fails", e);
 		}
         return true;
     }
 
     public void appStop()
     {
-        loginfo( "VoiceBridge stopping");
+        loginfo( "Audiobridge stopping");
 
 		Object service = this;
 
@@ -130,7 +131,7 @@ public class Application implements  CallEventListener  {
 
     public void callEventNotification(CallEvent callEvent)
     {
- 		loginfo( "VoiceBridge callEventNotification " + callEvent.toString());
+ 		loginfo( "Audiobridge callEventNotification " + callEvent.toString());
 
 		if (conferenceMonitors.size() > 0)
 		{
@@ -175,7 +176,7 @@ public class Application implements  CallEventListener  {
 
     public void manageCallParticipant(String uid, String parameter, String value)
     {
-    	loginfo("VoiceBridge manageParticipant");
+    	loginfo("Audiobridge manageParticipant");
 
         if ( callPartipants.containsKey(uid) == false)
         {
@@ -195,14 +196,14 @@ public class Application implements  CallEventListener  {
 		}
 	}
 
-    public void manageVoiceBridge(String parameter, String value)
+    public void manageConference(String parameter, String value)
     {
-    	loginfo("VoiceBridge manageConference");
+    	loginfo("Audiobridge manageConference");
 
 		try {
 
 			parseBridgeParameters(parameter, value);
-			reportInfo("manageVoiceBridge processing " + parameter + " value: " + value);
+			reportInfo("manageConference processing " + parameter + " value: " + value);
 
 		} catch (Exception e) {
 
@@ -212,7 +213,7 @@ public class Application implements  CallEventListener  {
 
     private void makeOutgoingCall(CallParticipant cp, String uid)
     {
-    	loginfo("VoiceBridge makeOutgoingCall");
+    	loginfo("Audiobridge makeOutgoingCall");
 
 		try {
 
@@ -246,7 +247,7 @@ public class Application implements  CallEventListener  {
 
     private void migrateCall(CallParticipant cp)
     {
-    	loginfo("VoiceBridge migrateCall");
+    	loginfo("Audiobridge migrateCall");
 
 		try {
 
@@ -272,7 +273,7 @@ public class Application implements  CallEventListener  {
 
 	private void reportError(String error)
 	{
-		logerror("VoiceBridge " + error);
+		logerror("Audiobridge " + error);
 	}
 
 	private void reportInfo(String info)

@@ -114,8 +114,7 @@ public class ConferenceManager {
      * Create a new conference
      * @param conferenceId String identifying the conference
      */
-    private ConferenceManager(String conferenceId, String mediaPreference,
-	    String displayName) throws SocketException {
+    private ConferenceManager(String conferenceId, String mediaPreference,   String displayName) throws SocketException {
 
         this.conferenceId = conferenceId;
 
@@ -124,9 +123,7 @@ public class ConferenceManager {
 	try {
 	    setMediaInfo(mediaPreference);
 	} catch (ParseException e) {
-	    Logger.println(conferenceId
-		+ ":  Can't set meeting media setting to "
-		+ mediaPreference + ": " + e.getMessage());
+	    Logger.println(conferenceId	+ ":  Can't set meeting media setting to "	+ mediaPreference + ": " + e.getMessage());
 	}
 
 	this.displayName = displayName;

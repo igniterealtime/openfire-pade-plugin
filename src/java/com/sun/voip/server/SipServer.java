@@ -175,9 +175,9 @@ public class SipServer implements SipListener {
 
 	    	Logger.println("");
             Logger.println("Bridge private address:   " + properties.getProperty("javax.sip.IP_ADDRESS"));
-
-			tcpListenPort = sipStack.createListeningPoint("0.0.0.0", sipPort, "tcp");
-			udpListenPort = sipStack.createListeningPoint("0.0.0.0", sipPort, "udp");
+					
+			tcpListenPort = sipStack.createListeningPoint(localHostAddress, sipPort, "tcp");
+			udpListenPort = sipStack.createListeningPoint(localHostAddress, sipPort, "udp");
 
 
 			if ("tcp".equals(JiveGlobals.getProperty("ofmeet.jigasi.sip.transport", "tcp").toLowerCase()))

@@ -471,12 +471,20 @@ public class Config implements MUCEventListener {
 
 	public String getPrivateHost()
 	{
-		return privateHost;
+        try {
+            return InetAddress.getByName(privateHost).getHostAddress();
+        } catch (Exception e) {
+			return privateHost;
+        }
 	}
 
 	public String getPublicHost()
 	{
-		return publicHost;
+        try {
+            return InetAddress.getByName(publicHost).getHostAddress();
+        } catch (Exception e) {
+			return publicHost;
+        }		
 	}
 
     public void setInternalExtenLength(int internalExtenLength)

@@ -281,3 +281,7 @@
   width: 30%;
   line-height: 36px;
 }
+
+.tags-modal .tingle-modal-box {
+  width: 600px;
+}

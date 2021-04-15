@@ -348,6 +348,119 @@ label {
   width: 100%
 }
 
+.form-check {
+  position: relative;
+  display: block;
+  padding-left: 1.25rem;
+}
+
+.form-check-input {
+  margin-top: 0.3rem;
+  margin-left: 0.25rem;
+  margin-right: 0.3rem;
+}
+
+.form-check-input:disabled~.form-check-label {
+  color: #6c757d;
+}
+
+.form-check-app-input {
+  opacity: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  position: absolute;
+}
+
+.form-check-app-input+.form-check-app-label {
+  cursor: pointer;
+  display: inline-block;
+  box-sizing: content-box;
+  position: relative;
+  width: 32px;
+  height: 16px;
+  background-color: rgb(59, 71, 92);
+  border: 2px solid transparent;
+  border-radius: 16px;
+  margin-bottom: -4px;
+}
+
+.form-check-app-input+.form-check-app-label:hover {
+  background-color: rgb(49, 61, 82);
+}
+
+.form-check-app-input:focus+.form-check-app-label {
+  border: 2px solid rgb(179, 212, 255);
+}
+
+.form-check-app-input:checked+.form-check-app-label {
+  background-color: rgb(54, 179, 126);
+}
+
+.form-check-app-input:checked+.form-check-app-label:hover {
+  background-color: rgb(87, 217, 163);
+}
+
+.form-check-app-input+.form-check-app-label:before {
+  content: "";
+  position: absolute;
+  display: block;
+  width: 14px;
+  height: 14px;
+  left: 1px;
+  top: 1px;
+  border-radius: 50%;
+  background-color: rgb(184, 199, 224);
+  transition: all 0.3s ease;
+}
+
+.form-check-app-input+.form-check-app-label:after {
+  content: "";
+  position: absolute;
+  display: block;
+  background-image: url('data:image/svg+xml;charset=utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="rgb(184, 199, 224)" fill-rule="evenodd" d="M15.185 7.4l-3.184 3.185-3.186-3.186a.507.507 0 00-.712.003l-.7.701a.496.496 0 00-.004.712l3.185 3.184L7.4 15.185a.507.507 0 00.004.712l.7.7c.206.207.516.2.712.004l3.186-3.185 3.184 3.185a.507.507 0 00.712-.004l.701-.7a.496.496 0 00.003-.712l-3.186-3.186 3.186-3.184a.507.507 0 00-.003-.712l-.7-.7a.508.508 0 00-.36-.153.5.5 0 00-.353.15z"/></svg>');
+  background-size: 16px 16px;
+  width: 16px;
+  height: 16px;
+  left: 16px;
+  top: 0;
+}
+
+.form-check-app-input:checked+.form-check-app-label:before {
+  transform: translateX(16px);
+  background-color: rgb(13, 20, 36);
+  transition: all 0.3s ease;
+}
+
+.form-check-app-input:checked+.form-check-app-label:after {
+  content: "";
+  position: absolute;
+  display: block;
+  background-image: url('data:image/svg+xml;charset=utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M7.356 10.942a.497.497 0 00-.713 0l-.7.701a.501.501 0 00-.003.71l3.706 3.707a.501.501 0 00.705.003l7.712-7.712a.493.493 0 00-.006-.708l-.7-.7a.504.504 0 00-.714 0l-6.286 6.286a.506.506 0 01-.713 0l-2.288-2.287z"/></svg>');
+  background-size: 16px 16px;
+  width: 16px;
+  height: 16px;
+  left: 0;
+  top: 0;
+}
+
+.form-check-label {
+  margin-bottom: 0;
+}
+
+.form-check-inline {
+  display: inline-flex;
+  align-items: center;
+  padding-left: 0;
+  margin-right: 0.75rem;
+}
+
+.form-check-inline .form-check-input {
+  position: static;
+  margin-top: 0;
+  margin-right: 0.3125rem;
+  margin-left: 0;
+}
+
 .btn {
   display: inline-block;
   font-weight: 400;
@@ -713,4 +826,11 @@ input[type=submit].btn-block {
   overflow: hidden;
   text-overflow: ellipsis;
   fill: currentColor
+}
+
+.pade-control-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin: 15px 0;
 }

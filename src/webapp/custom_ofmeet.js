@@ -58,7 +58,7 @@ var ofmeet = (function (ofm) {
         dbnames = [];
     let clockTrack = { start: 0, stop: 0, joins: 0, leaves: 0 },
         handsRaised = 0;
-    let tags = { location: "", date: localizedDate(new Date()).format('LL'), subject: "", host: "", activity: "" };
+    let tags = { location: '', date: '', subject: '', host: '', activity: ''};
     let audioTemporaryUnmuted = false,
         cursorShared = false,
         inviteByPhone = false;
@@ -68,6 +68,7 @@ var ofmeet = (function (ofm) {
     let vcardAvatar = null;
     let storage = null;
     let breakout = null;
+    let hashParams = [];
 
     class DummyStorage {
         constructor() {
@@ -124,6 +125,8 @@ var ofmeet = (function (ofm) {
 
     window.addEventListener("DOMContentLoaded", function () {
         console.debug("custom_ofmeet.js DOMContentLoaded");
+
+        parseHashParams();
 
         if (storageAvailable('localStorage')) {
             storage = window.localStorage;
@@ -220,6 +223,11 @@ var ofmeet = (function (ofm) {
     //
     //-------------------------------------------------------
 
+    function parseHashParams() {
+        const hash = location.hash.replace(/^#/, '');
+        hashParams = [...new URLSearchParams(hash).entries()].reduce((obj, e) => ({ ...obj, [e[0]]: e[1] }), {});
+    }
+
     function newElement(el, id, html, className, label) {
         const ele = document.createElement(el);
         if (id) ele.id = id;
@@ -294,7 +302,18 @@ var ofmeet = (function (ofm) {
         if (!config.webinar) {
             listenWebPushEvents();
 
-            APP.conference._room.on(JitsiMeetJS.events.conference.CONFERENCE_LEFT, function () {
+            const room = getConference()
+            if (room.isModerator()) {
+                if (hashParams.subject) {
+                    room.setSubject(hashParams.subject);
+                }
+            }
+
+            if (hashParams.mainRoomUserId) {
+                room.setLocalParticipantProperty('mainRoomUserId', hashParams.mainRoomUserId);
+            }
+
+            room.on(JitsiMeetJS.events.conference.CONFERENCE_LEFT, function () {
                 console.debug("custom_ofmeet.js me left");
 
                 if (interfaceConfig.OFMEET_RECORD_CONFERENCE) {
@@ -309,7 +328,7 @@ var ofmeet = (function (ofm) {
                 }
             });
 
-            APP.conference._room.on(JitsiMeetJS.events.conference.USER_ROLE_CHANGED, function (user, role) {
+            room.on(JitsiMeetJS.events.conference.USER_ROLE_CHANGED, function (user, role) {
                 console.debug("custom_ofmeet.js participant role change", user, role);
 
                 if (interfaceConfig.OFMEET_ENABLE_BREAKOUT && role == "moderator" && !breakoutIconVisible && user == APP.conference.getMyUserId()) {
@@ -318,7 +337,7 @@ var ofmeet = (function (ofm) {
                 }
             });
 
-            APP.conference._room.on(JitsiMeetJS.events.conference.TRACK_REMOVED, function (track) {
+            room.on(JitsiMeetJS.events.conference.TRACK_REMOVED, function (track) {
                 console.debug("custom_ofmeet.js track removed", track.getParticipantId());
 
                 if (track.getParticipantId() == APP.conference.getMyUserId()) {
@@ -332,20 +351,19 @@ var ofmeet = (function (ofm) {
 
                     if (ofm.recording) stopRecorder();
                 }
-
             });
 
-            APP.conference._room.on(JitsiMeetJS.events.conference.USER_JOINED, function (id) {
+            room.on(JitsiMeetJS.events.conference.USER_JOINED, function (id) {
                 console.debug("user join", id, participants);
                 addParticipant(id);
             });
 
-            APP.conference._room.on(JitsiMeetJS.events.conference.USER_LEFT, function (id) {
+            room.on(JitsiMeetJS.events.conference.USER_LEFT, function (id) {
                 console.debug("user left", id);
                 removeParticipant(id);
             });
 
-            APP.conference._room.on(JitsiMeetJS.events.conference.TRACK_ADDED, function (track) {
+            room.on(JitsiMeetJS.events.conference.TRACK_ADDED, function (track) {
                 const id = track.getParticipantId();
                 console.debug("custom_ofmeet.js track added", id, track.getType());
 
@@ -353,17 +371,13 @@ var ofmeet = (function (ofm) {
                     if (track.getType() == "audio") recordingAudioTrack[id] = track.stream;
                     if (track.getType() == "video") recordingVideoTrack[id] = track.stream;
                 }
-
-                if (APP.conference.getMyUserId() == id && !config.webinar) {
-
-                }
             });
 
-            APP.conference._room.on(JitsiMeetJS.events.conference.PARTICIPANT_PROPERTY_CHANGED, function (e, t, n, r) {
+            room.on(JitsiMeetJS.events.conference.PARTICIPANT_PROPERTY_CHANGED, function (e, t, n, r) {
                 console.debug("custom_ofmeet.js property changed", e, t, n, r);
             });
 
-            APP.conference._room.on(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, function (track) {
+            room.on(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, function (track) {
                 const id = track.getParticipantId();
                 console.debug("custom_ofmeet.js track muted", id, track.getType(), track.isMuted());
 
@@ -397,7 +411,7 @@ var ofmeet = (function (ofm) {
                 }
             });
 
-            APP.conference._room.on(JitsiMeetJS.events.conference.PRIVATE_MESSAGE_RECEIVED, function (id, text, ts) {
+            room.on(JitsiMeetJS.events.conference.PRIVATE_MESSAGE_RECEIVED, function (id, text, ts) {
                 var participant = APP.conference.getParticipantById(id);
                 var displayName = participant ? (participant._displayName || 'Anonymous-' + id) : (APP.conference.getLocalDisplayName() || "Me");
 
@@ -407,7 +421,7 @@ var ofmeet = (function (ofm) {
                 pdf_body.push([pretty_time, displayName, text]);
             });
 
-            APP.conference._room.on(JitsiMeetJS.events.conference.MESSAGE_RECEIVED, function (id, text, ts) {
+            room.on(JitsiMeetJS.events.conference.MESSAGE_RECEIVED, function (id, text, ts) {
                 var participant = APP.conference.getParticipantById(id);
                 var displayName = participant ? (participant._displayName || 'Anonymous-' + id) : (APP.conference.getLocalDisplayName() || "Me");
 
@@ -1070,7 +1084,7 @@ var ofmeet = (function (ofm) {
         console.debug("addParticipant", id, participant);
 
         if (participant && !participants[id]) {
-            participants[id] = participant;
+            participants[id] = { ...participant };
 
             if (breakout) {
                 breakout.addParticipant(id);
@@ -1123,7 +1137,7 @@ var ofmeet = (function (ofm) {
         }
     }
 
-    function removeParticipant() {
+    function removeParticipant(id) {
         console.debug("removeParticipant", id);
 
         if (breakout) {
@@ -1548,12 +1562,9 @@ var ofmeet = (function (ofm) {
 
     function doTags() {
         const template = `
-<!-- Modal Header -->
 <div class="modal-header">
     <h4 class="modal-title">${i18n('tag.conferenceCaptionsSubTitles')}</h4>
 </div>
-
-<!-- Modal body -->
 <div class="modal-body">
     <form>
         <div class="form-group">
@@ -1576,6 +1587,14 @@ var ofmeet = (function (ofm) {
             <label for="tags-activity" class="col-form-label"> ${i18n('tag.activity')}:</label>
             <input id="tags-activity" type="text" class="form-control" name="tags-activity" value="${tags.activity}"/>
         </div>
+        <div class="form-group pade-control-row" id="tags-message-captions-group">
+            <label class="form-check-label col-form-label" for="tags-message-captions">${i18n('tag.enableMessageCaptions')}</label>
+            <input type="checkbox" class="form-check-app-input" id="tags-message-captions"><label class="form-check-app-label" for="tags-message-captions"></label>
+        </div>
+        <div class="form-group pade-control-row" id="tags-voice-transcription-group">
+            <label class="form-check-label col-form-label" for="tags-voice-transcription">${i18n('tag.enableVoiceTranscription')}</label>
+            <input type="checkbox" class="form-check-app-input" id="tags-voice-transcription"><label class="form-check-app-label" for="tags-voice-transcription"></label>
+        </div>
     </form>
 </div>`;
 
@@ -1585,7 +1604,7 @@ var ofmeet = (function (ofm) {
                 stickyFooter: false,
                 closeMethods: ['overlay', 'button', 'escape'],
                 closeLabel: "Close",
-                cssClass: ['custom-class-1', 'custom-class-2'],
+                cssClass: ['tags-modal'],
                 onOpen: function () {
                     console.debug('tags modal open');
                 },
@@ -1593,75 +1612,93 @@ var ofmeet = (function (ofm) {
                     console.debug('tags modal closed');
                 },
                 beforeOpen: function () {
-                    document.getElementById('tags-date').value = localizedDate(new Date()).format('LL')
-                },
-                beforeClose: function () {
-                    tags.location = document.getElementById('tags-location').value;
-                    tags.date = document.getElementById('tags-date').value;
-                    tags.subject = document.getElementById('tags-subject').value;
-                    tags.host = document.getElementById('tags-host').value;
-                    tags.activity = document.getElementById('tags-activity').value;
-
-                    if (tags.location != "") {
-                        document.getElementById("subtitles").innerHTML =
-                            `<b>` + i18n('tag.location') + `</b>: ${tags.location} <br/><b>` +
-                            i18n('tag.date') + `</b>: ${tags.date} <br/><b>` +
-                            i18n('tag.subject') + `</b>: ${tags.subject} <br/><b>` +
-                            i18n('tag.host') + `</b>: ${tags.host} <br/><b>` +
-                            i18n('tag.activity') + `</b>: ${tags.activity}`;
+                    $('#tags-location').val(tags.location);
+                    if (tags.date) {
+                        $('#tags-date').val(tags.date);
+                    } else {
+                        $('#tags-date').val(localizedDate(new Date()).format('LL'));
                     }
-                    return true;
+                    if (tags.subject) {
+                        $('#tags-subject').val(tags.subject);
+                    } else {
+                        $('#tags-subject').val(getConferenceName());
+                    }
+                    if (tags.host) {
+                        $('#tags-host').val(tags.host);
+                    } else {
+                        const modrator = getAllParticipants().find(p => p.role == 'moderator');
+                        if (modrator) {
+                            $('#tags-host').val(modrator.name);
+                        }
+                    }
+                    $('#tags-activity').val(tags.activity);
                 }
             });
+
             tagsModal.setContent(template);
 
             tagsModal.addFooterBtn(i18n('tag.save'), 'btn btn-primary', function () {
                 // here goes some logic
+                tags.location = $('#tags-location').val();
+                tags.date = $('#tags-date').val();
+                tags.subject = $('#tags-subject').val();
+                tags.host = $('#tags-host').val();
+                tags.activity = $('#tags-activity').val();
+
+                if (tags.location) {
+                    const $subtitile = $("#subtitles");
+                    $subtitile.empty();
+                    $subtitile.append(`<div><b>${i18n('tag.location')}</b>: ${tags.location}</div>`);
+                    if (tags.date) {
+                        $subtitile.append(`<div><b>${i18n('tag.date')}</b>: ${tags.date}</div>`);
+                    }
+                    if (tags.subject) { 
+                        $subtitile.append(`<div><b>${i18n('tag.subject')}</b>: ${tags.subject}</div>`);
+                    }
+                    if (tags.host) {
+                        $subtitile.append(`<div><b>${i18n('tag.host')}</b>: ${tags.host}</div>`);
+                    }
+                    if (tags.activity) {
+                        $subtitile.append(`<div><b>${i18n('tag.activity')}</b>: ${tags.activity}</div>`);
+                    }
+                }
+
+                const room = getConference();
+                if (room.isModerator()) {
+                    if ($('#tags-subject').val()) {
+                        room.setSubject($('#tags-subject').val());
+                    }
+                }
                 tagsModal.close();
             });
 
             tagsModal.addFooterBtn(i18n('tag.cancel'), 'btn btn-secondary', function () {
-                event.preventDefault();
-                tags = { location: "", date: localizedDate(new Date()).format('LL'), subject: "", host: "", activity: "" };
-
-                document.getElementById('tags-location').value = tags.location;
-                document.getElementById('tags-date').value = tags.date;
-                document.getElementById('tags-subject').value = tags.subject;
-                document.getElementById('tags-host').value = tags.host;
-                document.getElementById('tags-activity').value = tags.activity;
-
-                document.getElementById("subtitles").innerHTML = "";
                 tagsModal.close();
             });
 
-            const msgCaptions = (captions.msgsDisabled ? i18n('tag.enableMessageCaptions') : i18n('tag.disableMessageCaptions'));
-            const msgClass = (captions.msgsDisabled ? 'btn-secondary' : 'btn-success') + ' btn';
-
             if (interfaceConfig.OFMEET_SHOW_CAPTIONS) {
-                tagsModal.addFooterBtn(msgCaptions, msgClass, function (evt) {
-                    captions.msgsDisabled = !captions.msgsDisabled;
-                    evt.target.classList.remove(captions.msgsDisabled ? 'btn-success' : 'btn-secondary');
-                    evt.target.classList.add(captions.msgsDisabled ? 'btn-secondary' : 'btn-success');
-                    evt.target.innerHTML = (captions.msgsDisabled ? i18n('tag.enableMessageCaptions') : i18n('tag.disableMessageCaptions'));
+                $('#tags-message-captions').on('change.tags', evt => {
+                    captions.msgsDisabled = !evt.target.checked;
                     if (captions.ele) captions.ele.innerHTML = "";
                 });
+            } else {
+                $('#tags-message-captions-group').hide();
             }
 
             if (ofm.recognition) {
-                const transcriptCaptions = (captions.transcriptDisabled ? i18n('tag.enableVoiceTranscription') : i18n('tag.disableVoiceTranscription'));
-                const transcriptClass = (captions.transcriptDisabled ? 'btn-secondary' : 'btn-success') + ' btn';
-
-                tagsModal.addFooterBtn(transcriptCaptions, transcriptClass, function (evt) {
-                    captions.transcriptDisabled = !captions.transcriptDisabled;
+                $('#tags-voice-transcription').on('change.tags', evt => {
+                    captions.transcriptDisabled = !evt.target.checked;
                     ofm.recognitionActive = !captions.transcriptDisabled;
-                    evt.target.classList.remove(captions.transcriptDisabled ? 'btn-success' : 'btn-secondary');
-                    evt.target.classList.add(captions.transcriptDisabled ? 'btn-secondary' : 'btn-success');
-                    evt.target.innerHTML = (captions.transcriptDisabled ? i18n('tag.enableVoiceTranscription') : i18n('tag.disableVoiceTranscription'));
 
-                    if (captions.transcriptDisabled) ofm.recognition.stop();
-                    if (!captions.transcriptDisabled) ofm.recognition.start();
+                    if (captions.transcriptDisabled){
+                        ofm.recognition.stop();
+                    } else {
+                        ofm.recognition.start();
+                    }
                     if (captions.ele) captions.ele.innerHTML = "";
                 });
+            } else {
+                $('#tags-voice-transcription-group').hide();
             }
         }
 
@@ -2048,8 +2085,8 @@ var ofmeet = (function (ofm) {
 
             const id = APP.conference.getMyUserId();
             const tracks = [
-              ...stream.getVideoTracks(),
-              ...mergeAudioStreams(stream, recordingAudioTrack[id].clone())
+                ...stream.getVideoTracks(),
+                ...mergeAudioStreams(stream, recordingAudioTrack[id].clone())
             ];
 
             recorderStreams[id] = new MediaStream(tracks);
@@ -2153,17 +2190,48 @@ var ofmeet = (function (ofm) {
     //
     //-------------------------------------------------------
 
+    function getConference() {
+        const state = APP.store.getState();
+        return state['features/base/conference'].conference;
+    }
+
+    function getConferenceName() {
+        const state = APP.store.getState();
+        const { callee } = state['features/base/jwt'];
+        const { callDisplayName } = state['features/base/config'];
+        const { pendingSubjectChange, room, subject } = state['features/base/conference'];
+
+        return pendingSubjectChange
+            || subject
+            || callDisplayName
+            || (callee && callee.name)
+            || safeStartCase(decodeURIComponent(room));
+    }
+
     function getAllParticipants() {
         const state = APP.store.getState();
         return (state["features/base/participants"] || []);
     }
 
+    function getParticipant(id) {
+        return getAllParticipants().find(p => p.id == id);
+    }
+
+    function safeStartCase(s = '') {
+        return _.words(`${s}`.replace(/['\u2019]/g, '')).reduce(
+            (result, word, index) => result + (index ? ' ' : '') + _.upperFirst(word)
+            , '');
+    }
+
+
     function handlePresence(presence) {
-        //console.debug("handlePresence", presence);
-        const id = Strophe.getResourceFromJid(presence.getAttribute("from"));
-        const raisedHand = presence.querySelector("jitsi_participant_raisedHand");
-        const email = presence.querySelector("email");
-        const nick = presence.querySelector("nick");
+        console.log("handlePresence", presence);
+
+        const id = Strophe.getResourceFromJid(presence.getAttribute('from'));
+        const raisedHand = presence.querySelector('jitsi_participant_raisedHand');
+        const email = presence.querySelector('email');
+        const nick = presence.querySelector('nick');
+        const avatarURL = presence.querySelector('avatar-url');
 
         if (raisedHand) {
             handsRaised = getAllParticipants().filter(p => p.raisedHand).length;
@@ -2182,9 +2250,31 @@ var ofmeet = (function (ofm) {
         }
 
         if (nick) {
-            if (APP.conference.getMyUserId() == id && nick.innerHTML != "" && localDisplayName != APP.conference.getLocalDisplayName()) {
-                localDisplayName = APP.conference.getLocalDisplayName();
-                changeAvatar(createAvatar(localDisplayName), AvatarType.INITIALS);
+            if (nick.innerHTML != "") {
+                if (APP.conference.getMyUserId() == id) {
+                    if (localDisplayName != APP.conference.getLocalDisplayName()) {
+                        localDisplayName = APP.conference.getLocalDisplayName();
+                        changeAvatar(createAvatar(localDisplayName), AvatarType.INITIALS);
+                    }
+                } else {
+                    if (id in participants && participants[id]._displayName != APP.conference.getParticipantDisplayName(id)) {
+                        participants[id] = APP.conference.getParticipantById(id);
+                        if (breakout) {
+                            breakout.updateParticipant(id);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (avatarURL) {
+            if (avatarURL.innerHTML != "") {
+                if (APP.conference.getMyUserId() != id && id in participants && participants[id].avatarURL != avatarURL.innerHTML) {
+                    participants[id].avatarURL = avatarURL.innerHTML
+                    if (breakout) {
+                        breakout.updateParticipant(id);
+                    }
+                }
             }
         }
 
@@ -2219,20 +2309,20 @@ var ofmeet = (function (ofm) {
             const json = JSON.parse(payload.innerHTML);
             console.debug("handleMucMessage", participant, json);
 
-            let label;
+            let message;
             switch (json.action) {
                 case 'start-breakout':
-                    label = 'breakout.joining';
+                    message = 'breakout.joining';
                     break;
                 case 'stop-breakout':
-                    label = 'breakout.leaving';
+                    message = 'breakout.leaving';
                     break;
                 default:
                     console.error("unknown MUC message");
                     return;
-
             }
-            APP.UI.messageHandler.notify(i18n('breakout.breakoutRooms'), i18n(label, { sec: json.wait }));
+
+            APP.UI.messageHandler.notify(i18n('breakout.breakoutRooms'), i18n(message, { sec: json.wait }));
             setTimeout(() => { location.replace(json.url) }, json.wait * 1000);
         }
 
@@ -2247,6 +2337,7 @@ var ofmeet = (function (ofm) {
             this.recallInfo = [];
             this.$status = $('#breakout-status');
             this.timeout = null;
+            this.countdown = null;
 
             const kanbanConfig = {
                 element: ".breakout-kanban",
@@ -2291,13 +2382,32 @@ var ofmeet = (function (ofm) {
         refresh() {
             const count = Object.keys(participants).length;
 
-            if (parseInt($('#breakout-rooms').val(), 10) < 1) {    
+            if (parseInt($('#breakout-rooms').val(), 10) < 1) {
                 $('#breakout-rooms').val(Math.round(count / 2));
                 this.resizeRoom(Math.round(count / 2));
             }
 
             if (parseInt($('#breakout-duration').val(), 10) < 1) {
                 $('breakout-duration').val(Breakout.defaultDuration);
+            }
+
+            if (!this.started) {
+                this.recallInfo = [];
+                $('.breakout-kanban .kanban-item').removeClass('disabled-item');
+            }
+
+            $('.breakout-kanban .kanban-item').each((index, element) => {
+                const $item = $(element);
+                const id = $item.attr('data-eid')
+                if (!this.recallInfo.some(i => i.id == id)) {
+                    this.updateParticipant(id);
+                }
+            })
+
+            for (const id in participants) {
+                if (!this.kanban.findElement(id)) {
+                    this.addParticipant(id);
+                }
             }
 
             $('#breakout-title').text(count);
@@ -2308,18 +2418,25 @@ var ofmeet = (function (ofm) {
         elementFromParticipant(participant) {
             const id = participant._id;
             const displayName = participant._displayName || i18n('breakout.anonymous', { id: id });
-            const participant2 = getAllParticipants().find(p => p.id == id);
-            const avatarURL = participant2 ? participant2.avatarURL : '/images/avatar.png';
+            const avatarURL = participant.avatarURL ?? '/images/avatar.png';
             return {
                 id: id,
                 title: `<div class="header-icon"><img class="avatar" src="${avatarURL}" style=""></div>${displayName}`
             };
         }
 
-
         addParticipant(id) {
-            if (id in participants) {
-                this.kanban.addElement('participants', this.elementFromParticipant(participants[id]));
+            const participant = participants[id];
+            if (participant) {
+                const jid = Strophe.getBareJidFromJid(participant._jid);
+                const info = this.recallInfo.find(i => i.jid == jid);
+                const elem = info ? this.kanban.findElement(info.id) : null;
+                if (elem) {
+                    $(elem).removeClass('disabled-item').attr('data-eid', participant._id);
+                    this.recallInfo = this.recallInfo.filter(i => i.id != info.id);
+                } else {
+                    this.kanban.addElement('participants', this.elementFromParticipant(participants[id]));
+                }
             }
             $('#breakout-title').text(participants.length);
         }
@@ -2333,15 +2450,22 @@ var ofmeet = (function (ofm) {
         }
 
         removeParticipant(id) {
-            this.kanban.removeElement(id);
+            if (this.started && this.recallInfo.some((i) => i.id == id)) {
+                const elem = this.kanban.findElement(id);
+                if (elem) {
+                    $(elem).addClass('disabled-item');
+                }
+            } else {
+                this.kanban.removeElement(id);
+            }
             $('#breakout-title').text(participants.length);
         }
 
         getRoomParticipants(index) {
             let roomParticipants = []
-            if (this.kanban.findBoard("room_" + index)) {
-                for (let elem of this.kanban.getBoardElements("room_" + index)) {
-                    let p = participants[elem.getAttribute("data-eid")];
+            if (this.kanban.findBoard('room_' + index)) {
+                for (let elem of this.kanban.getBoardElements('room_' + index)) {
+                    let p = participants[elem.getAttribute('data-eid')];
                     if (p) {
                         roomParticipants.push(p);
                     }
@@ -2376,8 +2500,15 @@ var ofmeet = (function (ofm) {
                     this.kanban.addBoards(boards);
 
                     for (let i = currentSize; i < size; i++) {
-                        const board = this.kanban.findBoard('room_' + (i + 1));
-                        board.setAttribute('data-room-name', APP.conference.roomName + '-room' + (i + 1) + '-' + Math.random().toString(36).substr(2, 9));
+                        const $board = $(this.kanban.findBoard('room_' + (i + 1)));
+                        $board.attr('data-room-name', APP.conference.roomName + '-room' + (i + 1) + '-' + Math.random().toString(36).substr(2, 9));
+                        // TODO: Replace with a nice-looking input from.
+                        $board.find('.kanban-title-board').on('keydown keyup', e => {
+                            e.stopPropagation();
+                            if (e.which == 13) {
+                                return false;
+                            }
+                        }).attr('contenteditable', 'true');
                     }
                 } else {
                     for (let i = currentSize - 1; i >= size; i--) {
@@ -2403,8 +2534,6 @@ var ofmeet = (function (ofm) {
                     for (let j = 0; j < ids.length; j++) {
                         // allocate participant j to room i
                         if (j % roomCount == i) {
-                            //const participant = this.kanban.findElement);
-                            //console.debug("allocateToRooms - participant", j, ids[j], participant);
                             this.moveRoomParticipant('room_' + (i + 1), participants[ids[j]]);
                         }
                     }
@@ -2429,26 +2558,23 @@ var ofmeet = (function (ofm) {
             this.recallInfo = [];
 
             for (let i = 0; i < this.roomCount; i++) {
-                const board = this.kanban.findBoard('room_' + (i + 1));
+                const $board = $(this.kanban.findBoard('room_' + (i + 1)));
+                const roomName = $board.attr("data-room-name");
+                const roomTitle = $board.find('.kanban-title-board').text();
                 const roomParticipants = this.getRoomParticipants(i + 1);
+
                 for (let p of roomParticipants) {
-                    let info = null;
-
                     const id = p._id;
-                    const webinar = p._tracks.length > 0 ? 'false' : 'true';
-                    const label = p._displayName || i18n('breakout.anonymous', { id: id });
                     const jid = p._jid;
-                    const roomName = board.getAttribute("data-room-name");
-                    const url = location.protocol + '//' + location.host + '/' + roomName;
+                    const url = new URL(roomName, location.href);
+                    url.hash = 'subject=' + getConferenceName() + ' - ' + roomTitle;
 
-                    info = {
+                    const info = {
                         action: 'start-breakout',
                         id: id,
                         room: roomName,
-                        label: label,
-                        jid: jid,
-                        url: url,
-                        webinar: webinar,
+                        jid: Strophe.getBareJidFromJid(jid),
+                        url: url.href,
                         wait: Breakout.wait
                     };
 
@@ -2457,14 +2583,25 @@ var ofmeet = (function (ofm) {
                 }
             }
 
-            const duration = $('#breakout-duration').val();
-            if (duration > 0) {
-                this.timeout = setTimeout(() => this.endBreakout(), 60000 * duration);
-                this.setStatusMessage(i18n('breakout.breakoutStartedWithDuration', { min: duration }));
-            } else {
-                this.setStatusMessage(i18n('breakout.breakoutStarted'));
-            }
-
+            let count = Breakout.wait;
+            this.setStatusMessage(i18n('breakout.breakoutStarting', {sec: count}));
+            this.countdown = setInterval(() => {
+                if (--count <= 0) {
+                    clearInterval(this.countdown);
+                    this.countdown = null;
+                    
+                    const duration = $('#breakout-duration').val();
+                    if (duration > 0) {
+                        this.timeout = setTimeout(() => this.endBreakout(), 60000 * duration);
+                        this.setStatusMessage(i18n('breakout.breakoutStartedWithDuration', { min: duration }));
+                    } else {
+                        this.setStatusMessage(i18n('breakout.breakoutStarted'));
+                    }
+                } else {
+                    this.setStatusMessage(i18n('breakout.breakoutStarting', {sec: count}));
+                }
+            }, 1000);
+            
             $('.btn-breakout')
                 .removeClass('btn-primary btn-breakout-start')
                 .addClass('btn-danger btn-breakout-stop')
@@ -2477,13 +2614,13 @@ var ofmeet = (function (ofm) {
                 return;
             }
 
-            for (let i = 0; i < this.recallInfo.length; i++) {
-                const webinar = this.recallInfo[i].webinar;
-                const jid = this.recallInfo[i].room + "@" + Strophe.getDomainFromJid(this.recallInfo[i].jid);
+            const rooms = Array.from(new Set(this.recallInfo.map(i => i.room)));
+            for (const room of rooms) {
+                const jid = room + '@' + APP.connection.xmpp.connection.domain;
                 const json = {
                     action: 'stop-breakout',
                     jid: jid,
-                    url: location.href + '#config.webinar=' + webinar
+                    url: location.href
                 };
 
                 this.joinRoom(jid);
@@ -2494,7 +2631,11 @@ var ofmeet = (function (ofm) {
             }
 
             this.setStatusMessage(i18n('breakout.breakoutHasEnded'));
-            if (this.timeout) clearTimeout(breakout.timeout);
+
+            if (this.timeout) {
+                clearTimeout(this.timeout);
+                this.timeout = null;
+            }
 
             $('.btn-breakout')
                 .removeClass('btn-danger btn-breakout-stop')
@@ -2519,23 +2660,22 @@ var ofmeet = (function (ofm) {
             console.debug("exitRoom", jid);
 
             const xmpp = APP.connection.xmpp.connection._stropheConn;
-
-            xmpp.send($pres({ type: 'unavailable', to: jid + '/' + APP.conference.getLocalDisplayName() }));
+            const to = Strophe.getBareJidFromJid(jid) + '/' + APP.conference.getLocalDisplayName();
+            xmpp.send($pres({ type: 'unavailable', to: to }));
         }
 
         joinRoom(jid) {
             console.debug("joinRoom", jid);
 
             const xmpp = APP.connection.xmpp.connection._stropheConn;
-
-            xmpp.send($pres({ to: jid + '/' + APP.conference.getLocalDisplayName() }).c("x", { xmlns: Strophe.NS.MUC }));
-        }
+            const to = Strophe.getBareJidFromJid(jid) + '/' + APP.conference.getLocalDisplayName();
+            xmpp.send($pres({ to: to }).c("x", { xmlns: Strophe.NS.MUC }));
+        }    
 
         broadcastBreakout(type, jid, json) {
             console.debug("broadcastBreakout", type, jid, json);
 
             const xmpp = APP.connection.xmpp.connection._stropheConn;
-
             xmpp.send($msg({ type: type, to: jid }).c('json', { xmlns: 'urn:xmpp:json:0' }).t(JSON.stringify(json)));
         }
 
@@ -2543,28 +2683,28 @@ var ofmeet = (function (ofm) {
             console.debug("broadcastMessage", text, breakout);
 
             const xmpp = APP.connection.xmpp.connection._stropheConn;
-
-            for (let i = 0; i < this.recall.length; i++) {
-                const jid = this.recall[i].room + "@" + Strophe.getDomainFromJid(breakout.recall[i].jid);
+            const rooms = Array.from(new Set(this.recallInfo.map(i => i.room)));
+            for (const room of rooms) {
+                const jid = room + '@' + APP.connection.xmpp.connection.domain;
 
                 this.joinRoom(jid);
-
                 setTimeout(() => {
                     xmpp.send($msg({ type: 'groupchat', to: jid }).c("body").t(text));
                     setTimeout(() => { this.exitRoom(jid) }, 1000);
-
                 }, 1000);
             }
         }
 
         openRoom(boardId) {
             console.debug("joinRoom", boardId);
-            const board = this.kanban.findBoard(boardId);
-            const roomName = board.getAttribute("data-room-name");
+            const $board = $(this.kanban.findBoard(boardId));
+            const roomName = $board.attr("data-room-name");
+            const roomTitle = $board.find('.kanban-title-board').text();
 
             if (roomName) {
-                const url = location.protocol + '//' + location.host + '/' + roomName;
-                open(url, roomName);
+                const url = new URL(roomName, location.href);
+                url.hash = 'subject=' + getConferenceName() + ' - ' + roomTitle;
+                open(url.href, roomName);
             }
         }
     }
@@ -2590,7 +2730,7 @@ var ofmeet = (function (ofm) {
 </div>`;
 
         if (!breakoutModal) {
-            for (i = 0; i < 30; i++) {
+            /*for (i = 0; i < 30; i++) {
                 const id = Math.floor(Math.random() * 4294967295).toString(16);
                 participants[id] = {
                     _connectionStatus: "active",
@@ -2606,7 +2746,7 @@ var ofmeet = (function (ofm) {
                     _supportsDTMF: false,
                     _tracks: []
                 };
-            }
+            }*/
 
             breakoutModal = new tingle.modal({
                 footer: true,
@@ -2617,19 +2757,11 @@ var ofmeet = (function (ofm) {
 
                 beforeOpen: function () {
                     console.debug("beforeOpen", breakout);
-
-                    if (!breakout) {
-                        breakout = new Breakout();
-                    }
-
-                    $('#breakout-rooms').on('input.breakoutroom', (evt) => {
-                        breakout.resizeRoom(evt.target.value);
-                        return false;
-                    });
-
                     breakout.refresh();
                 }
             });
+
+            breakoutModal.setContent(template);
 
             breakoutModal.addFooterBtn(i18n('breakout.allocate'), 'btn btn-primary', () => {
                 breakout.allocateToRooms();
@@ -2643,9 +2775,16 @@ var ofmeet = (function (ofm) {
                 breakoutModal.close();
             });
 
-            breakoutModal.setContent(template);
-        } else {
-            breakout.refresh();
+            if (!breakout) {
+                breakout = new Breakout();
+            }
+
+            $('#breakout-rooms').on('input.breakoutroom focusout.breakoutroom', (evt) => {
+                if (!evt.originalEvent.inputType || !evt.originalEvent.inputType.match(/delete/)) {
+                    breakout.resizeRoom(evt.target.value);
+                }
+                return false;
+            });
         }
 
         breakoutModal.open();
@@ -2793,10 +2932,10 @@ var ofmeet = (function (ofm) {
                             APP.conference._room.sendTextMessage(getUrl);
                         } else
 
-                        if (this.readyState == 4 && this.status >= 400) {
-                            console.error("uploadFile error", this.statusText);
-                            APP.conference._room.sendTextMessage(this.statusText);
-                        }
+                            if (this.readyState == 4 && this.status >= 400) {
+                                console.error("uploadFile error", this.statusText);
+                                APP.conference._room.sendTextMessage(this.statusText);
+                            }
 
                     };
                     req.open("PUT", putUrl, true);

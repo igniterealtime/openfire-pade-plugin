@@ -94,6 +94,16 @@
   width: 24px;
 }
 
+.kanban-item.disabled-item {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.kanban-item.disabled-item:hover {
+  cursor: default;
+}
+
+
 /* Dragula CSS  */
 .gu-mirror {
   position: fixed !important;

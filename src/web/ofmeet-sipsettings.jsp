@@ -155,7 +155,7 @@
 
 <form action="ofmeet-sipsettings.jsp" method="post">
 
-
+	<!--
     <fmt:message key="audiobridge.title" var="boxtitleAudiobridge"/>
     <admin:contentBox title="${boxtitleAudiobridge}">
         <p>
@@ -182,6 +182,7 @@
             </tr>  		
         </table>
     </admin:contentBox>  
+	-->
     
     <fmt:message key="sipsettings.freeswitch.title" var="boxtitleFreeswitch"/>
     <admin:contentBox title="${boxtitleFreeswitch}">

@@ -127,7 +127,7 @@ var ofmeet = (function (ofm) {
         if (storageAvailable('localStorage')) {
             storage = window.localStorage;
 
-            if (navigator.credentials && navigator.credentials.preventSilentAccess && typeof PasswordCredential === 'function') {
+            if (!isElectron() && navigator.credentials && navigator.credentials.preventSilentAccess && typeof PasswordCredential === 'function') {
                 // Credential Management API is supported!
                 navigator.credentials.get({ password: true, mediation: "silent" }).then(function (credential) {
                     console.debug("credential management api get", credential);
@@ -459,7 +459,7 @@ var ofmeet = (function (ofm) {
 
         if (APP.connection.xmpp.connection._stropheConn.pass || config.ofmeetWinSSOEnabled) {
             if (interfaceConfig.OFMEET_CACHE_PASSWORD && storageAvailable('localStorage')) {
-                if (navigator.credentials && navigator.credentials.preventSilentAccess && typeof PasswordCredential === 'function') {
+                if (!isElectron() && navigator.credentials && navigator.credentials.preventSilentAccess && typeof PasswordCredential === 'function') {
                     storage.removeItem("xmpp_username_override");
                     storage.removeItem("xmpp_password_override");
 

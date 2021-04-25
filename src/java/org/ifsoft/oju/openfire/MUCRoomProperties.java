@@ -44,6 +44,7 @@ public class MUCRoomProperties implements Map<String, String>, Serializable {
 		if (room != null)
 		{		
 			Map<String, String> props = (Map<String, String>) muc_properties.get(room.getJID().toString());
+			if (props == null) props = new MUCRoomProperties(room.getID());			
 			if (props == null) return defaultValue;
 			return props.get(propName);
 		}

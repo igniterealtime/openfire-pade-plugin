@@ -16,6 +16,7 @@
                 <item id="ofmeet-uisettings"          name="${config.page.uisettings.title}"     description="${config.page.uisettings.description}"          url="ofmeet-uisettings.jsp"/>
                 <item id="jitsi-videobridge-settings" name="${plugin.sidebar.networking.title}"  description="${plugin.sidebar.networking.title.description}" url="jitsi-videobridge.jsp"/>               
                 <item id="ofmeet-sipsettings"         name="${plugin.sidebar.sipsettings.title}" description="${plugin.sidebar.sipsettings.description}"      url="ofmeet-sipsettings.jsp"/>                
+                <item id="audiobridge-summary" 		  name="${audiobridge.summary.name}" 		 description="${audiobridge.summary.description}" 			  url="audiobridge-summary.jsp"/>				
                 <item id="ofmeet-planner"             name="${config.page.planner.title}"        description="${config.page.planner.description}"             url="ofmeet-planner.jsp"/>
             </sidebar>
            <sidebar id="siderbar-ofmeet" name="${plugin.freeswitch.title}">

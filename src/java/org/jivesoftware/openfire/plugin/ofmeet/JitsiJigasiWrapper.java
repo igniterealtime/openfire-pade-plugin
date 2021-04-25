@@ -52,6 +52,7 @@ public class JitsiJigasiWrapper implements ProcessListener
         final String DOMAIN = XMPPServer.getInstance().getServerInfo().getXMPPDomain();
         final String MAIN_MUC = JiveGlobals.getProperty( "ofmeet.main.muc", "conference." + DOMAIN);
         final String PUBLIC_PORT = JiveGlobals.getProperty( "httpbind.port.secure", "7443");
+        final String PLAIN_PORT = JiveGlobals.getProperty( "httpbind.port.plain", "7070");		
 		final String HOSTNAME = XMPPServer.getInstance().getServerInfo().getHostname();
 
         final String jigasiHomePath = pluginDirectory.getPath() + File.separator + "classes" + File.separator + "jigasi";
@@ -176,7 +177,7 @@ public class JitsiJigasiWrapper implements ProcessListener
         props.setProperty("net.java.sip.communicator.impl.protocol.jabber.acc-xmpp-1.Encodings.speex/32000", "0");
         props.setProperty("net.java.sip.communicator.impl.protocol.jabber.acc-xmpp-1.Encodings.speex/8000", "0");
         props.setProperty("net.java.sip.communicator.impl.protocol.jabber.acc-xmpp-1.BREWERY", "ofgasi@" + MAIN_MUC);
-        props.setProperty("net.java.sip.communicator.impl.protocol.jabber.acc-xmpp-1.BOSH_URL_PATTERN", "https://" + HOSTNAME + ":" + PUBLIC_PORT + "/http-bind?room={roomName}");
+        props.setProperty("net.java.sip.communicator.impl.protocol.jabber.acc-xmpp-1.BOSH_URL_PATTERN", "http://" + HOSTNAME + ":" + PLAIN_PORT + "/http-bind?room={roomName}");
         props.setProperty("net.java.sip.communicator.impl.protocol.jabber.acc-xmpp-1.DOMAIN_BASE", DOMAIN);
 
         Log.debug("sip-communicator.properties");

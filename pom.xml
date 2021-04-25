@@ -11,7 +11,7 @@
     
     <groupId>org.igniterealtime.openfire</groupId>
     <artifactId>pade</artifactId>
-    <version>1.3.4-SNAPSHOT</version>	
+    <version>1.4.0-SNAPSHOT</version>	
     
     <name>Pade</name>
     <description>Web-based chat, groupchat, telephones, audio and video conferencing solution using ConverseJS, Jitsi and FreeSWITCH</description>
@@ -32,7 +32,7 @@
                         <goal>wget</goal>
                     </goals>
                     <configuration>
-                        <url>https://download.jitsi.org/jitsi-meet/src/jitsi-meet-1.0.4641.tar.bz2</url>
+                        <url>https://download.jitsi.org/jitsi-meet/src/jitsi-meet-1.0.4917.tar.bz2</url>
                         <unpack>true</unpack>
                         <outputDirectory>${project.basedir}/classes</outputDirectory>
                     </configuration>
@@ -44,7 +44,7 @@
                         <goal>wget</goal>
                     </goals>
                     <configuration>
-                        <url>https://github.com/igniterealtime/pade/raw/master/docs-1.6.13.8.zip</url>
+                        <url>https://github.com/igniterealtime/pade/raw/master/docs-1.6.14.3.zip</url>
                         <unpack>true</unpack>
                         <outputDirectory>${project.basedir}/classes</outputDirectory>
                     </configuration>
@@ -98,7 +98,19 @@
         </plugins>
     </build>
 
-    <dependencies>        
+    <dependencies>   
+		<dependency>
+			<groupId>com.sun.medialib.codec</groupId>
+			<artifactId>dtmf</artifactId>
+			<version>0.0.1</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/codecLib_dtmf.jar</systemPath>
+		</dependency>	
+        <dependency>
+            <groupId>javax.sip</groupId>
+            <artifactId>jain-sip-ri</artifactId>
+            <version>1.3.0-91</version>
+        </dependency>		
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-client</artifactId>
@@ -215,7 +227,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>29.0-jre</version>
+            <version>30.0-jre</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.bitbucket.b_c/jose4j -->
@@ -379,7 +391,16 @@
 		  <groupId>com.yubico</groupId>
 		  <artifactId>webauthn-server-core</artifactId>
 		  <version>1.8.0</version>
-		</dependency>		
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.slf4j/log4j-over-slf4j -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>log4j-over-slf4j</artifactId>
+			<version>1.7.30</version>
+		</dependency>
+
+		
     </dependencies>
 	
     <repositories>
@@ -387,7 +408,7 @@
             <id>igniterealtime</id>
             <name>Ignite Realtime Repository</name>
             <url>https://igniterealtime.org/archiva/repository/maven/</url>
-        </repository>
+        </repository>		
         <repository>
             <id>jitsi-maven-repository-releases</id>
             <layout>default</layout>

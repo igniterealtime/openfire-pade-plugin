@@ -96,12 +96,14 @@ import org.json.JSONObject;
 import org.jitsi.util.OSUtils;
 import de.mxro.process.*;
 import javax.xml.bind.DatatypeConverter;
-
+import org.voicebridge.Application;
+import com.sun.voip.server.*;
+import com.sun.voip.*;
 
 /**
  * Bundles various Jitsi components into one, standalone Openfire plugin.
  */
-public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventListener, PropertyEventListener, IEslEventListener, MUCEventListener, ProcessListener
+public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventListener, PropertyEventListener, IEslEventListener, MUCEventListener, ProcessListener, CallEventListener 
 {
     private static final Logger Log = LoggerFactory.getLogger(OfMeetPlugin.class);
     private static final ScheduledExecutorService connExec = Executors.newSingleThreadScheduledExecutor();
@@ -122,6 +124,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     private ServletContextHandler jvbWsContext = null;
     private ServletContextHandler streamWsContext = null;	
     private BookmarkInterceptor bookmarkInterceptor;
+	private Application voiceBridge = null;	
 
     private final OFMeetConfig config;
     private final JitsiJvbWrapper jitsiJvbWrapper;
@@ -265,7 +268,13 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 		if (config.getLiveStreamEnabled())
 		{
 			setupFFMPEG(pluginDirectory);
-		}		
+		}
+
+		if (config.getAudiobridgeEnabled())
+		{
+			voiceBridge = new Application();
+			voiceBridge.appStart(pluginDirectory);		
+		}
     }
 
     public void destroyPlugin()
@@ -324,6 +333,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
         if (connectTask != null) connectTask.cancel(true);
         if (managerConnection != null) managerConnection.disconnect();	
+		if (voiceBridge != null) voiceBridge.appStop();
     }
 
     protected void loadPublicWebApp() throws Exception
@@ -891,7 +901,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     @Override
     public void occupantJoined(final JID roomJID, JID user, String nickname)
     {
-        if (client != null)
+        if (config.getJigasiSipEnabled() && config.getJigasiSipUserId() != null)		
         {
             Log.debug("occupantJoined " + roomJID + " " + nickname + " " + user);
 
@@ -903,16 +913,41 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
                 if ("focus".equals(userName) && nickname.startsWith("focus") && !"ofgasi".equals(roomName) && !"ofmeet".equals(roomName))
                 {
                     String sipUserId = config.jigasiSipUserId.get().split("@")[0];
-                    String command = "originate {sip_from_user=" + userName + ",origination_uuid=" + roomName + "}[sip_h_Jitsi-Conference-Room=" + roomName + "]user/" + sipUserId + " &conference(" + roomName + ")";
-                    String error = sendAsyncFWCommand(command);
+					
+					if (client != null)	
+					{						
+						String command = "originate {sip_from_user=" + userName + ",origination_uuid=" + roomName + "}[sip_h_Jitsi-Conference-Room=" + roomName + "]user/" + config.jigasiSipUserId.get() + " &conference(" + roomName + ")";
+						String error = sendAsyncFWCommand(command);
+						
+						if (error != null)
+						{
+							Log.info("focus joined room, started freeswitch conference " + command);
+							System.setProperty("ofmeet.freeswitch." + roomName, "true");
+						} else {
+							Log.error("focus joined room, freeswitch originate failed - " + error);
+						}						
+					}
 
-                    if (error != null)
-                    {
-                        Log.info("focus joined room, started freeswitch conference " + command);
-                        System.setProperty("ofmeet.freeswitch." + roomName, "true");
-                    } else {
-                        Log.error("focus joined room, freeswitch originate failed - " + error);
-                    }
+					if (config.getAudiobridgeEnabled())
+					{	
+						SipServer.setSendSipUriToProxy(true);
+						CallParticipant cp = new CallParticipant();
+						cp.setProtocol("SIP");
+						cp.setConferenceHeaderName("Jitsi-Conference-Room");
+						cp.setTransport(config.jigasiSipTransport.get());						
+						cp.setCallId(roomName);
+						cp.setDisplayName(sipUserId);						
+						cp.setVoiceDetection(false);
+						cp.setConferenceId(roomName);	
+						cp.setPhoneNumber(sipUserId);
+						cp.setSipProxy(config.jigasiProxyServer.get() + ":" + config.jigasiProxyPort.get());
+						
+						OutgoingCallHandler outgoingCallHandler = new OutgoingCallHandler(this, cp);
+						outgoingCallHandler.start();
+
+						Log.info("focus joined room, started audiobridge with " + cp);
+
+					}				
                 }
             } catch ( Exception e ) {
                 Log.error( "An exception occurred while trying to start freeswitch conference " + roomName, e );
@@ -944,6 +979,12 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
                         Log.error("focus left room, freeswitch uuid_kill failed - " + error);
                     }
                 }
+
+				if (config.getAudiobridgeEnabled())
+				{				
+					CallHandler.hangup(roomName, "User requested call termination");	
+					Log.info("focus left room, stopping audiobridge conference " + roomName);					
+				}					
 
                 String json = getConferenceStats();
                 String comment = "";
@@ -1251,4 +1292,14 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
         return response;
     }
+	
+    public boolean routeIncomingSIP(CallParticipant cp)
+    {
+		return false;
+	}
+
+    public void callEventNotification(CallEvent callEvent)
+    {
+ 		Log.info( "Audiobridge callEventNotification " + callEvent.toString());
+    }	
 }

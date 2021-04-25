@@ -60,10 +60,23 @@
         final String jigasiFreeSwitchPassword = request.getParameter( "jigasiFreeSwitchPassword" );    
         
         final boolean jigasiSipEnabled = ParamUtils.getBooleanParameter( request, "jigasiSipEnabled" );         
-        final boolean jigasiFreeSwitchEnabled = ParamUtils.getBooleanParameter( request, "jigasiFreeSwitchEnabled" );                 
+        final boolean jigasiFreeSwitchEnabled = ParamUtils.getBooleanParameter( request, "jigasiFreeSwitchEnabled" );
+		final boolean audiobridgeEnabled = ParamUtils.getBooleanParameter( request, "audiobridgeEnabled" );
+		final boolean audiobridgeLogging = ParamUtils.getBooleanParameter( request, "audiobridgeLogging" );
+		final boolean audiobridgeRegisterAll = ParamUtils.getBooleanParameter( request, "audiobridgeRegisterAll" );		
+		
+        if (audiobridgeEnabled && jigasiFreeSwitchEnabled)
+		{
+			errors.put( "Audiobridge and FreeSWITCH", "Cannot use both at the same time" );		
+		}
 
         final String jvmJigasi = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.jigasi.jvm.customOptions" );
-        if (jigasiSipEnabled && jvmJigasi.isEmpty()) errors.put( "JVM settings for Jigasi", "Cannot be empty" );
+		
+        if (jigasiSipEnabled && jvmJigasi != null && jvmJigasi.isEmpty())
+		{
+			JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.jigasi.jvm.customOptions", "-Xmx1024m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp" );
+		}
+		
 
         if ( errors.isEmpty() )
         {
@@ -81,7 +94,10 @@
             ofmeetConfig.jigasiFreeSwitchHost.set( jigasiFreeSwitchHost );
             ofmeetConfig.jigasiSipEnabled.set( Boolean.toString(jigasiSipEnabled) );            
             ofmeetConfig.jigasiFreeSwitchEnabled.set( Boolean.toString(jigasiFreeSwitchEnabled) );            
-
+            ofmeetConfig.audiobridgeEnabled.set( Boolean.toString(audiobridgeEnabled) ); 
+			ofmeetConfig.audiobridgeLogging.set( Boolean.toString(audiobridgeLogging) ); 
+			ofmeetConfig.audiobridgeRegisterAll.set( Boolean.toString(audiobridgeRegisterAll) ); 
+			
             response.sendRedirect( "ofmeet-sipsettings.jsp?settingsSaved=true" );
             return;
         }
@@ -139,6 +155,57 @@
 
 <form action="ofmeet-sipsettings.jsp" method="post">
 
+	<!--
+    <fmt:message key="audiobridge.title" var="boxtitleAudiobridge"/>
+    <admin:contentBox title="${boxtitleAudiobridge}">
+        <p>
+            <fmt:message key="audiobridge.description"/>
+        </p>
+        <table cellpadding="3" cellspacing="0" border="0" width="100%">
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" id="audiobridgeEnabled" name="audiobridgeEnabled" ${ofmeetConfig.getAudiobridgeEnabled() ? "checked" : ""}>
+                    <fmt:message key="audiobridge.enabled" />
+                </td>				
+            </tr> 			
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" id="audiobridgeLogging" name="audiobridgeLogging" ${ofmeetConfig.getAudiobridgeLogging() ? "checked" : ""}>
+                    <fmt:message key="audiobridge.logging.enabled" />
+                </td>				
+            </tr>  		
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" id="audiobridgeRegisterAll" name="audiobridgeRegisterAll" ${ofmeetConfig.getAudiobridgeRegisterAll() ? "checked" : ""}>
+                    <fmt:message key="audiobridge.allusers.register" />
+                </td>				
+            </tr>  		
+        </table>
+    </admin:contentBox>  
+	-->
+    
+    <fmt:message key="sipsettings.freeswitch.title" var="boxtitleFreeswitch"/>
+    <admin:contentBox title="${boxtitleFreeswitch}">
+        <p>
+            <fmt:message key="sipsettings.freeswitch.description"/>
+        </p>
+        <table cellpadding="3" cellspacing="0" border="0" width="100%">
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" id="jigasiFreeSwitchEnabled" name="jigasiFreeSwitchEnabled" ${ofmeetConfig.getJigasiFreeSwitchEnabled() ? "checked" : ""}>
+                    <fmt:message key="sipsettings.freeswitch.enabled" />
+                </td>
+            </tr>         
+            <tr>
+                <td width="200"><label for="jigasiFreeSwitchHost"><fmt:message key="sipsettings.freeswitch.hostname"/>:</label></td>
+                <td><input type="text" size="60" maxlength="100" name="jigasiFreeSwitchHost" id="jigasiFreeSwitchHost" value="${ofmeetConfig.jigasiFreeSwitchHost.get() == null ? '' : ofmeetConfig.jigasiFreeSwitchHost.get()}"></td>
+            </tr>
+            <tr>
+                <td width="200"><label for="jigasiFreeSwitchPassword"><fmt:message key="sipsettings.freeswitch.password"/>:</label></td>
+                <td><input type="password" size="60" maxlength="100" name="jigasiFreeSwitchPassword" id="jigasiFreeSwitchPassword" value="${ofmeetConfig.jigasiFreeSwitchPassword.get() == null ? 'ClueCon' : ofmeetConfig.jigasiFreeSwitchPassword.get()}"></td>
+            </tr>            
+        </table>
+    </admin:contentBox>  
     <fmt:message key="sipsettings.sip.account.title" var="boxtitleAccount"/>
     <admin:contentBox title="${boxtitleAccount}">
         <p>
@@ -222,30 +289,7 @@
                 <td><input type="text" size="60" maxlength="100" name="jigasiXmppRoomName" id="jigasiXmppRoomName" value="${ofmeetConfig.jigasiXmppRoomName.get() == null ? 'siptest' : ofmeetConfig.jigasiXmppRoomName.get()}"></td>
             </tr>   			
         </table>
-    </admin:contentBox>
-    
-    <fmt:message key="sipsettings.freeswitch.title" var="boxtitleAccount"/>
-    <admin:contentBox title="${boxtitleAccount}">
-        <p>
-            <fmt:message key="sipsettings.freeswitch.description"/>
-        </p>
-        <table cellpadding="3" cellspacing="0" border="0" width="100%">
-            <tr>
-                <td nowrap colspan="2">
-                    <input type="checkbox" id="jigasiFreeSwitchEnabled" name="jigasiFreeSwitchEnabled" ${ofmeetConfig.getJigasiFreeSwitchEnabled() ? "checked" : ""}>
-                    <fmt:message key="sipsettings.freeswitch.enabled" />
-                </td>
-            </tr>         
-            <tr>
-                <td width="200"><label for="jigasiFreeSwitchHost"><fmt:message key="sipsettings.freeswitch.hostname"/>:</label></td>
-                <td><input type="text" size="60" maxlength="100" name="jigasiFreeSwitchHost" id="jigasiFreeSwitchHost" value="${ofmeetConfig.jigasiFreeSwitchHost.get() == null ? '' : ofmeetConfig.jigasiFreeSwitchHost.get()}"></td>
-            </tr>
-            <tr>
-                <td width="200"><label for="jigasiFreeSwitchPassword"><fmt:message key="sipsettings.freeswitch.password"/>:</label></td>
-                <td><input type="password" size="60" maxlength="100" name="jigasiFreeSwitchPassword" id="jigasiFreeSwitchPassword" value="${ofmeetConfig.jigasiFreeSwitchPassword.get() == null ? 'ClueCon' : ofmeetConfig.jigasiFreeSwitchPassword.get()}"></td>
-            </tr>            
-        </table>
-    </admin:contentBox>    
+    </admin:contentBox>  
 
     <input type="hidden" name="csrf" value="${csrf}">
 

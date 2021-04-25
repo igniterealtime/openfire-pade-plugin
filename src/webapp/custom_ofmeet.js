@@ -237,7 +237,16 @@ var ofmeet = (function (ofm) {
 
     function parseHashParams() {
         const hash = location.hash.replace(/^#/, '');
-        hashParams = [...new URLSearchParams(hash).entries()].reduce((obj, e) => ({ ...obj, [e[0]]: JSON.parse(e[1]) }), {});
+        hashParams = [...new URLSearchParams(hash).entries()].reduce((obj, e) => {
+            let val;
+            try {
+                val = JSON.parse(e[1]);
+            } catch (error) {
+                console.error('Hash param is not a JSON format: ' + e[1]);
+                val = e[1];
+            }
+            return { ...obj, [e[0]]: val };
+        }, {});
     }
 
     function newElement(el, id, html, className, label) {
@@ -1217,12 +1226,12 @@ var ofmeet = (function (ofm) {
 
             switch (json.action) {
                 case 'start-breakout':
-                    if (breakoutClient) {
+                    if (breakoutClient && !breakoutHost) {
                         breakoutClient.startBreakout(json.url, json.wait, json.room, json.subject, json.startTime, json.endTime);
                     }
                     break;
                 case 'stop-breakout':
-                    if (breakoutClient) {
+                    if (breakoutClient && !breakoutHost) {
                         breakoutClient.stopBreakout(json.url, json.wait);
                     }
                     break;
@@ -2353,8 +2362,8 @@ var ofmeet = (function (ofm) {
 
     class BreakoutClient {
         constructor() {
-            this.countdown = null;
-            this.sessionTimeout = null;
+            this.countdownTimer = null;
+            this.endBreakoutTimer = null;
             this.state = BreakoutState.STOPPED;
 
             if (hashParams.mainRoomUserId) {
@@ -2378,27 +2387,30 @@ var ofmeet = (function (ofm) {
                 room.setLocalParticipantProperty('mainRoomUserId', this.mainRoomUserId);
             }
 
-            if (APP.conference.roomName != this.breakoutRoom) {
+            console.log(decodeURI(APP.conference.roomName));
+            if (decodeURI(APP.conference.roomName) != this.breakoutRoom) {
                 storage.removeItem('breakoutRoom');
                 storage.removeItem('startTime');
                 storage.removeItem('endTime');
                 return;
             }
 
-            const now = Math.floor((new Date()).getTime() / 1000);
-            if (this.startTime && this.endTime && this.startTime <= now && now < this.endTime) {
-                const remainingTime = this.endTime - now;
-                this.sessionTimeout = setTimeout(() => { this.stopBreakout() }, remainingTime * 1000);
+            const remainingTime = this.remainingTime;
+            const elapsedTime = this.elapsedTime;
+            if (remainingTime > 0) {
+                this.endBreakoutTimer = setTimeout(() => { this.stopBreakout(this.getMainRoomUrl(), BreakoutHost.wait) }, remainingTime * 1000);
                 this.state = BreakoutState.STARTED;
-            }
-
-            if (this.startTime && !this.endTime && this.startTime <= now) {
-                this.state = BreakoutState.STARTED
+            } else if(elapsedTime > 0) {
+                this.state = BreakoutState.STARTED;
             }
         }
 
         get mainRoomUserId() {
             return storage.getItem('mainRoomUserId');
+        }
+
+        get breakoutRoom() {
+            return storage.getItem('breakoutRoom');
         }
 
         get startTime() {
@@ -2411,7 +2423,18 @@ var ofmeet = (function (ofm) {
 
         get remainingTime() {
             const now = Math.floor((new Date()).getTime() / 1000);
-            return storage.getItem('endTime') - now;
+            if (this.startTime && this.endTime && this.startTime <= now && now < this.endTime) {
+                return this.endTime - now;
+            }
+            return -1;
+        }
+
+        get elapsedTime() {
+            const now = Math.floor((new Date()).getTime() / 1000);
+            if (this.startTime && this.startTime <= now) {
+                return now - this.startTime;;
+            }
+            return -1;
         }
 
         get duration() {
@@ -2419,16 +2442,16 @@ var ofmeet = (function (ofm) {
         }
 
         startBreakout(url, wait, room, subject, startTime, endTime) {
-            if (this.countdown) {
-                clearTimeout(this.countdown);
-                this.countdown = null;
+            if (this.countdownTimer) {
+                clearTimeout(this.countdownTimer);
+                this.countdownTimer = null;
             }
 
             this.state = BreakoutState.STARTING;
             
             storage.setItem('breakoutRoom', room);
             storage.setItem('mainRoomUserId', APP.conference.getMyUserId());
-            storage.setItem('startTime', endTime);
+            storage.setItem('startTime', startTime);
             storage.setItem('endTime', endTime);
 
             const params = {
@@ -2443,18 +2466,22 @@ var ofmeet = (function (ofm) {
             roomUrl.hash = this.toParamString(params, roomUrl.hash);
 
             APP.UI.messageHandler.notify(i18n('breakout.breakoutRooms'), i18n('breakout.joining', { sec: wait }));
-            breakoutCountdownTimer = setTimeout(() => { location.replace(roomUrl.href) }, wait * 1000);
+            this.countdownTimer = setTimeout(() => { location.replace(roomUrl.href) }, wait * 1000);
         }
 
         stopBreakout(url, wait) {
-            if (this.countdown) {
-                clearTimeout(this.countdown);
-                this.countdown = null;
+            if (this.state == BreakoutState.STOPPING && this.countdownTimer) {
+                return;
             }
 
-            if (this.state == BreakoutState.STARTING) {
+            if (this.countdownTimer) {
+                clearTimeout(this.countdownTimer);
+                this.countdownTimer = null;
+            }
+
+            if (url == location.href) {
                 this.state = BreakoutState.STOPPED;
-                APP.UI.messageHandler.notify(i18n('breakout.breakoutRooms'), i18n('breakout.leaving', { sec: wait }));
+                APP.UI.messageHandler.notify(i18n('breakout.breakoutRooms'), i18n('breakout.cancelled'));
             } else {
                 this.state = BreakoutState.STOPPING;
 
@@ -2462,13 +2489,17 @@ var ofmeet = (function (ofm) {
                 roomUrl.hash = this.toParamString({ mainRoomUserId: this.mainRoomUserId }, roomUrl.hash);
 
                 APP.UI.messageHandler.notify(i18n('breakout.breakoutRooms'), i18n('breakout.leaving', { sec: wait }));
-                this.countdown = setTimeout(() => { location.replace(roomUrl.href) }, wait * 1000);
+                this.countdownTimer = setTimeout(() => { location.replace(roomUrl.href) }, wait * 1000);
             }
         }
 
         toParamString(params, baseStr = '') {
             return ((baseStr && baseStr.length > 1) ? baseStr + '&' : '') +
                 Object.keys(params).map(key => `${key}=${JSON.stringify(params[key])}`).join('&');
+        }
+
+        getMainRoomUrl() {
+            return location.href.replace(/#.+?$/, '').replace(/-room\d+-[\da-z]{9}$/, '');
         }
     }
 
@@ -2479,9 +2510,13 @@ var ofmeet = (function (ofm) {
         constructor() {
             this.startedRooms = [];
             this.$status = $('#breakout-status');
-            this.timeout = null;
-            this.countdown = null;
+            this.$clock =$('#breakout-clock');
+            this.endBreakoutTimer = null;
+            this.countdownTimer = null;
+            this.clockTimer = null;
             this.domain = Strophe.getDomainFromJid(getConferenceJid());
+            this.startTime = null;
+            this.endTime = null;
 
             const kanbanConfig = {
                 element: ".breakout-kanban",
@@ -2494,7 +2529,7 @@ var ofmeet = (function (ofm) {
                 },
                 itemAddOptions: {
                     enabled: true,
-                    content: 'Join',
+                    content: i18n('breakout.join'),
                     class: 'kanban-title-button btn btn-default btn-sm btn-primary',
                 },
                 boards: [
@@ -2570,15 +2605,7 @@ var ofmeet = (function (ofm) {
         addParticipant(id) {
             const participant = participants[id];
             if (participant) {
-                /*const jid = Strophe.getBareJidFromJid(participant._jid);
-                const info = this.recallInfo.find(i => i.jid == jid);
-                const elem = info ? this.kanban.findElement(info.id) : null;
-                if (elem) {
-                    $(elem).removeClass('disabled-item').attr('data-eid', participant._id);
-                    this.recallInfo = this.recallInfo.filter(i => i.id != info.id);
-                } else {*/
                 this.kanban.addElement('participants', this.elementFromParticipant(participants[id]));
-                //}
             }
             $('#breakout-title').text(participants.length);
         }
@@ -2709,8 +2736,8 @@ var ofmeet = (function (ofm) {
 
             const duration = $('#breakout-duration').val();
 
-            const startTime = Math.floor((new Date()).getTime() / 1000);
-            const endTime = Math.floor((new Date()).getTime() / 1000 + duration * 60);
+            this.startTime = Math.floor((new Date()).getTime() / 1000 + BreakoutHost.wait);
+            this.endTime = duration > 0 ? this.startTime + duration * 60 : null;
             this.startedRooms = [];
 
             for (let i = 0; i < this.roomCount; i++) {
@@ -2731,23 +2758,30 @@ var ofmeet = (function (ofm) {
                         url: url.href,
                         wait: BreakoutHost.wait,
                         subject: getConferenceName() + ' - ' + roomTitle,
-                        startTime: startTime,
-                        endTime: endTime
+                        startTime: this.startTime,
+                        endTime: this.endTime
                     };
 
                     this.broadcastBreakout('chat', jid, payload);
                 }
             }
 
+            $('.btn-breakout')
+                .removeClass('btn-primary btn-breakout-start')
+                .addClass('btn-danger btn-breakout-stop')
+                .text(i18n('breakout.reassemble'));
+
             let count = BreakoutHost.wait;
             this.setStatusMessage(i18n('breakout.breakoutWillStart', { sec: count }));
-            this.countdown = setInterval(() => {
+            this.countdownTimer = setInterval(() => {
                 if (--count <= 0) {
-                    clearInterval(this.countdown);
-                    this.countdown = null;
+                    clearInterval(this.countdownTimer);
+                    this.countdownTimer = null;
+
+                    this.clockTimer = setInterval(() => this.updateClock());
 
                     if (duration > 0) {
-                        this.timeout = setTimeout(() => this.endBreakout(), 60000 * duration);
+                        this.endBreakoutTimer = setTimeout(() => this.stopBreakout(), 60000 * duration);
                         this.setStatusMessage(i18n('breakout.breakoutStartedWithDuration', { min: duration }));
                     } else {
                         this.setStatusMessage(i18n('breakout.breakoutStarted'));
@@ -2756,11 +2790,6 @@ var ofmeet = (function (ofm) {
                     this.setStatusMessage(i18n('breakout.breakoutWillStart', { sec: count }));
                 }
             }, 1000);
-
-            $('.btn-breakout')
-                .removeClass('btn-primary btn-breakout-start')
-                .addClass('btn-danger btn-breakout-stop')
-                .text(i18n('breakout.reassemble'));
         }
 
         stopBreakout() {
@@ -2769,49 +2798,68 @@ var ofmeet = (function (ofm) {
                 return;
             }
 
-            if (this.countdown) {
-                clearInterval(this.countdown);
-                this.countdown = null;
+            let immediate = false;
+            if (this.countdownTimer) {
+                clearInterval(this.countdownTimer);
+                this.countdownTimer = null;
+                immediate = true;
             }
 
+            clearInterval(this.clockTimer);
+            this.clockTimer = null;
+
+            const payload = {
+                action: 'stop-breakout',
+                url: location.href,
+                wait: BreakoutHost.wait,
+            };
+
+            this.broadcastBreakout('groupchat', getConferenceJid(), payload);
+            
             for (const room of this.startedRooms) {
                 const jid = room + '@' + this.domain;
-                const payload = {
-                    action: 'stop-breakout',
-                    url: location.href,
-                    wait: BreakoutHost.wait,
-                };
-
                 this.joinRoom(jid);
                 setTimeout(() => {
-                    this.broadcastBreakout('groupchat', Strophe.getBareJidFromJid(jid), payload);
+                    this.broadcastBreakout('groupchat', jid, payload);
                     setTimeout(() => { this.exitRoom(jid) }, 1000);
                 }, 1000);
             }
 
-            let count = BreakoutHost.wait;
-            this.setStatusMessage(i18n('breakout.breakoutWillEnd', { sec: count }));
-            this.countdown = setInterval(() => {
-                if (--count <= 0) {
-                    clearInterval(this.countdown);
-                    this.countdown = null;
-                    this.setStatusMessage(i18n('breakout.breakoutHasEnded'));
-                    $('.btn-breakout')
-                        .removeClass('btn-danger btn-breakout-stop')
-                        .addClass('btn-primary btn-breakout-start')
-                        .text(i18n('breakout.breakout'))
-                        .prop('disabled', false);
-                } else {
-                    this.setStatusMessage(i18n('breakout.breakoutWillEnd', { sec: count }));
-                }
-            }, 1000);
+            let endBreakout = () => {
+                this.setStatusMessage(i18n('breakout.breakoutHasEnded'));
+                $('.btn-breakout')
+                    .removeClass('btn-danger btn-breakout-stop')
+                    .addClass('btn-primary btn-breakout-start')
+                    .text(i18n('breakout.breakout'))
+                    .prop('disabled', false);
+            };
 
-            if (this.timeout) {
-                clearTimeout(this.timeout);
-                this.timeout = null;
+            if (this.endBreakoutTimer) {
+                clearTimeout(this.endBreakoutTimer);
+                this.endBreakoutTimer = null;
             }
 
+            this.startTime = null;
+            this.endTime = null;
+            this.updateClock()
+
             $('.btn-breakout').prop('disabled', true);
+
+            if (immediate) {
+                endBreakout();
+            } else {
+                let count = BreakoutHost.wait;
+                this.setStatusMessage(i18n('breakout.breakoutWillEnd', { sec: count }));
+                this.countdownTimer = setInterval(() => {
+                    if (--count <= 0) {
+                        clearInterval(this.countdownTimer);
+                        this.countdownTimer = null;
+                        endBreakout();
+                    } else {
+                        this.setStatusMessage(i18n('breakout.breakoutWillEnd', { sec: count }));
+                    }
+                }, 1000);
+            }
         }
 
         toggleBreakout() {
@@ -2820,6 +2868,19 @@ var ofmeet = (function (ofm) {
                 this.stopBreakout();
             } else {
                 this.startBreakout();
+            }
+        }
+
+        updateClock() {
+            if (this.startTime) {
+                const now = Math.floor((new Date()).getTime() / 1000);
+                if (this.endTime) {
+                    this.$clock.text(i18n('breakout.remainingTime') + ' ' + formatTimeSpan(this.endTime - now));
+                } else {
+                    this.$clock.text(i18n('breakout.elapsedTime') + ' ' + formatTimeSpan(now - this.startTime));
+                }
+            } else {
+                this.$clock.text('');
             }
         }
 
@@ -2881,9 +2942,9 @@ var ofmeet = (function (ofm) {
 
     function doBreakout() {
         const template = `
-<div class="modal-header form-inline">
+<div class="modal-header">
     <h4 class="modal-title">${i18n('breakout.breakoutRooms')} - ${i18n('breakout.participants', { title: '<span id="breakout-title"></span>' })}</h4>
-    <form class="form-inline">
+    <form id="breakout-option" class="form-inline">
         <div class="form-group">
             <label for="breakout-duration">${i18n('breakout.duration')}</label>
             <input id="breakout-duration" class="form-control" type="number" min="0" max="480" step="30" name="breakout-duration" value="${BreakoutHost.defaultDuration}"/>
@@ -2894,30 +2955,13 @@ var ofmeet = (function (ofm) {
         </div>
     </form>
     <div id="breakout-status"></div>
+    <div id="breakout-clock"></div>
 </div>
 <div class="modal-body">
     <div class="pade-col-container breakout-kanban"></div>
 </div>`;
 
         if (!breakoutModal) {
-            /*for (i = 0; i < 30; i++) {
-                const id = Math.floor(Math.random() * 4294967295).toString(16);
-                participants[id] = {
-                    _connectionStatus: "active",
-                    _displayName: 'Dummy ' + ("00" + i).slice(-3),
-                    _hidden: false,
-                    _id: id,
-                    _identity: undefined,
-                    _jid: "%e3%83%86%e3%82%b9%e3%83%88@conference.mtg01/" + id,
-                    _properties: { 'e2ee.idKey': "b2J5N2BgaBvXfZRUUNCqIuxCkYPfY6LHMP0R4xcvsH0", 'features_e2ee': true },
-                    _role: "participant",
-                    _statsID: "Delores-7Qt",
-                    _status: undefined,
-                    _supportsDTMF: false,
-                    _tracks: []
-                };
-            }*/
-
             breakoutModal = new tingle.modal({
                 footer: true,
                 stickyFooter: false,

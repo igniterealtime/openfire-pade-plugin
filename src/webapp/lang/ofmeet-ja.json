@@ -31,13 +31,17 @@
         "anonymous": "名無しの{{id}}",
         "room": "部屋{{n}}",
         "meetingParticipants": "会議の参加者",
+        "join": "参加",
         "breakoutWillStart": "あと{{sec}}秒でブレイクアウトを開始します。",
         "breakoutStartedWithDuration": "ブレイクアウトが開始され、{{min}}分後に終了します。",
         "breakoutStarted": "ブレイクアウトが開始されました。終了して参加者を呼び戻すには「ブレクアウト停止」をクリックしてください。",
         "breakoutWillEnd": "あと{{sec}}秒でブレイクアウトを終了します。",
         "breakoutHasEnded": "ブレクアウトは終了しました。",
         "joining": "あと{{sec}}秒でブレイクアウトに参加します。",
-        "leaving": "あと{{sec}}秒でブレイクアウトから退出します。"
+        "leaving": "あと{{sec}}秒でブレイクアウトから退出します。",
+        "cancelled": "ブレクアウトは中止されました。",
+        "elapsedTime": "経過時間:",
+        "remainingTime":"残り時間:"
     },
     "takePhoto": {
         "handsRaised": "挙手",

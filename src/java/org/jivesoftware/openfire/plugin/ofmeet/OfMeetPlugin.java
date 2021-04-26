@@ -64,6 +64,9 @@ import org.jivesoftware.util.PropertyEventDispatcher;
 import org.jivesoftware.util.PropertyEventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import org.xmpp.component.ComponentManager;
+import org.xmpp.component.ComponentManagerFactory;
 import org.xmpp.packet.IQ;
 import org.xmpp.packet.JID;
 import org.xmpp.packet.Message;
@@ -133,6 +136,9 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     private final MeetingPlanner meetingPlanner;
     private final LobbyMuc lobbyMuc;
     private final SecurityAuditManager securityAuditManager = SecurityAuditManager.getInstance();
+    
+	private ComponentManager componentManager;
+    private FocusComponent focusComponent = null;	
 
     public OfMeetPlugin()
     {
@@ -195,7 +201,11 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
             ensureFocusUser();
             jitsiJicofoWrapper.initialize(pluginDirectory);
-            loadBranding();			
+            loadBranding();	
+
+			focusComponent = new FocusComponent();
+			componentManager = ComponentManagerFactory.getComponentManager();			
+            componentManager.addComponent("focus", focusComponent);		
         }
         catch ( Exception ex )
         {
@@ -286,6 +296,8 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
             MUCEventDispatcher.removeListener(this);
 
             unloadPublicWebApp();
+			
+			componentManager.removeComponent("focus");			
         }
         catch ( Exception ex )
         {

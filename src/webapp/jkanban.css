@@ -17,7 +17,8 @@
 .kanban-board {
   position: relative;
   float: left;
-  background: #e2e4e6;
+  background: rgb(66, 82, 110);
+  border-radius: 3px;
   transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
@@ -62,10 +63,13 @@
 }
 
 .kanban-item {
-  background: #fff;
-  padding: 15px;
-  margin-bottom: 20px;
+  background: rgba(13, 20, 36, 0.63);
+  padding: 10px;
+  margin-bottom: 10px;
   transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  display: flex;
+  align-items: center;
+  border-radius: 3px;
 }
 
 .kanban-item:hover {
@@ -77,9 +81,28 @@
 }
 
 .kanban-item.is-moving.gu-mirror {
-  transform: rotate(3deg);
   height: auto !important;
 }
+
+.kanban-item .header-icon {
+  padding-right: 10px;
+}
+
+.kanban-item .header-icon .avatar {
+  font-size: 12px;
+  height: 24px;
+  width: 24px;
+}
+
+.kanban-item.disabled-item {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.kanban-item.disabled-item:hover {
+  cursor: default;
+}
+
 
 /* Dragula CSS  */
 .gu-mirror {

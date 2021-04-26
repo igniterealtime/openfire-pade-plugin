@@ -118,17 +118,16 @@
 .ofmeet-tooltip::after {
   background-color: rgb(13, 20, 36);
   border-radius: 3px;
-  color: rgb(184, 199, 224);
+  color: #fff;
   content: attr(aria-label);
   display: block;
   font-size: 12px;
   font-weight: 400;
-  line-height: 15.6px;
+  line-height: 14px;
   margin: 0;
-  max-width: 240px;
   overflow-wrap: break-word;
   opacity: 0;
-  padding: 2px 6px;
+  padding: 8px;
   position: absolute;
   pointer-events: none;
   top: 0;
@@ -153,17 +152,14 @@
 }
 
 .ofmeet-toolbox-small-icon {
-  background: #fff;
-  border: 1px solid rgba(0, 0, 0, .2);
-  border-radius: 50%;
-  bottom: 0;
-  box-shadow: 0 1px 4px rgb(0 0 0 / 25%);
   cursor: pointer;
-  height: 16px;
+  background: #36383c;
+  box-shadow: 0 4px 4px rgb(0 0 0 / 25%), 0 0 0 1px rgb(0 0 0 / 10%);
+  border-radius: 3px;
+  padding: 4px;
   position: absolute;
-  text-align: center;
-  right: -2px;
-  width: 16px;
+  right: -4px;
+  top: -3px;
 }
 
 @media only screen and (max-width: 500px) {
@@ -173,39 +169,39 @@
 }
 
 .ofmeet-toolbox-small-icon:hover {
-  bottom: -1px;
-  height: 20px;
-  right: -4px;
-  width: 20px;
+  background: #f2f3f4;
 }
 
 .ofmeet-toolbox-small-icon>svg {
-  fill: #5e6d7a;
-  margin-top: 5px;
+  fill: #fff;
 }
 
 .ofmeet-toolbox-small-icon:hover>svg {
-  height: 11px;
-  width: 11px;
-  margin-top: 6px;
+  fill: #000;
 }
 
-.ofmeet-toolbox-menu-container {
+.toolbox-button-wth-dialog {
   position: relative
 }
 
+.ofmeet-toolbox-menu-container {
+  position: absolute;
+  overflow-y: visible !important;
+}
+
 .ofmeet-toolbox-menu {
-  background: rgb(40, 52, 71);
+  background: rgb(36, 37, 40);
   border-radius: 3px;
   box-sizing: content-box;
-  color: rgb(184, 199, 224);
-  max-height: 448px;
+  color: rgb(255, 255, 255);
+  max-height: calc(100vh - calc(48px + 24px) - 46px);
   max-width: 448px;
-  padding: 16px 24px;
+  padding: 0;
   position: absolute;
-  bottom: 48px;
+  bottom: 60px;
   z-index: 300;
   box-shadow: rgb(13 20 36 / 85%) 0px 4px 8px -2px, rgb(13 20 36 / 81%) 0px 0px 1px;
+  transform: translateX(calc(-100% + 48px));
 }
 
 .button-group-left .ofmeet-toolbox-menu {
@@ -223,28 +219,30 @@
 }
 
 .ofmeet-toolbox-menu-item {
+  display: flex;
   align-items: center;
-  color: #b8c7e0;
+  color: rgb(255, 255, 255);
   cursor: pointer;
-  display: block;
   padding: 5px;
   text-align: center;
 }
 
 .ofmeet-toolbox-list-menu .ofmeet-toolbox-menu-item {
-  display: flex;
   font-size: 14px;
-  height: 22px;
+  height: 24px;
+  line-height: 24px;
+  padding: 8px 16px;
   text-align: left;
 }
 
 .ofmeet-toolbox-tile-menu .ofmeet-toolbox-menu-item {
+  justify-content: center;
   height: 36px;
   width: 36px;
 }
 
 .ofmeet-toolbox-menu-item:hover {
-  background-color: #313d52;
+  background-color: rgb(54, 56, 60);
 }
 
 .ofmeet-toolbox-menu-item * {
@@ -252,10 +250,13 @@
 }
 
 .ofmeet-toolbox-menu-item svg {
-  fill: #b8c7e0 !important;
+  fill: rgb(255, 255, 255) !important;
 }
 
 .ofmeet-toolbox-menu-item .jitsi-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   font-size: 24px;
   margin: auto;
   height: 24px;
@@ -270,4 +271,33 @@
 .popupmenu {
   width: auto;
   max-width: 250px;
+}
+
+.breakout-modal .participants .kanban-title-button {
+  display: none;
+}
+
+#breakout-option {
+  flex: none;
+  margin: 0 30px;
+}
+
+#breakout-status {
+  flex: auto;
+  color: #ff5983;
+  font-size: 16px;
+  line-height: 36px;
+}
+
+#breakout-clock {
+  flex: auto;
+  font-size: 18px;
+  font-weight: 600;
+  margin-right: 30px;
+  line-height: 36px;
+  text-align: right;
+}
+
+.tags-modal .tingle-modal-box {
+  width: 600px;
 }

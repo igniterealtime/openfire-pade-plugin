@@ -20,6 +20,7 @@
     /* ----------------------------------------------------------- */
 
     var isBusy = false
+    var closeTimer = null
 
     function Modal(options) {
         var defaults = {
@@ -101,6 +102,9 @@
             self.opts.beforeOpen()
         }
 
+        clearTimeout(closeTimer)
+        closeTimer = null;
+
         if (this.modal.style.removeProperty) {
             this.modal.style.removeProperty('display')
         } else {
@@ -157,7 +161,7 @@
         // using similar setup as onOpen
         var self = this
 
-        self.modal.style.display = 'none'
+        closeTimer = setTimeout(() => { self.modal.style.display = 'none' }, 500)
 
         // onClose callback
         if (typeof self.opts.onClose === 'function') {
@@ -352,7 +356,7 @@
         this.modalBox.appendChild(this.modalBoxContent)
 
         if (this.opts.closeMethods.indexOf('button') !== -1) {
-            this.modal.appendChild(this.modalCloseBtn)
+            this.modalBox.appendChild(this.modalCloseBtn)
         }
 
         this.modal.appendChild(this.modalBox)

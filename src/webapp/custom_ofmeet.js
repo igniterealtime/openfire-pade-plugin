@@ -30,7 +30,6 @@ var ofmeet = (function (ofm) {
     };
     const padsList = [],
         captions = { msgsDisabled: true, msgs: [] },
-        breakout = { rooms: [], duration: 60, roomCount: 10, wait: 10 },
         pdf_body = [];
     const lostAudioWorkaroundInterval = 300000; // 5min
     const i18n = i18next.getFixedT(null, 'ofmeet');
@@ -39,6 +38,12 @@ var ofmeet = (function (ofm) {
         UPLOAD: 'avatar.upload',
         VCARD: 'avatar.vcard',
         INITIALS: 'avatar.initials'
+    };
+    const BreakoutState = {
+        STOPPED: 'breakout.stopped',
+        STARTED: 'breakout.started',
+        STARTING: 'breakout.start',
+        STOPPING: 'breakout.stop'
     };
 
     let tagsModal = null,
@@ -58,15 +63,17 @@ var ofmeet = (function (ofm) {
         dbnames = [];
     let clockTrack = { start: 0, stop: 0, joins: 0, leaves: 0 },
         handsRaised = 0;
-    let tags = { location: "", date: localizedDate(new Date()).format('LL'), subject: "", host: "", activity: "" };
+    let tags = { location: '', date: '', subject: '', host: '', activity: '' };
     let audioTemporaryUnmuted = false,
         cursorShared = false,
         inviteByPhone = false;
-    let breakoutIconVisible = false;
     let avatarType = null;
     let localDisplayName = null;
     let vcardAvatar = null;
     let storage = null;
+    let breakoutHost = null;
+    let breakoutClient = null;
+    let hashParams = [];
 
     class DummyStorage {
         constructor() {
@@ -121,8 +128,17 @@ var ofmeet = (function (ofm) {
         }
     }
 
+    function formatTimeSpan(totalSeconds) {
+        const secs = ('00' + parseInt(totalSeconds % 60, 10)).slice(-2);
+        const mins = ('00' + parseInt((totalSeconds / 60) % 60, 10)).slice(-2);
+        const hrs = ('00' + parseInt((totalSeconds / 3600) % 24, 10)).slice(-2);
+        return `${hrs}:${mins}:${secs}`;
+    }
+
     window.addEventListener("DOMContentLoaded", function () {
         console.debug("custom_ofmeet.js DOMContentLoaded");
+
+        parseHashParams();
 
         if (storageAvailable('localStorage')) {
             storage = window.localStorage;
@@ -146,7 +162,7 @@ var ofmeet = (function (ofm) {
         } else {
             storage = new DummyStorage();
         }
-      
+        
         if (!config.webinar) {
             if (typeof indexedDB.databases == "function") {
                 indexedDB.databases().then(function (databases) {
@@ -219,6 +235,20 @@ var ofmeet = (function (ofm) {
     //
     //-------------------------------------------------------
 
+    function parseHashParams() {
+        const hash = location.hash.replace(/^#/, '');
+        hashParams = [...new URLSearchParams(hash).entries()].reduce((obj, e) => {
+            let val;
+            try {
+                val = JSON.parse(e[1]);
+            } catch (error) {
+                console.error('Hash param is not a JSON format: ' + e[1]);
+                val = e[1];
+            }
+            return { ...obj, [e[0]]: val };
+        }, {});
+    }
+
     function newElement(el, id, html, className, label) {
         const ele = document.createElement(el);
         if (id) ele.id = id;
@@ -290,11 +320,18 @@ var ofmeet = (function (ofm) {
 
         console.debug("custom_ofmeet.js setup");
 
-        if (!config.webinar)
-        {
+        if (!config.webinar) {
+            const room = getConference();
+
             listenWebPushEvents();
 
-            APP.conference._room.on(JitsiMeetJS.events.conference.CONFERENCE_LEFT, function () {
+            if (hashParams.subject) {
+                setConferenceName(hashParams.subject);
+            }
+
+            breakoutClient = new BreakoutClient();
+
+            room.on(JitsiMeetJS.events.conference.CONFERENCE_LEFT, function () {
                 console.debug("custom_ofmeet.js me left");
 
                 if (interfaceConfig.OFMEET_RECORD_CONFERENCE) {
@@ -309,16 +346,18 @@ var ofmeet = (function (ofm) {
                 }
             });
 
-            APP.conference._room.on(JitsiMeetJS.events.conference.USER_ROLE_CHANGED, function (user, role) {
+            room.on(JitsiMeetJS.events.conference.USER_ROLE_CHANGED, function (user, role) {
                 console.debug("custom_ofmeet.js participant role change", user, role);
 
-                if (interfaceConfig.OFMEET_ENABLE_BREAKOUT && role == "moderator" && !breakoutIconVisible && user == APP.conference.getMyUserId()) {
-                    createBreakoutRoomsButton();
-                    breakoutIconVisible = true;
+                if (interfaceConfig.OFMEET_ENABLE_BREAKOUT &&
+                    role == "moderator" &&
+                    user == APP.conference.getMyUserId() &&
+                    breakoutClient.state != BreakoutState.STARTED) {
+                    $('#ofmeet-breakout').parent().show();
                 }
             });
 
-            APP.conference._room.on(JitsiMeetJS.events.conference.TRACK_REMOVED, function (track) {
+            room.on(JitsiMeetJS.events.conference.TRACK_REMOVED, function (track) {
                 console.debug("custom_ofmeet.js track removed", track.getParticipantId());
 
                 if (track.getParticipantId() == APP.conference.getMyUserId()) {
@@ -332,25 +371,19 @@ var ofmeet = (function (ofm) {
 
                     if (ofm.recording) stopRecorder();
                 }
-
             });
 
-            APP.conference._room.on(JitsiMeetJS.events.conference.USER_JOINED, function (id) {
+            room.on(JitsiMeetJS.events.conference.USER_JOINED, function (id) {
                 console.debug("user join", id, participants);
                 addParticipant(id);
             });
 
-            APP.conference._room.on(JitsiMeetJS.events.conference.USER_LEFT, function (id) {
+            room.on(JitsiMeetJS.events.conference.USER_LEFT, function (id) {
                 console.debug("user left", id);
-
-                if (breakout.kanban) {
-                    breakout.kanban.removeElement(id);
-                }
-
-                delete participants[id];
+                removeParticipant(id);
             });
 
-            APP.conference._room.on(JitsiMeetJS.events.conference.TRACK_ADDED, function (track) {
+            room.on(JitsiMeetJS.events.conference.TRACK_ADDED, function (track) {
                 const id = track.getParticipantId();
                 console.debug("custom_ofmeet.js track added", id, track.getType());
 
@@ -358,17 +391,19 @@ var ofmeet = (function (ofm) {
                     if (track.getType() == "audio") recordingAudioTrack[id] = track.stream;
                     if (track.getType() == "video") recordingVideoTrack[id] = track.stream;
                 }
+            });
 
-                if (APP.conference.getMyUserId() == id && !config.webinar) {
+            room.on(JitsiMeetJS.events.conference.PARTICIPANT_PROPERTY_CHANGED, function (participant, property, oldValue, newValue) {
+                console.debug("custom_ofmeet.js property changed", participant, property, oldValue, newValue);
 
+                if (property == 'mainRoomUserId') {
+                    if (breakoutHost) {
+                        breakoutHost.recallParticipant(participant._id, newValue);
+                    }
                 }
             });
 
-            APP.conference._room.on(JitsiMeetJS.events.conference.PARTICIPANT_PROPERTY_CHANGED, function (e, t, n, r) {
-                console.debug("custom_ofmeet.js property changed", e, t, n, r);
-            });
-
-            APP.conference._room.on(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, function (track) {
+            room.on(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, function (track) {
                 const id = track.getParticipantId();
                 console.debug("custom_ofmeet.js track muted", id, track.getType(), track.isMuted());
 
@@ -402,7 +437,7 @@ var ofmeet = (function (ofm) {
                 }
             });
 
-            APP.conference._room.on(JitsiMeetJS.events.conference.PRIVATE_MESSAGE_RECEIVED, function (id, text, ts) {
+            room.on(JitsiMeetJS.events.conference.PRIVATE_MESSAGE_RECEIVED, function (id, text, ts) {
                 var participant = APP.conference.getParticipantById(id);
                 var displayName = participant ? (participant._displayName || 'Anonymous-' + id) : (APP.conference.getLocalDisplayName() || "Me");
 
@@ -412,7 +447,7 @@ var ofmeet = (function (ofm) {
                 pdf_body.push([pretty_time, displayName, text]);
             });
 
-            APP.conference._room.on(JitsiMeetJS.events.conference.MESSAGE_RECEIVED, function (id, text, ts) {
+            room.on(JitsiMeetJS.events.conference.MESSAGE_RECEIVED, function (id, text, ts) {
                 var participant = APP.conference.getParticipantById(id);
                 var displayName = participant ? (participant._displayName || 'Anonymous-' + id) : (APP.conference.getLocalDisplayName() || "Me");
 
@@ -439,8 +474,8 @@ var ofmeet = (function (ofm) {
                     pdf_body.push([pretty_time, displayName, text]);
                 }
 
-                if (breakout.started) {
-                    messageBreakoutRooms(text);
+                if (breakoutHost && breakoutHost.started) {
+                    breakoutHost.broadcastMessage(text);
                 }
             });
 
@@ -556,17 +591,17 @@ var ofmeet = (function (ofm) {
 
         // fake the interaction
         APP.conference.commands.addCommandListener("___FAKE_INTERACTION", function () {
-            if (interfaceConfig.OFMEET_ENABLE_BREAKOUT && APP.conference._room.isModerator() && !breakoutIconVisible) {
-                createBreakoutRoomsButton();
-                breakoutIconVisible = true;
+            if (interfaceConfig.OFMEET_ENABLE_BREAKOUT && APP.conference._room.isModerator() && breakoutClient.state != BreakoutState.STARTED) {
+                $('#ofmeet-breakout').parent().show();
             }
         });
 
-        if (interfaceConfig.OFMEET_ENABLE_BREAKOUT && APP.conference._room.isModerator()) {
+        if (interfaceConfig.OFMEET_ENABLE_BREAKOUT) {
             createBreakoutRoomsButton();
-            breakoutIconVisible = true;
-        } else {
-            APP.conference.commands.sendCommandOnce("___FAKE_INTERACTION", { value: !0 });
+            if (!APP.conference._room.isModerator() || breakoutClient.state == BreakoutState.STARTED) {
+                $('#ofmeet-breakout').parent().hide();
+                APP.conference.commands.sendCommandOnce("___FAKE_INTERACTION", { value: !0 });
+            }
         }
 
         if (interfaceConfig.OFMEET_RECORD_CONFERENCE && !config.webinar) {
@@ -738,7 +773,6 @@ var ofmeet = (function (ofm) {
             id: 'ofmeet-pads',
             icon: IMAGES.cryptpad,
             label: i18n('toolbar.launchCryptPadApplication'),
-            group: '.button-group-right',
             callback: (evt) => {
                 evt.stopPropagation();
                 doPads();
@@ -751,7 +785,6 @@ var ofmeet = (function (ofm) {
             id: 'ofmeet-avatar',
             icon: IMAGES.picture,
             label: i18n('toolbar.changePersonalAvatar'),
-            group: '.button-group-right',
             callback: (evt) => {
                 evt.stopPropagation();
                 doAvatar();
@@ -784,7 +817,6 @@ var ofmeet = (function (ofm) {
             id: 'ofmeet-cursor',
             icon: IMAGES.cursor,
             label: i18n('toolbar.shareCursorMousePointer'),
-            group: '.button-group-right',
             callback: (evt) => {
                 evt.stopPropagation();
 
@@ -822,7 +854,6 @@ var ofmeet = (function (ofm) {
             id: 'ofmeet-whiteboard',
             icon: IMAGES.whiteboard,
             label: i18n('toolbar.shareaWhiteboard'),
-            group: '.button-group-right',
             callback: (evt) => {
                 evt.stopPropagation();
                 APP.conference.commands.sendCommandOnce("WHITEBOARD", { value: !0 })
@@ -917,7 +948,6 @@ var ofmeet = (function (ofm) {
             id: 'ofmeet-confetti',
             icon: IMAGES.confetti,
             label: i18n('toolbar.shareSomeConfetti'),
-            group: '.button-group-right',
             shortcut: 'E',
             callback: (evt) => { sendConfettiCommand() },
             menu: menu,
@@ -929,7 +959,7 @@ var ofmeet = (function (ofm) {
             id: undefined,
             icon: undefined,
             label: undefined,
-            group: '.button-group-left',
+            group: '.toolbox-content-items',
             shortcut: undefined,
             callback: undefined,
             menu: {},
@@ -955,8 +985,8 @@ var ofmeet = (function (ofm) {
 
             let $toolbarItem = appendMenuToToolbarButton($button, option.menu);
 
-            if ($placeHolder.hasClass('button-group-right')) {
-                $placeHolder.children().last().before($toolbarItem);
+            if ($placeHolder.hasClass('toolbox-content-items')) {
+                $placeHolder.children().eq(-2).before($toolbarItem);
             } else {
                 $placeHolder.append($toolbarItem);
             }
@@ -1027,7 +1057,7 @@ var ofmeet = (function (ofm) {
             $menu.on('click.ofmeet-toolbox-menu', 'li', (e) => { option.callback(e); return option.closeOnClick; });
             $menuContainer.children('.ofmeet-toolbox-menu').append($menu);
 
-            $smallIcon = $('<div class="ofmeet-toolbox-small-icon"><svg fill="none" height="9" width="9" viewBox="0 0 10 6"><path clip-rule="evenodd" d="M8.07.248a.75.75 0 111.115 1.004L5.656 5.193a.75.75 0 01-1.115 0L1.068 1.252A.75.75 0 012.182.248L5.1 3.571 8.07.248z"></path></svg></div>');
+            $smallIcon = $('<div class="ofmeet-toolbox-small-icon"><svg fill="none" height="9" width="9" viewBox="0 0 10 7"><path clip-rule="evenodd" d="M8.411 6.057A.833.833 0 109.65 4.943L5.73.563a.833.833 0 00-1.24 0L.63 4.943a.833.833 0 001.24 1.114l3.24-3.691L8.41 6.057z"></path></svg></div>');
             $smallIcon.on('click.ofmeet-toolbox-small-icon', (e) => {
                 let hideMenu = () => {
                     $menuContainer.hide();
@@ -1051,6 +1081,165 @@ var ofmeet = (function (ofm) {
     }
 
     //-------------------------------------------------------
+    //
+    //  functions - common
+    //
+    //-------------------------------------------------------
+
+    function getConference() {
+        const state = APP.store.getState();
+        return state['features/base/conference'].conference;
+    }
+
+    function getConferenceName() {
+        const state = APP.store.getState();
+        const { callee } = state['features/base/jwt'];
+        const { callDisplayName } = state['features/base/config'];
+        const { pendingSubjectChange, room, subject } = state['features/base/conference'];
+
+        return pendingSubjectChange ||
+            subject ||
+            callDisplayName ||
+            (callee && callee.name) ||
+            safeStartCase(decodeURIComponent(room));
+    }
+
+    function setConferenceName(name) {
+        if (name) {
+            const room = getConference();
+            room.setSubject(name);
+            document.title = `${name} | ${interfaceConfig.APP_NAME}`;
+        }
+    }
+
+    function getConferenceJid() {
+        return getConference().room.roomjid;
+    }
+
+    function getAllParticipants() {
+        const state = APP.store.getState();
+        return (state["features/base/participants"] || []);
+    }
+
+    function getParticipant(id) {
+        return getAllParticipants().find(p => p.id == id);
+    }
+
+    function safeStartCase(s = '') {
+        return _.words(`${s}`.replace(/['\u2019]/g, '')).reduce(
+            (result, word, index) => result + (index ? ' ' : '') + _.upperFirst(word), '');
+    }
+
+    function handlePresence(presence) {
+        //console.log("handlePresence", presence);
+
+        const id = Strophe.getResourceFromJid(presence.getAttribute('from'));
+        const raisedHand = presence.querySelector('jitsi_participant_raisedHand');
+        const email = presence.querySelector('email');
+        const nick = presence.querySelector('nick');
+        const avatarURL = presence.querySelector('avatar-url');
+
+        if (raisedHand) {
+            handsRaised = getAllParticipants().filter(p => p.raisedHand).length;
+            const handsTotal = APP.conference.membersCount;
+            const handsPercentage = Math.round(100 * handsRaised / handsTotal);
+            const label = handsRaised > 0 ? i18n('handsRaised.handsRaised', { raised: handsRaised, total: handsTotal, percentage: handsPercentage }) : "";
+            if (captions.ele) captions.ele.innerHTML = label;
+            captions.msgs.push({ text: label, stamp: (new Date()).getTime() });
+        }
+
+        if (email) {
+            if (participants[id]) {
+                participants[id].ofEmail = email.innerHTML;
+                storage.setItem('pade.email.' + participants[id]._displayName, email.innerHTML);
+            }
+        }
+
+        if (nick) {
+            if (nick.innerHTML != "") {
+                if (APP.conference.getMyUserId() == id) {
+                    if (localDisplayName != APP.conference.getLocalDisplayName()) {
+                        localDisplayName = APP.conference.getLocalDisplayName();
+                        changeAvatar(createAvatar(localDisplayName), AvatarType.INITIALS);
+                    }
+                } else {
+                    if (id in participants && participants[id]._displayName != APP.conference.getParticipantDisplayName(id)) {
+                        participants[id] = APP.conference.getParticipantById(id);
+                        if (breakoutHost) {
+                            breakoutHost.updateParticipant(id);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (avatarURL) {
+            if (avatarURL.innerHTML != "") {
+                if (APP.conference.getMyUserId() != id && id in participants && participants[id].avatarURL != avatarURL.innerHTML) {
+                    participants[id].avatarURL = avatarURL.innerHTML
+                    if (breakoutHost) {
+                        breakoutHost.updateParticipant(id);
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
+    function handleMessage(msg) {
+        if (!msg.getAttribute("type")) // alert message
+        {
+            const body = msg.querySelector('body');
+
+            if (body) {
+                console.debug("alert message", body.innerHTML);
+                APP.UI.messageHandler.showError({ title: "System Adminitrator", description: body.innerHTML, hideErrorSupportLink: true });
+            }
+        }
+
+        return true;
+    }
+
+    function handleMucMessage(msg) {
+        const participant = Strophe.getResourceFromJid(msg.getAttribute("from"));
+
+        if (msg.getAttribute("type") == "error") {
+            console.error(msg);
+            return true;
+        }
+
+        if (getConferenceJid() != Strophe.getBareJidFromJid(msg.getAttribute("from"))) {
+            return true;
+        }
+
+        const payload = msg.querySelector('json');
+
+        if (payload) {
+            const json = JSON.parse(payload.innerHTML);
+            console.debug("handleMucMessage", participant, json);
+
+            switch (json.action) {
+                case 'start-breakout':
+                    if (breakoutClient && !breakoutHost) {
+                        breakoutClient.startBreakout(json.url, json.wait, json.room, json.subject, json.startTime, json.endTime);
+                    }
+                    break;
+                case 'stop-breakout':
+                    if (breakoutClient && !breakoutHost) {
+                        breakoutClient.stopBreakout(json.url, json.wait);
+                    }
+                    break;
+                default:
+                    console.error("unknown MUC message");
+                    return;
+            }
+        }
+
+        return true;
+    }
+
+    //-------------------------------------------------------
     //  WORKAROUND: prevent disruption of a muted audio connection by a short toggle
     //-------------------------------------------------------
 
@@ -1070,29 +1259,17 @@ var ofmeet = (function (ofm) {
     //-------------------------------------------------------
 
     function addParticipant(id) {
-        const Strophe = APP.connection.xmpp.connection.Strophe;
         const participant = APP.conference.getParticipantById(id);
 
         console.debug("addParticipant", id, participant);
 
-        if (participant && !participants[id] && breakout.kanban) {
-            participants[id] = participant;
-            const jid = participants[id]._jid;
-            const label = participants[id]._displayName || 'Anonymous-' + id;
+        if (participant && !participants[id]) {
+            participants[id] = { ...participant };
 
-            breakout.kanban.addElement("participants", {
-                id: id,
-                title: label,
-                drop: function (el) {
-                    breakoutDragAndDrop(el);
-                }
-            });
+            if (breakoutHost) {
+                breakoutHost.addParticipant(id);
+            }
 
-            const ids = Object.getOwnPropertyNames(participants);
-            document.getElementById('breakout-rooms').value = Math.round(ids.length / 2)
-        }
-
-        if (participant && id) {
             addParticipantDragDropHandlers(document.getElementById("participant_" + id));
         }
     }
@@ -1140,30 +1317,33 @@ var ofmeet = (function (ofm) {
         }
     }
 
+    function removeParticipant(id) {
+        console.debug("removeParticipant", id);
+
+        if (breakoutHost) {
+            breakoutHost.removeParticipant(id);
+        }
+
+        delete participants[id];
+    }
+
     function setOwnPresence() {
         const connection = APP.connection.xmpp.connection;
-        const $pres = APP.connection.xmpp.connection.$pres;
-        const Strophe = APP.connection.xmpp.connection.Strophe;
-
         connection.send($pres());
     }
 
     function getOccupants() {
         const connection = APP.connection.xmpp.connection;
-        const $iq = APP.connection.xmpp.connection.$iq;
-        const Strophe = APP.connection.xmpp.connection.Strophe;
         const thisRoom = APP.conference._room.room.roomjid;
 
         const stanza = $iq({ 'to': thisRoom, 'type': 'get' }).c('query', { 'xmlns': "http://jabber.org/protocol/disco#items" });
 
         connection.sendIQ(stanza, function (iq) {
-
             iq.querySelectorAll('item').forEach(function (item) {
                 console.debug("getOccupants", item);
                 const id = Strophe.getResourceFromJid(item.getAttribute("jid"));
                 addParticipant(id);
             });
-
         }, function (error) {
             console.error("get occupants error", error);
         });
@@ -1171,8 +1351,6 @@ var ofmeet = (function (ofm) {
 
     function getBookmarks() {
         const connection = APP.connection.xmpp.connection;
-        const $iq = APP.connection.xmpp.connection.$iq;
-        const Strophe = APP.connection.xmpp.connection.Strophe;
         const thisRoom = APP.conference._room.room.roomjid;
 
         const stanza = $iq({ 'from': connection.jid, 'type': 'get' }).c('query', { 'xmlns': "jabber:iq:private" }).c('storage', { 'xmlns': 'storage:bookmarks' });
@@ -1200,8 +1378,6 @@ var ofmeet = (function (ofm) {
 
     function getVCard() {
         const connection = APP.connection.xmpp.connection;
-        const $iq = APP.connection.xmpp.connection.$iq;
-        const Strophe = APP.connection.xmpp.connection.Strophe;
         const username = Strophe.getNodeFromJid(APP.connection.xmpp.connection.jid);
 
         const iq = $iq({ type: 'get', to: Strophe.getBareJidFromJid(APP.connection.xmpp.connection.jid) }).c('vCard', { xmlns: 'vcard-temp' });
@@ -1378,18 +1554,12 @@ var ofmeet = (function (ofm) {
         const textElem = document.getElementById("clocktext");
         textElem.style.display = "";
 
-        function pad(val) {
-            return (10 > val ? "0" : "") + val;
-        }
-
         function updateClock() {
-            let totalSeconds = parseInt((Date.now() - clockTrack.joins) / 1000);
-
-            const secs = pad(totalSeconds % 60);
-            const mins = pad(parseInt((totalSeconds / 60) % 60));
-            const hrs = pad(parseInt((totalSeconds / 3600) % 24, 10));
-
-            textElem.textContent = hrs + ":" + mins + ":" + secs;
+            let clockStr = formatTimeSpan((Date.now() - clockTrack.joins) / 1000);
+            if (breakoutClient && breakoutClient.state == BreakoutState.STARTED) {
+                clockStr += ' / ' + formatTimeSpan(breakoutClient.duration);
+            }
+            textElem.textContent = clockStr;
             setTimeout(updateClock, 1000);
         }
 
@@ -1482,7 +1652,7 @@ var ofmeet = (function (ofm) {
                     }
                 }
             });
-            padsModal.addFooterBtn('Share Clipboard', 'btn btn-success tingle-btn tingle-btn--primary', function () {
+            padsModal.addFooterBtn('Share Clipboard', 'btn btn-primary', function () {
                 navigator.clipboard.readText().then(function (clipText) {
                     console.debug("doPads", clipText);
 
@@ -1494,11 +1664,11 @@ var ofmeet = (function (ofm) {
                 });
             });
 
-            padsModal.addFooterBtn('Close', 'btn btn-success tingle-btn tingle-btn--primary', function () {
+            padsModal.addFooterBtn('Close', 'btn btn-secondary', function () {
                 padsModal.close();
             });
 
-            padsModal.addFooterBtn('Quit', 'btn btn-danger tingle-btn tingle-btn--danger', function () {
+            padsModal.addFooterBtn('Quit', 'btn btn-secondary', function () {
                 event.preventDefault();
                 padsModal.close();
 
@@ -1565,27 +1735,42 @@ var ofmeet = (function (ofm) {
     }
 
     function doTags() {
-        const template =
-            '    <!-- Modal Header -->' +
-            '    <div class="modal-header">' +
-            '      <h4 class="modal-title">' + i18n('tag.conferenceCaptionsSubTitles') + '</h4>' +
-            '    </div>' +
-
-            '    <!-- Modal body -->' +
-            '    <div class="modal-body">' +
-            '       <div class="form-group">' +
-            '       <label for="tags-location" class="col-form-label">' + i18n('tag.location') + ':</label>' +
-            '       <input id="tags-location" type="text" class="form-control" name="tag-location" value="' + tags.location + '"/>' +
-            '       <label for="tags-date" class="col-form-label">' + i18n('tag.date') + ':</label>' +
-            '       <input id="tags-date" type="text" class="form-control" name="tags-date"/>' +
-            '       <label for="tags-subject" class="col-form-label">' + i18n('tag.subject') + ':</label>' +
-            '       <input id="tags-subject" type="text" class="form-control" name="tags-subject" value="' + tags.subject + '"/>' +
-            '       <label for="tags-host" class="col-form-label">' + i18n('tag.host') + ':</label>' +
-            '       <input id="tags-host" type="text" class="form-control" name="tags-host" value="' + tags.host + '"/>' +
-            '       <label for="tags-activity" class="col-form-label">' + i18n('tag.activity') + ':</label>' +
-            '       <input id="tags-activity" type="text" class="form-control" name="tags-activity" value="' + tags.activity + '"/>' +
-            '       </div>' +
-            '    </div>'
+        const template = `
+<div class="modal-header">
+    <h4 class="modal-title">${i18n('tag.conferenceCaptionsSubTitles')}</h4>
+</div>
+<div class="modal-body">
+    <form>
+        <div class="form-group">
+            <label for="tags-location" class="col-form-label"> ${i18n('tag.location')}:</label>
+            <input id="tags-location" type="text" class="form-control" name="tag-location" value="${tags.location}"/>
+        </div>
+        <div class="form-group">
+            <label for="tags-date" class="col-form-label"> ${i18n('tag.date')}:</label>
+            <input id="tags-date" type="text" class="form-control" name="tags-date"/>
+        </div>
+        <div class="form-group">
+            <label for="tags-subject" class="col-form-label"> ${i18n('tag.subject')}:</label>
+            <input id="tags-subject" type="text" class="form-control" name="tags-subject" value="${tags.subject}"/>
+        </div>
+        <div class="form-group">
+            <label for="tags-host" class="col-form-label"> ${i18n('tag.host')}:</label>
+            <input id="tags-host" type="text" class="form-control" name="tags-host" value="${tags.host}"/>
+        </div>
+        <div class="form-group">
+            <label for="tags-activity" class="col-form-label"> ${i18n('tag.activity')}:</label>
+            <input id="tags-activity" type="text" class="form-control" name="tags-activity" value="${tags.activity}"/>
+        </div>
+        <div class="form-group pade-control-row" id="tags-message-captions-group">
+            <label class="form-check-label col-form-label" for="tags-message-captions">${i18n('tag.enableMessageCaptions')}</label>
+            <input type="checkbox" class="form-check-app-input" id="tags-message-captions"><label class="form-check-app-label" for="tags-message-captions"></label>
+        </div>
+        <div class="form-group pade-control-row" id="tags-voice-transcription-group">
+            <label class="form-check-label col-form-label" for="tags-voice-transcription">${i18n('tag.enableVoiceTranscription')}</label>
+            <input type="checkbox" class="form-check-app-input" id="tags-voice-transcription"><label class="form-check-app-label" for="tags-voice-transcription"></label>
+        </div>
+    </form>
+</div>`;
 
         if (!tagsModal) {
             tagsModal = new tingle.modal({
@@ -1593,7 +1778,7 @@ var ofmeet = (function (ofm) {
                 stickyFooter: false,
                 closeMethods: ['overlay', 'button', 'escape'],
                 closeLabel: "Close",
-                cssClass: ['custom-class-1', 'custom-class-2'],
+                cssClass: ['tags-modal'],
                 onOpen: function () {
                     console.debug('tags modal open');
                 },
@@ -1601,75 +1786,91 @@ var ofmeet = (function (ofm) {
                     console.debug('tags modal closed');
                 },
                 beforeOpen: function () {
-                    document.getElementById('tags-date').value = localizedDate(new Date()).format('LL')
-                },
-                beforeClose: function () {
-                    tags.location = document.getElementById('tags-location').value;
-                    tags.date = document.getElementById('tags-date').value;
-                    tags.subject = document.getElementById('tags-subject').value;
-                    tags.host = document.getElementById('tags-host').value;
-                    tags.activity = document.getElementById('tags-activity').value;
-
-                    if (tags.location != "") {
-                        document.getElementById("subtitles").innerHTML =
-                            `<b>` + i18n('tag.location') + `</b>: ${tags.location} <br/><b>` +
-                            i18n('tag.date') + `</b>: ${tags.date} <br/><b>` +
-                            i18n('tag.subject') + `</b>: ${tags.subject} <br/><b>` +
-                            i18n('tag.host') + `</b>: ${tags.host} <br/><b>` +
-                            i18n('tag.activity') + `</b>: ${tags.activity}`;
+                    $('#tags-location').val(tags.location);
+                    if (tags.date) {
+                        $('#tags-date').val(tags.date);
+                    } else {
+                        $('#tags-date').val(localizedDate(new Date()).format('LL'));
                     }
-                    return true;
+                    if (tags.subject) {
+                        $('#tags-subject').val(tags.subject);
+                    } else {
+                        $('#tags-subject').val(getConferenceName());
+                    }
+                    if (tags.host) {
+                        $('#tags-host').val(tags.host);
+                    } else {
+                        const modrator = getAllParticipants().find(p => p.role == 'moderator');
+                        if (modrator) {
+                            $('#tags-host').val(modrator.name);
+                        }
+                    }
+                    $('#tags-activity').val(tags.activity);
                 }
             });
+
             tagsModal.setContent(template);
 
-            tagsModal.addFooterBtn(i18n('tag.save'), 'btn btn-success tingle-btn tingle-btn--primary', function () {
+            tagsModal.addFooterBtn(i18n('tag.save'), 'btn btn-primary', function () {
                 // here goes some logic
+                tags.location = $('#tags-location').val();
+                tags.date = $('#tags-date').val();
+                tags.subject = $('#tags-subject').val();
+                tags.host = $('#tags-host').val();
+                tags.activity = $('#tags-activity').val();
+
+                if (tags.location) {
+                    const $subtitile = $("#subtitles");
+                    $subtitile.empty();
+                    $subtitile.append(`<div><b>${i18n('tag.location')}</b>: ${tags.location}</div>`);
+                    if (tags.date) {
+                        $subtitile.append(`<div><b>${i18n('tag.date')}</b>: ${tags.date}</div>`);
+                    }
+                    if (tags.subject) {
+                        $subtitile.append(`<div><b>${i18n('tag.subject')}</b>: ${tags.subject}</div>`);
+                    }
+                    if (tags.host) {
+                        $subtitile.append(`<div><b>${i18n('tag.host')}</b>: ${tags.host}</div>`);
+                    }
+                    if (tags.activity) {
+                        $subtitile.append(`<div><b>${i18n('tag.activity')}</b>: ${tags.activity}</div>`);
+                    }
+                }
+
+                if ($('#tags-subject').val()) {
+                    setConferenceName($('#tags-subject').val());
+                }
+
                 tagsModal.close();
             });
 
-            tagsModal.addFooterBtn(i18n('tag.cancel'), 'btn btn-danger tingle-btn tingle-btn--danger', function () {
-                event.preventDefault();
-                tags = { location: "", date: localizedDate(new Date()).format('LL'), subject: "", host: "", activity: "" };
-
-                document.getElementById('tags-location').value = tags.location;
-                document.getElementById('tags-date').value = tags.date;
-                document.getElementById('tags-subject').value = tags.subject;
-                document.getElementById('tags-host').value = tags.host;
-                document.getElementById('tags-activity').value = tags.activity;
-
-                document.getElementById("subtitles").innerHTML = "";
+            tagsModal.addFooterBtn(i18n('tag.cancel'), 'btn btn-secondary', function () {
                 tagsModal.close();
             });
-
-            const msgCaptions = (captions.msgsDisabled ? i18n('tag.enableMessageCaptions') : i18n('tag.disableMessageCaptions'));
-            const msgClass = (captions.msgsDisabled ? 'btn-secondary' : 'btn-success') + ' btn tingle-btn tingle-btn--pull-right';
 
             if (interfaceConfig.OFMEET_SHOW_CAPTIONS) {
-                tagsModal.addFooterBtn(msgCaptions, msgClass, function (evt) {
-                    captions.msgsDisabled = !captions.msgsDisabled;
-                    evt.target.classList.remove(captions.msgsDisabled ? 'btn-success' : 'btn-secondary');
-                    evt.target.classList.add(captions.msgsDisabled ? 'btn-secondary' : 'btn-success');
-                    evt.target.innerHTML = (captions.msgsDisabled ? i18n('tag.enableMessageCaptions') : i18n('tag.disableMessageCaptions'));
+                $('#tags-message-captions').on('change.tags', evt => {
+                    captions.msgsDisabled = !evt.target.checked;
                     if (captions.ele) captions.ele.innerHTML = "";
-                });
+                }).prop('checked', !captions.msgsDisabled);
+            } else {
+                $('#tags-message-captions-group').hide();
             }
 
             if (ofm.recognition) {
-                const transcriptCaptions = (captions.transcriptDisabled ? i18n('tag.enableVoiceTranscription') : i18n('tag.disableVoiceTranscription'));
-                const transcriptClass = (captions.transcriptDisabled ? 'btn-secondary' : 'btn-success') + ' btn tingle-btn tingle-btn--pull-right';
-
-                tagsModal.addFooterBtn(transcriptCaptions, transcriptClass, function (evt) {
-                    captions.transcriptDisabled = !captions.transcriptDisabled;
+                $('#tags-voice-transcription').on('change.tags', evt => {
+                    captions.transcriptDisabled = !evt.target.checked;
                     ofm.recognitionActive = !captions.transcriptDisabled;
-                    evt.target.classList.remove(captions.transcriptDisabled ? 'btn-success' : 'btn-secondary');
-                    evt.target.classList.add(captions.transcriptDisabled ? 'btn-secondary' : 'btn-success');
-                    evt.target.innerHTML = (captions.transcriptDisabled ? i18n('tag.enableVoiceTranscription') : i18n('tag.disableVoiceTranscription'));
 
-                    if (captions.transcriptDisabled) ofm.recognition.stop();
-                    if (!captions.transcriptDisabled) ofm.recognition.start();
+                    if (captions.transcriptDisabled) {
+                        ofm.recognition.stop();
+                    } else {
+                        ofm.recognition.start();
+                    }
                     if (captions.ele) captions.ele.innerHTML = "";
-                });
+                }).prop('checked', !captions.transcriptDisabled);
+            } else {
+                $('#tags-voice-transcription-group').hide();
             }
         }
 
@@ -1791,15 +1992,8 @@ var ofmeet = (function (ofm) {
     function createVttDataUrl() {
         console.debug("custom_ofmeet.js createVttDataUrl");
 
-        function pad(val) {
-            return (10 > val ? "0" : "") + val;
-        }
-
         function getTimeStamp(secs) {
-            const secondsLabel = pad(secs % 60);
-            const minutesLabel = pad(parseInt((secs / 60) % 60));
-            const hoursLabel = pad(parseInt((secs / 3600) % 24, 10));
-            return hoursLabel + ":" + minutesLabel + ":" + secondsLabel;
+            return formatTimeSpan(secs);
         }
 
         const vtt = ["WEBVTT", "00:00:00.000 --> 24:00:00.000 position:10% line:1% align:left size:100%"];
@@ -2056,8 +2250,8 @@ var ofmeet = (function (ofm) {
 
             const id = APP.conference.getMyUserId();
             const tracks = [
-              ...stream.getVideoTracks(),
-              ...mergeAudioStreams(stream, recordingAudioTrack[id].clone())
+                ...stream.getVideoTracks(),
+                ...mergeAudioStreams(stream, recordingAudioTrack[id].clone())
             ];
 
             recorderStreams[id] = new MediaStream(tracks);
@@ -2161,423 +2355,645 @@ var ofmeet = (function (ofm) {
     //
     //-------------------------------------------------------
 
-    function breakoutDragAndDrop(el) {
-        if (!el.dataset.eid) return;
+    class BreakoutClient {
+        constructor() {
+            this.countdownTimer = null;
+            this.endBreakoutTimer = null;
+            this.state = BreakoutState.STOPPED;
 
-        const id = el.dataset.eid;
-        const label = participants[id]._displayName || i18n('breakout.anonymous', { id: id });
-        const jid = participants[id]._jid;
-        const webinar = participants[id]._tracks.length > 0 ? "false" : "true";
+            if (hashParams.mainRoomUserId) {
+                storage.setItem('mainRoomUserId', hashParams.mainRoomUserId);
+            }
 
-        const boardId = breakout.kanban.getParentBoardID(id);
+            if (hashParams.breakoutRoom) {
+                storage.setItem('breakoutRoom', hashParams.breakoutRoom);
+            }
 
-        if (boardId && jid) {
-            if (boardId == "participants") return;
+            if (hashParams.startTime) {
+                storage.setItem('startTime', hashParams.startTime);
+            }
 
-            const roomindex = boardId.substring(5);
-            const roomid = breakout.rooms[parseInt(roomindex)]
+            if (hashParams.endTime) {
+                storage.setItem('endTime', hashParams.endTime);
+            }
 
-            console.debug("breakoutDragAndDrop", id, roomindex, roomid, label, jid, webinar);
+            if (this.mainRoomUserId) {
+                const room = getConference();
+                room.setLocalParticipantProperty('mainRoomUserId', this.mainRoomUserId);
+            }
 
-            el.setAttribute('data-jid', jid);
-            el.setAttribute('data-label', label);
-            el.setAttribute('data-roomid', roomid);
-            el.setAttribute('data-roomindex', roomindex);
-            el.setAttribute('data-webinar', webinar);
-        } else {
-            breakout.kanban.removeElement(id);
-            breakout.kanban.addElement("participants", {
-                id: id,
-                title: label,
-                drop: function (el) {
-                    breakoutDragAndDrop(el);
-                }
-            });
-        }
-    }
+            console.log(decodeURI(APP.conference.roomName));
+            if (decodeURI(APP.conference.roomName) != this.breakoutRoom) {
+                storage.removeItem('breakoutRoom');
+                storage.removeItem('startTime');
+                storage.removeItem('endTime');
+                return;
+            }
 
-    function getAllParticipants() {
-        const state = APP.store.getState();
-        return (state["features/base/participants"] || []);
-    }
-
-    function handlePresence(presence) {
-        //console.debug("handlePresence", presence);
-        const Strophe = APP.connection.xmpp.connection.Strophe;
-        const id = Strophe.getResourceFromJid(presence.getAttribute("from"));
-        const raisedHand = presence.querySelector("jitsi_participant_raisedHand");
-        const email = presence.querySelector("email");
-        const nick = presence.querySelector("nick");
-
-        if (raisedHand) {
-            handsRaised = getAllParticipants().filter(p => p.raisedHand).length;
-            const handsTotal = APP.conference.membersCount;
-            const handsPercentage = Math.round(100 * handsRaised / handsTotal);
-            const label = handsRaised > 0 ? i18n('handsRaised.handsRaised', { raised: handsRaised, total: handsTotal, percentage: handsPercentage }) : "";
-            if (captions.ele) captions.ele.innerHTML = label;
-            captions.msgs.push({ text: label, stamp: (new Date()).getTime() });
-        }
-
-        if (email) {
-            if (participants[id]) {
-                participants[id].ofEmail = email.innerHTML;
-                storage.setItem('pade.email.' + participants[id]._displayName, email.innerHTML);
+            const remainingTime = this.remainingTime;
+            const elapsedTime = this.elapsedTime;
+            if (remainingTime > 0) {
+                this.endBreakoutTimer = setTimeout(() => { this.stopBreakout(this.getMainRoomUrl(), BreakoutHost.wait) }, remainingTime * 1000);
+                this.state = BreakoutState.STARTED;
+            } else if(elapsedTime > 0) {
+                this.state = BreakoutState.STARTED;
             }
         }
 
-        if (nick) {
-            if (APP.conference.getMyUserId() == id && nick.innerHTML != "" && localDisplayName != APP.conference.getLocalDisplayName()) {
-                localDisplayName = APP.conference.getLocalDisplayName();
-                changeAvatar(createAvatar(localDisplayName), AvatarType.INITIALS);
+        get mainRoomUserId() {
+            return storage.getItem('mainRoomUserId');
+        }
+
+        get breakoutRoom() {
+            return storage.getItem('breakoutRoom');
+        }
+
+        get startTime() {
+            return storage.getItem('startTime');
+        }
+
+        get endTime() {
+            return storage.getItem('endTime');
+        }
+
+        get remainingTime() {
+            const now = Math.floor((new Date()).getTime() / 1000);
+            if (this.startTime && this.endTime && this.startTime <= now && now < this.endTime) {
+                return this.endTime - now;
             }
+            return -1;
         }
 
-        return true;
-    }
-
-    function handleMessage(msg) {
-        if (!msg.getAttribute("type")) // alert message
-        {
-            const body = msg.querySelector('body');
-
-            if (body) {
-                console.debug("alert message", body.innerHTML);
-                APP.UI.messageHandler.showError({ title: "System Adminitrator", description: body.innerHTML, hideErrorSupportLink: true });
+        get elapsedTime() {
+            const now = Math.floor((new Date()).getTime() / 1000);
+            if (this.startTime && this.startTime <= now) {
+                return now - this.startTime;;
             }
+            return -1;
         }
 
-        return true;
-    }
-
-    function handleMucMessage(msg) {
-        const Strophe = APP.connection.xmpp.connection.Strophe;
-        const participant = Strophe.getResourceFromJid(msg.getAttribute("from"));
-
-        if (msg.getAttribute("type") == "error") {
-            console.error(msg);
-            return true;
+        get duration() {
+            return storage.getItem('endTime') - storage.getItem('startTime');
         }
 
-        const payload = msg.querySelector('json');
-
-        if (payload) {
-            const json = JSON.parse(payload.innerHTML);
-            console.debug("handleMucMessage", participant, json);
-            const label = json.action == 'breakout' ? 'breakout.joining' : 'breakout.leaving';
-
-            APP.UI.messageHandler.notify(i18n('breakout.breakoutRooms'), i18n(label, { sec: breakout.wait }));
-            setTimeout(function () { location.href = json.url }, breakout.wait * 1000);
-        }
-
-        return true;
-    }
-
-    function broadcastBreakout(type, jid, xmpp, json) {
-        console.debug("broadcastBreakout", type, jid, xmpp, json);
-        const $msg = APP.connection.xmpp.connection.$msg;
-        xmpp.send($msg({ type: type, to: jid }).c("json", { xmlns: "urn:xmpp:json:0" }).t(JSON.stringify(json)));
-    }
-
-    function exitRoom(jid) {
-        console.debug("exitRoom", jid);
-        const xmpp = APP.connection.xmpp.connection._stropheConn;
-        const $pres = APP.connection.xmpp.connection.$pres;
-        xmpp.send($pres({ type: 'unavailable', to: jid + '/' + APP.conference.getLocalDisplayName() }));
-    }
-
-    function joinRoom(jid) {
-        console.debug("joinRoom", jid);
-        const xmpp = APP.connection.xmpp.connection._stropheConn;
-        const $pres = APP.connection.xmpp.connection.$pres;
-        const Strophe = APP.connection.xmpp.connection.Strophe;
-        xmpp.send($pres({ to: jid + '/' + APP.conference.getLocalDisplayName() }).c("x", { xmlns: Strophe.NS.MUC }));
-    }
-
-    function endBreakout() {
-        if (breakout.started) toggleBreakout();
-    }
-
-    function startBreakout() {
-        if (!breakout.started) toggleBreakout();
-    }
-
-    function toggleBreakout() {
-        const Strophe = APP.connection.xmpp.connection.Strophe;
-        const xmpp = APP.connection.xmpp.connection._stropheConn;
-        const pos = location.href.lastIndexOf("/");
-        const rootUrl = location.href.substring(0, pos);
-
-        console.debug("toggleBreakout", rootUrl, breakout);
-
-        if (!breakout.started) {
-            breakout.recall = [];
-
-            for (let i = 0; i < breakout.roomCount; i++) {
-                if (breakout.kanban.findBoard("room_" + i)) {
-                    const items = breakout.kanban.getBoardElements("room_" + i);
-                    let json = null;
-
-                    items.forEach(function (node) {
-                        const id = node.getAttribute("data-eid");
-                        const webinar = node.getAttribute("data-webinar");
-                        const room = node.getAttribute("data-roomid");
-                        const label = node.getAttribute("data-label");
-                        const jid = node.getAttribute("data-jid");
-                        const url = rootUrl + '/' + room;
-
-                        json = { action: 'breakout', id: id, room: room, label: label, jid: jid, url: url, return: location.href, webinar: webinar };
-                        broadcastBreakout("chat", jid, xmpp, json);
-                    });
-
-                    breakout.recall.push(json);
-                }
+        startBreakout(url, wait, room, subject, startTime, endTime) {
+            if (this.countdownTimer) {
+                clearTimeout(this.countdownTimer);
+                this.countdownTimer = null;
             }
 
-            if (breakout.duration > 0) {
-                breakout.timeout = setTimeout(toggleBreakout, 60000 * breakout.duration);
-                breakoutStatus(i18n('breakout.breakoutStartedWithDuration', { min: breakout.duration }));
+            this.state = BreakoutState.STARTING;
+            
+            storage.setItem('breakoutRoom', room);
+            storage.setItem('mainRoomUserId', APP.conference.getMyUserId());
+            storage.setItem('startTime', startTime);
+            storage.setItem('endTime', endTime);
+
+            const params = {
+                breakoutRoom: room,
+                subject: subject,
+                startTime: startTime,
+                endTime: endTime,
+                mainRoomUserId: APP.conference.getMyUserId()
+            };
+
+            const roomUrl = new URL(url);
+            roomUrl.hash = this.toParamString(params, roomUrl.hash);
+
+            APP.UI.messageHandler.notify(i18n('breakout.breakoutRooms'), i18n('breakout.joining', { sec: wait }));
+            this.countdownTimer = setTimeout(() => { location.replace(roomUrl.href) }, wait * 1000);
+        }
+
+        stopBreakout(url, wait) {
+            if (this.state == BreakoutState.STOPPING && this.countdownTimer) {
+                return;
+            }
+
+            if (this.countdownTimer) {
+                clearTimeout(this.countdownTimer);
+                this.countdownTimer = null;
+            }
+
+            if (url == location.href) {
+                this.state = BreakoutState.STOPPED;
+                APP.UI.messageHandler.notify(i18n('breakout.breakoutRooms'), i18n('breakout.cancelled'));
             } else {
-                breakoutStatus(i18n('breakout.breakoutStarted'));
+                this.state = BreakoutState.STOPPING;
+
+                const roomUrl = new URL(url);
+                roomUrl.hash = this.toParamString({ mainRoomUserId: this.mainRoomUserId }, roomUrl.hash);
+
+                APP.UI.messageHandler.notify(i18n('breakout.breakoutRooms'), i18n('breakout.leaving', { sec: wait }));
+                this.countdownTimer = setTimeout(() => { location.replace(roomUrl.href) }, wait * 1000);
             }
-        } else {
-            for (let i = 0; i < breakout.recall.length; i++) {
-                const webinar = breakout.recall[i].webinar;
-                const jid = breakout.recall[i].room + "@" + Strophe.getDomainFromJid(breakout.recall[i].jid);
-                const json = { action: 'reassemble', jid: jid, url: location.href + '#config.webinar=' + webinar };
-
-                joinRoom(jid);
-
-                setTimeout(function () {
-                    broadcastBreakout("groupchat", Strophe.getBareJidFromJid(jid), xmpp, json);
-                    setTimeout(function () { exitRoom(jid) }, 1000);
-
-                }, 1000);
-            }
-
-            breakoutStatus(i18n('breakout.breakoutHasEnded'));
-            if (breakout.timeout) clearTimeout(breakout.timeout);
         }
 
-        breakout.started = !breakout.started;
-        breakout.button.classList.remove(breakout.started ? 'btn-success' : 'btn-secondary');
-        breakout.button.classList.add(breakout.started ? 'btn-secondary' : 'btn-success');
-        breakout.button.innerHTML = breakout.started ? i18n('breakout.reassemble') : i18n('breakout.breakout');
-    }
+        toParamString(params, baseStr = '') {
+            return ((baseStr && baseStr.length > 1) ? baseStr + '&' : '') +
+                Object.keys(params).map(key => `${key}=${JSON.stringify(params[key])}`).join('&');
+        }
 
-    function messageBreakoutRooms(text) {
-        console.debug("messageBreakoutRooms", text, breakout);
-
-        const xmpp = APP.connection.xmpp.connection._stropheConn;
-        const $msg = APP.connection.xmpp.connection.$msg;
-
-        for (let i = 0; i < breakout.recall.length; i++) {
-            const jid = breakout.recall[i].room + "@" + Strophe.getDomainFromJid(breakout.recall[i].jid);
-
-            joinRoom(jid);
-
-            setTimeout(function () {
-                xmpp.send($msg({ type: 'groupchat', to: jid }).c("body").t(text));
-                setTimeout(function () { exitRoom(jid) }, 1000);
-
-            }, 1000);
+        getMainRoomUrl() {
+            return location.href.replace(/#.+?$/, '').replace(/-room\d+-[\da-z]{9}$/, '');
         }
     }
 
-    function allocateToRooms(roomCount) {
-        console.debug("allocateToRooms", roomCount, breakout);
+    class BreakoutHost {
+        static defaultDuration = 60;
+        static wait = 10;
 
-        for (let i = 0; i < breakout.roomCount; i++) {
-            if (breakout.kanban.findBoard("room_" + i)) {
-                breakout.kanban.removeBoard("room_" + i);
+        constructor() {
+            this.startedRooms = [];
+            this.$status = $('#breakout-status');
+            this.$clock =$('#breakout-clock');
+            this.endBreakoutTimer = null;
+            this.countdownTimer = null;
+            this.clockTimer = null;
+            this.domain = Strophe.getDomainFromJid(getConferenceJid());
+            this.startTime = null;
+            this.endTime = null;
+
+            const kanbanConfig = {
+                element: ".breakout-kanban",
+                gutter: "5px",
+                widthBoard: "250px",
+                dragBoards: false,
+                buttonClick: (el, boardId) => {
+                    console.debug("Board clicked", boardId);
+                    if (boardId != "participants") this.openRoom(boardId)
+                },
+                itemAddOptions: {
+                    enabled: true,
+                    content: i18n('breakout.join'),
+                    class: 'kanban-title-button btn btn-default btn-sm btn-primary',
+                },
+                boards: [
+                    {
+                        id: 'participants',
+                        title: i18n('breakout.meetingParticipants'),
+                        class: 'participants',
+                        item: []
+                    }
+                ]
             }
+
+            for (let id in participants) {
+                kanbanConfig.boards[0].item.push(this.elementFromParticipant(participants[id]));
+            }
+
+            console.debug("createBreakout", kanbanConfig);
+            this.kanban = new jKanban(kanbanConfig);
         }
 
-        breakout.kanban.removeBoard("participants");
+        get roomCount() {
+            return $('.breakout-kanban .kanban-board .room').length;
+        }
 
-        const boards = [{
-            id: "participants",
-            title: i18n('breakout.meetingParticipants'),
-            class: "participants",
-            item: []
-        }]
+        get started() {
+            return $('.btn-breakout').hasClass('btn-breakout-stop');
+        }
 
-        const ids = Object.getOwnPropertyNames(participants);
+        refresh() {
+            const count = Object.keys(participants).length;
 
-        for (let i = 0; i < roomCount; i++) {
-            boards[i + 1] = {
-                id: "room_" + i,
-                title: i18n('breakout.room', { n: (i + 1).toString() }),
-                class: "room",
-                item: []
+            if (parseInt($('#breakout-rooms').val(), 10) < 1) {
+                $('#breakout-rooms').val(Math.round(count / 2));
+                this.resizeRoom(Math.round(count / 2));
             }
 
-            breakout.rooms[i] = APP.conference.roomName + '-' + Math.random().toString(36).substr(2, 9);
+            if (parseInt($('#breakout-duration').val(), 10) < 1) {
+                $('breakout-duration').val(BreakoutHost.defaultDuration);
+            }
 
-            for (let j = 0; j < ids.length; j++) {
-                if (j % roomCount == i) // allocate participant j to room i
-                {
-                    console.debug("allocateToRooms - participant", j, ids[j], participants[ids[j]]);
+            if (!this.started) {
+                this.startedRooms = [];
+                $('.breakout-kanban .kanban-item').removeClass('disabled-item');
+            }
 
-                    const label = participants[ids[j]]._displayName || i18n('breakout.anonymous', { id: id });
-                    const jid = participants[ids[j]]._jid;
-                    const webinar = participants[ids[j]]._tracks.length > 0 ? "false" : "true";
+            $('.breakout-kanban .kanban-item').each((index, element) => {
+                const $item = $(element);
+                const id = $item.attr('data-eid');
+                this.updateParticipant(id);
+            })
 
-                    boards[i + 1].item.push({
-                        id: ids[j],
-                        title: label,
-                        label: label,
-                        jid: jid,
-                        webinar: webinar,
-                        roomid: breakout.rooms[i],
-                        roomindex: i,
-                        drop: function (el) {
-                            breakoutDragAndDrop(el);
-                        }
-                    });
+            for (const id in participants) {
+                if (!this.kanban.findElement(id)) {
+                    this.addParticipant(id);
                 }
+            }
+
+            $('#breakout-title').text(count);
+
+            this.setStatusMessage('');
+        }
+
+        elementFromParticipant(participant) {
+            const id = participant._id;
+            const displayName = participant._displayName || i18n('breakout.anonymous', { id: id });
+            const avatarURL = participant.avatarURL ?? '/images/avatar.png';
+            return {
+                id: id,
+                title: `<div class="header-icon"><img class="avatar" src="${avatarURL}" style=""></div>${displayName}`
             };
         }
 
-        breakout.kanban.addBoards(boards);
-    }
-
-    function visitBreakoutRoom(boardId) {
-        console.debug("visitBreakoutRoom", boardId);
-        const roomindex = boardId.substring(5);
-        const roomid = breakout.rooms[parseInt(roomindex)];
-
-        if (roomid) {
-            const pos = location.href.lastIndexOf("/");
-            const rootUrl = location.href.substring(0, pos);
-            const url = rootUrl + '/' + roomid;
-
-            open(url, roomid);
-        }
-    }
-
-    function createBreakout() {
-        const kanbanConfig = {
-            element: ".breakout-kanban",
-            gutter: "5px",
-            widthBoard: "300px",
-            dragBoards: false,
-            itemHandleOptions: {
-                enabled: true,
-            },
-            buttonClick: function (el, boardId) {
-                console.debug("Board clicked", boardId);
-                if (boardId != "participants") visitBreakoutRoom(boardId)
-            },
-            click: function (el) {
-                console.debug("Trigger on all items click!");
-            },
-            dropEl: function (el, target, source, sibling) {
-                console.debug(target.parentElement.getAttribute('data-id'));
-                console.debug(el, target, source, sibling)
-            },
-            addItemButton: true,
-            boards: [
-                {
-                    id: "participants",
-                    title: i18n('breakout.meetingParticipants'),
-                    class: "participants",
-                    dragTo: [],
-                    item: []
-              }
-            ]
+        addParticipant(id) {
+            const participant = participants[id];
+            if (participant) {
+                this.kanban.addElement('participants', this.elementFromParticipant(participants[id]));
+            }
+            $('#breakout-title').text(participants.length);
         }
 
-        const ids = Object.getOwnPropertyNames(participants);
+        updateParticipant(id) {
+            if (id in participants) {
+                this.kanban.replaceElement(id, this.elementFromParticipant(participants[id]));
+            } else if (!this.started) {
+                this.kanban.removeElement(id);
+            }
+        }
 
-        ids.forEach(function (id) {
-            kanbanConfig.boards[0].item.push({
-                id: id,
-                title: participants[id]._displayName || i18n('breakout.anonymous', { id: id }),
-                drop: function (el) {
-                    breakoutDragAndDrop(el);
+        removeParticipant(id) {
+            if (this.started) {
+                const elem = this.kanban.findElement(id);
+                if (elem) {
+                    $(elem).addClass('disabled-item');
                 }
-            });
-        });
+            } else {
+                this.kanban.removeElement(id);
+            }
+            $('#breakout-title').text(participants.length);
+        }
 
-        console.debug("createBreakout", kanbanConfig);
-        breakout.kanban = new jKanban(kanbanConfig);
-    }
+        recallParticipant(id, oldId) {
+            const elem = this.kanban.findElement(oldId);
+            if (elem) {
+                this.kanban.removeElement(id);
+                $(elem).removeClass('disabled-item').attr('data-eid', id);
+                this.kanban.replaceElement(id, this.elementFromParticipant(participants[id]));
+                $('#breakout-title').text(participants.length);
+            }
+        }
 
-    function breakoutStatus(text) {
-        document.getElementById('breakout-status').innerHTML = text;
+        getRoomParticipants(index) {
+            let roomParticipants = []
+            if (this.kanban.findBoard('room_' + index)) {
+                for (let elem of this.kanban.getBoardElements('room_' + index)) {
+                    let p = participants[elem.getAttribute('data-eid')];
+                    if (p) {
+                        roomParticipants.push(p);
+                    }
+                }
+            }
+            return roomParticipants;
+        }
+
+        moveRoomParticipant(roomIndex, participant) {
+            if (participant) {
+                const pid = participant._id;
+                if (roomIndex != this.kanban.getParentBoardID(pid)) {
+                    this.kanban.removeElement(pid);
+                    this.kanban.addElement(roomIndex, this.elementFromParticipant(participant));
+                }
+            }
+        }
+
+        resizeRoom(size) {
+            if (size > 0 && size < 50) {
+                const currentSize = this.roomCount;
+                if (currentSize < size) {
+                    const boards = [];
+                    for (let i = currentSize; i < size; i++) {
+                        boards.push({
+                            id: 'room_' + (i + 1),
+                            title: i18n('breakout.room', { n: (i + 1).toString() }),
+                            class: 'room',
+                            item: []
+                        });
+                    }
+                    this.kanban.addBoards(boards);
+
+                    for (let i = currentSize; i < size; i++) {
+                        const $board = $(this.kanban.findBoard('room_' + (i + 1)));
+                        $board.attr('data-room-name', APP.conference.roomName + '-room' + (i + 1) + '-' + Math.random().toString(36).substr(2, 9));
+                        // TODO: Replace with a nice-looking input from.
+                        $board.find('.kanban-title-board').on('keydown keyup', e => {
+                            e.stopPropagation();
+                            if (e.which == 13) {
+                                return false;
+                            }
+                        }).attr('contenteditable', 'true');
+                    }
+                } else {
+                    for (let i = currentSize - 1; i >= size; i--) {
+                        const roomParticipants = this.getRoomParticipants(i + 1);
+                        for (let p of roomParticipants) {
+                            console.log(p);
+                            this.moveRoomParticipant('participants', p);
+                        }
+                        this.kanban.removeBoard('room_' + (i + 1));
+                    }
+                }
+            }
+        }
+
+        allocateToRooms() {
+            const ids = Object.getOwnPropertyNames(participants);
+            const roomCount = this.roomCount;
+
+            console.debug("allocateToRooms", roomCount, breakoutHost);
+
+            if (ids.length > 0 && roomCount > 0) {
+                for (let i = 0; i < roomCount; i++) {
+                    for (let j = 0; j < ids.length; j++) {
+                        // allocate participant j to room i
+                        if (j % roomCount == i) {
+                            this.moveRoomParticipant('room_' + (i + 1), participants[ids[j]]);
+                        }
+                    }
+                }
+                this.setStatusMessage(i18n('breakout.allocatedMessage', { participants: ids.length, rooms: roomCount }));
+            } else {
+                this.setStatusMessage(i18n('breakout.missingParticipants'));
+            }
+        }
+
+        startBreakout() {
+            if (this.started) {
+                console.error("startBreakout error. breakout has already started.");
+                return;
+            }
+
+            if (this.roomCount < 1 || $('.breakout-modal header.room+main .kanban-item').length < 1) {
+                this.setStatusMessage(i18n('breakout.allocateParticipantsFirst'));
+                return;
+            }
+
+            const duration = $('#breakout-duration').val();
+
+            this.startTime = Math.floor((new Date()).getTime() / 1000 + BreakoutHost.wait);
+            this.endTime = duration > 0 ? this.startTime + duration * 60 : null;
+            this.startedRooms = [];
+
+            for (let i = 0; i < this.roomCount; i++) {
+                const $board = $(this.kanban.findBoard('room_' + (i + 1)));
+                const roomName = $board.attr("data-room-name");
+                const roomTitle = $board.find('.kanban-title-board').text();
+                const roomParticipants = this.getRoomParticipants(i + 1);
+
+                this.startedRooms.push(roomName);
+
+                for (let p of roomParticipants) {
+                    const jid = p._jid;
+                    const url = new URL(roomName, location.href);
+
+                    const payload = {
+                        action: 'start-breakout',
+                        room: roomName,
+                        url: url.href,
+                        wait: BreakoutHost.wait,
+                        subject: getConferenceName() + ' - ' + roomTitle,
+                        startTime: this.startTime,
+                        endTime: this.endTime
+                    };
+
+                    this.broadcastBreakout('chat', jid, payload);
+                }
+            }
+
+            $('.btn-breakout')
+                .removeClass('btn-primary btn-breakout-start')
+                .addClass('btn-danger btn-breakout-stop')
+                .text(i18n('breakout.reassemble'));
+
+            let count = BreakoutHost.wait;
+            this.setStatusMessage(i18n('breakout.breakoutWillStart', { sec: count }));
+            this.countdownTimer = setInterval(() => {
+                if (--count <= 0) {
+                    clearInterval(this.countdownTimer);
+                    this.countdownTimer = null;
+
+                    this.clockTimer = setInterval(() => this.updateClock());
+
+                    if (duration > 0) {
+                        this.endBreakoutTimer = setTimeout(() => this.stopBreakout(), 60000 * duration);
+                        this.setStatusMessage(i18n('breakout.breakoutStartedWithDuration', { min: duration }));
+                    } else {
+                        this.setStatusMessage(i18n('breakout.breakoutStarted'));
+                    }
+                } else {
+                    this.setStatusMessage(i18n('breakout.breakoutWillStart', { sec: count }));
+                }
+            }, 1000);
+        }
+
+        stopBreakout() {
+            if (!this.started) {
+                console.error("stopBreakout error. no breakout has been started.");
+                return;
+            }
+
+            let immediate = false;
+            if (this.countdownTimer) {
+                clearInterval(this.countdownTimer);
+                this.countdownTimer = null;
+                immediate = true;
+            }
+
+            clearInterval(this.clockTimer);
+            this.clockTimer = null;
+
+            const payload = {
+                action: 'stop-breakout',
+                url: location.href,
+                wait: BreakoutHost.wait,
+            };
+
+            this.broadcastBreakout('groupchat', getConferenceJid(), payload);
+            
+            for (const room of this.startedRooms) {
+                const jid = room + '@' + this.domain;
+                this.joinRoom(jid);
+                setTimeout(() => {
+                    this.broadcastBreakout('groupchat', jid, payload);
+                    setTimeout(() => { this.exitRoom(jid) }, 1000);
+                }, 1000);
+            }
+
+            let endBreakout = () => {
+                this.setStatusMessage(i18n('breakout.breakoutHasEnded'));
+                $('.btn-breakout')
+                    .removeClass('btn-danger btn-breakout-stop')
+                    .addClass('btn-primary btn-breakout-start')
+                    .text(i18n('breakout.breakout'))
+                    .prop('disabled', false);
+            };
+
+            if (this.endBreakoutTimer) {
+                clearTimeout(this.endBreakoutTimer);
+                this.endBreakoutTimer = null;
+            }
+
+            this.startTime = null;
+            this.endTime = null;
+            this.updateClock()
+
+            $('.btn-breakout').prop('disabled', true);
+
+            if (immediate) {
+                endBreakout();
+            } else {
+                let count = BreakoutHost.wait;
+                this.setStatusMessage(i18n('breakout.breakoutWillEnd', { sec: count }));
+                this.countdownTimer = setInterval(() => {
+                    if (--count <= 0) {
+                        clearInterval(this.countdownTimer);
+                        this.countdownTimer = null;
+                        endBreakout();
+                    } else {
+                        this.setStatusMessage(i18n('breakout.breakoutWillEnd', { sec: count }));
+                    }
+                }, 1000);
+            }
+        }
+
+        toggleBreakout() {
+            console.debug("toggleBreakout");
+            if (this.started) {
+                this.stopBreakout();
+            } else {
+                this.startBreakout();
+            }
+        }
+
+        updateClock() {
+            if (this.startTime) {
+                const now = Math.floor((new Date()).getTime() / 1000);
+                if (this.endTime) {
+                    this.$clock.text(i18n('breakout.remainingTime') + ' ' + formatTimeSpan(this.endTime - now));
+                } else {
+                    this.$clock.text(i18n('breakout.elapsedTime') + ' ' + formatTimeSpan(now - this.startTime));
+                }
+            } else {
+                this.$clock.text('');
+            }
+        }
+
+        setStatusMessage(message) {
+            this.$status.text(message);
+        }
+
+        exitRoom(jid) {
+            console.debug("exitRoom", jid);
+
+            const xmpp = APP.connection.xmpp.connection._stropheConn;
+            const to = Strophe.getBareJidFromJid(jid) + '/' + APP.conference.getLocalDisplayName();
+            xmpp.send($pres({ type: 'unavailable', to: to }));
+        }
+
+        joinRoom(jid) {
+            console.debug("joinRoom", jid);
+
+            const xmpp = APP.connection.xmpp.connection._stropheConn;
+            const to = Strophe.getBareJidFromJid(jid) + '/' + APP.conference.getLocalDisplayName();
+            xmpp.send($pres({ to: to }).c("x", { xmlns: Strophe.NS.MUC }));
+        }
+
+        broadcastBreakout(type, jid, json) {
+            console.debug("broadcastBreakout", type, jid, json);
+
+            const xmpp = APP.connection.xmpp.connection._stropheConn;
+            xmpp.send($msg({ type: type, to: jid }).c('json', { xmlns: 'urn:xmpp:json:0' }).t(JSON.stringify(json)));
+        }
+
+        broadcastMessage(text) {
+            console.debug("broadcastMessage", text, breakoutHost);
+
+            const xmpp = APP.connection.xmpp.connection._stropheConn;
+            for (const room of this.startedRooms) {
+                const jid = room + '@' + this.domain;
+
+                this.joinRoom(jid);
+                setTimeout(() => {
+                    xmpp.send($msg({ type: 'groupchat', to: jid }).c("body").t(text));
+                    setTimeout(() => { this.exitRoom(jid) }, 1000);
+                }, 1000);
+            }
+        }
+
+        openRoom(boardId) {
+            console.debug("joinRoom", boardId);
+            const $board = $(this.kanban.findBoard(boardId));
+            const roomName = $board.attr("data-room-name");
+            const roomTitle = $board.find('.kanban-title-board').text();
+
+            if (roomName) {
+                const url = new URL(roomName, location.href);
+                url.hash = 'subject=' + getConferenceName() + ' - ' + roomTitle;
+                open(url.href, roomName);
+            }
+        }
     }
 
     function doBreakout() {
-        const ids = Object.getOwnPropertyNames(participants);
-        const count = Math.round(ids.length / 2);
-
-        const template =
-            '<div class="modal-header">' +
-            '    <h4 class="modal-title">' + i18n('breakout.breakoutRooms') + ' - ' + i18n('breakout.participants', { title: '<span id="breakout-title">' + ids.length + '</span>' }) + '</h4>' +
-            '       <label for="breakout-duration" class="col-form-label">' + i18n('breakout.duration') + '</label>' +
-            '       <input id="breakout-duration" type="number" min="0" max="480" step="30" name="breakout-duration" value="' + breakout.duration + '"/>' +
-            '       <label for="breakout-rooms" class="col-form-label">' + i18n('breakout.rooms') + '</label>' +
-            '       <input id="breakout-rooms" type="number" min="1" max="10" name="breakout-rooms" value="' + count + '"/>' +
-            '       <div id="breakout-status" style="width:30%; color:red"></div>' +
-            '</div>' +
-            '<div class="modal-body">' +
-            '    <div class="pade-col-container breakout-kanban"></div>' +
-            '</div>'
+        const template = `
+<div class="modal-header">
+    <h4 class="modal-title">${i18n('breakout.breakoutRooms')} - ${i18n('breakout.participants', { title: '<span id="breakout-title"></span>' })}</h4>
+    <form id="breakout-option" class="form-inline">
+        <div class="form-group">
+            <label for="breakout-duration">${i18n('breakout.duration')}</label>
+            <input id="breakout-duration" class="form-control" type="number" min="0" max="480" step="30" name="breakout-duration" value="${BreakoutHost.defaultDuration}"/>
+        </div>
+        <div class="form-group">
+            <label for="breakout-rooms">${i18n('breakout.rooms')}</label>
+            <input id="breakout-rooms" class="form-control" type="number" min="1" max="100" name="breakout-rooms" value="0"/>
+        </div>
+    </form>
+    <div id="breakout-status"></div>
+    <div id="breakout-clock"></div>
+</div>
+<div class="modal-body">
+    <div class="pade-col-container breakout-kanban"></div>
+</div>`;
 
         if (!breakoutModal) {
             breakoutModal = new tingle.modal({
                 footer: true,
                 stickyFooter: false,
                 closeMethods: ['overlay', 'button', 'escape'],
-                closeLabel: "Close",
-                cssClass: ['custom-class-1', 'custom-class-2'],
+                closeLabel: 'Close',
+                cssClass: ['breakout-modal', 'modal-lg', 'modal-fix-height'],
 
                 beforeOpen: function () {
-                    console.debug("beforeOpen", breakout);
-
-                    if (!breakout.created) {
-                        createBreakout();
-                        breakout.created = true;
-                    }
-                }
-            });
-
-            breakoutModal.addFooterBtn(i18n('breakout.close'), 'btn btn-danger tingle-btn tingle-btn--primary', function () {
-                breakoutModal.close();
-            });
-
-            breakoutModal.addFooterBtn(i18n('breakout.allocate'), 'btn btn-success tingle-btn tingle-btn--primary', function () {
-                const roomCount = parseInt(document.getElementById('breakout-rooms').value);
-                const ids = Object.getOwnPropertyNames(participants);
-
-                if (ids.length > 0 && roomCount > 0) {
-                    allocateToRooms(roomCount);
-                    breakoutStatus(i18n('breakout.allocatedMessage', { participants: ids.length, rooms: roomCount }));
-                } else {
-                    breakoutStatus(i18n('breakout.missingParticipants'));
-                }
-
-                breakout.roomCount = roomCount;
-            });
-
-            const label = breakout.started ? i18n('breakout.reassemble') : i18n('breakout.breakout');
-
-            breakoutModal.addFooterBtn(label, 'btn btn-success tingle-btn tingle-btn--primary', function (evt) {
-                breakout.button = evt.target;
-                breakout.duration = parseInt(document.getElementById('breakout-duration').value);
-
-                if (breakout.roomCount > 0) {
-                    toggleBreakout();
-                } else {
-                    breakoutStatus(i18n('breakout.allocateParticipantsFirst'));
+                    console.debug("beforeOpen", breakoutHost);
+                    breakoutHost.refresh();
                 }
             });
 
             breakoutModal.setContent(template);
-        } else {
-            document.getElementById('breakout-rooms').value = count;
-            document.getElementById('breakout-duration').innerHTML = breakout.duration;
-            document.getElementById('breakout-title').innerHTML = ids.length;
+
+            breakoutModal.addFooterBtn(i18n('breakout.allocate'), 'btn btn-primary', () => {
+                breakoutHost.allocateToRooms();
+            });
+
+            breakoutModal.addFooterBtn(i18n('breakout.breakout'), 'btn btn-primary btn-breakout btn-breakout-start', () => {
+                breakoutHost.toggleBreakout();
+            });
+
+            breakoutModal.addFooterBtn(i18n('breakout.close'), 'btn btn-secondary', () => {
+                breakoutModal.close();
+            });
+
+            if (!breakoutHost) {
+                breakoutHost = new BreakoutHost();
+            }
+
+            $('#breakout-rooms').on('input.breakoutroom focusout.breakoutroom', (evt) => {
+                if (!evt.originalEvent.inputType || !evt.originalEvent.inputType.match(/delete/)) {
+                    breakoutHost.resizeRoom(evt.target.value);
+                }
+                return false;
+            });
         }
 
         breakoutModal.open();
@@ -2705,12 +3121,7 @@ var ofmeet = (function (ofm) {
     function uploadFile(file) {
         console.debug("uploadFile", file);
 
-        var getUrl = null;
-        var putUrl = null;
-        var errorText = null;
-
         const connection = APP.connection.xmpp.connection;
-        const $iq = APP.connection.xmpp.connection.$iq;
 
         const iq = $iq({ type: 'get', to: "httpfileupload." + connection.domain }).c('request', { xmlns: 'urn:xmpp:http:upload' }).c('filename').t(file.name).up().c('size').t(file.size);
 
@@ -2834,7 +3245,6 @@ var ofmeet = (function (ofm) {
 
     function listenWebPushEvents() {
         const connection = APP.connection.xmpp.connection;
-        const Strophe = APP.connection.xmpp.connection.Strophe;
 
         connection.addHandler(function (message) {
             console.debug('webpush handler', message);
@@ -2970,7 +3380,7 @@ var ofmeet = (function (ofm) {
                 }
             });
 
-            contactsModal.addFooterBtn('Reset Selected', 'btn btn-success tingle-btn tingle-btn--primary', function () {
+            contactsModal.addFooterBtn('Reset Selected', 'btn btn-success btn-primary', function () {
                 const container = document.querySelector(".meeting-contacts");
 
                 container.querySelectorAll(".meeting-icon > img").forEach(function (icon) {
@@ -2978,7 +3388,7 @@ var ofmeet = (function (ofm) {
                 });
             });
 
-            contactsModal.addFooterBtn('Close', 'btn btn-success tingle-btn tingle-btn--primary', function () {
+            contactsModal.addFooterBtn('Close', 'btn btn-success btn-secondary', function () {
                 contactsModal.close();
             });
 
@@ -2988,7 +3398,7 @@ var ofmeet = (function (ofm) {
         if (APP.conference._room.isSIPCallingSupported() && !inviteByPhone) {
             inviteByPhone = true;
 
-            contactsModal.addFooterBtn('Invite by Phone', 'btn btn-danger tingle-btn tingle-btn--primary', function () {
+            contactsModal.addFooterBtn('Invite by Phone', 'btn btn-primary', function () {
                 const phoneNumber = prompt("Please enter phone number");
 
                 if (phoneNumber && phoneNumber != "") {
@@ -3017,7 +3427,6 @@ var ofmeet = (function (ofm) {
 
     function publishWebPush() {
         const connection = APP.connection.xmpp.connection;
-        const $msg = APP.connection.xmpp.connection.$msg;
 
         if (window.WebPushLib && window.WebPushLib.selfSecret && APP.conference._room.room) {
             console.debug("publishWebPush", window.WebPushLib.selfSecret);
@@ -3069,7 +3478,6 @@ var ofmeet = (function (ofm) {
 
     function registerWebAuthn() {
         console.debug("registerWebAuthn");
-        const Strophe = APP.connection.xmpp.connection.Strophe;
         const username = Strophe.getNodeFromJid(APP.connection.xmpp.connection._stropheConn.authzid);
 
         let bufferDecode = function (e) {

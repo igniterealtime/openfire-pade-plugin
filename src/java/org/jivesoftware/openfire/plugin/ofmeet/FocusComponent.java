@@ -4,6 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.jivesoftware.openfire.XMPPServer;
+import org.jivesoftware.openfire.SessionManager;
+import org.jivesoftware.openfire.session.ClientSession;
 
 import org.xmpp.component.Component;
 import org.xmpp.component.AbstractComponent;
@@ -59,7 +61,13 @@ public class FocusComponent extends AbstractComponent
 			iq1.setChildElement(iq.getChildElement().createCopy());
 			
 			JID from = iq.getFrom();
-			iq.setTo("focus@" + XMPPServer.getInstance().getServerInfo().getXMPPDomain() + "/focus");
+			String to = "focus@" + XMPPServer.getInstance().getServerInfo().getXMPPDomain() + "/focus";
+			
+			for (ClientSession sess : SessionManager.getInstance().getSessions("focus") )
+			{
+				to = sess.getAddress().toString();	
+			}			
+			iq.setTo(to);
 			iq.setFrom(from.getNode() + "@focus." + XMPPServer.getInstance().getServerInfo().getXMPPDomain() + "/" + from);
 			XMPPServer.getInstance().getIQRouter().route( iq );			
         }

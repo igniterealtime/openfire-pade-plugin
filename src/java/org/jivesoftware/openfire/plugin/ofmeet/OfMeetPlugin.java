@@ -203,9 +203,12 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
             jitsiJicofoWrapper.initialize(pluginDirectory);
             loadBranding();	
 
-			focusComponent = new FocusComponent();
-			componentManager = ComponentManagerFactory.getComponentManager();			
-            componentManager.addComponent("focus", focusComponent);		
+            if ( JiveGlobals.getBooleanProperty( "ofmeet.use.internal.focus.component", false ) )
+            {
+				focusComponent = new FocusComponent();
+				componentManager = ComponentManagerFactory.getComponentManager();			
+				componentManager.addComponent("focus", focusComponent);		
+			}
         }
         catch ( Exception ex )
         {
@@ -297,7 +300,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
             unloadPublicWebApp();
 			
-			componentManager.removeComponent("focus");			
+			if (focusComponent != null) componentManager.removeComponent("focus");			
         }
         catch ( Exception ex )
         {

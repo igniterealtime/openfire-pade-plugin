@@ -773,7 +773,6 @@ var ofmeet = (function (ofm) {
             id: 'ofmeet-pads',
             icon: IMAGES.cryptpad,
             label: i18n('toolbar.launchCryptPadApplication'),
-            group: '.button-group-right',
             callback: (evt) => {
                 evt.stopPropagation();
                 doPads();
@@ -786,7 +785,6 @@ var ofmeet = (function (ofm) {
             id: 'ofmeet-avatar',
             icon: IMAGES.picture,
             label: i18n('toolbar.changePersonalAvatar'),
-            group: '.button-group-right',
             callback: (evt) => {
                 evt.stopPropagation();
                 doAvatar();
@@ -819,7 +817,6 @@ var ofmeet = (function (ofm) {
             id: 'ofmeet-cursor',
             icon: IMAGES.cursor,
             label: i18n('toolbar.shareCursorMousePointer'),
-            group: '.button-group-right',
             callback: (evt) => {
                 evt.stopPropagation();
 
@@ -857,7 +854,6 @@ var ofmeet = (function (ofm) {
             id: 'ofmeet-whiteboard',
             icon: IMAGES.whiteboard,
             label: i18n('toolbar.shareaWhiteboard'),
-            group: '.button-group-right',
             callback: (evt) => {
                 evt.stopPropagation();
                 APP.conference.commands.sendCommandOnce("WHITEBOARD", { value: !0 })
@@ -952,7 +948,6 @@ var ofmeet = (function (ofm) {
             id: 'ofmeet-confetti',
             icon: IMAGES.confetti,
             label: i18n('toolbar.shareSomeConfetti'),
-            group: '.button-group-right',
             shortcut: 'E',
             callback: (evt) => { sendConfettiCommand() },
             menu: menu,
@@ -964,7 +959,7 @@ var ofmeet = (function (ofm) {
             id: undefined,
             icon: undefined,
             label: undefined,
-            group: '.button-group-left',
+            group: '.toolbox-content-items',
             shortcut: undefined,
             callback: undefined,
             menu: {},
@@ -990,8 +985,8 @@ var ofmeet = (function (ofm) {
 
             let $toolbarItem = appendMenuToToolbarButton($button, option.menu);
 
-            if ($placeHolder.hasClass('button-group-right')) {
-                $placeHolder.children().last().before($toolbarItem);
+            if ($placeHolder.hasClass('toolbox-content-items')) {
+                $placeHolder.children().eq(-2).before($toolbarItem);
             } else {
                 $placeHolder.append($toolbarItem);
             }
@@ -1062,7 +1057,7 @@ var ofmeet = (function (ofm) {
             $menu.on('click.ofmeet-toolbox-menu', 'li', (e) => { option.callback(e); return option.closeOnClick; });
             $menuContainer.children('.ofmeet-toolbox-menu').append($menu);
 
-            $smallIcon = $('<div class="ofmeet-toolbox-small-icon"><svg fill="none" height="9" width="9" viewBox="0 0 10 6"><path clip-rule="evenodd" d="M8.07.248a.75.75 0 111.115 1.004L5.656 5.193a.75.75 0 01-1.115 0L1.068 1.252A.75.75 0 012.182.248L5.1 3.571 8.07.248z"></path></svg></div>');
+            $smallIcon = $('<div class="ofmeet-toolbox-small-icon"><svg fill="none" height="9" width="9" viewBox="0 0 10 7"><path clip-rule="evenodd" d="M8.411 6.057A.833.833 0 109.65 4.943L5.73.563a.833.833 0 00-1.24 0L.63 4.943a.833.833 0 001.24 1.114l3.24-3.691L8.41 6.057z"></path></svg></div>');
             $smallIcon.on('click.ofmeet-toolbox-small-icon', (e) => {
                 let hideMenu = () => {
                     $menuContainer.hide();

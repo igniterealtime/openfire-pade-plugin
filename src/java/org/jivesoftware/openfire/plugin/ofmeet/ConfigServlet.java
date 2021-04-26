@@ -25,6 +25,8 @@ package org.jivesoftware.openfire.plugin.ofmeet;
 
 import org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig;
 import org.jivesoftware.openfire.XMPPServer;
+import org.jivesoftware.openfire.SessionManager;
+import org.jivesoftware.openfire.session.ClientSession;
 import org.jivesoftware.util.JiveGlobals;
 import org.jivesoftware.util.Version;
 import org.json.JSONArray;
@@ -157,9 +159,15 @@ public class ConfigServlet extends HttpServlet
 
             final Map<String, String> hosts = new HashMap<>();
             hosts.put( "domain", xmppDomain );
-            hosts.put( "muc", mucDomain );
-            //hosts.put( "bridge", "jitsi-videobridge." + xmppDomain );
-            hosts.put( "focus", "focus." + xmppDomain );
+            hosts.put( "muc", mucDomain );			
+
+/*	Trying to fix Upgrading Jicofo to Stable Release 2.0.5765 #317. It did not work
+		
+			for (ClientSession sess : SessionManager.getInstance().getSessions("focus") )
+			{
+				hosts.put( "focus", sess.getAddress().toString() );	
+			}	
+*/
             config.put( "hosts", hosts );
 
             final Map<String, Object> p2p = new HashMap<>();

@@ -225,7 +225,7 @@ public class LobbyMuc implements ServerIdentitiesProvider, ServerFeaturesProvide
         if (presence.getError() != null && presence.getError().getElement() != null
                 && presence.getType() == Presence.Type.error && !incoming) {
             childElement = presence.getChildElement("x", "http://jabber.org/protocol/muc");
-            if (childElement != null) {
+            if (childElement != null && presence.getFrom() != null) {
                 String lobbyRoom = presence.getFrom().getNode() + "@" + LOBBY_MUC;
                 Log.debug("lobbyroom add room to disco#info for " + lobbyRoom);
                 childElement.addElement("lobbyroom").setText(lobbyRoom);

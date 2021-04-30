@@ -68,7 +68,7 @@ public class FocusComponent extends AbstractComponent
 				to = sess.getAddress().toString();	
 			}			
 			iq.setTo(to);
-			iq.setFrom(from.getNode() + "@focus." + XMPPServer.getInstance().getServerInfo().getXMPPDomain() + "/" + from);
+			iq.setFrom("focus." + XMPPServer.getInstance().getServerInfo().getXMPPDomain() + "/" + from);
 			XMPPServer.getInstance().getIQRouter().route( iq );			
         }
         catch(Exception e) {

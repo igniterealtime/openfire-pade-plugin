@@ -98,7 +98,7 @@ public class JitsiJicofoWrapper implements ProcessListener
 			props.setProperty("org.jitsi.jicofo.jigasi.BREWERY", "ofgasi@" + MAIN_MUC);
 		}				
 
-        props.setProperty("org.jitsi.jicofo.BRIDGE_MUC", "ofmeet@" + MAIN_MUC);
+        props.setProperty( "org.jitsi.jicofo.BRIDGE_MUC", "ofmeet@" + MAIN_MUC);
         props.setProperty( "org.jitsi.jicofo.ALWAYS_TRUST_MODE_ENABLED", "true" );
         props.setProperty( "org.jitsi.jicofo.PING_INTERVAL", "-1" );
         props.setProperty( "org.jitsi.jicofo.SERVICE_REDISCOVERY_INTERVAL", "60000" );
@@ -122,7 +122,12 @@ public class JitsiJicofoWrapper implements ProcessListener
             "        # Whether SCTP data channels are enabled",
             "        enabled = " + (JiveGlobals.getBooleanProperty( "ofmeet.bridge.ws.channel", OSUtils.IS_WINDOWS) ? "false" : "true"),
             "    }",
-            "",
+            "    xmpp {",
+            "      client {",
+            "        client-proxy = focus." + XMPPServer.getInstance().getServerInfo().getXMPPDomain(),
+            "        use-tls = false",
+            "       }",				
+            "    }",			
             "}"
         );
 

@@ -75,6 +75,6 @@ public class FocusComponent extends AbstractComponent
             Log.error("handleIQSet", e);
         }				
 		
-        return iq1;
+        return null;
     }	
 }

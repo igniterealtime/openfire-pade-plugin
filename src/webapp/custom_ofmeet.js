@@ -154,15 +154,17 @@ var ofmeet = (function (ofm) {
                         }
                         storage.setItem("xmpp_username_override", user);
                         storage.setItem("xmpp_password_override", credential.password);
+                        console.debug("credentials passed to local store");
                     }
                 }).catch(function (err) {
                     console.error("credential management api get error", err);
                 });
             }
+
         } else {
             storage = new DummyStorage();
         }
-        
+
         if (!config.webinar) {
             if (typeof indexedDB.databases == "function") {
                 indexedDB.databases().then(function (databases) {
@@ -493,29 +495,33 @@ var ofmeet = (function (ofm) {
         setOwnPresence();
 
         if (APP.connection.xmpp.connection._stropheConn.pass || config.ofmeetWinSSOEnabled) {
-            if (interfaceConfig.OFMEET_CACHE_PASSWORD && storageAvailable('localStorage')) {
-                if (!isElectron() && navigator.credentials && navigator.credentials.preventSilentAccess && typeof PasswordCredential === 'function') {
-                    storage.removeItem("xmpp_username_override");
-                    storage.removeItem("xmpp_password_override");
+            if (storageAvailable('localStorage')) {
 
-                    const id = APP.connection.xmpp.connection._stropheConn.authcid;
-                    const pass = APP.connection.xmpp.connection._stropheConn.pass;
-                    navigator.credentials.create({ password: { id: id, password: pass } }).then(function (credential) {
-                        navigator.credentials.store(credential).then(function () {
-                            console.debug("credential management api put", credential);
+                storage.removeItem("xmpp_username_override");
+                storage.removeItem("xmpp_password_override");
+                console.debug("credentials in local store cleared");
 
+                if (interfaceConfig.OFMEET_CACHE_PASSWORD) {
+                    if (!isElectron() && navigator.credentials && navigator.credentials.preventSilentAccess && typeof PasswordCredential === 'function') {
+                        const id = APP.connection.xmpp.connection._stropheConn.authcid;
+                        const pass = APP.connection.xmpp.connection._stropheConn.pass;
+                        navigator.credentials.create({ password: { id: id, password: pass } }).then(function (credential) {
+                            navigator.credentials.store(credential).then(function () {
+                                console.debug("credential management api put", credential);
+
+                            }).catch(function (err) {
+                                console.error("credential management api put error", err);
+                            });
                         }).catch(function (err) {
                             console.error("credential management api put error", err);
                         });
-                    }).catch(function (err) {
-                        console.error("credential management api put error", err);
-                    });
-                } else {
-                    const jid = APP.connection.xmpp.connection._stropheConn.authzid;
-                    const pass = APP.connection.xmpp.connection._stropheConn.pass;
-                    storage.setItem("xmpp_username_override", jid);
-                    storage.setItem("xmpp_password_override", pass);
-                    console.debug("credentials local store " + jid);
+                    } else {
+                        const jid = APP.connection.xmpp.connection._stropheConn.authzid;
+                        const pass = APP.connection.xmpp.connection._stropheConn.pass;
+                        storage.setItem("xmpp_username_override", jid);
+                        storage.setItem("xmpp_password_override", pass);
+                        console.debug("credentials put to local store for" + jid);
+                    }
                 }
             }
 
@@ -3053,6 +3059,11 @@ var ofmeet = (function (ofm) {
 
         ofm.recognition.onerror = function (event) {
             console.debug("Speech to text error", event);
+         console.debug('Speech recognition error detected: ' + event.error);
+         console.debug('Additional information: ' + event.message);
+         if (event.error && event.error == "network") {
+                ofm.recognitionActive = false;
+         }
         }
 
         ofm.recognition.start();

@@ -470,11 +470,11 @@ var ofmeet = (function (ofm) {
                     if (text.indexOf("http") != 0 && !captions.msgsDisabled) {
                         if (captions.ele) {
                           captions.ele.innerHTML = displayName + " : " + text;
-                          if (interfaceConfig.OFMEET_CHAT_CC_TIMEOUT && (interfaceConfig.OFMEET_CHAT_CC_TIMEOUT > 0)) {
+                          if (interfaceConfig.OFMEET_CHAT_CAPTIONS_TIMEOUT && (interfaceConfig.OFMEET_CHAT_CAPTIONS_TIMEOUT > 0)) {
                             if (captions.timerHandle) window.clearTimeout(captions.timerHandle);
                             captions.timerHandle = window.setTimeout(function() {
                               captions.ele.innerHTML = "";
-                            }, interfaceConfig.OFMEET_CHAT_CC_TIMEOUT);
+                            }, interfaceConfig.OFMEET_CHAT_CAPTIONS_TIMEOUT);
                           }
                         }
                         captions.msgs.push({ text: text, stamp: (new Date()).getTime() });

@@ -468,7 +468,15 @@ var ofmeet = (function (ofm) {
                 } else {
 
                     if (text.indexOf("http") != 0 && !captions.msgsDisabled) {
-                        if (captions.ele) captions.ele.innerHTML = displayName + " : " + text;
+                        if (captions.ele) {
+                          captions.ele.innerHTML = displayName + " : " + text;
+                          if (interfaceConfig.OFMEET_CHAT_CAPTIONS_TIMEOUT && (interfaceConfig.OFMEET_CHAT_CAPTIONS_TIMEOUT > 0)) {
+                            if (captions.timerHandle) window.clearTimeout(captions.timerHandle);
+                            captions.timerHandle = window.setTimeout(function() {
+                              captions.ele.innerHTML = "";
+                            }, interfaceConfig.OFMEET_CHAT_CAPTIONS_TIMEOUT);
+                          }
+                        }
                         captions.msgs.push({ text: text, stamp: (new Date()).getTime() });
                     }
 
@@ -1150,6 +1158,7 @@ var ofmeet = (function (ofm) {
             const handsTotal = APP.conference.membersCount;
             const handsPercentage = Math.round(100 * handsRaised / handsTotal);
             const label = handsRaised > 0 ? i18n('handsRaised.handsRaised', { raised: handsRaised, total: handsTotal, percentage: handsPercentage }) : "";
+            if (captions.timerHandle) window.clearTimeout(captions.timerHandle);
             if (captions.ele) captions.ele.innerHTML = label;
             captions.msgs.push({ text: label, stamp: (new Date()).getTime() });
         }
@@ -3059,11 +3068,11 @@ var ofmeet = (function (ofm) {
 
         ofm.recognition.onerror = function (event) {
             console.debug("Speech to text error", event);
-         console.debug('Speech recognition error detected: ' + event.error);
-         console.debug('Additional information: ' + event.message);
-         if (event.error && event.error == "network") {
+            console.debug('Speech recognition error detected: ' + event.error);
+            console.debug('Additional information: ' + event.message);
+            if (event.error && event.error == "network") {
                 ofm.recognitionActive = false;
-         }
+            }
         }
 
         ofm.recognition.start();

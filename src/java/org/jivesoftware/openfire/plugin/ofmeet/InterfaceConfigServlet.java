@@ -99,6 +99,7 @@ public class InterfaceConfigServlet extends HttpServlet
             config.put( "OFMEET_ENABLE_CONFETTI",                JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.confetti",               true                ) );
             config.put( "OFMEET_CACHE_PASSWORD",                 JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.cache.password",                true                ) );
             config.put( "OFMEET_ALLOW_UPLOADS",                  JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.allow.uploads",                 true                ) );
+            config.put( "OFMEET_CHAT_CAPTIONS_TIMEOUT",          JiveGlobals.getIntProperty(     "org.jitsi.videobridge.ofmeet.chat.captions.timeout",         0                   ) );
             config.put( "OFMEET_SHOW_CAPTIONS",                  JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.show.captions",                 false               ) );
             config.put( "OFMEET_ENABLE_TRANSCRIPTION",           JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.transcription",          false               ) );
             config.put( "OFMEET_CONTACTS_MGR",                   JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.contacts.manager",              false               ) );
@@ -114,7 +115,7 @@ public class InterfaceConfigServlet extends HttpServlet
 
             config.put( "RECENT_LIST_ENABLED",                   JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.recentlist",        true                ) );
             config.put( "IN_PROGRESS_LIST_ENABLED",              JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist",    false               ) );
-            config.put( "IN_PROGRESS_LIST_INTERVAL",             JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.interval", 10                ) );
+            config.put( "IN_PROGRESS_LIST_INTERVAL",             JiveGlobals.getIntProperty(     "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.interval", 10            ) );
 
             config.put( "filmStripOnly",                         ofMeetConfig.getFilmstripOnly()      );
             config.put( "VERTICAL_FILMSTRIP",                    ofMeetConfig.getVerticalFilmstrip()  );

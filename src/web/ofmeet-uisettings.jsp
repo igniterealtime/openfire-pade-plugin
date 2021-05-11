@@ -129,6 +129,12 @@
         final boolean enableConfetti = ParamUtils.getBooleanParameter( request, "enableConfetti" );          
         final boolean cachePassword = ParamUtils.getBooleanParameter( request, "cachePassword" );     
         final boolean showCaptions = ParamUtils.getBooleanParameter( request, "showCaptions" );        
+        final String chatCaptionsTimeout = request.getParameter( "chatCaptionsTimeout" );
+        try {
+            Long.parseLong( chatCaptionsTimeout );
+        } catch (NumberFormatException ex ) {
+            errors.put( "chatCaptionsTimeout", "Cannot parse value as long value." );
+        }
         final boolean enableTranscription = ParamUtils.getBooleanParameter( request, "enableTranscription" );  
         final boolean contactManager = ParamUtils.getBooleanParameter( request, "contactManager" );  
         final boolean allowUploads = ParamUtils.getBooleanParameter( request, "allowUploads" );           
@@ -233,6 +239,7 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.confetti", Boolean.toString( enableConfetti ) );             
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.cache.password", Boolean.toString( cachePassword ) ); 
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.show.captions", Boolean.toString( showCaptions ) ); 
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.chat.captions.timeout", chatCaptionsTimeout );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.transcription", Boolean.toString( enableTranscription  ) );                        
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.contacts.manager", Boolean.toString( contactManager  ) );                        
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.allow.uploads", Boolean.toString( allowUploads ) );             
@@ -507,6 +514,10 @@
                     <fmt:message key="ofmeet.show.captions" />
                 </td>
             </tr>    
+            <tr>
+                <td width="200"><fmt:message key="ofmeet.chat.captions.timeout"/>:</td>
+                <td><input type="text" size="10" maxlength="20" name="chatCaptionsTimeout" value="${admin:getLongProperty("org.jitsi.videobridge.ofmeet.chat.captions.timeout", 0)}"></td>
+            </tr>
             <tr>
                 <td nowrap colspan="2">
                     <input type="checkbox" name="enableTranscription" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.transcription", false) ? "checked" : ""}>

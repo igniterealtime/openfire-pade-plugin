@@ -15,12 +15,13 @@ import org.xmpp.component.ComponentManagerFactory;
 
 import org.dom4j.Element;
 import org.xmpp.packet.*;
-import java.util.List;
+import java.util.*;
 
 public class FocusComponent extends AbstractComponent
 {
     private static final Logger Log = LoggerFactory.getLogger(FocusComponent.class);
-
+	private HashMap<String, IQ> requests = new HashMap<>();
+	
     public FocusComponent()
     {
 
@@ -35,44 +36,70 @@ public class FocusComponent extends AbstractComponent
     {
         return "focus";
     }	
+
+    @Override protected void handleIQError(IQ iq)
+    {
+		handleResult(iq);	
+	}
 	
     @Override protected void handleIQResult(IQ iq)
     {
-        Log.debug("handleIQResult \n"+ iq.toString());	
+		handleResult(iq);	
+	}
+	
+    @Override public IQ handleIQSet(IQ iq)
+    {
+		return handleSet(iq);
+	}
+
+    @Override public IQ handleIQGet(IQ iq)
+    {
+		return handleSet(iq);
+	}		
+	
+    private void handleResult(IQ iq)
+    {	
+        Log.debug("handleResult got \n"+ iq.toString());	
 		
-        try {		
+        try {	
 			JID to = iq.getTo();
-			iq.setTo(to.getResource());
-			iq.setFrom("focus." + XMPPServer.getInstance().getServerInfo().getXMPPDomain());
-			XMPPServer.getInstance().getIQRouter().route( iq );	
+			String from = to.getResource();
+
+			IQ iq1 = iq.createCopy();			
+			iq1.setTo(from);
+			iq1.setFrom("focus." + XMPPServer.getInstance().getServerInfo().getXMPPDomain());
+			requests.put(from, iq1);
         }
         catch(Exception e) {
-            Log.error("handleIQResult", e);
+            Log.error("handleResult", e);
         }		
 	}		
 
-    @Override public IQ handleIQSet(IQ iq)
+    private IQ handleSet(IQ iq)
     {
-        Log.debug("handleIQSet \n"+ iq.toString());
-		IQ iq1 = IQ.createResultIQ(iq);
+        Log.debug("handleSet got \n"+ iq.toString());
 			
-        try {	
-			iq1.setType(org.xmpp.packet.IQ.Type.result);
-			iq1.setChildElement(iq.getChildElement().createCopy());
-			
-			JID from = iq.getFrom();
+        try {				
+			String from = iq.getFrom().toString();
 			String to = "focus@" + XMPPServer.getInstance().getServerInfo().getXMPPDomain() + "/focus";
 			
 			for (ClientSession sess : SessionManager.getInstance().getSessions("focus") )
 			{
 				to = sess.getAddress().toString();	
-			}			
-			iq.setTo(to);
-			iq.setFrom("focus." + XMPPServer.getInstance().getServerInfo().getXMPPDomain() + "/" + from);
-			XMPPServer.getInstance().getIQRouter().route( iq );			
+			}
+			IQ iq1 = iq.createCopy();		
+			iq1.setTo(to);
+			iq1.setFrom("focus." + XMPPServer.getInstance().getServerInfo().getXMPPDomain() + "/" + from);
+			XMPPServer.getInstance().getIQRouter().route( iq1 );
+			Log.debug("handleSet forwarded \n"+ iq1.toString());	
+			
+			while (!requests.containsKey(from)) Thread.sleep(1000);
+			IQ iq2 = requests.remove(from);
+			Log.debug("handleSet sent \n"+ iq2.toString());			
+			return iq2;
         }
         catch(Exception e) {
-            Log.error("handleIQSet", e);
+            Log.error("handleSet", e);
         }				
 		
         return null;

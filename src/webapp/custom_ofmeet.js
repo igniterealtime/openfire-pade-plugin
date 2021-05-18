@@ -672,8 +672,9 @@ var ofmeet = (function (ofm) {
             id: 'ofmeet-contacts',
             icon: IMAGES.contact,
             label: i18n('toolbar.contactsManager'),
+            shortcut: 'O',
             callback: (evt) => {
-                evt.stopPropagation();
+                if (evt) evt.stopPropagation();
                 doContacts();
             }
         });
@@ -762,8 +763,9 @@ var ofmeet = (function (ofm) {
             id: 'ofmeet-breakout',
             icon: IMAGES.person,
             label: i18n('toolbar.createBreakoutRooms'),
+            shortcut: 'B',
             callback: (evt) => {
-                evt.stopPropagation();
+                if (evt) evt.stopPropagation();
                 doBreakout();
                 getOccupants();
             }
@@ -831,8 +833,9 @@ var ofmeet = (function (ofm) {
             id: 'ofmeet-cursor',
             icon: IMAGES.cursor,
             label: i18n('toolbar.shareCursorMousePointer'),
+            shortcut: 'P',
             callback: (evt) => {
-                evt.stopPropagation();
+                if (evt) evt.stopPropagation();
 
                 if (!cursorShared) {
                     $('#ofmeet-cursor').addClass('toggled');

@@ -1264,7 +1264,7 @@ var ofmeet = (function (ofm) {
             audioTemporaryUnmuted = !audioTemporaryUnmuted;
             console.debug("audio " + (audioTemporaryUnmuted ? "temporary un" : "re") + "muted");
         }
-        setTimeout(lostAudioWorkaround, audioTemporaryUnmuted ? 1000 : lostAudioWorkaroundInterval);
+        setTimeout(lostAudioWorkaround, audioTemporaryUnmuted ? 1 : lostAudioWorkaroundInterval);
     }
 
     //-------------------------------------------------------

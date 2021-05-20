@@ -182,14 +182,14 @@ public class MeetController {
 				.setPrivateKey(privateKey)
 				.setSubject("mailto:admin@" + XMPPServer.getInstance().getServerInfo().getXMPPDomain());
 
-				Subscription subscription = new Gson().fromJson(subscriptionJson.toString(), Subscription.class);
-				Notification notification = new Notification(subscription, payload);
-				HttpResponse response = pushService.send(notification);
-				int statusCode = response.getStatusLine().getStatusCode();
+			Subscription subscription = new Gson().fromJson(subscriptionJson.toString(), Subscription.class);
+			Notification notification = new Notification(subscription, payload);
+			HttpResponse response = pushService.send(notification);
+			int statusCode = response.getStatusLine().getStatusCode();
 
-				ok = (200 == statusCode) || (201 == statusCode);
+			ok = (200 == statusCode) || (201 == statusCode);
 
-				Log.debug("sendWebPush delivered "  + statusCode + "\n" + response);
+			Log.debug("sendWebPush delivered "  + statusCode + "\n" + response);
 
         } catch (Exception e1) {
             Log.error("sendWebPush failed\n" + json, e1);

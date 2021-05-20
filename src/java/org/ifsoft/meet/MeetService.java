@@ -81,7 +81,7 @@ public class MeetService {
 
         return new UserEntities(users.values());
     }
-
+	
     @GET
     @Path("/webpush/{username}")
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -135,6 +135,23 @@ public class MeetService {
         return Response.status(Response.Status.BAD_REQUEST).build();
     }
 
+    @POST
+    @Path("/webpushsend")
+    public Response sendWebPush(String data) throws ServiceException {
+        Log.debug("sendWebPush \n" + data);
+
+        try {
+            if (meetController.sendWebPush(data))
+            {
+                return Response.status(Response.Status.OK).build();
+            }
+
+        } catch (Exception e) {
+            Log.error("sendWebPush", e);
+        }
+        return Response.status(Response.Status.BAD_REQUEST).build();
+    }
+	
     //-------------------------------------------------------
     //
     //  Message

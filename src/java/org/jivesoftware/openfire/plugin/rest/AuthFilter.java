@@ -41,6 +41,11 @@ public class AuthFilter implements ContainerRequestFilter {
         // Let web authn through
         if (containerRequest.getPath().contains("/meet/webauthn")) {
             return containerRequest;
+        }	
+
+        // Let web push through
+        if (containerRequest.getPath().contains("/webpushsend") && "POST".equals(containerRequest.getMethod())) {
+            return containerRequest;
         }		
 
         // Get the authentification passed in HTTP headers parameters

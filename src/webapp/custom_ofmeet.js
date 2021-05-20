@@ -3463,18 +3463,30 @@ var ofmeet = (function (ofm) {
         if (storage.getItem('pade.webpush.' + name)) {
             const secret = JSON.parse(storage.getItem('pade.webpush.' + name));
             const payload = { msgSubject: interfaceConfig.APP_NAME, msgBody: body, msgType: 'meeting', url: location.href };
-
-            console.debug("sendWebPush secret", secret, payload);
-
-            window.WebPushLib.setVapidDetails('xmpp:' + APP.conference._room.room.myroomjid, secret.publicKey, secret.privateKey);
-
-            window.WebPushLib.sendNotification(secret.subscription, JSON.stringify(payload), { TTL: 60 }).then(response => {
-                console.debug("Web Push Notification is sended!");
+			const data = {payload, publicKey: secret.publicKey, privateKey: secret.privateKey, subscription: secret.subscription};
+			
+            console.debug("sendWebPush data", data);
+			
+            fetch(location.protocol + "//" + location.host + "/rest/api/restapi/v1/meet/webpushsend", { method: "POST", body: JSON.stringify(data) }).then((success) => {
+                console.debug("webpushsend ok");
                 if (callback) callback(name);
-            }).catch(e => {
-                console.error('Failed to notify', name, e)
-                if (callback) callback(name, e);
+            }).catch((error) => {
+                console.error("webpushsend error", error);
+                if (callback) callback(name, error);				
             })
+
+			/* TODO go back to client-side when free proxy available or browser vendors support CORS
+		
+				window.WebPushLib.setVapidDetails('xmpp:' + APP.conference._room.room.myroomjid, secret.publicKey, secret.privateKey);
+
+				window.WebPushLib.sendNotification(secret.subscription, JSON.stringify(payload), { TTL: 60 }).then(response => {
+					console.debug("Web Push Notification is sended!");
+					if (callback) callback(name);
+				}).catch(e => {
+					console.error('Failed to notify', name, e)
+					if (callback) callback(name, e);
+				})
+			*/			
         }
     }
 

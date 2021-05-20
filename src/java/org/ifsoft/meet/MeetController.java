@@ -118,7 +118,7 @@ public class MeetController {
 
         User user = RawPropertyEditor.getInstance().getAndCheckUser(username);
         if (user == null) return false;
-        boolean ok = false;
+        boolean ok = true;
 
         String publicKey = user.getProperties().get("vapid.public.key");
         String privateKey = user.getProperties().get("vapid.private.key");
@@ -164,6 +164,39 @@ public class MeetController {
 
         return ok;
     }
+	
+    public boolean sendWebPush(String json)
+    {
+        Log.debug("sendWebPush\n" + json);
+        boolean ok = false;
+
+        try {	
+			JSONObject data = new JSONObject(json);
+			String payload = data.getString("payload");			
+			String publicKey = data.getString("publicKey");
+			String privateKey = data.getString("privateKey");
+			JSONObject subscriptionJson = data.getJSONObject("subscription");		
+			
+			PushService pushService = new PushService()
+				.setPublicKey(publicKey)
+				.setPrivateKey(privateKey)
+				.setSubject("mailto:admin@" + XMPPServer.getInstance().getServerInfo().getXMPPDomain());
+
+				Subscription subscription = new Gson().fromJson(subscriptionJson.toString(), Subscription.class);
+				Notification notification = new Notification(subscription, payload);
+				HttpResponse response = pushService.send(notification);
+				int statusCode = response.getStatusLine().getStatusCode();
+
+				ok = (200 == statusCode) || (201 == statusCode);
+
+				Log.debug("sendWebPush delivered "  + statusCode + "\n" + response);
+
+        } catch (Exception e1) {
+            Log.error("sendWebPush failed\n" + json, e1);
+        }
+
+        return ok;
+    }	
 
     /**
      * store web push subscription as a user property

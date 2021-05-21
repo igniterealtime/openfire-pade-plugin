@@ -493,7 +493,7 @@ var ofmeet = (function (ofm) {
         }
 
         if (storage.getItem('ofmeet.settings.avatar')) {
-            console.log('custom_ofmeet.js found avatar');
+            console.debug('custom_ofmeet.js found avatar');
             const dataUri = JSON.parse(storage.getItem('ofmeet.settings.avatar'));
             changeAvatar(dataUri, AvatarType.UPLOAD);
         } else {
@@ -556,7 +556,7 @@ var ofmeet = (function (ofm) {
         setTimeout(postLoadSetup);
         setTimeout(postJoinSetup);
 
-        console.log("custom_ofmeet.js setup", APP.connection, captions);
+        console.debug("custom_ofmeet.js setup", APP.connection, captions);
 
         setTimeout(lostAudioWorkaround, 5000);
     }
@@ -1148,7 +1148,7 @@ var ofmeet = (function (ofm) {
     }
 
     function handlePresence(presence) {
-        //console.log("handlePresence", presence);
+        //console.debug("handlePresence", presence);
 
         const id = Strophe.getResourceFromJid(presence.getAttribute('from'));
         const raisedHand = presence.querySelector('jitsi_participant_raisedHand');
@@ -2225,16 +2225,16 @@ var ofmeet = (function (ofm) {
         const ws = new WebSocket(url, [streamKey]);
 
         ws.onopen = (event) => {
-            console.log(`Connection opened: ${JSON.stringify(event)}`);
+            console.debug(`Connection opened: ${JSON.stringify(event)}`);
             ws.send(JSON.stringify(metadata));
         };
 
         ws.onclose = (event) => {
-            console.log(`Connection closed: ${JSON.stringify(event)}`);
+            console.debug(`Connection closed: ${JSON.stringify(event)}`);
         };
 
         ws.onerror = (event) => {
-            console.log(`An error occurred with websockets: ${JSON.stringify(event)}`);
+            console.debug(`An error occurred with websockets: ${JSON.stringify(event)}`);
         };
         return ws;
     }
@@ -2400,7 +2400,7 @@ var ofmeet = (function (ofm) {
                 room.setLocalParticipantProperty('mainRoomUserId', this.mainRoomUserId);
             }
 
-            console.log(decodeURI(APP.conference.roomName));
+            console.debug(decodeURI(APP.conference.roomName));
             if (decodeURI(APP.conference.roomName) != this.breakoutRoom) {
                 storage.removeItem('breakoutRoom');
                 storage.removeItem('startTime');
@@ -2706,7 +2706,7 @@ var ofmeet = (function (ofm) {
                     for (let i = currentSize - 1; i >= size; i--) {
                         const roomParticipants = this.getRoomParticipants(i + 1);
                         for (let p of roomParticipants) {
-                            console.log(p);
+                            console.debug(p);
                             this.moveRoomParticipant('participants', p);
                         }
                         this.kanban.removeBoard('room_' + (i + 1));

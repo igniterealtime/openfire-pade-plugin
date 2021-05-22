@@ -3464,10 +3464,11 @@ var ofmeet = (function (ofm) {
             const secret = JSON.parse(storage.getItem('pade.webpush.' + name));
             const payload = { msgSubject: interfaceConfig.APP_NAME, msgBody: body, msgType: 'meeting', url: location.href };
 			const data = {payload, publicKey: secret.publicKey, privateKey: secret.privateKey, subscription: secret.subscription};
+			const host = config.bosh.split("/")[2];
 			
-            console.debug("sendWebPush data", data);
+            console.debug("sendWebPush data", host, data);
 			
-            fetch(location.protocol + "//" + location.host + "/rest/api/restapi/v1/meet/webpushsend", { method: "POST", body: JSON.stringify(data) }).then((success) => {
+            fetch(location.protocol + "//" + host + "/rest/api/restapi/v1/meet/webpushsend", { method: "POST", body: JSON.stringify(data) }).then((success) => {
                 console.debug("webpushsend ok");
                 if (callback) callback(name);
             }).catch((error) => {

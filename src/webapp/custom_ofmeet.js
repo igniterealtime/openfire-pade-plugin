@@ -178,7 +178,7 @@ var ofmeet = (function (ofm) {
             if (window.webkitSpeechRecognition && !isElectron()) setupVoiceCommand()
         }
 
-        setTimeout(setup);
+        setTimeout(preSetup);
     });
 
     window.addEventListener("beforeunload", function (event) {
@@ -319,15 +319,30 @@ var ofmeet = (function (ofm) {
             enter_room_button.parentNode.appendChild(button);
         }
     }
+	
+    function preSetup() {
+        if (!APP.connection) {
+            setTimeout(preSetup);
+            return;
+        }
+
+        console.debug("custom_ofmeet.js pre-setup");
+		
+        APP.connection.xmpp.connection.addHandler(handleMessage, null, "message");
+        APP.connection.xmpp.connection.addHandler(handleMucMessage, "urn:xmpp:json:0", "message");
+        APP.connection.xmpp.connection.addHandler(handlePresence, null, "presence");
+		
+		setup();	
+	}	
 
     function setup() {
         if (!APP.connection || !APP.conference || !APP.conference.isJoined()) {
-            setTimeout(setup, 100);
+            setTimeout(setup);
             return;
         }
 
         console.debug("custom_ofmeet.js setup");
-
+				
         if (!config.webinar) {
             const room = getConference();
 
@@ -386,10 +401,12 @@ var ofmeet = (function (ofm) {
                 addParticipant(id);
             });
 
-            room.on(JitsiMeetJS.events.conference.USER_LEFT, function (id) {
-                console.debug("user left", id);
-                removeParticipant(id);
-            });
+
+			room.on(JitsiMeetJS.events.conference.USER_LEFT, function (id) {
+				console.debug("user left", id);
+				removeParticipant(id);
+			});
+			
 
             room.on(JitsiMeetJS.events.conference.TRACK_ADDED, function (track) {
                 const id = track.getParticipantId();
@@ -550,10 +567,6 @@ var ofmeet = (function (ofm) {
             getVCard();
             getBookmarks();
         }
-
-        APP.connection.xmpp.connection.addHandler(handleMessage, null, "message");
-        APP.connection.xmpp.connection.addHandler(handleMucMessage, "urn:xmpp:json:0", "message");
-        APP.connection.xmpp.connection.addHandler(handlePresence, null, "presence");
 
         getServiceWorker(function (registration) {
             console.debug('Service worker registered', registration);
@@ -1220,7 +1233,7 @@ var ofmeet = (function (ofm) {
         return true;
     }
 
-    function handleMessage(msg) {
+    function handleMessage(msg) {		
         if (!msg.getAttribute("type")) // alert message
         {
             const body = msg.querySelector('body');
@@ -1234,7 +1247,7 @@ var ofmeet = (function (ofm) {
         return true;
     }
 
-    function handleMucMessage(msg) {
+    function handleMucMessage(msg) {	
         const participant = Strophe.getResourceFromJid(msg.getAttribute("from"));
 
         if (msg.getAttribute("type") == "error") {
@@ -1263,14 +1276,26 @@ var ofmeet = (function (ofm) {
                         breakoutClient.stopBreakout(json.url, json.wait);
                     }
                     break;
+				case 'push-room-properties':
+					handleRoomProperties(json);
+					break;
                 default:
                     console.error("unknown MUC message");
-                    return;
+                    return true;
             }
         }
 
         return true;
     }
+	
+	function handleRoomProperties(json)	{
+        const keys = Object.getOwnPropertyNames(json);
+
+        keys.forEach(function (key) {
+			console.debug("handleRoomProperties", key, json[key]);
+			interfaceConfig[key] = json[key];
+        })		
+	}
 
     //-------------------------------------------------------
     //  WORKAROUND: prevent disruption of a muted audio connection by a short toggle

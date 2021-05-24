@@ -37,15 +37,30 @@ public class MUCRoomProperties implements Map<String, String>, Serializable {
 
     private static Cache muc_properties = CacheFactory.createLocalCache("MUC Room Properties");
 
-    public static String get(String service, String roomName, String propName, String defaultValue)
+    public static Map<String, String> get(String service, String roomName)
     {
 		MUCRoom room = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(service).getChatRoom(roomName);
 
 		if (room != null)
 		{		
 			Map<String, String> props = (Map<String, String>) muc_properties.get(room.getJID().toString());
-			if (props == null) props = new MUCRoomProperties(room.getID());			
-			if (props == null) return defaultValue;
+			
+			if (props == null)
+			{
+				props = new MUCRoomProperties(room.getID());			
+                muc_properties.put(room.getJID().toString(), props);
+			}				
+			return props;
+		}
+		return null;
+    }
+	
+    public static String get(String service, String roomName, String propName, String defaultValue)
+    {
+		Map<String, String> props =  MUCRoomProperties.get(service, roomName);
+
+		if (props != null)
+		{		
 			return props.get(propName);
 		}
 		return defaultValue;

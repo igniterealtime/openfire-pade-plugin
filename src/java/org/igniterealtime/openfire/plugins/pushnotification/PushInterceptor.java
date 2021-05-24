@@ -104,7 +104,7 @@ public class PushInterceptor implements PacketInterceptor, OfflineMessageListene
         }
         catch ( UserNotFoundException e )
         {
-            Log.debug( "Not a recognized user.", e );
+            Log.debug( "Not a recognized user.");
             return;
         }
 

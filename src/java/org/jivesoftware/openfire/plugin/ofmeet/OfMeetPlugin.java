@@ -62,6 +62,8 @@ import org.jivesoftware.util.JiveGlobals;
 import org.jivesoftware.util.StringUtils;
 import org.jivesoftware.util.PropertyEventDispatcher;
 import org.jivesoftware.util.PropertyEventListener;
+import org.jivesoftware.util.cache.Cache;
+import org.jivesoftware.util.cache.CacheFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,6 +104,7 @@ import javax.xml.bind.DatatypeConverter;
 import org.voicebridge.Application;
 import com.sun.voip.server.*;
 import com.sun.voip.*;
+import org.ifsoft.oju.openfire.MUCRoomProperties;
 
 /**
  * Bundles various Jitsi components into one, standalone Openfire plugin.
@@ -110,8 +113,9 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 {
     private static final Logger Log = LoggerFactory.getLogger(OfMeetPlugin.class);
     private static final ScheduledExecutorService connExec = Executors.newSingleThreadScheduledExecutor();
+    private static Cache muc_properties = CacheFactory.createLocalCache("MUC Room Properties");	
     public static OfMeetPlugin self;
-    public static String webRoot;
+    public static String webRoot;	
     public boolean restartNeeded = false;
 
     private ManagerConnection managerConnection;
@@ -916,13 +920,14 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     @Override
     public void occupantJoined(final JID roomJID, JID user, String nickname)
     {
+		String roomName = roomJID.getNode();
+		String serviceName = roomJID.getDomain().replace("."+ XMPPServer.getInstance().getServerInfo().getXMPPDomain(), "");		
+		String userName = user.getNode();
+		
+        Log.debug("occupantJoined " + roomName + " " + serviceName + " " + nickname + " " + userName);		
+			
         if (config.getJigasiSipEnabled() && config.getJigasiSipUserId() != null)		
         {
-            Log.debug("occupantJoined " + roomJID + " " + nickname + " " + user);
-
-            String roomName = roomJID.getNode();
-            String userName = user.getNode();
-
             try {
 
                 if ("focus".equals(userName) && nickname.startsWith("focus") && !"ofgasi".equals(roomName) && !"ofmeet".equals(roomName))
@@ -965,9 +970,33 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 					}				
                 }
             } catch ( Exception e ) {
-                Log.error( "An exception occurred while trying to start freeswitch conference " + roomName, e );
+                Log.error( "occupantJoined error " + roomName, e );
             }
         }
+		else if (!"ofgasi".equals(roomName) && !"ofmeet".equals(roomName)) {		
+			Map<String, String> props =  MUCRoomProperties.get(serviceName, roomName);	
+
+			if (props != null)
+			{
+				JSONObject jsonMsg = new JSONObject();
+				jsonMsg.put("action", "push-room-properties");
+				
+				for (String key : props.keySet())
+				{
+					String value = props.get(key);
+					jsonMsg.put(key, value.equals("true") ? true : (value.equals("false") ? false : value));
+				}
+				
+				Message message = new Message();
+				message.setFrom(roomJID);
+				message.setTo(user);
+				Element json = message.addChildElement("json", "urn:xmpp:json:0");
+				json.setText(jsonMsg.toString());
+				XMPPServer.getInstance().getRoutingTable().routePacket(user, message, true);	
+				
+				Log.debug("occupantJoined json\n" + jsonMsg); 					
+			}			
+		}
     }
 
     @Override

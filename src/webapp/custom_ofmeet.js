@@ -165,18 +165,17 @@ var ofmeet = (function (ofm) {
             storage = new DummyStorage();
         }
 
-        if (!config.webinar) {
-            if (typeof indexedDB.databases == "function") {
-                indexedDB.databases().then(function (databases) {
-                    console.debug("custom_ofmeet.js found databases", databases);
+		if (typeof indexedDB.databases == "function") {
+			indexedDB.databases().then(function (databases) {
+				console.debug("custom_ofmeet.js found databases", databases);
 
-                    databases.forEach(function (db) {
-                        if (db.name.indexOf("ofmeet-db-") > -1) recoverRecording(db.name);
-                    })
-                })
-            }
-            if (window.webkitSpeechRecognition && !isElectron()) setupVoiceCommand()
-        }
+				databases.forEach(function (db) {
+					if (db.name.indexOf("ofmeet-db-") > -1) recoverRecording(db.name);
+				})
+			})
+		}
+		if (window.webkitSpeechRecognition && !isElectron()) setupVoiceCommand()
+
 
         setTimeout(preSetup);
     });
@@ -184,7 +183,7 @@ var ofmeet = (function (ofm) {
     window.addEventListener("beforeunload", function (event) {
         console.debug("custom_ofmeet.js beforeunload");
 
-        if (APP.connection && !config.webinar) {
+        if (APP.connection) {
             if (dbnames.length > 0 || ofm.recording) {
                 event.preventDefault();
                 event.returnValue = '';
@@ -342,178 +341,175 @@ var ofmeet = (function (ofm) {
         }
 
         console.debug("custom_ofmeet.js setup");
-				
-        if (!config.webinar) {
-            const room = getConference();
+		
+		const room = getConference();
+		listenWebPushEvents();
 
-            listenWebPushEvents();
+		if (hashParams.subject) {
+			setConferenceName(hashParams.subject);
+		}
 
-            if (hashParams.subject) {
-                setConferenceName(hashParams.subject);
-            }
+		breakoutClient = new BreakoutClient();
 
-            breakoutClient = new BreakoutClient();
+		room.on(JitsiMeetJS.events.conference.CONFERENCE_LEFT, function () {
+			console.debug("custom_ofmeet.js me left");
 
-            room.on(JitsiMeetJS.events.conference.CONFERENCE_LEFT, function () {
-                console.debug("custom_ofmeet.js me left");
+			if (interfaceConfig.OFMEET_RECORD_CONFERENCE) {
+				if (ofm.recording) stopRecorder();
 
-                if (interfaceConfig.OFMEET_RECORD_CONFERENCE) {
-                    if (ofm.recording) stopRecorder();
+				const ids = Object.getOwnPropertyNames(recordingVideoTrack);
 
-                    const ids = Object.getOwnPropertyNames(recordingVideoTrack);
+				ids.forEach(function (id) {
+					delete recordingAudioTrack[id];
+					delete recordingVideoTrack[id];
+				});
+			}
+		});
 
-                    ids.forEach(function (id) {
-                        delete recordingAudioTrack[id];
-                        delete recordingVideoTrack[id];
-                    });
-                }
-            });
+		room.on(JitsiMeetJS.events.conference.USER_ROLE_CHANGED, function (user, role) {
+			console.debug("custom_ofmeet.js participant role change", user, role);
 
-            room.on(JitsiMeetJS.events.conference.USER_ROLE_CHANGED, function (user, role) {
-                console.debug("custom_ofmeet.js participant role change", user, role);
+			if (interfaceConfig.OFMEET_ENABLE_BREAKOUT &&
+				role == "moderator" &&
+				user == APP.conference.getMyUserId() &&
+				breakoutClient.state != BreakoutState.STARTED) {
+				$('#ofmeet-breakout').parent().show();
+			}
+		});
 
-                if (interfaceConfig.OFMEET_ENABLE_BREAKOUT &&
-                    role == "moderator" &&
-                    user == APP.conference.getMyUserId() &&
-                    breakoutClient.state != BreakoutState.STARTED) {
-                    $('#ofmeet-breakout').parent().show();
-                }
-            });
+		room.on(JitsiMeetJS.events.conference.TRACK_REMOVED, function (track) {
+			console.debug("custom_ofmeet.js track removed", track.getParticipantId());
 
-            room.on(JitsiMeetJS.events.conference.TRACK_REMOVED, function (track) {
-                console.debug("custom_ofmeet.js track removed", track.getParticipantId());
+			if (track.getParticipantId() == APP.conference.getMyUserId()) {
+				clockTrack.leaves = (new Date()).getTime();
+				hideClock();
 
-                if (track.getParticipantId() == APP.conference.getMyUserId()) {
-                    clockTrack.leaves = (new Date()).getTime();
-                    hideClock();
+				if (ofm.recognition) {
+					ofm.recognitionActive = false;
+					ofm.recognition.stop();
+				}
 
-                    if (ofm.recognition) {
-                        ofm.recognitionActive = false;
-                        ofm.recognition.stop();
-                    }
+				if (ofm.recording) stopRecorder();
+			}
+		});
 
-                    if (ofm.recording) stopRecorder();
-                }
-            });
-
-            room.on(JitsiMeetJS.events.conference.USER_JOINED, function (id) {
-                console.debug("user join", id, participants);
-                addParticipant(id);
-            });
+		room.on(JitsiMeetJS.events.conference.USER_JOINED, function (id) {
+			console.debug("user join", id, participants);
+			addParticipant(id);
+		});
 
 
-			room.on(JitsiMeetJS.events.conference.USER_LEFT, function (id) {
-				console.debug("user left", id);
-				removeParticipant(id);
-			});
-			
+		room.on(JitsiMeetJS.events.conference.USER_LEFT, function (id) {
+			console.debug("user left", id);
+			removeParticipant(id);
+		});
+		
 
-            room.on(JitsiMeetJS.events.conference.TRACK_ADDED, function (track) {
-                const id = track.getParticipantId();
-                console.debug("custom_ofmeet.js track added", id, track.getType());
+		room.on(JitsiMeetJS.events.conference.TRACK_ADDED, function (track) {
+			const id = track.getParticipantId();
+			console.debug("custom_ofmeet.js track added", id, track.getType());
 
-                if (interfaceConfig.OFMEET_RECORD_CONFERENCE) {
-                    if (track.getType() == "audio") recordingAudioTrack[id] = track.stream;
-                    if (track.getType() == "video") recordingVideoTrack[id] = track.stream;
-                }
-            });
+			if (interfaceConfig.OFMEET_RECORD_CONFERENCE) {
+				if (track.getType() == "audio") recordingAudioTrack[id] = track.stream;
+				if (track.getType() == "video") recordingVideoTrack[id] = track.stream;
+			}
+		});
 
-            room.on(JitsiMeetJS.events.conference.PARTICIPANT_PROPERTY_CHANGED, function (participant, property, oldValue, newValue) {
-                console.debug("custom_ofmeet.js property changed", participant, property, oldValue, newValue);
+		room.on(JitsiMeetJS.events.conference.PARTICIPANT_PROPERTY_CHANGED, function (participant, property, oldValue, newValue) {
+			console.debug("custom_ofmeet.js property changed", participant, property, oldValue, newValue);
 
-                if (property == 'mainRoomUserId') {
-                    if (breakoutHost) {
-                        breakoutHost.recallParticipant(participant._id, newValue);
-                    }
-                }
-            });
+			if (property == 'mainRoomUserId') {
+				if (breakoutHost) {
+					breakoutHost.recallParticipant(participant._id, newValue);
+				}
+			}
+		});
 
-            room.on(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, function (track) {
-                const id = track.getParticipantId();
-                console.debug("custom_ofmeet.js track muted", id, track.getType(), track.isMuted());
+		room.on(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, function (track) {
+			const id = track.getParticipantId();
+			console.debug("custom_ofmeet.js track muted", id, track.getType(), track.isMuted());
 
-                if (interfaceConfig.OFMEET_RECORD_CONFERENCE) {
-                    if (track.getType() == "audio" && recordingAudioTrack[id]) recordingAudioTrack[id].getAudioTracks()[0].enabled = !track.isMuted();
-                    if (track.getType() == "video" && recordingVideoTrack[id]) recordingVideoTrack[id].getVideoTracks()[0].enabled = !track.isMuted();
+			if (interfaceConfig.OFMEET_RECORD_CONFERENCE) {
+				if (track.getType() == "audio" && recordingAudioTrack[id]) recordingAudioTrack[id].getAudioTracks()[0].enabled = !track.isMuted();
+				if (track.getType() == "video" && recordingVideoTrack[id]) recordingVideoTrack[id].getVideoTracks()[0].enabled = !track.isMuted();
 
-                    const recordingStream = recorderStreams[id];
+				const recordingStream = recorderStreams[id];
 
-                    if (recordingStream) // recording active
-                    {
-                        if (track.getType() == "audio") recordingStream.getAudioTracks()[0].enabled = !track.isMuted();
-                        if (track.getType() == "video") recordingStream.getVideoTracks()[0].enabled = !track.isMuted();
-                    }
-                }
+				if (recordingStream) // recording active
+				{
+					if (track.getType() == "audio") recordingStream.getAudioTracks()[0].enabled = !track.isMuted();
+					if (track.getType() == "video") recordingStream.getVideoTracks()[0].enabled = !track.isMuted();
+				}
+			}
 
-                if (APP.conference.getMyUserId() == id) {
-                    if (ofm.recognition) {
-                        if (track.isMuted()) // speech recog synch
-                        {
-                            console.debug("muted, stopping speech transcription");
+			if (APP.conference.getMyUserId() == id) {
+				if (ofm.recognition) {
+					if (track.isMuted()) // speech recog synch
+					{
+						console.debug("muted, stopping speech transcription");
 
-                            ofm.recognitionActive = false;
-                            ofm.recognition.stop();
+						ofm.recognitionActive = false;
+						ofm.recognition.stop();
 
-                        } else {
-                            console.debug("unmuted, starting speech transcription");
-                            ofm.recognition.start();
-                        }
-                    }
-                }
-            });
+					} else {
+						console.debug("unmuted, starting speech transcription");
+						ofm.recognition.start();
+					}
+				}
+			}
+		});
 
-            room.on(JitsiMeetJS.events.conference.PRIVATE_MESSAGE_RECEIVED, function (id, text, ts) {
-                var participant = APP.conference.getParticipantById(id);
-                var displayName = participant ? (participant._displayName || 'Anonymous-' + id) : (APP.conference.getLocalDisplayName() || "Me");
+		room.on(JitsiMeetJS.events.conference.PRIVATE_MESSAGE_RECEIVED, function (id, text, ts) {
+			var participant = APP.conference.getParticipantById(id);
+			var displayName = participant ? (participant._displayName || 'Anonymous-' + id) : (APP.conference.getLocalDisplayName() || "Me");
 
-                console.debug("custom_ofmeet.js private message", id, text, ts, displayName);
+			console.debug("custom_ofmeet.js private message", id, text, ts, displayName);
 
-                const pretty_time = dayjs().format('MMM DD HH:mm:ss');
-                pdf_body.push([pretty_time, displayName, text]);
-            });
+			const pretty_time = dayjs().format('MMM DD HH:mm:ss');
+			pdf_body.push([pretty_time, displayName, text]);
+		});
 
-            room.on(JitsiMeetJS.events.conference.MESSAGE_RECEIVED, function (id, text, ts) {
-                var participant = APP.conference.getParticipantById(id);
-                var displayName = participant ? (participant._displayName || 'Anonymous-' + id) : (APP.conference.getLocalDisplayName() || "Me");
+		room.on(JitsiMeetJS.events.conference.MESSAGE_RECEIVED, function (id, text, ts) {
+			var participant = APP.conference.getParticipantById(id);
+			var displayName = participant ? (participant._displayName || 'Anonymous-' + id) : (APP.conference.getLocalDisplayName() || "Me");
 
-                console.debug("custom_ofmeet.js message", id, text, ts, displayName, participant, padsModalOpened);
+			console.debug("custom_ofmeet.js message", id, text, ts, displayName, participant, padsModalOpened);
 
-                if (text.indexOf(interfaceConfig.OFMEET_CRYPTPAD_URL) == 0) {
-                    if (padsModalOpened) notifyText(displayName, text, id, function (button) {
-                        openPad(text);
-                    })
+			if (text.indexOf(interfaceConfig.OFMEET_CRYPTPAD_URL) == 0) {
+				if (padsModalOpened) notifyText(displayName, text, id, function (button) {
+					openPad(text);
+				})
 
-                    if (padsModalOpened) {
-                        addPad(text);
-                    } else {
-                        padsList.push(text);
-                    }
-                } else {
+				if (padsModalOpened) {
+					addPad(text);
+				} else {
+					padsList.push(text);
+				}
+			} else {
 
-                    if (text.indexOf("http") != 0 && !captions.msgsDisabled) {
-                        if (captions.ele) {
-                          captions.ele.innerHTML = displayName + " : " + text;
-                          if (interfaceConfig.OFMEET_CHAT_CAPTIONS_TIMEOUT && (interfaceConfig.OFMEET_CHAT_CAPTIONS_TIMEOUT > 0)) {
-                            if (captions.timerHandle) window.clearTimeout(captions.timerHandle);
-                            captions.timerHandle = window.setTimeout(function() {
-                              captions.ele.innerHTML = "";
-                            }, interfaceConfig.OFMEET_CHAT_CAPTIONS_TIMEOUT);
-                          }
-                        }
-                        captions.msgs.push({ text: text, stamp: (new Date()).getTime() });
-                    }
+				if (text.indexOf("http") != 0 && !captions.msgsDisabled) {
+					if (captions.ele) {
+					  captions.ele.innerHTML = displayName + " : " + text;
+					  if (interfaceConfig.OFMEET_CHAT_CAPTIONS_TIMEOUT && (interfaceConfig.OFMEET_CHAT_CAPTIONS_TIMEOUT > 0)) {
+						if (captions.timerHandle) window.clearTimeout(captions.timerHandle);
+						captions.timerHandle = window.setTimeout(function() {
+						  captions.ele.innerHTML = "";
+						}, interfaceConfig.OFMEET_CHAT_CAPTIONS_TIMEOUT);
+					  }
+					}
+					captions.msgs.push({ text: text, stamp: (new Date()).getTime() });
+				}
 
-                    const pretty_time = dayjs().format('MMM DD HH:mm:ss');
-                    pdf_body.push([pretty_time, displayName, text]);
-                }
+				const pretty_time = dayjs().format('MMM DD HH:mm:ss');
+				pdf_body.push([pretty_time, displayName, text]);
+			}
 
-                if (breakoutHost && breakoutHost.started) {
-                    breakoutHost.broadcastMessage(text);
-                }
-            });
+			if (breakoutHost && breakoutHost.started) {
+				breakoutHost.broadcastMessage(text);
+			}
+		});
 
-            captions.ele = document.getElementById("captions");
-        }
+		captions.ele = document.getElementById("captions");
 
         if (storage.getItem('ofmeet.settings.avatar')) {
             console.debug('custom_ofmeet.js found avatar');
@@ -637,7 +633,7 @@ var ofmeet = (function (ofm) {
             }
         }
 
-        if (interfaceConfig.OFMEET_RECORD_CONFERENCE && !config.webinar) {
+        if (interfaceConfig.OFMEET_RECORD_CONFERENCE) {
             createRecordButton();
             createPhotoButton();
             createDesktopButton();
@@ -648,7 +644,7 @@ var ofmeet = (function (ofm) {
             }
         }
 
-        if (interfaceConfig.OFMEET_TAG_CONFERENCE && !config.webinar) {
+        if (interfaceConfig.OFMEET_TAG_CONFERENCE) {
             if (interfaceConfig.OFMEET_ENABLE_TRANSCRIPTION && window.webkitSpeechRecognition && !isElectron()) {
                 setupSpeechRecognition();
             }

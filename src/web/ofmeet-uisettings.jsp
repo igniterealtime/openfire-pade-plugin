@@ -128,7 +128,7 @@
         final boolean startEtherpad = ParamUtils.getBooleanParameter( request, "startEtherpad" );          
         final boolean enableConfetti = ParamUtils.getBooleanParameter( request, "enableConfetti" );          
         final boolean cachePassword = ParamUtils.getBooleanParameter( request, "cachePassword" );     
-        final boolean showCaptions = ParamUtils.getBooleanParameter( request, "showCaptions" );        
+        final boolean enableCaptions = ParamUtils.getBooleanParameter( request, "enableCaptions" );        
         final String chatCaptionsTimeout = request.getParameter( "chatCaptionsTimeout" );
         try {
             Long.parseLong( chatCaptionsTimeout );
@@ -240,7 +240,7 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.start.etherpad", Boolean.toString( startEtherpad ) );             
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.confetti", Boolean.toString( enableConfetti ) );             
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.cache.password", Boolean.toString( cachePassword ) ); 
-            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.show.captions", Boolean.toString( showCaptions ) ); 
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.captions", Boolean.toString( enableCaptions ) ); 
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.chat.captions.timeout", chatCaptionsTimeout );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.start.captions", Boolean.toString( startCaptions ) ); 
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.transcription", Boolean.toString( enableTranscription  ) );                        
@@ -514,8 +514,8 @@
             </tr>   
             <tr>
                 <td nowrap>
-                    <input type="checkbox" name="showCaptions" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.show.captions", false) ? "checked" : ""}>
-                    <fmt:message key="ofmeet.show.captions" />
+                    <input type="checkbox" name="enableCaptions" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.captions", false) ? "checked" : ""}>
+                    <fmt:message key="ofmeet.enable.captions" />
                 </td>
                 <td nowrap>
                     <input type="checkbox" name="startCaptions" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.start.captions", false) ? "checked" : ""}>

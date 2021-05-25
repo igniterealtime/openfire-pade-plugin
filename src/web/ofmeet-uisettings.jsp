@@ -135,7 +135,9 @@
         } catch (NumberFormatException ex ) {
             errors.put( "chatCaptionsTimeout", "Cannot parse value as long value." );
         }
+        final boolean startCaptions = ParamUtils.getBooleanParameter( request, "startCaptions" );        
         final boolean enableTranscription = ParamUtils.getBooleanParameter( request, "enableTranscription" );  
+        final boolean startTranscription = ParamUtils.getBooleanParameter( request, "startTranscription" );  
         final boolean contactManager = ParamUtils.getBooleanParameter( request, "contactManager" );  
         final boolean allowUploads = ParamUtils.getBooleanParameter( request, "allowUploads" );           
         final boolean enableBreakout = ParamUtils.getBooleanParameter( request, "enableBreakout" ); 
@@ -240,7 +242,9 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.cache.password", Boolean.toString( cachePassword ) ); 
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.show.captions", Boolean.toString( showCaptions ) ); 
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.chat.captions.timeout", chatCaptionsTimeout );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.start.captions", Boolean.toString( startCaptions ) ); 
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.transcription", Boolean.toString( enableTranscription  ) );                        
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.start.transcription", Boolean.toString( startTranscription  ) );                        
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.contacts.manager", Boolean.toString( contactManager  ) );                        
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.allow.uploads", Boolean.toString( allowUploads ) );             
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.breakout", Boolean.toString( enableBreakout ) );              
@@ -509,9 +513,13 @@
                 </td>
             </tr>   
             <tr>
-                <td nowrap colspan="2">
+                <td nowrap>
                     <input type="checkbox" name="showCaptions" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.show.captions", false) ? "checked" : ""}>
                     <fmt:message key="ofmeet.show.captions" />
+                </td>
+                <td nowrap>
+                    <input type="checkbox" name="startCaptions" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.start.captions", false) ? "checked" : ""}>
+                    <fmt:message key="ofmeet.start.captions" />
                 </td>
             </tr>    
             <tr>
@@ -519,9 +527,13 @@
                 <td><input type="text" size="10" maxlength="20" name="chatCaptionsTimeout" value="${admin:getLongProperty("org.jitsi.videobridge.ofmeet.chat.captions.timeout", 0)}"></td>
             </tr>
             <tr>
-                <td nowrap colspan="2">
+                <td nowrap>
                     <input type="checkbox" name="enableTranscription" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.transcription", false) ? "checked" : ""}>
                     <fmt:message key="ofmeet.enable.transcription" />
+                </td>
+                <td nowrap>
+                    <input type="checkbox" name="startTranscription" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.start.transcription", false) ? "checked" : ""}>
+                    <fmt:message key="ofmeet.start.transcription" />
                 </td>
             </tr>                            
             <tr>

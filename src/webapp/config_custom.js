@@ -10,8 +10,8 @@ if (location.hash.indexOf("interfaceConfig.OFMEET_RECORD_CONFERENCE=false") > -1
 if (location.hash.indexOf("interfaceConfig.OFMEET_ENABLE_TRANSCRIPTION=true") > -1) interfaceConfig.OFMEET_ENABLE_TRANSCRIPTION = true;
 if (location.hash.indexOf("interfaceConfig.OFMEET_ENABLE_TRANSCRIPTION=false") > -1) interfaceConfig.OFMEET_ENABLE_TRANSCRIPTION = false;
 
-if (location.hash.indexOf("interfaceConfig.OFMEET_SHOW_CAPTIONS=true") > -1) interfaceConfig.OFMEET_SHOW_CAPTIONS = true;
-if (location.hash.indexOf("interfaceConfig.OFMEET_SHOW_CAPTIONS=false") > -1) interfaceConfig.OFMEET_SHOW_CAPTIONS = false;
+if (location.hash.indexOf("interfaceConfig.OFMEET_ENABLE_CAPTIONS=true") > -1) interfaceConfig.OFMEET_ENABLE_CAPTIONS = true;
+if (location.hash.indexOf("interfaceConfig.OFMEET_ENABLE_CAPTIONS=false") > -1) interfaceConfig.OFMEET_ENABLE_CAPTIONS = false;
 
 if (location.hash.indexOf("interfaceConfig.OFMEET_ENABLE_BREAKOUT=true") > -1) interfaceConfig.OFMEET_ENABLE_BREAKOUT = true;
 if (location.hash.indexOf("interfaceConfig.OFMEET_ENABLE_BREAKOUT=false") > -1) interfaceConfig.OFMEET_ENABLE_BREAKOUT = false;

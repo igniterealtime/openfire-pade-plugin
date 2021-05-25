@@ -649,8 +649,8 @@ var ofmeet = (function (ofm) {
                 setupSpeechRecognition();
             }
 
-            captions.msgsDisabled = !interfaceConfig.OFMEET_SHOW_CAPTIONS;
-            captions.transcriptDisabled = !interfaceConfig.OFMEET_ENABLE_TRANSCRIPTION || isElectron();
+            captions.msgsDisabled = !interfaceConfig.OFMEET_ENABLE_CAPTIONS || interfaceConfig.OFMEET_STARTWITH_CAPTIONS_DISABLED;
+            captions.transcriptDisabled = !interfaceConfig.OFMEET_ENABLE_TRANSCRIPTION || interfaceConfig.OFMEET_STARTWITH_TRANSCRIPTION_DISABLED || isElectron();
 
             createTagsButton();
         }
@@ -1902,7 +1902,7 @@ var ofmeet = (function (ofm) {
                 tagsModal.close();
             });
 
-            if (interfaceConfig.OFMEET_SHOW_CAPTIONS) {
+            if (interfaceConfig.OFMEET_ENABLE_CAPTIONS) {
                 $('#tags-message-captions').on('change.tags', evt => {
                     captions.msgsDisabled = !evt.target.checked;
                     if (captions.ele) captions.ele.innerHTML = "";

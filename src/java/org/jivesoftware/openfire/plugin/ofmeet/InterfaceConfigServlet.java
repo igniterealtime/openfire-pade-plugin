@@ -100,8 +100,10 @@ public class InterfaceConfigServlet extends HttpServlet
             config.put( "OFMEET_CACHE_PASSWORD",                 JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.cache.password",                true                ) );
             config.put( "OFMEET_ALLOW_UPLOADS",                  JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.allow.uploads",                 true                ) );
             config.put( "OFMEET_CHAT_CAPTIONS_TIMEOUT",          JiveGlobals.getIntProperty(     "org.jitsi.videobridge.ofmeet.chat.captions.timeout",         0                   ) );
-            config.put( "OFMEET_SHOW_CAPTIONS",                  JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.show.captions",                 false               ) );
+            config.put( "OFMEET_ENABLE_CAPTIONS",                JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.captions",               false               ) );
             config.put( "OFMEET_ENABLE_TRANSCRIPTION",           JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.transcription",          false               ) );
+            config.put( "OFMEET_STARTWITH_CAPTIONS_DISABLED",    !JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.start.captions",               false               ) );
+            config.put( "OFMEET_STARTWITH_TRANSCRIPTION_DISABLED",!JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.start.transcription",         false               ) );
             config.put( "OFMEET_CONTACTS_MGR",                   JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.contacts.manager",              false               ) );
             config.put( "OFMEET_WELCOME_PAGE_TITLE",             JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.welcomepage.title",             "Pade Meetings"     ) );
             config.put( "OFMEET_WELCOME_PAGE_DESCRIPTION",       JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.welcomepage.description",       ""                  ) );

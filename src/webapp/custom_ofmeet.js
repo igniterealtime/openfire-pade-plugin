@@ -603,6 +603,11 @@ var ofmeet = (function (ofm) {
 
         console.debug("postJoinSetup");
 
+        // setup drag& drop
+        console.debug("add drag&drop handlers to local and participants windows");
+        addParticipantDragDropHandlers(document.getElementById("localVideoTileViewContainer"));
+        getOccupants();
+
         // custom events for show/hide toolbox
         const toolboxObserver = new MutationObserver(mutations => {
             mutations.forEach((mutation) => {

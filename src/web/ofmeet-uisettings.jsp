@@ -103,6 +103,9 @@
             errors.put( "mousecursorTimeout", "Cannot parse value as long value." );
         }
 
+        final boolean enableAudioLevels = ParamUtils.getBooleanParameter( request, "enableAudioLevels" );
+        final boolean enableAudioLevelCircles = ParamUtils.getBooleanParameter( request, "enableAudioLevelCircles" );
+
         int filmstripMaxHeight = ofmeetConfig.getFilmstripMaxHeight();
         try {
             filmstripMaxHeight = Integer.parseInt( request.getParameter( "filmstripMaxHeight" ) );
@@ -264,6 +267,9 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcome.content",  welcomeContent );              
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcome.toolbarcontent", welcomeToolbarContent );            
 
+            JiveGlobals.setProperty( "ofmeet.audioLevels.enabled", Boolean.toString(enableAudioLevels) );
+            JiveGlobals.setProperty( "ofmeet.audioLevels.circles", Boolean.toString(enableAudioLevelCircles) );
+
             JiveGlobals.setProperty( "ofmeet.feedback.enabled", Boolean.toString(enablefeedback) );
             JiveGlobals.setProperty( "ofmeet.feedback.description", descriptionMessage );
             JiveGlobals.setProperty( "ofmeet.feedback.placeholder", placeholderText );
@@ -416,9 +422,9 @@
                     <fmt:message key="ofmeet.random.roomnames.enabled" />
                 </td>
             </tr>
-           <tr>
+            <tr>
                 <td width="200"><fmt:message key="config.page.configuration.language.title" /></td>
-        <td>
+                <td>
                     <select name="language" required>
                         <c:forEach items="${ofmeetConfig.languages}" var="language">
                             <option name="language" value="${language.getCode()}" id="${language.getCode()}" ${(ofmeetConfig.language == language ? "selected" : "")}>${language}</option>
@@ -426,7 +432,7 @@
                 </select>
                 </td>
             </tr>            
-           <tr>
+            <tr>
                 <td nowrap colspan="2">
                     <input type="checkbox" name="enableLanguageDetection" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.languagedetection", false) ? "checked" : ""}>
                     <fmt:message key="ofmeet.enable.languagedetection" />
@@ -435,6 +441,16 @@
             <tr>
                 <td width="200"><fmt:message key="ofmeet.mousecursor.timeout"/>:</td>
                 <td><input type="text" size="10" maxlength="20" name="mousecursorTimeout" value="${admin:getLongProperty("org.jitsi.videobridge.ofmeet.mousecursor.timeout", 10000)}"></td>
+            </tr>
+            <tr>
+                <td width="200" nowrap>
+                    <input type="checkbox" name="enableAudioLevels" ${admin:getBooleanProperty( "ofmeet.audioLevels.enabled", false) ? "checked" : ""}>
+                    <fmt:message key="config.page.configuration.ofmeet.audioLevels.enabled"/>
+                </td>
+                <td nowrap>
+                    <input type="checkbox" name="enableAudioLevelCircles" ${admin:getBooleanProperty( "ofmeet.audioLevels.circles", false) ? "checked" : ""}>
+                    <fmt:message key="config.page.configuration.ofmeet.audioLevels.circles"/>
+                </td>
             </tr>
         </table>
     </admin:contentBox>

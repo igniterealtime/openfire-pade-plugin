@@ -125,6 +125,10 @@ public class InterfaceConfigServlet extends HttpServlet
             config.put( "INVITE_OPTIONS",                        new JSONArray( ofMeetConfig.getInviteOptions() ) );
             config.put( "ENFORCE_NOTIFICATION_AUTO_DISMISS_TIMEOUT", "15000" );
 
+            if ( JiveGlobals.getBooleanProperty("ofmeet.audioLevels.enabled",false) && JiveGlobals.getBooleanProperty("ofmeet.audioLevels.circles",false) ) {
+                config.put("AUDIO_LEVEL_PRIMARY_COLOR", "rgba(255,255,255,0.4)");
+                config.put("AUDIO_LEVEL_SECONDARY_COLOR", "rgba(255,255,255,0.2)");
+            }
 
             // Jitsi-meet appears to have replaced LOCAL_THUMBNAIL_RATIO_WIDTH and LOCAL_THUMBNAIL_RATIO_HEIGHT with a combined value in LOCAL_THUMBNAIL_RATIO.
             final int localThumbnailRatioWidth  = JiveGlobals.getIntProperty("org.jitsi.videobridge.ofmeet.local.thumbnail.ratio.width",16 );

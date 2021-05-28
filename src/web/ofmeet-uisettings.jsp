@@ -171,6 +171,7 @@
             errors.put( "welcomeInProgressListInterval", "Cannot parse value as integer value." );
         }
         final String welcomeInProgressListExclude = ParamUtils.getParameter( request, "welcomepageInProgressListExclude" );
+        final String welcomeInProgressListExcludeNicks = ParamUtils.getParameter( request, "welcomepageInProgressListExcludeNicks" );
 
         final String language = ParamUtils.getParameter( request, "language" );                
         final boolean enableLanguageDetection = ParamUtils.getBooleanParameter( request, "enableLanguageDetection" );  
@@ -262,6 +263,7 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.enableProtectionInfo", Boolean.toString( enableProtectionInfo ) );            
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.interval", welcomeInProgressListInterval );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.exclude", welcomeInProgressListExclude );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.excludeNicks", welcomeInProgressListExcludeNicks );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.title",  welcomeTitle );     
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.description",  welcomeDesc );  
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcome.content",  welcomeContent );              
@@ -630,6 +632,10 @@
             <tr>
                 <td width="200"><fmt:message key="ofmeet.welcomepage.inprogresslist.exclude" />:</td>
                 <td><input type="text" size="60" maxlength="100" name="welcomepageInProgressListExclude" value="${admin:getProperty("org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.exclude", "secret_")}"></td>
+            </tr>
+            <tr>
+                <td width="200"><fmt:message key="ofmeet.welcomepage.inprogresslist.excludeNicks" />:</td>
+                <td><input type="text" size="60" maxlength="100" name="welcomepageInProgressListExcludeNicks" value="${admin:getProperty("org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.excludeNicks", "")}"></td>
             </tr>
         </table>
     </admin:contentBox>

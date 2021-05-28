@@ -183,6 +183,8 @@
         final boolean adaptivelastn = ParamUtils.getBooleanParameter( request, "adaptivelastn" );
         final boolean simulcast = ParamUtils.getBooleanParameter( request, "simulcast" );
         final boolean adaptivesimulcast = ParamUtils.getBooleanParameter( request, "adaptivesimulcast" );
+        final boolean enableAudioLevels = ParamUtils.getBooleanParameter( request, "enableAudioLevels" );
+        final boolean enableAudioLevelCircles = ParamUtils.getBooleanParameter( request, "enableAudioLevelCircles" );
         final boolean enableStereo = ParamUtils.getBooleanParameter( request, "enableStereo" );
         final boolean lipSync = ParamUtils.getBooleanParameter( request, "lipSync" );
         
@@ -193,6 +195,8 @@
 
         if ( errors.isEmpty() )
         {
+            JiveGlobals.setProperty( "ofmeet.audioLevels.enabled", Boolean.toString(enableAudioLevels) );
+            JiveGlobals.setProperty( "ofmeet.audioLevels.circles", Boolean.toString(enableAudioLevelCircles) );
             JiveGlobals.setProperty( "ofmeet.stereo.enabled", Boolean.toString(enableStereo) );
             JiveGlobals.setProperty( "ofmeet.winsso.enabled", Boolean.toString( securityenabled ) );
             JiveGlobals.setProperty( "ofmeet.webauthn.enabled", Boolean.toString( webauthn_enabled ) );         
@@ -523,6 +527,16 @@
                 <td nowrap colspan="2">
                     <input type="checkbox" name="enableStereo" ${admin:getBooleanProperty( "ofmeet.stereo.enabled", false) ? "checked" : ""}>
                     <fmt:message key="config.page.configuration.ofmeet.stereo.enabled"/>
+                </td>
+            </tr>            
+            <tr>
+                <td width="300" nowrap>
+                    <input type="checkbox" name="enableAudioLevels" ${admin:getBooleanProperty( "ofmeet.audioLevels.enabled", false) ? "checked" : ""}>
+                    <fmt:message key="config.page.configuration.ofmeet.audioLevels.enabled"/>
+                </td>
+                <td nowrap>
+                    <input type="checkbox" name="enableAudioLevelCircles" ${admin:getBooleanProperty( "ofmeet.audioLevels.circles", false) ? "checked" : ""}>
+                    <fmt:message key="config.page.configuration.ofmeet.audioLevels.circles"/>
                 </td>
             </tr>            
             <tr>

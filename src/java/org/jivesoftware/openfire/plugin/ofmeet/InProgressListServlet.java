@@ -67,15 +67,16 @@ public class InProgressListServlet extends HttpServlet
             Log.debug("ofmeet base url: {}", url);
 
             final String service = "conference"; //mainMuc.split(".")[0];
-            final List<MUCRoom> rooms = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(service).getChatRooms();
+            final List<MUCRoom> chatRooms = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(service).getChatRooms();
             final JSONArray meetings = new JSONArray();
-            final String[] excludeKeywords = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.exclude", "").split(":");
+            final String[] excludedRoomNames = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.exclude", "").split(":");
+            final String[] excludedNickNames = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.excludeNicks", "").split(":");
             final Boolean isSizeInfoEnabled = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.enableSizeInfo", false);
             final Boolean isParticipantsInfoEnabled = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.enableParticipantsInfo", false);
             final Boolean isProtectionInfoEnabled = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.enableProtectionInfo", false);
             final URL requestUrl = new URL(url);
             final Date Now = new Date();
-            for (MUCRoom chatRoom : rooms)
+            for (MUCRoom chatRoom : chatRooms)
             {
                 final String roomName = chatRoom.getJID().getNode();
                 final String roomDecodedName = URLDecoder.decode(roomName, "UTF-8");
@@ -85,16 +86,16 @@ public class InProgressListServlet extends HttpServlet
                     continue;
                 }
 
-                boolean bExclusion = false;
-                for ( String keyword : excludeKeywords )
+                boolean foundExclusion = false;
+                for ( String excludedRoomName : excludedRoomNames )
                 {
-                    if ( !keyword.isEmpty() && roomDecodedName.toLowerCase().contains(keyword.toLowerCase()) )
+                    if ( !excludedRoomName.isEmpty() && roomDecodedName.toLowerCase().contains(excludedRoomName.toLowerCase()) )
                     {
-                        bExclusion = true;
+                        foundExclusion = true;
                         break;
                     }
                 }
-                if ( bExclusion )
+                if ( foundExclusion )
                 {
                     continue;
                 }
@@ -114,6 +115,20 @@ public class InProgressListServlet extends HttpServlet
                     }
                     else
                     {
+                        foundExclusion = false;
+                        for ( String excludedNickName : excludedNickNames )
+                        {
+                            if ( !nick.isEmpty() && nick.equals(excludedNickName) )
+                            {
+                                foundExclusion = true;
+                                break;
+                            }
+                        }
+                        if ( foundExclusion )
+                        {
+                            continue;
+                        }
+
                         final String bareJID = occupant.getUserAddress().toBareJID();
                         final JSONObject member = new JSONObject();
                         member.put("id", bareJID);

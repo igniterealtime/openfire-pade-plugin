@@ -177,6 +177,8 @@
         final boolean enableLanguageDetection = ParamUtils.getBooleanParameter( request, "enableLanguageDetection" );  
         
         final boolean randomRoomNames = ParamUtils.getBooleanParameter( request, "randomRoomNames" );
+        final boolean pinScreenShare = ParamUtils.getBooleanParameter( request, "pinScreenShare" );
+        final boolean enableInviteMore = ParamUtils.getBooleanParameter( request, "enableInviteMore" );
 
         final boolean enableEmoticonConfetti = ParamUtils.getBooleanParameter( request, "enableEmoticonConfetti" );
         final boolean closeEmoticonConfettiMenu = ParamUtils.getBooleanParameter( request, "closeEmoticonConfettiMenu" );
@@ -253,6 +255,8 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.allow.uploads", Boolean.toString( allowUploads ) );             
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.breakout", Boolean.toString( enableBreakout ) );              
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.random.roomnames", Boolean.toString( randomRoomNames ) );            
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.pin_screen_share", Boolean.toString( pinScreenShare ) );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.enable.inviteMore", Boolean.toString( enableInviteMore ) );
             
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.content", Boolean.toString( welcomepageContent ) );            
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.welcomepage.toolbarcontent", Boolean.toString( welcomepageToolbarContent ) );            
@@ -454,6 +458,18 @@
                     <fmt:message key="config.page.configuration.ofmeet.audioLevels.circles"/>
                 </td>
             </tr>
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="pinScreenShare" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.pin_screen_share", true) ? "checked" : ""}>
+                    <fmt:message key="ofmeet.pinScreenShare" />
+                </td>
+            </tr>            
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="enableInviteMore" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.inviteMore", true) ? "checked" : ""}>
+                    <fmt:message key="ofmeet.enable.inviteMore" />
+                </td>
+            </tr>            
         </table>
     </admin:contentBox>
     

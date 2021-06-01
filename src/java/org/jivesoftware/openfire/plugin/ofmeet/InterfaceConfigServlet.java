@@ -88,6 +88,7 @@ public class InterfaceConfigServlet extends HttpServlet
             config.put( "DISABLE_FOCUS_INDICATOR",               JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.disable.focus.indicator",       false               ) );
             config.put( "DISABLE_VIDEO_BACKGROUND",              JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.disable.video_background",      false               ) );
             config.put( "ACTIVE_SPEAKER_AVATAR_SIZE",            JiveGlobals.getIntProperty(     "org.jitsi.videobridge.ofmeet.active.speaker.avatarsize",     100                 ) );
+            config.put( "AUTO_PIN_LATEST_SCREEN_SHARE",          JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.pin_screen_share", true )   ? "remote-only" : "false" );
 
             config.put( "OFMEET_MOUSECURSOR_TIMEOUT",            JiveGlobals.getIntProperty(     "org.jitsi.videobridge.ofmeet.mousecursor.timeout",           10000               ) );
             config.put( "OFMEET_ENABLE_MOUSE_SHARING",           JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.mouse.sharing",          true                ) );
@@ -122,6 +123,7 @@ public class InterfaceConfigServlet extends HttpServlet
             config.put( "filmStripOnly",                         ofMeetConfig.getFilmstripOnly()      );
             config.put( "VERTICAL_FILMSTRIP",                    ofMeetConfig.getVerticalFilmstrip()  );
             config.put( "FILM_STRIP_MAX_HEIGHT",                 ofMeetConfig.getFilmstripMaxHeight() );
+            config.put( "HIDE_INVITE_MORE_HEADER",               !JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.inviteMore",            true                ) );
             config.put( "INVITE_OPTIONS",                        new JSONArray( ofMeetConfig.getInviteOptions() ) );
             config.put( "ENFORCE_NOTIFICATION_AUTO_DISMISS_TIMEOUT", "15000" );
 

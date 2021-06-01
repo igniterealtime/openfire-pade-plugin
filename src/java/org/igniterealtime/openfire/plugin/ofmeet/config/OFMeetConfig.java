@@ -36,7 +36,7 @@ import java.util.List;
 public class OFMeetConfig
 {
     public static final String OFMEET_WEBAPP_CONTEXTPATH_PROPERTYNAME = "ofmeet.webapp.contextpath";
-	public static final String hostname = XMPPServer.getInstance().getServerInfo().getHostname();
+        public static final String hostname = XMPPServer.getInstance().getServerInfo().getHostname();
 
     // No static methods! Static methods are not accessible when using this class as a bean in the Admin Console JSP pages.
     public void setWebappContextPath( String contextPath )
@@ -206,7 +206,7 @@ public class OFMeetConfig
     public List<String> getButtonsImplemented() // BAO
     {
         // These should match the implementations that are provided in the Toolbox.web.js file in jitsi-meet.
-        return JiveGlobals.getListProperty( "ofmeet.buttons.implemented", Arrays.asList( "microphone", "camera", "closedcaptions", "desktop", "fullscreen", "fodeviceselection", "hangup", "profile", "info", "chat", "recording", "livestreaming", "etherpad", "sharedvideo", "settings", "raisehand", "videoquality", "filmstrip", "invite", "feedback", "stats", "shortcuts", "tileview", "videobackgroundblur", "download", "help", "mute-everyone" ) );
+        return JiveGlobals.getListProperty( "ofmeet.buttons.implemented", Arrays.asList( "microphone", "camera", "closedcaptions", "embedmeeting", "desktop", "fullscreen", "fodeviceselection", "hangup", "profile", "chat", "recording", "livestreaming", "etherpad", "sharedvideo", "shareaudio", "settings", "raisehand", "videoquality", "filmstrip", "invite", "feedback", "stats", "shortcuts", "tileview", "select-background", "download", "help", "mute-everyone", "mute-video-everyone", "security" ) );
     }
 
     public void resetButtonsImplemented()
@@ -221,7 +221,7 @@ public class OFMeetConfig
 
     public List<String> getButtonsEnabled() // BAO
     {
-        return JiveGlobals.getListProperty( "ofmeet.buttons.enabled", Arrays.asList( "microphone", "camera", "closedcaptions", "desktop", "fullscreen", "fodeviceselection", "hangup", "profile", "info", "chat", "recording", "livestreaming", "etherpad", "sharedvideo", "settings", "raisehand", "videoquality", "filmstrip", "invite", "feedback", "stats", "shortcuts", "tileview", "videobackgroundblur", "download", "help", "mute-everyone" ) );
+        return JiveGlobals.getListProperty( "ofmeet.buttons.enabled", Arrays.asList( "microphone", "camera", "closedcaptions", "embedmeeting", "desktop", "fullscreen", "fodeviceselection", "hangup", "profile", "chat", "recording", "livestreaming", "etherpad", "sharedvideo", "shareaudio", "settings", "raisehand", "videoquality", "filmstrip", "invite", "feedback", "stats", "shortcuts", "tileview", "select-background", "download", "help", "mute-everyone", "mute-video-everyone", "security" ) );
     }
 
     public void resetButtonsEnabled()
@@ -770,9 +770,9 @@ public class OFMeetConfig
 
     public final StringProperty jigasiXmppRoomName = new StringProperty( "ofmeet.jigasi.xmpp.room-name", "siptest" );
     public StringProperty getJigasiXmppRoomName() { return jigasiXmppRoomName; }
-	
+        
     public final StringProperty jigasiSipHeaderRoomName = new StringProperty( "ofmeet.jigasi.room.header.name", "Jitsi-Conference-Room" );
-    public StringProperty getJigasiSipHeaderRoomName() { return jigasiSipHeaderRoomName; }	
+    public StringProperty getJigasiSipHeaderRoomName() { return jigasiSipHeaderRoomName; }      
 
     public final StringProperty jigasiXmppPassword = new StringProperty( "ofmeet.jigasi.xmpp.password", null );
     public StringProperty getJigasiXmppPassword() { return jigasiXmppPassword; }
@@ -787,24 +787,24 @@ public class OFMeetConfig
     public boolean getJigasiSipEnabled() { return jigasiSipEnabled.get().equals("true"); }
 
     public final StringProperty jigasiFreeSwitchEnabled = new StringProperty( "ofmeet.freeswitch.enabled", "false" );
-    public boolean getJigasiFreeSwitchEnabled() { return jigasiFreeSwitchEnabled.get().equals("true"); }	
-		
+    public boolean getJigasiFreeSwitchEnabled() { return jigasiFreeSwitchEnabled.get().equals("true"); }        
+                
     public final StringProperty liveStreamEnabled = new StringProperty( "ofmeet.live.stream.enabled", "false" );
     public boolean getLiveStreamEnabled() { return liveStreamEnabled.get().equals("true"); }
-	
-	public final StringProperty liveStreamUrl = new StringProperty( "ofmeet.live.stream.url", "rtmp://a.rtmp.youtube.com/live2" );
+        
+        public final StringProperty liveStreamUrl = new StringProperty( "ofmeet.live.stream.url", "rtmp://a.rtmp.youtube.com/live2" );
     public StringProperty getLiveStreamUrl() { return liveStreamUrl; }
-	
+        
     public final StringProperty liveStreamKey = new StringProperty( "ofmeet.live.stream.key", "" );
-    public StringProperty getLiveStreamKey() { return liveStreamKey; }	
+    public StringProperty getLiveStreamKey() { return liveStreamKey; }  
 
     public final StringProperty audiobridgeEnabled = new StringProperty( "ofmeet.audiobridge.enabled", "false" );
-    public boolean getAudiobridgeEnabled() { return audiobridgeEnabled.get().equals("true"); }	
+    public boolean getAudiobridgeEnabled() { return audiobridgeEnabled.get().equals("true"); }  
 
     public final StringProperty audiobridgeLogging = new StringProperty( "ofmeet.audiobridge.logging.enabled", "false" );
-    public boolean getAudiobridgeLogging() { return audiobridgeLogging.get().equals("true"); }	
-	
+    public boolean getAudiobridgeLogging() { return audiobridgeLogging.get().equals("true"); }  
+        
     public final StringProperty audiobridgeRegisterAll = new StringProperty( "ofmeet.audiobridge.register.all", "false" );
-    public boolean getAudiobridgeRegisterAll() { return audiobridgeRegisterAll.get().equals("true"); }	
-	
+    public boolean getAudiobridgeRegisterAll() { return audiobridgeRegisterAll.get().equals("true"); }  
+        
 }

@@ -606,7 +606,7 @@ var ofmeet = (function (ofm) {
 
         // setup drag& drop
         console.debug("add drag&drop handlers to local and participants windows");
-        addParticipantDragDropHandlers(document.getElementById("localVideoTileViewContainer"));
+        addParticipantDragDropHandlers(document.getElementById("filmstripLocalVideoThumbnail"));
         getOccupants();
 
         // custom events for show/hide toolbox
@@ -756,7 +756,7 @@ var ofmeet = (function (ofm) {
                 evt.stopPropagation();
                 takePhoto();
 
-                APP.UI.messageHandler.notify("Recording", "Conference Photo Taken");
+                APP.UI.messageHandler.showWarning({title:"Recording", description:"Conference Photo Taken"});
             }
         });
     }
@@ -871,7 +871,7 @@ var ofmeet = (function (ofm) {
 
         // Observe tile view status.
         // TODO: When the tile view change event is implemented in Jitsi Meet, it will be replaced with it.
-        const localVideoTileViewContainer = document.getElementById('localVideoTileViewContainer')
+        const localVideoTileViewContainer = document.getElementById('filmstripLocalVideoThumbnail')
 
         const observer = new MutationObserver(mutations => {
             APP.UI.emitEvent('UI.tile_view_changed', APP.store.getState()['features/video-layout'].tileViewEnabled);
@@ -1720,7 +1720,7 @@ var ofmeet = (function (ofm) {
 
                     //APP.UI.toggleChat();
                     APP.conference._room.sendTextMessage(clipText)
-                    APP.UI.messageHandler.notify("Share Clipboard", "Clipboard shared with other participants");
+                    APP.UI.messageHandler.showWarning({title:"Share Clipboard", description:"Clipboard shared with other participants"});
                 });
             });
 
@@ -1750,7 +1750,7 @@ var ofmeet = (function (ofm) {
 
         if (padContent) {
             padsModal.close();
-            APP.UI.messageHandler.notify("CryptPad", "Quit active pad before opening a new one");
+            APP.UI.messageHandler.showWarning({title:"CryptPad", description:"Quit active pad before opening a new one"});
         } else {
             const largeVideo = document.querySelector("#largeVideo");
             const iframe = largeVideo.cloneNode(false);
@@ -2032,9 +2032,9 @@ var ofmeet = (function (ofm) {
 
         if (!config.ofmeetLiveStream) {
             createVideoViewerHTML();
-            APP.UI.messageHandler.notify("Recording", "Conference recording stopped");
+            APP.UI.messageHandler.showWarning({title:"Recording", description:"Conference recording stopped"});
         } else {
-            APP.UI.messageHandler.notify("Streaming", "Conference streaming stopped");
+            APP.UI.messageHandler.showWarning({title:"Streaming", description:"Conference streaming stopped"});
         }
         ofm.recording = false;
     }
@@ -2171,7 +2171,7 @@ var ofmeet = (function (ofm) {
         console.debug("custom_ofmeet.js startMeetingRecorder");
 
         $('#ofmeet-record svg').css('fill', '#f00');
-        APP.UI.messageHandler.notify("Recording", "Conference Recording Started");
+        APP.UI.messageHandler.showWarning({title:"Recording", description:"Conference Recording Started"});
 
         captions.msgs = [];
         clockTrack.start = (new Date()).getTime();
@@ -2332,7 +2332,7 @@ var ofmeet = (function (ofm) {
                     websocket = null;
                 }
 
-                APP.UI.messageHandler.notify("Streaming", "Conference streaming started");
+                APP.UI.messageHandler.showWarning({title:"Streaming", description:"Conference streaming started"});
 
             } else {
                 filenames[id] = getFilename("ofmeet-video-" + id, ".webm");
@@ -2379,7 +2379,7 @@ var ofmeet = (function (ofm) {
                     });
                 }
 
-                APP.UI.messageHandler.notify("Recording", "Conference recording started");
+                APP.UI.messageHandler.showWarning({title:"Recording", description:"Conference recording started"});
             }
             videoRecorder[id].start(1000);
             const startTime = Date.now();
@@ -2520,7 +2520,7 @@ var ofmeet = (function (ofm) {
             const roomUrl = new URL(url);
             roomUrl.hash = this.toParamString(params, roomUrl.hash);
 
-            APP.UI.messageHandler.notify(i18n('breakout.breakoutRooms'), i18n('breakout.joining', { sec: wait }));
+            APP.UI.messageHandler.showWarning({title:i18n('breakout.breakoutRooms'), description:i18n('breakout.joining', { sec: wait })});
             this.countdownTimer = setTimeout(() => { location.replace(roomUrl.href) }, wait * 1000);
         }
 
@@ -2536,14 +2536,14 @@ var ofmeet = (function (ofm) {
 
             if (url == location.href) {
                 this.state = BreakoutState.STOPPED;
-                APP.UI.messageHandler.notify(i18n('breakout.breakoutRooms'), i18n('breakout.cancelled'));
+                APP.UI.messageHandler.showWarning({title:i18n('breakout.breakoutRooms'), description:i18n('breakout.cancelled')});
             } else {
                 this.state = BreakoutState.STOPPING;
 
                 const roomUrl = new URL(url);
                 roomUrl.hash = this.toParamString({ mainRoomUserId: this.mainRoomUserId }, roomUrl.hash);
 
-                APP.UI.messageHandler.notify(i18n('breakout.breakoutRooms'), i18n('breakout.leaving', { sec: wait }));
+                APP.UI.messageHandler.showWarning({title:i18n('breakout.breakoutRooms'), description:i18n('breakout.leaving', { sec: wait })});
                 this.countdownTimer = setTimeout(() => { location.replace(roomUrl.href) }, wait * 1000);
             }
         }
@@ -3153,15 +3153,15 @@ var ofmeet = (function (ofm) {
 
                     reader.onerror = function (event) {
                         console.error("uploadAvatar - error", event);
-                        APP.UI.messageHandler.notify(i18n('avatar.avatarUpload'), i18n('avatar.imageFileError') + event);
+                        APP.UI.messageHandler.showWarning({title:i18n('avatar.avatarUpload'), description:i18n('avatar.imageFileError') + event});
                     };
 
                     reader.readAsDataURL(file);
                 } else {
-                    APP.UI.messageHandler.notify(i18n('avatar.avatarUpload'), i18n('avatar.imageFileSizeError', { size: (avatarFileSizeLimit / 1024 / 1024) }));
+                    APP.UI.messageHandler.showWarning({title:i18n('avatar.avatarUpload'), description:i18n('avatar.imageFileSizeError', { size: (avatarFileSizeLimit / 1024 / 1024) })});
                 }
             } else {
-                APP.UI.messageHandler.notify(i18n('avatar.avatarUpload'), i18n('avatar.imageFileTypeError'));
+                APP.UI.messageHandler.showWarning({title:i18n('avatar.avatarUpload'), description:i18n('avatar.imageFileTypeError')});
             }
         }
     }

@@ -16,10 +16,12 @@
 
 package org.jivesoftware.openfire.plugin.ofmeet;
 
+import org.jivesoftware.openfire.Connection;
 import org.jivesoftware.openfire.component.ExternalComponentManager;
 import org.jivesoftware.openfire.component.ExternalComponentConfiguration;
 import org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig;
 import org.jivesoftware.openfire.XMPPServer;
+import org.jivesoftware.openfire.muc.*;
 import org.jivesoftware.openfire.spi.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +36,7 @@ import java.nio.charset.Charset;
 import java.util.*;
 import org.jitsi.util.OSUtils;
 import java.util.Properties;
+import org.xmpp.packet.*;
 
 /**
  * A wrapper object for the Jitsi Component Focus (jicofo) component.
@@ -50,9 +53,13 @@ public class JitsiJicofoWrapper implements ProcessListener
         System.setProperty("ofmeet.jicofo.started", "false");
 
         final String jicofoSubdomain = "focus";
-        final ConnectionType connectionType = ConnectionType.COMPONENT;
         final ConnectionManagerImpl manager = (ConnectionManagerImpl) XMPPServer.getInstance().getConnectionManager();
-        final ConnectionConfiguration plaintextConfiguration  = manager.getListener( connectionType, false ).generateConnectionConfiguration();
+        final ConnectionConfiguration plaintextConfiguration  = manager.getListener( ConnectionType.COMPONENT, false ).generateConnectionConfiguration();
+        final ConnectionConfiguration clientConfiguration = manager.getListener( ConnectionType.SOCKET_C2S, false ).generateConnectionConfiguration();	
+
+        final String MAIN_MUC = JiveGlobals.getProperty( "ofmeet.main.muc", "conference." + XMPPServer.getInstance().getServerInfo().getXMPPDomain());
+		final MultiUserChatService mucService = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService("conference");
+	    final String roomName = "ofmeet";		
 
         String defaultSecret = ExternalComponentManager.getDefaultSecret();
 
@@ -77,7 +84,6 @@ public class JitsiJicofoWrapper implements ProcessListener
 
         final OFMeetConfig config = new OFMeetConfig();
         final String port = String.valueOf(plaintextConfiguration.getPort());
-        final String MAIN_MUC = JiveGlobals.getProperty( "ofmeet.main.muc", "conference." + XMPPServer.getInstance().getServerInfo().getXMPPDomain());
 
         final String parameters =
             " --host=" + XMPPServer.getInstance().getServerInfo().getHostname() +
@@ -98,7 +104,7 @@ public class JitsiJicofoWrapper implements ProcessListener
 			props.setProperty("org.jitsi.jicofo.jigasi.BREWERY", "ofgasi@" + MAIN_MUC);
 		}				
 
-        props.setProperty( "org.jitsi.jicofo.BRIDGE_MUC", "ofmeet@" + MAIN_MUC);
+        props.setProperty( "org.jitsi.jicofo.BRIDGE_MUC", roomName + "@" + MAIN_MUC);
         props.setProperty( "org.jitsi.jicofo.ALWAYS_TRUST_MODE_ENABLED", "true" );
         props.setProperty( "org.jitsi.jicofo.PING_INTERVAL", "-1" );
         props.setProperty( "org.jitsi.jicofo.SERVICE_REDISCOVERY_INTERVAL", "60000" );
@@ -115,6 +121,7 @@ public class JitsiJicofoWrapper implements ProcessListener
         }
 
         props.store(new FileOutputStream(props_file), "Jitsi Colibri Focus");
+		
 
         List<String> lines = Arrays.asList(
             "jicofo {",
@@ -124,8 +131,10 @@ public class JitsiJicofoWrapper implements ProcessListener
             "    }",
             "    xmpp {",
             "      client {",
+			"		 conference-muc-jid = " + MAIN_MUC,
+			"		 disable-certificate-verification = false",
             "        client-proxy = focus." + XMPPServer.getInstance().getServerInfo().getXMPPDomain(),
-            "        use-tls = false",
+            "        use-tls = " + (clientConfiguration.getTlsPolicy() == Connection.TLSPolicy.required ? "true" : "false"),
             "       }",				
             "    }",			
             "}"
@@ -153,6 +162,20 @@ public class JitsiJicofoWrapper implements ProcessListener
         final String cmdLine = javaExec + " " + customOptions + " -Dconfig.file=" + configFile + " -Dnet.java.sip.communicator.SC_HOME_DIR_LOCATION=" + jicofoHomePath + " -Dnet.java.sip.communicator.SC_HOME_DIR_NAME=config -Djava.util.logging.config.file=./logging.properties -Djdk.tls.ephemeralDHKeySize=2048 -cp ./jicofo-1.1-SNAPSHOT.jar" + File.pathSeparator + "./jicofo-1.1-SNAPSHOT-jar-with-dependencies.jar org.jitsi.jicofo.Main" + parameters;
         jicofoThread = Spawn.startProcess(cmdLine, new File(jicofoHomePath), this);
 
+		// create ofmeet muc room if it does not exist. needed for race condition when jicofo is a tls connection
+		
+		if (mucService.getChatRoom(roomName) == null)
+		{
+			try {
+				MUCRoom mucRoom = mucService.getChatRoom(roomName, new JID("admin@" + XMPPServer.getInstance().getServerInfo().getXMPPDomain()));
+				mucRoom.setPersistent(false);
+				mucRoom.setPublicRoom(false);
+				mucRoom.unlock(mucRoom.getRole());
+			} catch (Exception e) {
+				Log.error("Cannot create MUC room", e);
+			}	
+		}			
+		
         Log.info( "Successfully initialized Jitsi Focus Component (jicofo).\n"  + cmdLine);
         Log.debug( "Jicofo config.\n" + String.join("\n", lines));
     }

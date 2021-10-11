@@ -1019,7 +1019,7 @@ var ofmeet = (function (ofm) {
             let $button = $(`
             <div aria-label="${option.label}" class="toolbox-button ofmeet-tooltip">
                 <div id="${option.id}" class="toolbox-icon">
-                    <div class="jitsi-icon" style="font-size: 12px;">${option.icon}</div>
+                    <div class="jitsi-icon jitsi-icon-default" style="font-size: 12px;">${option.icon}</div>
                 </div>
             </div>`);
             $button.children('.toolbox-icon').on('click.ofmeet-toolbox-icon', option.callback);
@@ -1077,10 +1077,10 @@ var ofmeet = (function (ofm) {
                 let $item;
                 switch (option.type) {
                     case 'list':
-                        $item = $(`<li class="ofmeet-toolbox-menu-item"><span class="overflow-menu-item-icon"><div class="jitsi-icon">${item.icon}</div></span><span class="profile-text">${item.text}</span></li>`);
+                        $item = $(`<li class="ofmeet-toolbox-menu-item"><span class="overflow-menu-item-icon"><div class="jitsi-icon jitsi-icon-default">${item.icon}</div></span><span class="profile-text">${item.text}</span></li>`);
                         break;
                     case 'tile':
-                        $item = $(`<li class="ofmeet-toolbox-menu-item"><div class="jitsi-icon">${item.icon}</div></li>`);
+                        $item = $(`<li class="ofmeet-toolbox-menu-item"><div class="jitsi-icon jitsi-icon-default">${item.icon}</div></li>`);
                         break;
                 }
 

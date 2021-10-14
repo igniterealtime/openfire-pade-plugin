@@ -272,9 +272,9 @@ public class MUCRoomController {
 
         // Set broadcast presence roles
         if (mucRoomEntity.getBroadcastPresenceRoles() != null) {
-            room.setRolesToBroadcastPresence(mucRoomEntity.getBroadcastPresenceRoles());
+            room.setRolesToBroadcastPresence(MUCRoomUtils.convertStringsToRoles(mucRoomEntity.getBroadcastPresenceRoles()));			
         } else {
-            room.setRolesToBroadcastPresence(new ArrayList<String>());
+            room.setRolesToBroadcastPresence(new ArrayList<>());
         }
         // Set all roles
         setRoles(room, mucRoomEntity);
@@ -481,8 +481,7 @@ public class MUCRoomController {
         mucRoomEntity.setAdminGroups(MUCRoomUtils.convertGroupsToStringList(admins.getGroups()));
         mucRoomEntity.setMemberGroups(MUCRoomUtils.convertGroupsToStringList(members.getGroups()));
         mucRoomEntity.setOutcastGroups(MUCRoomUtils.convertGroupsToStringList(outcasts.getGroups()));
-
-        mucRoomEntity.setBroadcastPresenceRoles(room.getRolesToBroadcastPresence());
+		mucRoomEntity.setBroadcastPresenceRoles(MUCRoomUtils.convertRolesToStringList(room.getRolesToBroadcastPresence()));		
 
         mucRoomEntity.setCreationDate(room.getCreationDate());
         mucRoomEntity.setModificationDate(room.getModificationDate());

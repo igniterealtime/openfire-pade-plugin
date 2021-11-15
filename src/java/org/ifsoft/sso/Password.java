@@ -17,6 +17,7 @@ import javax.servlet.ServletOutputStream;
 
 import java.io.*;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.*;
 import java.text.*;
@@ -126,14 +127,13 @@ public class Password extends HttpServlet
     private String getNtlmUserName(HttpServletRequest request, HttpServletResponse response) throws IOException
     {
         String auth = request.getHeader("Authorization");
-        String s = null;
 
         //no auth, request NTLM
         if (auth == null)
         {
                 response.setStatus(response.SC_UNAUTHORIZED);
                 response.setHeader("WWW-Authenticate", "NTLM");
-                return s;
+                return null;
         }
 
         //check what client sent
@@ -141,10 +141,9 @@ public class Password extends HttpServlet
         {
                 byte[] msg = java.util.Base64.getDecoder().decode(auth.substring(5));
                 int off = 0, length, offset;
+                String s = null;
 
                 if (msg[8] == 1) {
-                    off = 18;
-
                     byte z = 0;
                     byte[] msg1 =
                         {(byte)'N', (byte)'T', (byte)'L', (byte)'M', (byte)'S',(byte)'S', (byte)'P',
@@ -157,29 +156,31 @@ public class Password extends HttpServlet
                     response.setStatus(response.SC_UNAUTHORIZED);
                     String enc2 = new String(java.util.Base64.getEncoder().encode(msg1), "UTF-8");
                     response.setHeader("WWW-Authenticate", "NTLM "+ enc2.trim());
-                    return s;
+                    return null;
                 }
                 else if (msg[8] == 3) {
                         off = 30;
                         length = msg[off+17]*256 + msg[off+16];
-                        offset = msg[off+19]*256 + msg[off+8];
-                        s = new String(msg, offset, length);
-                        // print computer name // out.println(s + " ");
+                        offset = msg[off+19]*256 + msg[off+18];
+                        s = new String(msg, offset, length, StandardCharsets.UTF_16LE);
+                        Log.debug("NTLMAuth Computer Name {}", s);
                 }
-                else
-                return s;
-
+                else {
+                    return null;
+                }
                 length = msg[off+1]*256 + msg[off];
                 offset = msg[off+3]*256 + msg[off+2];
-                s = new String(msg, offset, length);
-                //domain//out.println(s + " ");
+                s = new String(msg, offset, length, StandardCharsets.UTF_16LE);
+                Log.debug("NTLMAuth Domain Name {}", s);
+
                 length = msg[off+9]*256 + msg[off+8];
                 offset = msg[off+11]*256 + msg[off+10];
 
-                s = new String(msg, offset, length);
+                s = new String(msg, offset, length, StandardCharsets.UTF_16LE);
+                Log.debug("NTLMAuth User Name {}", s);
                 return s;
         }
-        return s;
+        return null;
     }
 
     private void writeHeader(HttpServletResponse response)

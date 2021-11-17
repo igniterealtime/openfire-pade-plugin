@@ -199,10 +199,20 @@ public class JitsiJvbWrapper implements ProcessListener
 
         final String customOptions = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.jvb.jvm.customOptions", defaultOptions);
         final String cmdLine = javaExec + " " + customOptions + " -Dconfig.file=" + configFile + " -Dnet.java.sip.communicator.SC_HOME_DIR_LOCATION=" + jvbHomePath + " -Dnet.java.sip.communicator.SC_HOME_DIR_NAME=config -Djava.util.logging.config.file=./logging.properties -Djdk.tls.ephemeralDHKeySize=2048 -cp ./jitsi-videobridge-2.1-SNAPSHOT.jar" + File.pathSeparator + "./jitsi-videobridge-2.1-SNAPSHOT-jar-with-dependencies.jar org.jitsi.videobridge.MainKt  --apis=rest";
-        jvbThread = Spawn.startProcess(cmdLine, new File(jvbHomePath), this);
 
-        Log.info( "Successfully initialized Jitsi Videobridge.\n" + cmdLine);
-        Log.debug( "JVB config.\n" + String.join("\n", lines));
+        if ( JiveGlobals.getBooleanProperty("ofmeet.use.internal.jvb", true) )
+        {
+            jvbThread = Spawn.startProcess(cmdLine, new File(jvbHomePath), this);
+
+            Log.info( "Successfully initialized Jitsi Videobridge.\n" + cmdLine);
+            Log.debug( "JVB config.\n" + String.join("\n", lines));
+        } else {
+            System.setProperty("ofmeet.jvb.started", "true");
+            System.setProperty("ofmeet.jvb.started.timestamp", String.valueOf(System.currentTimeMillis()));
+
+            Log.info( "Waiting for external Jitsi Videobridge...");
+            Log.debug( "External JVB Should use config:\n" + String.join("\n", lines));
+        }
     }
 
     private void writeProperties( File props_file, String local_ip, String public_ip )
@@ -379,7 +389,8 @@ public class JitsiJvbWrapper implements ProcessListener
         try {
             HttpClient client = new DefaultHttpClient();
             final String rest_port = JiveGlobals.getProperty( "ofmeet.videobridge.rest.port", "8188");
-            HttpGet get = new HttpGet("http://localhost:" + rest_port + "/colibri/stats");
+            final String rest_host = JiveGlobals.getProperty( "ofmeet.videobridge.rest.host", "localhost");
+            HttpGet get = new HttpGet("http://" + rest_host + ":" + rest_port + "/colibri/stats");
             HttpResponse response2 = client.execute(get);
             BufferedReader rd = new BufferedReader(new InputStreamReader(response2.getEntity().getContent()));
 

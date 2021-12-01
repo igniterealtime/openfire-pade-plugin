@@ -123,9 +123,9 @@ public class ConfigServlet extends HttpServlet
             int video_width_max = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.constraints.video.width.max", ofMeetConfig.getVideoConstraintsMaxHeight() * 16/9);
             int video_width_min = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.constraints.video.width.min", ofMeetConfig.getVideoConstraintsMinHeight() * 16/9);
 
-            int lowMaxBitratesVideo = JiveGlobals.getIntProperty( "org.jitsi.videobridge.low.max.bitrates.video", 200000 );
-            int standardMaxBitratesVideo = JiveGlobals.getIntProperty( "org.jitsi.videobridge.standard.max.bitrates.video", 500000 );
-            int highMaxBitratesVideo = JiveGlobals.getIntProperty( "org.jitsi.videobridge.high.max.bitrates.video", 1500000 );
+            int lowMaxBitratesVideo = JiveGlobals.getIntProperty( "org.jitsi.videobridge.low.max.bitrates.video", 100000 );
+            int standardMaxBitratesVideo = JiveGlobals.getIntProperty( "org.jitsi.videobridge.standard.max.bitrates.video", 300000 );
+            int highMaxBitratesVideo = JiveGlobals.getIntProperty( "org.jitsi.videobridge.high.max.bitrates.video", 1200000 );
 
             boolean capScreenshareBitrate = JiveGlobals.getBooleanProperty( "ofmeet.cap.screenshare.bitrate", true);
             boolean enableLayerSuspension = JiveGlobals.getBooleanProperty( "ofmeet.enable.layer.suspension", true);
@@ -136,7 +136,8 @@ public class ConfigServlet extends HttpServlet
             String displayNotice = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.display.notice", "");
             String ofmeetStreamKey = JiveGlobals.getProperty( "ofmeet.live.stream.key", "");
             String ofmeetStreamPort = JiveGlobals.getProperty( "ofmeet.live.stream.port", "8080");          
-            boolean ofmeetLiveStream = JiveGlobals.getBooleanProperty( "ofmeet.live.stream.enabled", false);            
+            boolean ofmeetLiveStream = JiveGlobals.getBooleanProperty( "ofmeet.live.stream.enabled", false);  
+			boolean useNewBandwidthAllocationStrategy = JiveGlobals.getBooleanProperty( "ofmeet.use.new.bandwidth.allocation.strategy", true); 
             
             boolean wsBridgeChannel = JiveGlobals.getBooleanProperty( "ofmeet.bridge.ws.channel", org.jitsi.util.OSUtils.IS_WINDOWS);
 
@@ -162,7 +163,8 @@ public class ConfigServlet extends HttpServlet
 
             final Map<String, Object> p2p = new HashMap<>();
             p2p.put( "enabled", ofMeetConfig.getP2pEnabled() );
-            p2p.put( "preferH264", ofMeetConfig.getP2pPreferH264() );
+            p2p.put( "preferredCodec", "VP9" );
+            p2p.put( "preferH264", ofMeetConfig.getP2pPreferH264() );			
             p2p.put( "disableH264", ofMeetConfig.getP2pDisableH264() );
             p2p.put( "useStunTurn", ofMeetConfig.getP2pUseStunTurn() );
             config.put( "p2p", p2p );
@@ -230,12 +232,19 @@ public class ConfigServlet extends HttpServlet
             config.put( "minHDHeight", minHDHeight );
             config.put( "hiddenDomain", "recorder." + xmppDomain );
             config.put( "startBitrate", startBitrate );
+			
+            config.put( "useNewBandwidthAllocationStrategy", useNewBandwidthAllocationStrategy );			
 
             final JSONObject videoQuality = new JSONObject();
+            videoQuality.put( "preferredCodec", "VP9" );	
+			
             final JSONObject maxBitratesVideo = new JSONObject();
-            maxBitratesVideo.put( "low", lowMaxBitratesVideo );
-            maxBitratesVideo.put( "standard", standardMaxBitratesVideo );
-            maxBitratesVideo.put( "high", highMaxBitratesVideo );
+            final JSONObject vp9 = new JSONObject();			
+            vp9.put( "low", lowMaxBitratesVideo );
+            vp9.put( "standard", standardMaxBitratesVideo );
+            vp9.put( "high", highMaxBitratesVideo );
+            maxBitratesVideo.put( "VP9", vp9 );	
+			
             videoQuality.put( "maxBitratesVideo", maxBitratesVideo );
 
             final JSONObject minHeightForQualityLvl = new JSONObject();

@@ -490,7 +490,7 @@
                     <label class="jive-label" for="lowMaxBitratesVideo"><fmt:message key="config.page.configuration.ofmeet.bitrates.low.max.bitrates.video"/></label>
                 </td>
                 <td>
-                    <input type="text" name="lowMaxBitratesVideo" id="lowMaxBitratesVideo" value="${admin:getProperty( "org.jitsi.videobridge.low.max.bitrates.video", "200000")}">
+                    <input type="text" name="lowMaxBitratesVideo" id="lowMaxBitratesVideo" value="${admin:getProperty( "org.jitsi.videobridge.low.max.bitrates.video", "100000")}">
                 </td>
             </tr>
             <tr>
@@ -498,7 +498,7 @@
                     <label class="jive-label" for="highMaxBitratesVideo"><fmt:message key="config.page.configuration.ofmeet.bitrates.high.max.bitrates.video"/></label>
                 </td>
                 <td>
-                    <input type="text" name="highMaxBitratesVideo" id="highMaxBitratesVideo" value="${admin:getProperty( "org.jitsi.videobridge.high.max.bitrates.video", "1500000")}">
+                    <input type="text" name="highMaxBitratesVideo" id="highMaxBitratesVideo" value="${admin:getProperty( "org.jitsi.videobridge.high.max.bitrates.video", "1200000")}">
                 </td>
             </tr>       
             <tr>
@@ -506,7 +506,7 @@
                     <label class="jive-label" for="standardMaxBitratesVideo"><fmt:message key="config.page.configuration.ofmeet.bitrates.standard.max.bitrates.video"/></label>
                 </td>
                 <td>
-                    <input type="text" name="standardMaxBitratesVideo" id="standardMaxBitratesVideo" value="${admin:getProperty( "org.jitsi.videobridge.standard.max.bitrates.video", "500000")}">
+                    <input type="text" name="standardMaxBitratesVideo" id="standardMaxBitratesVideo" value="${admin:getProperty( "org.jitsi.videobridge.standard.max.bitrates.video", "300000")}">
                 </td>
             </tr>                
         </table>        

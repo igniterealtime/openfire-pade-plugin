@@ -163,11 +163,13 @@ public class ConfigServlet extends HttpServlet
 
             final Map<String, Object> p2p = new HashMap<>();
             p2p.put( "enabled", ofMeetConfig.getP2pEnabled() );
+			p2p.put( "enableUnifiedOnChrome", true);
             p2p.put( "preferredCodec", "VP9" );
             p2p.put( "preferH264", ofMeetConfig.getP2pPreferH264() );			
             p2p.put( "disableH264", ofMeetConfig.getP2pDisableH264() );
             p2p.put( "useStunTurn", ofMeetConfig.getP2pUseStunTurn() );
-            config.put( "p2p", p2p );
+            config.put( "enableP2P", true );
+            config.put( "p2p", p2p );			
             // TODO
             //if ( ofMeetConfig.getP2pStunServers() != null && !ofMeetConfig.getP2pStunServers().isEmpty() )
             //p2p.put( "stunServers", ofMeetConfig.getP2pStunServers() );
@@ -178,6 +180,8 @@ public class ConfigServlet extends HttpServlet
             }
             //config.put( "enforcedBridge", "jitsi-videobridge." + xmppDomain );
             config.put( "useStunTurn", useStunTurn );
+			config.put( "useTurnUdp", false);
+			
             if ( defaultLanguage != null && !defaultLanguage.trim().isEmpty() )
             {
                 config.put( "defaultLanguage", defaultLanguage.trim() );
@@ -188,12 +192,13 @@ public class ConfigServlet extends HttpServlet
             config.put( "useRtcpMux", useRtcpMux );
             //config.put( "useBundle", useBundle );
             config.put( "enableWelcomePage", enableWelcomePage );
+            config.put( "isBrand", false );			
             config.put( "enableClosePage", enableFeedback );
             config.put( "enableRtpStats", enableRtpStats );
             config.put( "enableLipSync", ofMeetConfig.getLipSync() );
 
-            config.put( "enableRemb", true );
-            config.put( "enableTcc", true );
+            //config.put( "enableRemb", true );
+            //config.put( "enableTcc", true );
 
             if ( recordingKey == null || recordingKey.isEmpty() )
             {
@@ -294,7 +299,10 @@ public class ConfigServlet extends HttpServlet
             constraints.put( "video", videoConstraints );
             config.put( "constraints", constraints );
             config.put( "enableLayerSuspension", enableLayerSuspension );
-
+			config.put( "enableUnifiedOnChrome", true);
+			config.put( "enableForcedReload", true);
+			config.put( "enableUserRolesBasedOnToken", false);
+			
             final JSONObject testing = new JSONObject();
             final JSONObject octo = new JSONObject();
             octo.put( "probability", 0 );
@@ -323,7 +331,7 @@ public class ConfigServlet extends HttpServlet
             {
                 config.put( "websocket", new URI( "https".equals(request.getScheme()) ? "wss" : "ws", null, request.getServerName(), request.getServerPort(), "/ws/", null, null) );
             }
-            config.put( "openBridgeChannel", wsBridgeChannel ? "websocket" : "datachannel" );
+            //config.put( "openBridgeChannel", wsBridgeChannel ? "websocket" : "datachannel" );
             config.put( "channelLastN", ofMeetConfig.getChannelLastN() );
             config.put( "adaptiveLastN", ofMeetConfig.getAdaptiveLastN() );
             config.put( "disableSimulcast", !ofMeetConfig.getSimulcast() );

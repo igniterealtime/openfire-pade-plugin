@@ -326,12 +326,7 @@ var ofmeet = (function (ofm) {
             return;
         }
 
-        console.debug("custom_ofmeet.js pre-setup");
-		
-        APP.connection.xmpp.connection.addHandler(handleMessage, null, "message");
-        APP.connection.xmpp.connection.addHandler(handleMucMessage, "urn:xmpp:json:0", "message");
-        APP.connection.xmpp.connection.addHandler(handlePresence, null, "presence");
-		
+        console.debug("custom_ofmeet.js pre-setup");		
 		setup();	
 	}	
 
@@ -340,7 +335,21 @@ var ofmeet = (function (ofm) {
             setTimeout(setup);
             return;
         }
+		
+        APP.connection.xmpp.connection.addHandler(handleMessage, null, "message");
+        APP.connection.xmpp.connection.addHandler(handleMucMessage, "urn:xmpp:json:0", "message");
+        APP.connection.xmpp.connection.addHandler(handlePresence, null, "presence");
+		
+		APP.conference.getLocalDisplayName = function() {
+			const settings = JSON.parse(localStorage.getItem("features/base/settings"));
+			return settings?.displayName;
+		}
 
+		APP.conference.getParticipantDisplayName = function(id) {
+			const participant = APP.conference.getParticipantById(APP.conference.getMyUserId());
+			return participant?._displayName;
+		}
+		
         console.debug("custom_ofmeet.js setup");
 		
 		const room = getConference();
@@ -1165,11 +1174,11 @@ var ofmeet = (function (ofm) {
 
     function getAllParticipants() {
         const state = APP.store.getState();
-        return (state["features/base/participants"] || []);
+        return (state["features/base/participants"].remote);
     }
 
     function getParticipant(id) {
-        return getAllParticipants().find(p => p.id == id);
+        return getAllParticipants().get(id);
     }
 
     function safeStartCase(s = '') {
@@ -1186,8 +1195,8 @@ var ofmeet = (function (ofm) {
         const nick = presence.querySelector('nick');
         const avatarURL = presence.querySelector('avatar-url');
 
-        if (raisedHand) {
-            handsRaised = getAllParticipants().filter(p => p.raisedHand).length;
+        if (raisedHand) {			
+            handsRaised = Array.from(getAllParticipants().keys()).filter(p => p.raisedHand).length;
             const handsTotal = APP.conference.membersCount;
             const handsPercentage = Math.round(100 * handsRaised / handsTotal);
             const label = handsRaised > 0 ? i18n('handsRaised.handsRaised', { raised: handsRaised, total: handsTotal, percentage: handsPercentage }) : "";
@@ -1860,7 +1869,7 @@ var ofmeet = (function (ofm) {
                     if (tags.host) {
                         $('#tags-host').val(tags.host);
                     } else {
-                        const modrator = getAllParticipants().find(p => p.role == 'moderator');
+                        const modrator = Array.from(getAllParticipants().keys()).find(p => p.role == 'moderator');
                         if (modrator) {
                             $('#tags-host').val(modrator.name);
                         }
@@ -3710,6 +3719,7 @@ var ofmeet = (function (ofm) {
     }({}));
 
     ofm.recording = false;
+	ofm.getAllParticipants = getAllParticipants;
 
     return ofm;
 

@@ -325,7 +325,11 @@ var ofmeet = (function (ofm) {
             setTimeout(preSetup);
             return;
         }
-
+		
+        APP.connection.xmpp.connection.addHandler(handleMessage, null, "message");
+        APP.connection.xmpp.connection.addHandler(handleMucMessage, "urn:xmpp:json:0", "message");
+        APP.connection.xmpp.connection.addHandler(handlePresence, null, "presence");
+		
         console.debug("custom_ofmeet.js pre-setup");		
 		setup();	
 	}	
@@ -335,10 +339,6 @@ var ofmeet = (function (ofm) {
             setTimeout(setup);
             return;
         }
-		
-        APP.connection.xmpp.connection.addHandler(handleMessage, null, "message");
-        APP.connection.xmpp.connection.addHandler(handleMucMessage, "urn:xmpp:json:0", "message");
-        APP.connection.xmpp.connection.addHandler(handlePresence, null, "presence");
 		
 		APP.conference.getLocalDisplayName = function() {
 			const settings = JSON.parse(localStorage.getItem("features/base/settings"));

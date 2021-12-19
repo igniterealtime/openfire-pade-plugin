@@ -65,7 +65,6 @@ public class JitsiJvbWrapper implements ProcessListener
         jitsiPlugin.initializePlugin( manager, pluginDirectory );
 
         final OFMeetConfig config = new OFMeetConfig();
-        ensureJvbUser(config);
 
         final String jvbHomePath = pluginDirectory.getPath() + File.separator + "classes" + File.separator + "jvb";
         final String domain = XMPPServer.getInstance().getServerInfo().getXMPPDomain();
@@ -93,16 +92,18 @@ public class JitsiJvbWrapper implements ProcessListener
             "    http-servers {",
             "        private {",
             "            port = " + rest_port,
+            "            host = " + local_ip,			
             "        }",
             "        public {",
             "            port = " + plain_port,
+            "            host = " + public_ip,			
             "        }",
             "    }",
             "",
             "    websockets {",
-            "        server-id = ofmeet",
+            "        server-id = " + hostname,
             "        enabled = true",
-            "        domain = \"" + JiveGlobals.getProperty( "ofmeet.websockets.domain", domain) + ":" + JiveGlobals.getProperty( "ofmeet.websockets.publicport", public_port) + "\"",
+            "        domain = \"" + JiveGlobals.getProperty( "ofmeet.websockets.domain", hostname) + ":" + JiveGlobals.getProperty( "ofmeet.websockets.publicport", public_port) + "\"",
             "        tls = true",
             "    }",
             "",
@@ -315,11 +316,13 @@ public class JitsiJvbWrapper implements ProcessListener
                 break;
 
             case PluginImpl.MANUAL_HARVESTER_LOCAL_PROPERTY_NAME:
+			    value = JiveGlobals.getXMLProperty("network.interface");
                 if (value == null || value.isEmpty()) break;
                 props.setProperty( "org.ice4j.ice.harvest.NAT_HARVESTER_LOCAL_ADDRESS", value );
                 break;
 
             case PluginImpl.MANUAL_HARVESTER_PUBLIC_PROPERTY_NAME:
+			    value = JiveGlobals.getXMLProperty("network.interface");			
                 if (value == null || value.isEmpty()) break;
                 props.setProperty( "org.ice4j.ice.harvest.NAT_HARVESTER_PUBLIC_ADDRESS", value );
                 break;
@@ -371,13 +374,17 @@ public class JitsiJvbWrapper implements ProcessListener
     public String getIpAddress()
     {
         String ourHostname = XMPPServer.getInstance().getServerInfo().getHostname();
-        String ourIpAddress = "127.0.0.1";
+        String ourIpAddress = JiveGlobals.getXMLProperty("network.interface");
+		
+		if (ourIpAddress == null) {
+			ourIpAddress = "127.0.0.1";
+			
+			try {
+				ourIpAddress = InetAddress.getByName(ourHostname).getHostAddress();
+			} catch (Exception e) {
 
-        try {
-            ourIpAddress = InetAddress.getByName(ourHostname).getHostAddress();
-        } catch (Exception e) {
-
-        }
+			}
+		}
 
         return ourIpAddress;
     }
@@ -389,7 +396,7 @@ public class JitsiJvbWrapper implements ProcessListener
         try {
             HttpClient client = new DefaultHttpClient();
             final String rest_port = JiveGlobals.getProperty( "ofmeet.videobridge.rest.port", "8188");
-            final String rest_host = JiveGlobals.getProperty( "ofmeet.videobridge.rest.host", "localhost");
+            final String rest_host = JiveGlobals.getProperty( "ofmeet.videobridge.rest.host", server);
             HttpGet get = new HttpGet("http://" + rest_host + ":" + rest_port + "/colibri/stats");
             HttpResponse response2 = client.execute(get);
             BufferedReader rd = new BufferedReader(new InputStreamReader(response2.getEntity().getContent()));
@@ -449,32 +456,5 @@ public class JitsiJvbWrapper implements ProcessListener
     public void onError(final Throwable t)
     {
         Log.error("Thread error", t);
-    }
-
-    private void ensureJvbUser(OFMeetConfig config)
-    {
-        final UserManager userManager = XMPPServer.getInstance().getUserManager();
-        final String username =  config.getJvbName();
-
-        if ( !userManager.isRegisteredUser( username ) )
-        {
-            Log.info( "No pre-existing 'jvb' user detected. Generating one." );
-            String password = config.getJvbPassword();
-
-            if ( password == null || password.isEmpty() )
-            {
-                password = StringUtils.randomString( 40 );
-            }
-
-            try
-            {
-                userManager.createUser( username, password, "JVB User (generated)", null);
-                config.setJvbPassword( password );
-            }
-            catch ( Exception e )
-            {
-                Log.error( "Unable to provision a 'jvb' user.", e );
-            }
-        }
     }
 }

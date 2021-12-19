@@ -751,11 +751,6 @@ public class Config implements MUCEventListener {
 
     }
 
-    public void occupantLeft(JID roomJID, JID user)
-    {
-
-    }
-
     public void nicknameChanged(JID roomJID, JID user, String oldNickname, String newNickname)
     {
 
@@ -775,7 +770,18 @@ public class Config implements MUCEventListener {
 	{
 
 	}
-
+	
+	public void occupantNickKicked(JID roomJID, String nickname)
+	{
+		
+	}
+	
+    public void occupantLeft(JID roomJID, JID user, String nickname)
+	{
+		
+	}
+	
+	
 	public class Conference
 	{
 		public String pin = null;

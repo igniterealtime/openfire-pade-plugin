@@ -26,6 +26,7 @@ import org.jivesoftware.openfire.session.ClientSession;
 import org.jivesoftware.openfire.session.Session;
 import org.jivesoftware.openfire.user.User;
 import org.jivesoftware.openfire.user.UserNotFoundException;
+import org.jivesoftware.openfire.OfflineMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xmpp.packet.IQ;
@@ -72,6 +73,8 @@ public class PushInterceptor implements PacketInterceptor, OfflineMessageListene
      * @param processed flag that indicates if the action (read/send) was performed. (PRE vs. POST).
      * @throws PacketRejectedException if the packet should be prevented from being processed.
      */
+	 
+	
     @Override
     public void interceptPacket( final Packet packet, final Session session, final boolean incoming, final boolean processed ) throws PacketRejectedException
     {
@@ -144,8 +147,10 @@ public class PushInterceptor implements PacketInterceptor, OfflineMessageListene
      * @param message the message that was stored offline.
      */
     @Override
-    public void messageStored( final Message message )
+    public void messageStored( final OfflineMessage offlineMessage )
     {
+		final Message message = (Message) offlineMessage;
+		
         if ( message.getBody() == null || message.getBody().isEmpty() )
         {
             return;

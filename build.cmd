@@ -4,7 +4,17 @@ cd target
 rename pade-openfire-plugin-assembly.jar pade.jar
 rd "C:\openfire_4_6_3\plugins\pade" /q /s
 del "C:\openfire_4_6_3\plugins\pade.jar" 
-del "C:\openfire_4_6_3\logs\*.*"
+del /q "C:\openfire_4_6_3\logs\*.*"
 copy pade.jar C:\openfire_4_6_3\plugins\pade.jar
+
+rd "D:\Projects\openfire-cluster\node1\plugins\pade" /q /s
+del "D:\Projects\openfire-cluster\node1\plugins\pade.jar" 
+del /q "D:\Projects\openfire-cluster\node1\logs\*.*"
+copy pade.jar D:\Projects\openfire-cluster\node1\plugins\pade.jar
+
+rd "D:\Projects\openfire-cluster\node2\plugins\pade" /q /s
+del "D:\Projects\openfire-cluster\node2\plugins\pade.jar" 
+del /q "D:\Projects\openfire-cluster\node2\logs\*.*"
+copy pade.jar D:\Projects\openfire-cluster\node2\plugins\pade.jar
 
 pause

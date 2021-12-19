@@ -132,11 +132,11 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     private ServletContextHandler streamWsContext = null;	
     private BookmarkInterceptor bookmarkInterceptor;
 	private Application voiceBridge = null;	
+    private JitsiJvbWrapper jitsiJvbWrapper;
+    private JitsiJicofoWrapper jitsiJicofoWrapper;
+    private JitsiJigasiWrapper jitsiJigasiWrapper;
 
-    private final OFMeetConfig config;
-    private final JitsiJvbWrapper jitsiJvbWrapper;
-    private final JitsiJicofoWrapper jitsiJicofoWrapper;
-    private final JitsiJigasiWrapper jitsiJigasiWrapper;
+    private final OFMeetConfig config;		
     private final MeetingPlanner meetingPlanner;
     private final LobbyMuc lobbyMuc;
     private final SecurityAuditManager securityAuditManager = SecurityAuditManager.getInstance();
@@ -147,11 +147,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     public OfMeetPlugin()
     {
         config = new OFMeetConfig();
-
-        jitsiJigasiWrapper = new JitsiJigasiWrapper();
-        jitsiJicofoWrapper = new JitsiJicofoWrapper();
-        jitsiJvbWrapper = new JitsiJvbWrapper();
-
         meetingPlanner = new MeetingPlanner();
         lobbyMuc = new LobbyMuc();
     }
@@ -163,6 +158,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
     public String getConferenceStats()
     {
+		if (jitsiJvbWrapper == null) return null;
         return jitsiJvbWrapper.getConferenceStats();
     }
 
@@ -183,32 +179,50 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     {
         return "OfMeet Plugin";
     }
-
-    public void initializePlugin(final PluginManager manager, final File pluginDirectory)
-    {
-        self = this;
-        webRoot = pluginDirectory.getPath() + "/classes";
-
-        this.manager = manager;
-        this.pluginDirectory = pluginDirectory;
-
-        // Initialize all Jitsi software, which provided the video-conferencing functionality.
+	
+	private void createConference(final String roomName)
+	{
         try
+        {			
+			final String domain = XMPPServer.getInstance().getServerInfo().getXMPPDomain();
+			MultiUserChatService mucService = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService("conference");	
+			MUCRoom controlRoom = mucService.getChatRoom(roomName, new JID("admin@" + domain));
+			controlRoom.setPersistent(false);
+			controlRoom.setPublicRoom(true);
+			controlRoom.unlock(controlRoom.getRole());
+			mucService.syncChatRoom(controlRoom);	
+        }
+        catch ( Exception ex )
         {
-            jitsiJvbWrapper.initialize( manager, pluginDirectory );
+            Log.error( "An exception occurred while attempting to create conference " + roomName, ex );
+        }			
+	}
+	
+	private void setupJvb()
+	{
+        try
+        {	
+			jitsiJvbWrapper = new JitsiJvbWrapper();		
+			ensureJvbUser();
+			createConference("ofmeet");			
+			jitsiJvbWrapper.initialize( manager, pluginDirectory );			
+        }
+        catch ( Exception ex )
+        {
+            Log.error( "An exception occurred while attempting to initialize jicofo", ex );
+        }						
+	}
+	
+	private void setupJicofo()
+	{
+        try
+        {	
+			jitsiJicofoWrapper = new JitsiJicofoWrapper();		
+			ensureFocusUser();
+			jitsiJicofoWrapper.initialize(pluginDirectory);
 
-            if (config.getJigasiSipEnabled() && config.getJigasiSipUserId() != null)
-            {
-                ensureJigasiUser();
-                jitsiJigasiWrapper.initialize(pluginDirectory);
-            }
-
-            ensureFocusUser();
-            jitsiJicofoWrapper.initialize(pluginDirectory);
-            loadBranding();	
-
-            if ( JiveGlobals.getBooleanProperty( "ofmeet.use.internal.focus.component", true ) )
-            {
+			if ( JiveGlobals.getBooleanProperty( "ofmeet.use.internal.focus.component", true ) )
+			{
 				focusComponent = new FocusComponent();
 				componentManager = ComponentManagerFactory.getComponentManager();			
 				componentManager.addComponent("focus", focusComponent);		
@@ -216,32 +230,70 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         }
         catch ( Exception ex )
         {
-            Log.error( "An exception occurred while attempting to initialize the Jitsi components.", ex );
-        }
-
-        // Initialize our own additional functinality providers.
+            Log.error( "An exception occurred while attempting to initialize jicofo", ex );
+        }			
+	}
+	
+	private void setupJigasi()
+	{
         try
-        {
-            meetingPlanner.initialize();
-            lobbyMuc.initialize();
+        {		
+            if (config.getJigasiSipEnabled() && config.getJigasiSipUserId() != null)
+            {
+				jitsiJigasiWrapper = new JitsiJigasiWrapper();				
+                ensureJigasiUser();
+				createConference("ofgasi");					
+                jitsiJigasiWrapper.initialize(pluginDirectory);
+
+				String freeswitchServer = config.jigasiFreeSwitchHost.get();
+				String freeswitchPassword = config.jigasiFreeSwitchPassword.get();;
+				System.setProperty("ofmeet.freeswitch.started", "false");
+				
+				if (config.getJigasiFreeSwitchEnabled() && freeswitchServer != null)
+				{
+					managerConnection = new DefaultManagerConnection(freeswitchServer, freeswitchPassword);
+					managerConnection.getESLClient();
+					ConnectThread connector = new ConnectThread();
+					connectTask = (ScheduledFuture<ConnectThread>) connExec.scheduleAtFixedRate(connector, 30,  5, TimeUnit.SECONDS);
+				}	
+			}				
         }
         catch ( Exception ex )
         {
-            Log.error( "An exception occurred while attempting to initialize the Meeting Planner.", ex );
-        }
+            Log.error( "An exception occurred while attempting to initialize jigasi", ex );
+        }			
+	}	
 
+    public void initializePlugin(final PluginManager manager, final File pluginDirectory)
+    {
+        self = this;
+        webRoot = pluginDirectory.getPath() + "/classes";
+
+        this.manager = manager;
+        this.pluginDirectory = pluginDirectory;	
+
+        // Initialize all Jitsi software, which provided the video-conferencing functionality.
+
+        try
+        {
+			if (!ClusterManager.isClusteringEnabled())
+			{				
+				setupJvb();
+				setupJicofo();
+				setupJigasi();
+			}
+
+			ClusterManager.addListener(this);
+
+        }
+        catch ( Exception ex )
+        {
+            Log.error( "An exception occurred while attempting to initialize Jitsi", ex );
+        }			
+				
         try
         {
             loadPublicWebApp();
-        }
-        catch ( Exception ex )
-        {
-            Log.error( "An exception occurred while attempting to load the public web application.", ex );
-        }
-
-        try
-        {
-            ClusterManager.addListener(this);
             checkDownloadFolder(pluginDirectory);
 
             Log.info("OfMeet Plugin - Initialize IQ handler ");
@@ -258,40 +310,26 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
             SessionEventDispatcher.addListener(this);
             PropertyEventDispatcher.addListener(this);
             MUCEventDispatcher.addListener(this);
-        }
-        catch (Exception e) {
-            Log.error("Could NOT start open fire meetings", e);
-        }
+			
+			loadBranding();					
+            meetingPlanner.initialize();
+            lobbyMuc.initialize();
+								
+			if (config.getLiveStreamEnabled())
+			{
+				setupFFMPEG(pluginDirectory);
+			}
 
-        String freeswitchServer = config.jigasiFreeSwitchHost.get();
-        String freeswitchPassword = config.jigasiFreeSwitchPassword.get();;
-        System.setProperty("ofmeet.freeswitch.started", "false");
-
-        try
-        {
-            if (config.getJigasiFreeSwitchEnabled() && freeswitchServer != null)
-            {
-                managerConnection = new DefaultManagerConnection(freeswitchServer, freeswitchPassword);
-                managerConnection.getESLClient();
-                ConnectThread connector = new ConnectThread();
-                connectTask = (ScheduledFuture<ConnectThread>) connExec.scheduleAtFixedRate(connector, 30,  5, TimeUnit.SECONDS);
-            }
+			if (config.getAudiobridgeEnabled())
+			{
+				voiceBridge = new Application();
+				voiceBridge.appStart(pluginDirectory);		
+			}			
         }
         catch ( Exception ex )
         {
-            Log.error( "An exception occurred while attempting to connect to FreeSWITCH", ex );
-        }
-					
-		if (config.getLiveStreamEnabled())
-		{
-			setupFFMPEG(pluginDirectory);
-		}
-
-		if (config.getAudiobridgeEnabled())
-		{
-			voiceBridge = new Application();
-			voiceBridge.appStart(pluginDirectory);		
-		}
+            Log.error( "An exception occurred while attempting to initialize pade extensions", ex );
+        }		
     }
 
     public void destroyPlugin()
@@ -302,9 +340,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
             PropertyEventDispatcher.removeListener( this );
             MUCEventDispatcher.removeListener(this);
 
-            unloadPublicWebApp();
-			
-			if (focusComponent != null) componentManager.removeComponent("focus");			
+            unloadPublicWebApp();		
         }
         catch ( Exception ex )
         {
@@ -333,9 +369,10 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
         try
         {
-            jitsiJigasiWrapper.destroy();
-            jitsiJvbWrapper.destroy();
-            jitsiJicofoWrapper.destroy();
+            if (jitsiJigasiWrapper != null) jitsiJigasiWrapper.destroy();
+            if (jitsiJvbWrapper != null) 	jitsiJvbWrapper.destroy();
+            if (jitsiJicofoWrapper != null) jitsiJicofoWrapper.destroy();
+			if (focusComponent != null) componentManager.removeComponent("focus");				
         }
         catch ( Exception ex )
         {
@@ -538,10 +575,37 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         return ourIpAddress;
     }
 
+	private void ensureJvbUser()
+    {
+        final UserManager userManager = XMPPServer.getInstance().getUserManager();
+        final String username =  config.getJvbName();
+
+        if ( !userManager.isRegisteredUser( username ) )
+        {
+            Log.info( "No pre-existing 'jvb' user detected. Generating one." );
+            String password = config.getJvbPassword();
+
+            if ( password == null || password.isEmpty() )
+            {
+                password = StringUtils.randomString( 40 );
+            }
+
+            try
+            {
+                userManager.createUser( username, password, "JVB User (generated)", null);
+                config.setJvbPassword( password );
+            }
+            catch ( Exception e )
+            {
+                Log.error( "Unable to provision a 'jvb' user.", e );
+            }
+        }
+    }
+	
     private void ensureJigasiUser()
     {
-        // Ensure that the 'jigasi' user exists.
         final UserManager userManager = XMPPServer.getInstance().getUserManager();
+		
         if ( !userManager.isRegisteredUser( config.jigasiXmppUserId.get() ) )
         {
             Log.info( "No pre-existing 'jigasi' user detected. Generating one." );
@@ -842,18 +906,30 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     //
     //-------------------------------------------------------
 
-    @Override
-    public void joinedCluster()
-    {
-        Log.info("OfMeet Plugin - joinedCluster");
+	private void terminateJisti()
+	{
         try
         {
-            jitsiJvbWrapper.destroy();
+            if (jitsiJigasiWrapper != null) jitsiJigasiWrapper.destroy();
+            if (jitsiJvbWrapper != null) 	jitsiJvbWrapper.destroy();
+            if (jitsiJicofoWrapper != null) jitsiJicofoWrapper.destroy();
+			if (focusComponent != null) 	componentManager.removeComponent("focus");				
+			
+			Thread.sleep(5000);	
         }
         catch ( Exception ex )
         {
-            Log.error( "An exception occurred while trying to destroy the Jitsi Plugin.", ex );
-        }
+            Log.error( "An exception occurred while trying to destroy Jitsi components.", ex );
+        }		
+	}
+	
+    @Override
+    public void joinedCluster()
+    {
+        Log.info("OfMeet Plugin - joinedCluster");			
+		terminateJisti();
+		
+		setupJvb();		
     }
 
     @Override
@@ -865,14 +941,11 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     public void leftCluster()
     {
         Log.info("OfMeet Plugin - leftCluster");
-        try
-        {
-            jitsiJvbWrapper.initialize( manager, pluginDirectory );
-        }
-        catch ( Exception ex )
-        {
-            Log.error( "An exception occurred while trying to initialize the Jitsi Plugin.", ex );
-        }
+		terminateJisti();
+		
+		setupJvb();
+		setupJicofo();
+		setupJigasi();			
     }
 
     @Override
@@ -884,14 +957,8 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     public void markedAsSeniorClusterMember()
     {
         Log.info("OfMeet Plugin - markedAsSeniorClusterMember");
-        try
-        {
-            jitsiJvbWrapper.initialize( manager, pluginDirectory );
-        }
-        catch ( Exception ex )
-        {
-            Log.error( "An exception occurred while trying to initialize the Jitsi Plugin.", ex );
-        }
+		setupJicofo();
+		setupJigasi();	
     }
 
     public void setRecording(String roomName, String path)
@@ -1000,7 +1067,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     }
 
     @Override
-    public void occupantLeft(final JID roomJID, JID user)
+    public void occupantLeft(final JID roomJID, JID user, String nickname)
     {
         Log.debug("occupantLeft " + roomJID + " " + user);
 
@@ -1078,6 +1145,13 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         }
     }
 
+	
+	@Override
+	public void occupantNickKicked(JID roomJID, String nickname)
+	{
+		
+	}
+	
     @Override
     public void nicknameChanged(JID roomJID, JID user, String oldNickname, String newNickname)
     {
@@ -1101,7 +1175,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     {
 
     }
-
+	
     //-------------------------------------------------------
     //
     //      session management

@@ -404,11 +404,6 @@ public class PadePlugin implements Plugin, MUCEventListener
 
     }
 
-    public void occupantLeft(JID roomJID, JID user)
-    {
-
-    }
-
     public void nicknameChanged(JID roomJID, JID user, String oldNickname, String newNickname)
     {
 
@@ -480,6 +475,16 @@ public class PadePlugin implements Plugin, MUCEventListener
 
     }
 
+	public void occupantNickKicked(JID roomJID, String nickname)
+	{
+		
+	}
+	
+    public void occupantLeft(JID roomJID, JID user, String nickname)
+	{
+		
+	}
+	
     private void notifyRoomSubscribers(JID subscriberJID, MUCRoom room, JID roomJID, Message message, String nickname, String senderJid)
     {
         try {

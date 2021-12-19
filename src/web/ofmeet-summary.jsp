@@ -6,6 +6,7 @@
                  java.util.*,                 
                  net.sf.json.*,
 				 org.ifsoft.oju.openfire.MUCRoomProperties,
+				 org.jivesoftware.openfire.cluster.ClusterManager,
                  java.net.URLEncoder"                 
     errorPage="error.jsp"
 %>
@@ -201,12 +202,17 @@
         <td align="left" width="29%"><fmt:message key="ofmeet.summary.jvb" /></td>  
         <td align="left" width="70%"><img src="<%= jvb.equals("true") ? "images/success-16x16.gif" : "images/error-16x16.gif" %>"/></td>         
     </tr>   
+<%
+    if ((ClusterManager.isClusteringEnabled() && ClusterManager.isSeniorClusterMember()) || !ClusterManager.isClusteringEnabled()) 
+    {
+%> 	
     <tr>   
         <td width="1%">2</td>        
         <td align="left" width="29%"><fmt:message key="ofmeet.summary.jicofo" /></td>     
         <td align="left" width="70%"><img src="<%= jicofo.equals("true")  ? "images/success-16x16.gif" : "images/error-16x16.gif" %>"/></td>        
     </tr>   
 <%
+	}
     if (ofmeetConfig.getJigasiSipEnabled()) 
     {
 %>   

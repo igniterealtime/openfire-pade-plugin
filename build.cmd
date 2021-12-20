@@ -2,10 +2,10 @@ call mvn clean package -Dmaven.test.skip=true
 
 cd target
 rename pade-openfire-plugin-assembly.jar pade.jar
-rd "C:\openfire_4_6_3\plugins\pade" /q /s
-del "C:\openfire_4_6_3\plugins\pade.jar" 
-del /q "C:\openfire_4_6_3\logs\*.*"
-copy pade.jar C:\openfire_4_6_3\plugins\pade.jar
+rd "C:\openfire_4_7_0\plugins\pade" /q /s
+del "C:\openfire_4_7_0\plugins\pade.jar" 
+del /q "C:\openfire_4_7_0\logs\*.*"
+copy pade.jar C:\openfire_4_7_0\plugins\pade.jar
 
 rd "D:\Projects\openfire-cluster\node1\plugins\pade" /q /s
 del "D:\Projects\openfire-cluster\node1\plugins\pade.jar" 

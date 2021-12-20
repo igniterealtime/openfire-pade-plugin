@@ -428,7 +428,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     {
         @Override public Object createWebSocket(ServletUpgradeRequest req, ServletUpgradeResponse resp)
         {
-            String ipaddr = getIpAddress();
+			String ipaddr = JiveGlobals.getProperty( "ofmeet.videobridge.rest.host", OfMeetPlugin.self.getIpAddress());	
             String jvbPort = JiveGlobals.getProperty( "ofmeet.websockets.plainport", "8180");
 
             HttpServletRequest request = req.getHttpServletRequest();
@@ -447,7 +447,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
             Log.info("JvbSocketCreator " + path + " " + query);
 
-            String url = "ws://localhost:" + jvbPort + path;
+            String url = "ws://" + ipaddr + ":" + jvbPort + path;
 
             ProxyWebSocket socket = null;
             ProxyConnection proxyConnection = new ProxyConnection(URI.create(url), protocols, 10000);
@@ -561,16 +561,20 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         }
     }
 
-    public static String getIpAddress()
+    public String getIpAddress()
     {
         String ourHostname = XMPPServer.getInstance().getServerInfo().getHostname();
-        String ourIpAddress = "127.0.0.1";
+        String ourIpAddress = JiveGlobals.getXMLProperty("network.interface");
+		
+		if (ourIpAddress == null) {
+			ourIpAddress = "127.0.0.1";
+			
+			try {
+				ourIpAddress = InetAddress.getByName(ourHostname).getHostAddress();
+			} catch (Exception e) {
 
-        try {
-            ourIpAddress = InetAddress.getByName(ourHostname).getHostAddress();
-        } catch (Exception e) {
-
-        }
+			}
+		}
 
         return ourIpAddress;
     }

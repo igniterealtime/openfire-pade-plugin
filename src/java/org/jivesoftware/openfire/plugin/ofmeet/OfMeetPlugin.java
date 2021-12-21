@@ -919,7 +919,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
             if (jitsiJicofoWrapper != null) jitsiJicofoWrapper.destroy();
 			if (focusComponent != null) 	componentManager.removeComponent("focus");				
 			
-			Thread.sleep(5000);	
+			Thread.sleep(60000);	
         }
         catch ( Exception ex )
         {

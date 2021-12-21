@@ -20,6 +20,7 @@ import org.jivesoftware.openfire.Connection;
 import org.jivesoftware.openfire.component.ExternalComponentManager;
 import org.jivesoftware.openfire.component.ExternalComponentConfiguration;
 import org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig;
+import org.jivesoftware.openfire.cluster.ClusterManager;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.muc.*;
 import org.jivesoftware.openfire.spi.*;
@@ -129,6 +130,12 @@ public class JitsiJicofoWrapper implements ProcessListener
             "        # Whether SCTP data channels are enabled",
             "        enabled = " + (JiveGlobals.getBooleanProperty( "ofmeet.bridge.ws.channel", OSUtils.IS_WINDOWS) ? "false" : "true"),
             "    }",
+            "    octo  {",
+            "        enabled = " + (ClusterManager.isClusteringEnabled() ? "true" : "false"),
+            "    }",
+            "    bridge  {",
+            "        selection-strategy = RegionBasedBridgeSelectionStrategy ",
+            "    }",			
             "    xmpp {",
             "      client {",
 			"		 conference-muc-jid = " + MAIN_MUC,

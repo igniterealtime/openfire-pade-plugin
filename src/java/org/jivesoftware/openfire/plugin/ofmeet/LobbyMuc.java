@@ -42,9 +42,7 @@ public class LobbyMuc implements ServerIdentitiesProvider, ServerFeaturesProvide
 
     protected void initialize() throws Exception
     {
-        final boolean backwardsCompatible = new Version(4, 6, 1, null, -1 ).isNewerThan( XMPPServer.getInstance().getServerInfo().getVersion() );
-
-        if (!XMPPServer.getInstance().getMultiUserChatManager().isServiceRegistered(LOBBY_NAME) && backwardsCompatible) {
+         if (!XMPPServer.getInstance().getMultiUserChatManager().isServiceRegistered(LOBBY_NAME)) {
             lobbyService = XMPPServer.getInstance().getMultiUserChatManager().createMultiUserChatService(LOBBY_NAME, LOBBY_DESC, false);
             lobbyService.addExtraIdentity("component", LOBBY_MUC, LOBBY_IDENTITY_TYPE);
             lobbyService.addExtraFeature(DISPLAY_NAME_REQUIRED_FEATURE);
@@ -189,6 +187,7 @@ public class LobbyMuc implements ServerIdentitiesProvider, ServerFeaturesProvide
                         lobbyRoom.setPublicRoom(true);
                         lobbyRoom.setPassword(mucRoom.getPassword());
                         lobbyRoom.unlock(lobbyRoom.getRole());
+						lobbyService.syncChatRoom(lobbyRoom);							
                         notify_lobby_enabled(iq.getTo(), iq.getFrom(), true);
                     } catch (Exception e) {
                         Log.error("Cannot create MUC room", e);

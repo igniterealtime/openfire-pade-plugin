@@ -24,6 +24,7 @@
 package org.jivesoftware.openfire.plugin.ofmeet;
 
 import org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig;
+import org.jivesoftware.openfire.cluster.ClusterManager;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.util.JiveGlobals;
 import org.jivesoftware.util.Version;
@@ -302,10 +303,14 @@ public class ConfigServlet extends HttpServlet
 			config.put( "enableUnifiedOnChrome", true);
 			config.put( "enableForcedReload", true);
 			config.put( "enableUserRolesBasedOnToken", false);
+
+            final JSONObject deploymentInfo = new JSONObject();
+            deploymentInfo.put( "region", "region1");			
+            config.put( "deploymentInfo", deploymentInfo );
 			
             final JSONObject testing = new JSONObject();
             final JSONObject octo = new JSONObject();
-            octo.put( "probability", 0 );
+            octo.put( "probability", ClusterManager.isClusteringEnabled() ? 1 : 0 );
             testing.put( "octo", octo);
             testing.put( "capScreenshareBitrate", capScreenshareBitrate ? 1 : 0 );
             config.put( "testing", testing );

@@ -320,6 +320,16 @@ var ofmeet = (function (ofm) {
         }
     }
 	
+	function getLocalDisplayName() {
+		const settings = JSON.parse(localStorage.getItem("features/base/settings"));
+		return settings?.displayName;
+	}
+
+	function getParticipantDisplayName(id) {
+		const participant = APP.conference.getParticipantById(APP.conference.getMyUserId());
+		return participant?._displayName;
+	}
+		
     function preSetup() {
         if (!APP.connection) {
             setTimeout(preSetup);
@@ -339,16 +349,6 @@ var ofmeet = (function (ofm) {
             setTimeout(setup);
             return;
         }
-		
-		APP.conference.getLocalDisplayName = function() {
-			const settings = JSON.parse(localStorage.getItem("features/base/settings"));
-			return settings?.displayName;
-		}
-
-		APP.conference.getParticipantDisplayName = function(id) {
-			const participant = APP.conference.getParticipantById(APP.conference.getMyUserId());
-			return participant?._displayName;
-		}
 		
         console.debug("custom_ofmeet.js setup");
 		
@@ -471,7 +471,7 @@ var ofmeet = (function (ofm) {
 
 		room.on(JitsiMeetJS.events.conference.PRIVATE_MESSAGE_RECEIVED, function (id, text, ts) {
 			var participant = APP.conference.getParticipantById(id);
-			var displayName = participant ? (participant._displayName || 'Anonymous-' + id) : (APP.conference.getLocalDisplayName() || "Me");
+			var displayName = participant ? (participant._displayName || 'Anonymous-' + id) : (getLocalDisplayName() || "Me");
 
 			console.debug("custom_ofmeet.js private message", id, text, ts, displayName);
 
@@ -481,7 +481,7 @@ var ofmeet = (function (ofm) {
 
 		room.on(JitsiMeetJS.events.conference.MESSAGE_RECEIVED, function (id, text, ts) {
 			var participant = APP.conference.getParticipantById(id);
-			var displayName = participant ? (participant._displayName || 'Anonymous-' + id) : (APP.conference.getLocalDisplayName() || "Me");
+			var displayName = participant ? (participant._displayName || 'Anonymous-' + id) : (getLocalDisplayName() || "Me");
 
 			console.debug("custom_ofmeet.js message", id, text, ts, displayName, participant, padsModalOpened);
 
@@ -526,7 +526,7 @@ var ofmeet = (function (ofm) {
             const dataUri = JSON.parse(storage.getItem('ofmeet.settings.avatar'));
             changeAvatar(dataUri, AvatarType.UPLOAD);
         } else {
-            changeAvatar(createAvatar(APP.conference.getLocalDisplayName()), AvatarType.INITIALS);
+            changeAvatar(createAvatar(getLocalDisplayName()), AvatarType.INITIALS);
         }
 
         setOwnPresence();
@@ -1169,7 +1169,7 @@ var ofmeet = (function (ofm) {
     }
 
     function getConferenceJid() {
-        return getConference().room.roomjid;
+        return getConference()?.room?.roomjid;
     }
 
     function getAllParticipants() {
@@ -1215,12 +1215,12 @@ var ofmeet = (function (ofm) {
         if (nick) {
             if (nick.innerHTML != "") {
                 if (APP.conference.getMyUserId() == id) {
-                    if (localDisplayName != APP.conference.getLocalDisplayName()) {
-                        localDisplayName = APP.conference.getLocalDisplayName();
+                    if (localDisplayName != getLocalDisplayName()) {
+                        localDisplayName = getLocalDisplayName();
                         changeAvatar(createAvatar(localDisplayName), AvatarType.INITIALS);
                     }
                 } else {
-                    if (id in participants && participants[id]._displayName != APP.conference.getParticipantDisplayName(id)) {
+                    if (id in participants && participants[id]._displayName != getParticipantDisplayName(id)) {
                         participants[id] = APP.conference.getParticipantById(id);
                         if (breakoutHost) {
                             breakoutHost.updateParticipant(id);
@@ -1506,13 +1506,13 @@ var ofmeet = (function (ofm) {
         if (vcardAvatar) {
             changeAvatar(vcardAvatar, AvatarType.VCARD);
         } else {
-            changeAvatar(createAvatar(APP.conference.getLocalDisplayName()), AvatarType.INITIALS);
+            changeAvatar(createAvatar(getLocalDisplayName()), AvatarType.INITIALS);
         }
     }
 
     function changeInitialsAvatarColor() {
         getNickColor(true);
-        changeAvatar(createAvatar(APP.conference.getLocalDisplayName()), AvatarType.INITIALS);
+        changeAvatar(createAvatar(getLocalDisplayName()), AvatarType.INITIALS);
     }
 
     function createAvatar(nickname, width, height, font) {
@@ -2272,7 +2272,7 @@ var ofmeet = (function (ofm) {
     }
 
     function connectLiveStream(url, streamKey) {
-        const metadata = { user: APP.conference.getLocalDisplayName(), room: APP.conference.roomName, key: streamKey };
+        const metadata = { user: getLocalDisplayName(), room: APP.conference.roomName, key: streamKey };
         const ws = new WebSocket(url, [streamKey]);
 
         ws.onopen = (event) => {
@@ -2956,7 +2956,7 @@ var ofmeet = (function (ofm) {
             console.debug("exitRoom", jid);
 
             const xmpp = APP.connection.xmpp.connection._stropheConn;
-            const to = Strophe.getBareJidFromJid(jid) + '/' + APP.conference.getLocalDisplayName();
+            const to = Strophe.getBareJidFromJid(jid) + '/' + getLocalDisplayName();
             xmpp.send($pres({ type: 'unavailable', to: to }));
         }
 
@@ -2964,7 +2964,7 @@ var ofmeet = (function (ofm) {
             console.debug("joinRoom", jid);
 
             const xmpp = APP.connection.xmpp.connection._stropheConn;
-            const to = Strophe.getBareJidFromJid(jid) + '/' + APP.conference.getLocalDisplayName();
+            const to = Strophe.getBareJidFromJid(jid) + '/' + getLocalDisplayName();
             xmpp.send($pres({ to: to }).c("x", { xmlns: Strophe.NS.MUC }));
         }
 
@@ -3328,7 +3328,7 @@ var ofmeet = (function (ofm) {
                 const secret = handleElement.innerHTML;
                 const id = Strophe.getResourceFromJid(message.getAttribute("from"));
                 const participant = APP.conference.getParticipantById(id);
-                const myName = APP.conference.getLocalDisplayName();
+                const myName = getLocalDisplayName();
 
                 console.debug('webpush contact', id, participant);
 
@@ -3429,7 +3429,7 @@ var ofmeet = (function (ofm) {
 
                 container.querySelectorAll(".meeting-icon > img").forEach(function (icon) {
                     const contact = icon.getAttribute("data-contact");
-                    const message = APP.conference.getLocalDisplayName() + ' invites you to join the room ' + APP.conference.roomName + '.';
+                    const message = getLocalDisplayName() + ' invites you to join the room ' + APP.conference.roomName + '.';
 
                     sendWebPush(message, contact, function (name, error) {
                         let image = './delivered.png';

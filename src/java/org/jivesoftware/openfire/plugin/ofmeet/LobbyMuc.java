@@ -156,8 +156,7 @@ public class LobbyMuc implements ServerIdentitiesProvider, ServerFeaturesProvide
     }
 
 
-    public void interceptPacket(Packet packet, Session session, boolean incoming, boolean processed)
-            throws PacketRejectedException {
+    public void interceptPacket(Packet packet, Session session, boolean incoming, boolean processed) throws PacketRejectedException {
         if (!processed && lobbyService != null) {
             if (packet instanceof IQ) {
                 interceptIQ((IQ) packet, session, incoming, processed);
@@ -278,8 +277,7 @@ public class LobbyMuc implements ServerIdentitiesProvider, ServerFeaturesProvide
         }
     }
 
-    protected void interceptMessage(Message message, Session session, boolean incoming, boolean processed)
-            throws PacketRejectedException {
+    protected void interceptMessage(Message message, Session session, boolean incoming, boolean processed) throws PacketRejectedException {
         Element childElement = message.getChildElement("x", "http://jabber.org/protocol/muc#user");
 
         if (childElement != null && MAIN_MUC.equals(message.getTo().getDomain())) {

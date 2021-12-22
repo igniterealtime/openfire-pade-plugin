@@ -425,6 +425,13 @@
 			<version>1.8.0</version> 		  
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/com.linkedin.urls/url-detector -->
+		<dependency>
+			<groupId>com.linkedin.urls</groupId>
+			<artifactId>url-detector</artifactId>
+			<version>0.1.17</version>
+		</dependency>
+		
     </dependencies>
 	
     <repositories>

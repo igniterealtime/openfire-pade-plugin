@@ -35,6 +35,7 @@ import org.xmpp.packet.Message;
 import org.xmpp.packet.Packet;
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,6 +46,10 @@ import org.apache.http.HttpResponse;
 import nl.martijndwars.webpush.*;
 import org.jivesoftware.util.*;
 import com.j256.twofactorauth.TimeBasedOneTimePasswordUtil;
+import com.linkedin.urls.detection.*;
+import com.linkedin.urls.*;
+import org.broadbear.link.preview.*;
+
 
 public class PushInterceptor implements PacketInterceptor, OfflineMessageListener
 {
@@ -100,6 +105,56 @@ public class PushInterceptor implements PacketInterceptor, OfflineMessageListene
             return;
         }
 
+        Element originId = ((Message) packet).getChildElement("origin-id", "urn:xmpp:sid:0");
+		
+		if (originId != null && originId.attribute("id") != null) {
+			String id = originId.attribute("id").getStringValue();
+			
+			if (id != null) {
+				UrlDetector parser = new UrlDetector(body, UrlDetectorOptions.Default);
+				List<Url> found = parser.detect();
+
+				for(Url url : found) {
+					Log.info("found URL " + url + " " + id);
+					
+					SourceContent sourceContent = TextCrawler.scrape(url.toString(), 3);
+
+					if (sourceContent != null) {
+						String image = null;
+						try {
+							image = sourceContent.getImages().get(0);
+						} catch (Exception e) {}
+						String descriptionShort = sourceContent.getDescription();
+						String title = sourceContent.getTitle();
+						
+						Log.debug("found unfurl " + image + " " + descriptionShort + " " + title);
+						
+						if (image != null || !"".equals(descriptionShort) || !"".equals(title)) {
+							String msgId = "unfurl-" + System.currentTimeMillis() ;
+							Message message = new Message();
+							message.setFrom(packet.getFrom().toBareJID());
+							message.setID(msgId);
+							message.setTo(packet.getTo());
+							message.setType(Message.Type.groupchat);
+							message.addChildElement("x", "http://jabber.org/protocol/muc#user");	
+							
+							Element applyTo = message.addChildElement("apply-to", "urn:xmpp:fasten:0").addAttribute("id", id);
+							applyTo.addElement("meta", "http://www.w3.org/1999/xhtml").addAttribute("property", "og:url").addAttribute("content", url.toString());
+							applyTo.addElement("meta", "http://www.w3.org/1999/xhtml").addAttribute("property", "og:title").addAttribute("content", title);	
+							applyTo.addElement("meta", "http://www.w3.org/1999/xhtml").addAttribute("property", "og:description").addAttribute("content", descriptionShort);
+							
+							if (image != null) {
+								applyTo.addElement("meta", "http://www.w3.org/1999/xhtml").addAttribute("property", "og:image").addAttribute("content", image);								
+							}
+							
+							message.addChildElement("origin-id", "urn:xmpp:sid:0").addAttribute("id", msgId);							
+							XMPPServer.getInstance().getRoutingTable().routePacket(packet.getTo(), message, true);		
+						}							
+					}					
+				}
+			}
+		}
+	
         final User user;
         try
         {

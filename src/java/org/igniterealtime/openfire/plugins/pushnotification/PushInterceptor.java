@@ -27,6 +27,10 @@ import org.jivesoftware.openfire.session.Session;
 import org.jivesoftware.openfire.user.User;
 import org.jivesoftware.openfire.user.UserNotFoundException;
 import org.jivesoftware.openfire.OfflineMessage;
+
+import org.jivesoftware.util.cache.Cache;
+import org.jivesoftware.util.cache.CacheFactory;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xmpp.packet.IQ;
@@ -49,6 +53,7 @@ import com.j256.twofactorauth.TimeBasedOneTimePasswordUtil;
 import com.linkedin.urls.detection.*;
 import com.linkedin.urls.*;
 import org.broadbear.link.preview.*;
+import net.sf.json.*;
 
 
 public class PushInterceptor implements PacketInterceptor, OfflineMessageListener
@@ -56,6 +61,7 @@ public class PushInterceptor implements PacketInterceptor, OfflineMessageListene
     private static final Logger Log = LoggerFactory.getLogger( PushInterceptor.class );
     public static final ConcurrentHashMap<String, String> tokens = new ConcurrentHashMap<>();
     public static final ConcurrentHashMap<String, String> notifications = new ConcurrentHashMap<>();
+    private static Cache url_source = CacheFactory.createLocalCache("URL Source Content");	
 
     /**
      * Invokes the interceptor on the specified packet. The interceptor can either modify
@@ -117,15 +123,13 @@ public class PushInterceptor implements PacketInterceptor, OfflineMessageListene
 				for(Url url : found) {
 					Log.info("found URL " + url + " " + id);
 					
-					SourceContent sourceContent = TextCrawler.scrape(url.toString(), 3);
+					String sourceContent = getUrlSource(url.toString());
 
 					if (sourceContent != null) {
-						String image = null;
-						try {
-							image = sourceContent.getImages().get(0);
-						} catch (Exception e) {}
-						String descriptionShort = sourceContent.getDescription();
-						String title = sourceContent.getTitle();
+						JSONObject source = new JSONObject(sourceContent);	
+						String image = source.getString("image");
+						String descriptionShort = source.getString("descriptionShort");
+						String title = source.getString("title");
 						
 						Log.debug("found unfurl " + image + " " + descriptionShort + " " + title);
 						
@@ -185,6 +189,34 @@ public class PushInterceptor implements PacketInterceptor, OfflineMessageListene
             webPush(user, body, jid, msgtype, null);
         }
     }
+	
+	private String getUrlSource(String url)
+	{
+		String sourceText = (String) url_source.get(url);	
+		
+		if (sourceText == null) {
+			SourceContent sourceContent = TextCrawler.scrape(url.toString(), 3);
+
+			if (sourceContent != null) {
+				JSONObject source = new JSONObject();				
+				String image = null;
+				try {
+					source.put("image", image = sourceContent.getImages().get(0));
+				} catch (Exception e) {}
+				
+				String title = sourceContent.getTitle();
+				
+				if (title != null && !"".equals(title)) {
+					source.put("title", title);					
+					source.put("descriptionShort", sourceContent.getDescription());
+					sourceText = source.toString();
+					url_source.put(url, sourceText);
+				}
+			}				
+		}
+		return sourceText;
+	}
+	
     /**
      * Notification message indicating that a message was not stored offline but bounced
      * back to the sender.

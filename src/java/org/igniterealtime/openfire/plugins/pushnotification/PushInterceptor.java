@@ -121,20 +121,25 @@ public class PushInterceptor implements PacketInterceptor, OfflineMessageListene
 				List<Url> found = parser.detect();
 
 				for(Url url : found) {
-					Log.info("found URL " + url + " " + id);
+					Log.debug("found URL " + url + " " + id);
 					
 					String sourceContent = getUrlSource(url.toString());
 
 					if (sourceContent != null) {
 						JSONObject source = new JSONObject(sourceContent);	
-						String image = source.getString("image");
-						String descriptionShort = source.getString("descriptionShort");
-						String title = source.getString("title");
+						
+						String image = null;
+						if (source.has("image")) image = source.getString("image");
+
+						String descriptionShort = "";						
+						if (source.has("descriptionShort")) descriptionShort = source.getString("descriptionShort");
+						
+						String title = "";						
+						if (source.has("title"))  title = source.getString("title");
 						
 						Log.debug("found unfurl " + image + " " + descriptionShort + " " + title);
 						
-						if (image != null || !"".equals(descriptionShort) || !"".equals(title)) {
-							String msgId = "unfurl-" + System.currentTimeMillis() ;
+						if (!"".equals(descriptionShort) || !"".equals(title)) {							String msgId = "unfurl-" + System.currentTimeMillis() ;
 							Message message = new Message();
 							message.setFrom(packet.getFrom().toBareJID());
 							message.setID(msgId);

@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
 import org.jivesoftware.openfire.plugin.rest.BasicAuth;
 import org.xmpp.packet.JID;
 import net.sf.json.*;
-import org.igniterealtime.openfire.plugins.pushnotification.PushInterceptor;
+import org.igniterealtime.openfire.plugins.pushnotification.WebPushInterceptor;
 import uk.ifsoft.openfire.plugins.pade.PadePlugin;
 
 
@@ -472,9 +472,9 @@ public class MeetService {
 
         if (token != null)
         {
-            if (PushInterceptor.tokens.containsKey(token))
+            if (WebPushInterceptor.tokens.containsKey(token))
             {
-                return PushInterceptor.tokens.remove(token);    // claim token
+                return WebPushInterceptor.tokens.remove(token);    // claim token
 
             } else {
                 String[] usernameAndPassword = BasicAuth.decode(token);

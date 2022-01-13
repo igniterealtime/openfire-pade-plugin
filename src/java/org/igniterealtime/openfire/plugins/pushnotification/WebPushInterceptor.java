@@ -56,9 +56,9 @@ import org.broadbear.link.preview.*;
 import net.sf.json.*;
 
 
-public class PushInterceptor implements PacketInterceptor, OfflineMessageListener
+public class WebPushInterceptor implements PacketInterceptor, OfflineMessageListener
 {
-    private static final Logger Log = LoggerFactory.getLogger( PushInterceptor.class );
+    private static final Logger Log = LoggerFactory.getLogger( WebPushInterceptor.class );
     public static final ConcurrentHashMap<String, String> tokens = new ConcurrentHashMap<>();
     public static final ConcurrentHashMap<String, String> notifications = new ConcurrentHashMap<>();
     private static Cache url_source = CacheFactory.createLocalCache("URL Source Content");	

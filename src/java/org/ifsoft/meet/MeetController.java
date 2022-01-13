@@ -31,7 +31,7 @@ import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.interfaces.ECPrivateKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
-import org.igniterealtime.openfire.plugins.pushnotification.PushInterceptor;
+import org.igniterealtime.openfire.plugins.pushnotification.WebPushInterceptor;
 
 /**
  * The Class MeetController.
@@ -324,7 +324,7 @@ public class MeetController {
             message.setBody(">" + json.getString("msgBody") + "\n\n" + json.getString("reply"));
             XMPPServer.getInstance().getRoutingTable().routePacket(jid2, message, true);
 
-            PushInterceptor.notifications.remove(username); // reset notification indicator
+            WebPushInterceptor.notifications.remove(username); // reset notification indicator
 
         } catch (Exception e) {
             Log.error("postChatMessage", e);

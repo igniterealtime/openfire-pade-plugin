@@ -50,7 +50,7 @@ import waffle.servlet.NegotiateSecurityFilter;
 import waffle.servlet.WaffleInfoServlet;
 import org.xmpp.packet.*;
 import org.dom4j.Element;
-import org.igniterealtime.openfire.plugins.pushnotification.PushInterceptor;
+import org.igniterealtime.openfire.plugins.pushnotification.WebPushInterceptor;
 import org.jivesoftware.openfire.plugin.ofmeet.OfMeetPlugin;
 
 import com.yubico.webauthn.*;
@@ -75,7 +75,7 @@ public class PadePlugin implements Plugin, MUCEventListener
     private WebAppContext contextPrivate;
     private WebAppContext contextWinSSO;
     private WebAppContext contextWellKnown;
-    private PushInterceptor interceptor;
+    private WebPushInterceptor interceptor;
     private OfMeetPlugin ofMeetPlugin;
 	private RelyingParty relyingParty;
 	private UserRegistrationStorage userRegistrationStorage;
@@ -98,7 +98,7 @@ public class PadePlugin implements Plugin, MUCEventListener
 
         Log.info("start pade server " + server);
 
-        interceptor = new PushInterceptor();
+        interceptor = new WebPushInterceptor();
         InterceptorManager.getInstance().addInterceptor( interceptor );
         OfflineMessageStrategy.addListener( interceptor );
 

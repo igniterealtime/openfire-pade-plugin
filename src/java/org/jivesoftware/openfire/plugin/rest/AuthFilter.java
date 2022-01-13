@@ -20,7 +20,7 @@ import org.jivesoftware.util.*;
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerRequestFilter;
 
-import org.igniterealtime.openfire.plugins.pushnotification.PushInterceptor;
+import org.igniterealtime.openfire.plugins.pushnotification.WebPushInterceptor;
 import org.ifsoft.sso.Password;
 
 /**
@@ -57,7 +57,7 @@ public class AuthFilter implements ContainerRequestFilter {
 
         // let replies through
 
-        if (PushInterceptor.tokens.containsKey(auth))
+        if (WebPushInterceptor.tokens.containsKey(auth))
         {
             return containerRequest;
         }

@@ -59,6 +59,11 @@ public class BookmarkInterceptor implements PacketInterceptor
             return;
         }
 
+        if ( packet == null || session == null )
+        {
+            return;
+        }
+		
         // Only interested in stanzas that are either:
         // - from the server itself.
         // - sent 'on behalf of' the user that is the recipient of the stanza ('from' matches session address).

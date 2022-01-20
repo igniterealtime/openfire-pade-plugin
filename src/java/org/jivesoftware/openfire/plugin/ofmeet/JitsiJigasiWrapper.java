@@ -216,12 +216,12 @@ public class JitsiJigasiWrapper implements ProcessListener
 
     public void onOutputLine(final String line)
     {
-        Log.info("onOutputLine " + line);
+        Log.debug("onOutputLine " + line);
     }
 
     public void onProcessQuit(int code)
     {
-        Log.info("onProcessQuit " + code);
+        Log.debug("onProcessQuit " + code);
         System.setProperty("ofmeet.jigasi.started", "false");
     }
 
@@ -231,7 +231,7 @@ public class JitsiJigasiWrapper implements ProcessListener
 
     public void onErrorLine(final String line)
     {
-        Log.info(line);
+        Log.debug(line);
         if (line.contains("newState=RegistrationState=Registered")) System.setProperty("ofmeet.jigasi.started", "true");
     }
 

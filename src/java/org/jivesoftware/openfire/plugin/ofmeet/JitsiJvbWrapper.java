@@ -429,12 +429,12 @@ public class JitsiJvbWrapper implements ProcessListener
 
     public void onOutputLine(final String line)
     {
-        Log.info("onOutputLine " + line);
+        Log.debug("onOutputLine " + line);
     }
 
     public void onProcessQuit(int code)
     {
-        Log.info("onProcessQuit " + code);
+        Log.debug("onProcessQuit " + code);
         System.setProperty("ofmeet.jvb.started", "false");
     }
 
@@ -444,7 +444,7 @@ public class JitsiJvbWrapper implements ProcessListener
 
     public void onErrorLine(final String line)
     {
-        Log.info(line);
+        Log.debug(line);
 
         if (line.contains("Server.doStart: Started"))
         {

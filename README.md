@@ -49,10 +49,6 @@ Make sure this user is online and has joined the **ofmeet** chat room. Confirm f
 
 ![image](https://user-images.githubusercontent.com/110731/99916763-eb412900-2d03-11eb-9028-c391713d4384.png)
 
-Jicofo (offocus plugin) is still has as an xmpp component even though I suspect it is not being used. It connects to Openfire now as an external component
-
-![image](https://user-images.githubusercontent.com/110731/99916862-a10c7780-2d04-11eb-838c-0ba134643852.png)
-
 if you have configured a SIP account for jigasi, also confirm that the jigasi user has logged in.
 
 If you have an active focus user, then you can do a quick peer-to-peer test with two browser tabs on your desktop. Open both of them to the same conference like https://your_server:7443/ofmeet/testconf and confirm that it is showing in the conference summary.

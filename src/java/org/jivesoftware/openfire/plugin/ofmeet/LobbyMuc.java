@@ -242,15 +242,16 @@ public class LobbyMuc implements ServerIdentitiesProvider, ServerFeaturesProvide
 
                             // Remove the user from the allowed list                            
                             JID roomJID = presence.getFrom();
-                            MUCRoom room = XMPPServer.getInstance().getMultiUserChatManager()
-                                    .getMultiUserChatService(roomJID).getChatRoom(roomJID.getNode());
+							
+							if (roomJID != null && roomJID.getNode() != null) {
+								MUCRoom room = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(roomJID).getChatRoom(roomJID.getNode());
+								List<Presence> addNonePresence = room.addNone(kicked, room.getRole());
 
-                            List<Presence> addNonePresence = room.addNone(kicked, room.getRole());
-
-                            // Send a presence to other room members
-                            for (Presence p : addNonePresence) {
-                                room.send(p, room.getRole());
-                            }
+								// Send a presence to other room members
+								for (Presence p : addNonePresence) {
+									room.send(p, room.getRole());
+								}
+							}
                         }
                     } catch (Exception e) {
                         Log.error("kick failure", e);

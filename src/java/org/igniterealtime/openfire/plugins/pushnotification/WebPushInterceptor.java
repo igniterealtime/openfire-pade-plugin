@@ -139,7 +139,8 @@ public class WebPushInterceptor implements PacketInterceptor, OfflineMessageList
 						
 						Log.debug("found unfurl " + image + " " + descriptionShort + " " + title);
 						
-						if (!"".equals(descriptionShort) || !"".equals(title)) {							String msgId = "unfurl-" + System.currentTimeMillis() ;
+						if (!"".equals(descriptionShort) || !"".equals(title)) {							
+							String msgId = "unfurl-" + System.currentTimeMillis();
 							Message message = new Message();
 							message.setFrom(packet.getFrom().toBareJID());
 							message.setID(msgId);

@@ -319,16 +319,6 @@ var ofmeet = (function (ofm) {
             enter_room_button.parentNode.appendChild(button);
         }
     }
-	
-	function getLocalDisplayName() {
-		const settings = JSON.parse(localStorage.getItem("features/base/settings"));
-		return settings?.displayName;
-	}
-
-	function getParticipantDisplayName(id) {
-		const participant = APP.conference.getParticipantById(APP.conference.getMyUserId());
-		return participant?._displayName;
-	}
 		
     function preSetup() {
         if (!APP.connection) {
@@ -1171,7 +1161,17 @@ var ofmeet = (function (ofm) {
     function getConferenceJid() {
         return getConference()?.room?.roomjid;
     }
+	
+	function getLocalDisplayName() {
+		const settings = JSON.parse(localStorage.getItem("features/base/settings"));
+		return settings?.displayName;
+	}
 
+	function getParticipantDisplayName(id) {
+		const participant = APP.conference.getParticipantById(APP.conference.getMyUserId());
+		return participant?._displayName;
+	}
+	
     function getAllParticipants() {
         const state = APP.store.getState();
         return (state["features/base/participants"].remote);
@@ -3720,6 +3720,8 @@ var ofmeet = (function (ofm) {
 
     ofm.recording = false;
 	ofm.getAllParticipants = getAllParticipants;
+	ofm.getLocalDisplayName = getLocalDisplayName;
+	ofm.getParticipantDisplayName = getParticipantDisplayName;
 
     return ofm;
 

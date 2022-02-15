@@ -301,7 +301,7 @@ var collab = (function (coop) {
             Cursor._cursors[clientId] = cursor;
 
             if (APP.conference.isLocalId(clientId)) {
-                cursor.setName(APP.conference.getLocalDisplayName());
+                cursor.setName(ofmeet.getLocalDisplayName());
                 cursor.setColor(getConference().getLocalParticipantProperty('cursorColor'));
             } else {
                 let participant = getParticipant(clientId);

@@ -96,7 +96,7 @@ public class JitsiJvbWrapper implements ProcessListener
             "        }",
             "        public {",
             "            port = " + plain_port,
-            "            host = " + JiveGlobals.getProperty( "ofmeet.videobridge.rest.host", public_ip),	
+            "            host = " + JiveGlobals.getProperty( "ofmeet.videobridge.rest.host", local_ip),	
             "        }",
             "    }",
             "",

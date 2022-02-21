@@ -316,14 +316,21 @@ public class JitsiJvbWrapper implements ProcessListener
                 break;
 
             case PluginImpl.MANUAL_HARVESTER_LOCAL_PROPERTY_NAME:
-			    value = JiveGlobals.getXMLProperty("network.interface");
+				String localBoundIp = JiveGlobals.getXMLProperty("network.interface");
+				
+                if (localBoundIp != null && !localBoundIp.isEmpty()) {
+					value = localBoundIp;
+				}
                 if (value == null || value.isEmpty()) break;
                 props.setProperty( "org.ice4j.ice.harvest.NAT_HARVESTER_LOCAL_ADDRESS", value );
                 break;
 
-            case PluginImpl.MANUAL_HARVESTER_PUBLIC_PROPERTY_NAME:
-			    value = JiveGlobals.getXMLProperty("network.interface");			
-                if (value == null || value.isEmpty()) break;
+            case PluginImpl.MANUAL_HARVESTER_PUBLIC_PROPERTY_NAME:		
+				String publicBoundIp = JiveGlobals.getXMLProperty("network.interface.public");
+				
+                if (publicBoundIp != null && !publicBoundIp.isEmpty()) {
+					value = publicBoundIp;
+				}
                 props.setProperty( "org.ice4j.ice.harvest.NAT_HARVESTER_PUBLIC_ADDRESS", value );
                 break;
 

@@ -331,6 +331,7 @@ public class JitsiJvbWrapper implements ProcessListener
                 if (publicBoundIp != null && !publicBoundIp.isEmpty()) {
 					value = publicBoundIp;
 				}
+                if (value == null || value.isEmpty()) break;				
                 props.setProperty( "org.ice4j.ice.harvest.NAT_HARVESTER_PUBLIC_ADDRESS", value );
                 break;
 

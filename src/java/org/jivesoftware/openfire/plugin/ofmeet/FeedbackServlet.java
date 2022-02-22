@@ -4,9 +4,7 @@ import org.jivesoftware.util.JiveGlobals;
 import org.jivesoftware.util.LocaleUtils;
 import org.jivesoftware.openfire.security.SecurityAuditManager;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
+import java.io.*;
 import java.nio.charset.Charset;
 
 import javax.servlet.ServletException;
@@ -16,7 +14,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.poi.util.ReplacingInputStream;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -56,8 +53,7 @@ public class FeedbackServlet extends HttpServlet
         final ClassLoader classLoader = this.getClass().getClassLoader();
         try (InputStream template = classLoader.getResourceAsStream("static/feedback.html"))
         {
-            // IOUtils.copy(inputStream, response.getOutputStream());
-            IOUtils.copy
+            copyLarge
             (
                 new ReplacingInputStream
                 (
@@ -91,6 +87,32 @@ public class FeedbackServlet extends HttpServlet
         }
     }
 
+	
+    private long copyLarge(final InputStream inputStream, final OutputStream outputStream) throws IOException {
+		final byte[] buffer = new byte[8192];
+		long count = 0;
+		int n;
+		
+		while (-1 != (n = inputStream.read(buffer))) {
+			outputStream.write(buffer, 0, n);
+			count += n;
+		}
+		if (count > Integer.MAX_VALUE) {
+			return -1;
+		}
+		return count;
+    }
+	
+	private static String getValue(Part part) throws IOException {
+		BufferedReader reader = new BufferedReader(new InputStreamReader(part.getInputStream(), Charset.defaultCharset()));
+		StringBuilder value = new StringBuilder();
+		char[] buffer = new char[8192];
+		
+		for (int length = 0; (length = reader.read(buffer)) > 0;) {
+			value.append(buffer, 0, length);
+		}
+		return value.toString();
+	}	
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
@@ -100,9 +122,8 @@ public class FeedbackServlet extends HttpServlet
             for (final Part part : request.getParts())
             {
                 String partName = part.getName();
-                StringWriter writer = new StringWriter();
-                IOUtils.copy(part.getInputStream(), writer, Charset.defaultCharset());
-                feedback.put(partName, writer.toString());
+				String partValue = getValue(part);
+                feedback.put(partName, partValue);
             }
             LOG.info(feedback.toString());
             final String room = feedback.optString("room","").toLowerCase();

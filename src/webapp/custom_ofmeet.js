@@ -697,56 +697,61 @@ var ofmeet = (function (ofm) {
 
     function setupInprogressList() {
         if (interfaceConfig.IN_PROGRESS_LIST_ENABLED) {
-            $('#react').on('click.tab-button', '.tab-buttons .tab', () => setTimeout(() => updateInprogressList(), 0));
+            $('#react').on('click.tab-button', '.tab-buttons .tab', () => setTimeout(() => refreshInprogressListDOM(), 0));
 
             if (interfaceConfig.IN_PROGRESS_LIST_INTERVAL > 0) {
-                inprogressListUpdateInterval = setInterval(() => fetchInprogressListJson(), interfaceConfig.IN_PROGRESS_LIST_INTERVAL * 1000);
+                inprogressListUpdateInterval = setInterval(() => updateInprogressList(), interfaceConfig.IN_PROGRESS_LIST_INTERVAL * 1000);
             }
-            fetchInprogressListJson();
+            updateInprogressList();
         }
     }
 
-    function fetchInprogressListJson() {
+    function updateInprogressList() {
         fetch("inProgressList.json")
             .then(res => res.ok && res.json())
             .then(data => {
                 inprogressList = data;
-                updateInprogressList();
+                refreshInprogressListDOM();
             })
             .catch(error => console.error(error));
     }
 	
-	function updateInprogressList() {
+	function refreshInprogressListDOM() {
 		let $container = $('#inprogress_list')
 		
 		if ($container.length) {
-            $container.attr({
-                'aria-label': i18n('welcomepage.inProgressList'),
-                'class': "meetings-list",
-                'role': "menu",
-                'tabindex': "-1"}).empty()
-            
+            if (!$container.hasClass('meetings-list')) {
+                $container.attr({
+                    'aria-label': i18n('welcomepage.inProgressList'),
+                    'class': "meetings-list",
+                    'role': "menu",
+                    'tabindex': "-1"})
+                    .on('click.inprogress-list', '.with-click-handler', (e) => {
+                        location.href = $(e.currentTarget).data('url');
+                    });
+            }
+
+            let html = '';
             if (inprogressList && inprogressList.length) {
                 inprogressList.forEach(item => {
-                    let $item = $(`
-                        <div aria-label="test" class="item with-click-handler" role="menuitem" tabindex="0"">
+                    html +=
+                        `<div aria-label="test" class="item with-click-handler" role="menuitem" tabindex="0" data-url="${item.url}">
                             <div class="left-column">
                                 <span class="title">${localizedDate(item.date).format('LL')}</span><span class="subtitle">${localizedDate(item.date).format('LT')}</span>
                             </div>
                             <div class="right-column">
                                 <span class="title">${item.name}</span><span class="subtitle">${formatTimeSpan(item.duration / 1000)}</span>
                             </div>
-                        </div>`);
-                    $item.on('click.inprogress-list', () => {location.href = item.url});
-                    $container.append($item);
+                        </div>`;
                 })
             } else {
-                let $empty = $(`
-                    <div aria-describedby="meetings-list-empty-description" aria-label="${i18n('welcomepage.inProgressList')}" class="meetings-list-empty" role="region">
+                html =
+                    `<div aria-describedby="meetings-list-empty-description" aria-label="${i18n('welcomepage.inProgressList')}" class="meetings-list-empty" role="region">
                         <span class="description" id="meetings-list-empty-description">${i18n('welcomepage.inProgressListEmpty')}</span>
-                    </div>`);
-                $container.append($empty);
+                    </div>`;
             }
+
+            $container.empty().append(html);
 		}
 	}
 

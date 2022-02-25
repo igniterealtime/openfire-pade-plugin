@@ -204,6 +204,12 @@
   transform: translateX(calc(-100% + 48px));
 }
 
+.ofmeet-toolbox-menu ul{
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
 .button-group-left .ofmeet-toolbox-menu {
   left: 0;
 }
@@ -233,6 +239,7 @@
   line-height: 24px;
   padding: 8px 16px;
   text-align: left;
+  white-space: nowrap;
 }
 
 .ofmeet-toolbox-tile-menu .ofmeet-toolbox-menu-item {

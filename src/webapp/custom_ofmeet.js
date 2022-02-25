@@ -75,6 +75,7 @@ var ofmeet = (function (ofm) {
     let breakoutHost = null;
     let breakoutClient = null;
     let hashParams = [];
+    let inprogressList = {};
 
     class DummyStorage {
         constructor() {
@@ -177,8 +178,11 @@ var ofmeet = (function (ofm) {
 		}
 		if (window.webkitSpeechRecognition && !isElectron()) setupVoiceCommand()
 
-
-        setTimeout(preSetup);
+        if ($('#welcome_page').length) {
+			setTimeout(setupWelcomePage);
+		} else {
+        	setTimeout(preSetup);
+        }
     });
 
     window.addEventListener("beforeunload", function (event) {
@@ -680,6 +684,76 @@ var ofmeet = (function (ofm) {
             createConfettiButton();
         }
     }
+
+    //-------------------------------------------------------
+    //
+    //  setup welcome page
+    //
+    //-------------------------------------------------------
+
+    function setupWelcomePage() {
+		setupInprogressList();
+	}
+
+    function setupInprogressList() {
+        if (interfaceConfig.IN_PROGRESS_LIST_ENABLED) {
+            $('#react').on('click.tab-button', '.tab-buttons .tab', () => setTimeout(() => refreshInprogressListDOM(), 0));
+
+            if (interfaceConfig.IN_PROGRESS_LIST_INTERVAL > 0) {
+                inprogressListUpdateInterval = setInterval(() => updateInprogressList(), interfaceConfig.IN_PROGRESS_LIST_INTERVAL * 1000);
+            }
+            updateInprogressList();
+        }
+    }
+
+    function updateInprogressList() {
+        fetch("inProgressList.json")
+            .then(res => res.ok && res.json())
+            .then(data => {
+                inprogressList = data;
+                refreshInprogressListDOM();
+            })
+            .catch(error => console.error(error));
+    }
+	
+	function refreshInprogressListDOM() {
+		let $container = $('#inprogress_list')
+		
+		if ($container.length) {
+            if (!$container.hasClass('meetings-list')) {
+                $container.attr({
+                    'aria-label': i18n('welcomepage.inProgressList'),
+                    'class': "meetings-list",
+                    'role': "menu",
+                    'tabindex': "-1"})
+                    .on('click.inprogress-list', '.with-click-handler', (e) => {
+                        location.href = $(e.currentTarget).data('url');
+                    });
+            }
+
+            let html = '';
+            if (inprogressList && inprogressList.length) {
+                inprogressList.forEach(item => {
+                    html +=
+                        `<div aria-label="test" class="item with-click-handler" role="menuitem" tabindex="0" data-url="${item.url}">
+                            <div class="left-column">
+                                <span class="title">${localizedDate(item.date).format('LL')}</span><span class="subtitle">${localizedDate(item.date).format('LT')}</span>
+                            </div>
+                            <div class="right-column">
+                                <span class="title">${item.name}</span><span class="subtitle">${formatTimeSpan(item.duration / 1000)}</span>
+                            </div>
+                        </div>`;
+                })
+            } else {
+                html =
+                    `<div aria-describedby="meetings-list-empty-description" aria-label="${i18n('welcomepage.inProgressList')}" class="meetings-list-empty" role="region">
+                        <span class="description" id="meetings-list-empty-description">${i18n('welcomepage.inProgressListEmpty')}</span>
+                    </div>`;
+            }
+
+            $container.empty().append(html);
+		}
+	}
 
     //-------------------------------------------------------
     //

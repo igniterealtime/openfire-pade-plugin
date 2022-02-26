@@ -15,7 +15,7 @@ import javax.servlet.http.*;
 import java.io.*;
 import java.nio.file.*;
 
-import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.ZipFile;
 
 import org.jivesoftware.util.*;
 import org.jivesoftware.openfire.*;

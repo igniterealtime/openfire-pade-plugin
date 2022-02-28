@@ -9,6 +9,7 @@ import org.jitsi.videobridge.openfire.*;
 
 import de.mxro.process.*;
 import org.jivesoftware.openfire.user.UserManager;
+import org.jivesoftware.openfire.cluster.ClusterManager;
 import org.jivesoftware.util.StringUtils;
 import org.jivesoftware.util.JiveGlobals;
 import java.nio.file.*;
@@ -316,20 +317,26 @@ public class JitsiJvbWrapper implements ProcessListener
                 break;
 
             case PluginImpl.MANUAL_HARVESTER_LOCAL_PROPERTY_NAME:
-				String localBoundIp = JiveGlobals.getXMLProperty("network.interface");
-				
-                if (localBoundIp != null && !localBoundIp.isEmpty()) {
-					value = localBoundIp;
+
+				if (ClusterManager.isClusteringEnabled()) {		
+					String localBoundIp = JiveGlobals.getXMLProperty("network.interface");
+					
+					if (localBoundIp != null && !localBoundIp.isEmpty()) {
+						value = localBoundIp;
+					}
 				}
                 if (value == null || value.isEmpty()) break;
                 props.setProperty( "org.ice4j.ice.harvest.NAT_HARVESTER_LOCAL_ADDRESS", value );
                 break;
 
-            case PluginImpl.MANUAL_HARVESTER_PUBLIC_PROPERTY_NAME:		
-				String publicBoundIp = JiveGlobals.getXMLProperty("network.interface.public");
-				
-                if (publicBoundIp != null && !publicBoundIp.isEmpty()) {
-					value = publicBoundIp;
+            case PluginImpl.MANUAL_HARVESTER_PUBLIC_PROPERTY_NAME:	
+
+				if (ClusterManager.isClusteringEnabled()) {				
+					String publicBoundIp = JiveGlobals.getXMLProperty("network.interface.public");
+					
+					if (publicBoundIp != null && !publicBoundIp.isEmpty()) {
+						value = publicBoundIp;
+					}
 				}
                 if (value == null || value.isEmpty()) break;				
                 props.setProperty( "org.ice4j.ice.harvest.NAT_HARVESTER_PUBLIC_ADDRESS", value );

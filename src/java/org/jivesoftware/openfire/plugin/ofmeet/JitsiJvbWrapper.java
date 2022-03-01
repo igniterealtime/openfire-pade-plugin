@@ -317,7 +317,8 @@ public class JitsiJvbWrapper implements ProcessListener
                 break;
 
             case PluginImpl.MANUAL_HARVESTER_LOCAL_PROPERTY_NAME:
-
+                if (value == null || value.isEmpty()) break;
+				
 				if (ClusterManager.isClusteringEnabled()) {		
 					String localBoundIp = JiveGlobals.getXMLProperty("network.interface");
 					
@@ -330,14 +331,16 @@ public class JitsiJvbWrapper implements ProcessListener
                 break;
 
             case PluginImpl.MANUAL_HARVESTER_PUBLIC_PROPERTY_NAME:	
-
+                if (value == null || value.isEmpty()) break;	
+				
 				if (ClusterManager.isClusteringEnabled()) {				
-					String publicBoundIp = JiveGlobals.getXMLProperty("network.interface.public");
+					String publicBoundIp = JiveGlobals.getXMLProperty("network.interface_public");
 					
 					if (publicBoundIp != null && !publicBoundIp.isEmpty()) {
 						value = publicBoundIp;
 					}
 				}
+				
                 if (value == null || value.isEmpty()) break;				
                 props.setProperty( "org.ice4j.ice.harvest.NAT_HARVESTER_PUBLIC_ADDRESS", value );
                 break;

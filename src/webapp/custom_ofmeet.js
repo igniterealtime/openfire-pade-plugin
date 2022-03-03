@@ -177,6 +177,23 @@ var ofmeet = (function (ofm) {
 			})
 		}
 		if (window.webkitSpeechRecognition && !isElectron()) setupVoiceCommand()
+			
+		const actionChannel = new BroadcastChannel('ofmeet-notification-event');
+		
+		actionChannel.addEventListener('message', event =>
+		{
+			console.debug("sw notication action", event);
+			
+			if (event.data.action == "accept") {
+				const start = event.data.payload.msgDate + "T" + event.data.payload.msgTime + ":00";
+				const key = "ofmeet.calendar." + start;
+				const title = "Join " + event.data.payload.name;
+				const url = event.data.payload.url;
+				
+				storage.setItem(key, JSON.stringify({title, url, start}));
+			}					
+
+		});			
 
         if ($('#welcome_page').length) {
 			setTimeout(setupWelcomePage);
@@ -480,8 +497,8 @@ var ofmeet = (function (ofm) {
 			console.debug("custom_ofmeet.js message", id, text, ts, displayName, participant, padsModalOpened);
 
 			if (text.indexOf(interfaceConfig.OFMEET_CRYPTPAD_URL) == 0) {
-				if (padsModalOpened) notifyText(displayName, text, id, function (button) {
-					openPad(text);
+				if (padsModalOpened) notifyText(displayName, text, id, function (id, button) {
+					if (button == 0) openPad(text);
 				})
 
 				if (padsModalOpened) {
@@ -692,18 +709,27 @@ var ofmeet = (function (ofm) {
     //-------------------------------------------------------
 
     function setupWelcomePage() {
-		setupInprogressList();
+
+        if (interfaceConfig.IN_PROGRESS_LIST_ENABLED) {		
+			setupInprogressList();
+		}
+		
+        if (interfaceConfig.OFMEET_CONTACTS_MGR) {		
+			setupCalendarView();	
+		}			
 	}
 
     function setupInprogressList() {
-        if (interfaceConfig.IN_PROGRESS_LIST_ENABLED) {
-            $('#react').on('click.tab-button', '.tab-buttons .tab', () => setTimeout(() => refreshInprogressListDOM(), 0));
+		$('#react').on('click.tab-button', '.tab-buttons .tab', () => setTimeout(() => refreshInprogressListDOM(), 0));
 
-            if (interfaceConfig.IN_PROGRESS_LIST_INTERVAL > 0) {
-                inprogressListUpdateInterval = setInterval(() => updateInprogressList(), interfaceConfig.IN_PROGRESS_LIST_INTERVAL * 1000);
-            }
-            updateInprogressList();
-        }
+		if (interfaceConfig.IN_PROGRESS_LIST_INTERVAL > 0) 
+		{			
+			if (window.inprogressListUpdateInterval) {
+				clearInterval(window.inprogressListUpdateInterval);
+			}			
+			window.inprogressListUpdateInterval = setInterval(() => updateInprogressList(), interfaceConfig.IN_PROGRESS_LIST_INTERVAL * 1000);
+		}
+		updateInprogressList();
     }
 
     function updateInprogressList() {
@@ -753,6 +779,128 @@ var ofmeet = (function (ofm) {
 
             $container.empty().append(html);
 		}
+	}
+	
+	function setupCalendarView() {		
+		const welcome = document.querySelector('#welcome_page');		
+		let container = document.querySelector('#ofmeet_calendar');	
+		
+		function setupFullCalendar() {
+			container = document.querySelector('#ofmeet_calendar');	
+
+			if (!container) {
+				setTimeout(setupFullCalendar, 500);
+				return;
+			}	
+			
+			let html = "<div id='full_calendar' style='color:black; background-color:white;'></div>";
+			container.innerHTML = html;
+			calendarEl = document.querySelector('#full_calendar');
+			
+			const config =  {
+				selectable: true,				
+				initialView: 'dayGridMonth',
+				initialDate: '2022-02-07',
+				headerToolbar: {
+					left: 'prev,next today',
+					center: 'title',
+					right: 'dayGridMonth,timeGridWeek,timeGridDay'
+				},
+				dateClick: function(info) {
+					console.debug("dateClick", info)
+				},
+			    select: function(info) {
+					console.debug("select", info)
+			    },				
+				events: []
+			};
+			
+			for (var i = 0; i < storage.length; i++) 
+			{
+				if (storage.key(i).indexOf("ofmeet.calendar.") == 0) {
+					config.events.push(JSON.parse(storage.getItem(storage.key(i))));
+				}
+			}			
+
+			console.debug("setupCalendarView", calendarEl, config);
+			
+			calendar = new FullCalendar.Calendar(calendarEl, config);
+			calendar.render();	
+
+			if (window.calendarInterval) {
+				clearInterval(window.calendarInterval);
+			}
+			
+			window.calendarInterval = setInterval(checkForMeetings, 300000);		
+			checkForMeetings();		
+		}
+			
+		if (welcome) {					
+			if (!container) {
+				setTimeout(setupCalendarView, 500);
+				return;
+			}	
+
+			let calendarEl = document.querySelector('#full_calendar');
+			
+			if (!calendarEl) {
+				setupFullCalendar();
+
+				const tab = document.querySelector('.tab.selected');
+				
+				if (tab) tab.addEventListener("click", function (evt) 
+				{		
+					if (evt.target.innerHTML == "Calendar") {
+						setupFullCalendar();
+					}
+				})
+			}				
+		}
+	}	
+	
+	function checkForMeetings() {
+		console.debug("checkForMeetings");		
+        fetch("inProgressList.json").then(res => res.ok && res.json()).then(data => notifyForMeeting(data)).catch(error => console.error(error));		
+	}
+	
+	function notifyForMeeting(list)	{
+		console.debug("notifyForMeeting", list);
+		
+		for (var i = 0; i < storage.length; i++) 
+		{
+			if (storage.key(i).indexOf("ofmeet.calendar.") == 0) {
+				const meeting = JSON.parse(storage.getItem(storage.key(i)));
+				const start = dayjs(meeting.start + ".000Z");
+				const now = dayjs();
+				
+				const notifyStart = start.subtract(15, 'minute');
+				const notifyStop = start.add(15, 'minute');
+				
+				const notifyBefore = now.isBefore(start) && now.isAfter(notifyStart);
+				const notifyAfter = now.isBefore(notifyStop) && now.isAfter(start);
+				
+				console.debug("notifyForMeeting", meeting, start, now, notifyStart, notifyBefore, notifyAfter, list);
+				
+				if (notifyBefore) {
+					notifyText(meeting.title, meeting.url, storage.key(i), (id, button) => {
+						console.log("clicked button", button);
+						if (button == 0) location.href = meeting.url;
+					})					
+				}
+				else {
+					list.forEach(item => 
+					{
+						if (item.url.toLowerCase() == meeting.url.toLowerCase() && notifyAfter) {
+							notifyText(item.name, item.url, storage.key(i), (id, button) => {
+								console.log("clicked button", button);								
+								if (button == 0) location.href = item.url;
+							})								
+						}
+					})					
+				}
+					
+			}
+		}		
 	}
 
     //-------------------------------------------------------
@@ -1237,7 +1385,7 @@ var ofmeet = (function (ofm) {
     }
 	
 	function getLocalDisplayName() {
-		const settings = JSON.parse(localStorage.getItem("features/base/settings"));
+		const settings = JSON.parse(storage.getItem("features/base/settings"));
 		return settings?.displayName;
 	}
 
@@ -3437,11 +3585,12 @@ var ofmeet = (function (ofm) {
     function doContacts() {
         const template =
             '<div class="modal-header">' +
-            '    <h4 class="modal-title">Contacts Manager</h4>' +
+            '    <h4 class="modal-title">Contacts Manager</h4><p><br/></p>' +
+			'    <span style="float: right;"><b>Date: &nbsp;</b><input id="meeting-date" type="date"><input type="time" id="meeting-time" min="09:00" max="18:00"></span>' + 					
             '</div>' +
             '<div class="modal-body">' +
             '    <div class="pade-col-container meeting-contacts">' +
-            '   </div>' +
+            '   </div>' +	
             '</div>'
 
         if (!contactsModal) {
@@ -3461,20 +3610,24 @@ var ofmeet = (function (ofm) {
                         container.addEventListener("click", function (evt) {
                             evt.stopPropagation();
                             var parent = evt.target.parentNode;
-                            while (parent.tagName != "LI") {
-                                parent = parent.parentNode;
-                            }
-                            const contact = parent.getAttribute("data-contact");
-                            const email = parent.getAttribute("data-email");
-                            const ele = parent.querySelector(".meeting-icon");
-                            const selected = parent.querySelector(".meeting-icon > img");
-                            const image = email ? IMAGES.mail : IMAGES.contact;
 
-                            if (ele && contact) {
-                                console.debug("beforeOpen - click", contact, ele);
-                                const emailAttr = email ? 'data-email="' + email + '"' : '';
-                                if (ele) ele.innerHTML = selected ? image : '<img ' + emailAttr + ' data-contact="' + contact + '" width="24" height="24" src="./check-solid.png">';
-                            }
+							while (parent && parent.tagName != "LI") {
+								parent = parent.parentNode;
+							}	
+								
+							if (parent) {
+								const contact = parent.getAttribute("data-contact");
+								const email = parent.getAttribute("data-email");
+								const ele = parent.querySelector(".meeting-icon");
+								const selected = parent.querySelector(".meeting-icon > img");
+								const image = email ? IMAGES.mail : IMAGES.contact;
+
+								if (ele && contact) {
+									console.debug("beforeOpen - click", contact, ele);
+									const emailAttr = email ? 'data-email="' + email + '"' : '';
+									if (ele) ele.innerHTML = selected ? image : '<img ' + emailAttr + ' data-contact="' + contact + '" width="24" height="24" src="./check-solid.png">';
+								}
+							}
                         });
 
                         contactsModalOpened = true;
@@ -3500,12 +3653,20 @@ var ofmeet = (function (ofm) {
 
             contactsModal.addFooterBtn('Invite Selected', 'btn btn-danger tingle-btn tingle-btn--primary', function () {
                 const container = document.querySelector(".meeting-contacts");
-
+				const meetingTime = document.querySelector("#meeting-time").value.trim();
+				const meetingDate = document.querySelector("#meeting-date").value.trim();
+				
+				console.debug("addFooterBtn", meetingTime, meetingDate);
+				
                 container.querySelectorAll(".meeting-icon > img").forEach(function (icon) {
                     const contact = icon.getAttribute("data-contact");
-                    const message = getLocalDisplayName() + ' invites you to join the room ' + APP.conference.roomName + '.';
+                    let message = getLocalDisplayName() + ' invites you to join the room ' + APP.conference.roomName;
+					
+					if (meetingDate != "") {
+						message = message + " on " + meetingDate + " at " + meetingTime;
+					}
 
-                    sendWebPush(message, contact, function (name, error) {
+                    sendWebPush(message, contact, meetingTime, meetingDate, function (name, error) {
                         let image = './delivered.png';
                         if (error) image = './times-solid.png';
                         icon.outerHTML = '<img data-contact="' + name + '" width="24" height="24" src="' + image + '">';
@@ -3582,12 +3743,12 @@ var ofmeet = (function (ofm) {
         }
     }
 
-    function sendWebPush(body, name, callback) {
-        console.debug('sendWebPush', body, name);
+    function sendWebPush(body, name, time, date, callback) {
+        console.debug('sendWebPush', body, name, time, date);
 
         if (storage.getItem('pade.webpush.' + name)) {
             const secret = JSON.parse(storage.getItem('pade.webpush.' + name));
-            const payload = { msgSubject: interfaceConfig.APP_NAME, msgBody: body, msgType: 'meeting', url: location.href };
+            const payload = { msgSubject: interfaceConfig.APP_NAME, msgBody: body, msgType: 'meeting', url: location.href, msgTime: time, msgDate: date, name };
 			const data = {payload, publicKey: secret.publicKey, privateKey: secret.privateKey, subscription: secret.subscription};
 			const host = config.bosh.split("/")[2];
 			
@@ -3672,7 +3833,7 @@ var ofmeet = (function (ofm) {
             console.debug("/webauthn/register/start", credentialCreationOptions);
 
             // confirm webauthn register after first step because second step fails with a re-register
-            localStorage.setItem("ofmeet.webauthn.username", username);
+            storage.setItem("ofmeet.webauthn.username", username);
 
             if (credentialCreationOptions.excludeCredentials) {
                 credentialCreationOptions.excludeCredentials.forEach(function (listItem) {

@@ -7,6 +7,9 @@
   }
 }
 
+.fc-timegrid-slot-label-cushion, .fc-timegrid-axis-cushion {
+	color: black;
+}
 /*
  * 20200427/G.Jaekel@DNB.DE   make raisehand more noticeable
  * 20200512/G.Jaekel@DNB.DE   make it even a bit more noticeable, humans seems more sensible to motion ...

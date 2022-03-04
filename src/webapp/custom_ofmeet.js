@@ -2515,8 +2515,8 @@ var ofmeet = (function (ofm) {
     function startDesktopRecorder() {
         console.debug("custom_ofmeet.js startDesktopRecorder");
 
-        const recConstraints = { video: true, audio: { autoGainControl: false, echoCancellation: false, googAutoGainControl: false, noiseSuppression: false } };
-        const streamConstraints = { video: true, audio: true };
+        const recConstraints = { video: true, preferCurrentTab: true, audio: { autoGainControl: false, echoCancellation: false, googAutoGainControl: false, noiseSuppression: false } };
+        const streamConstraints = { video: true, audio: true, preferCurrentTab: true };
 
         if (config.ofmeetLiveStream) {
             if (!config.ofmeetStreamKey || config.ofmeetStreamKey.trim() === '') {

@@ -2334,7 +2334,9 @@ var ofmeet = (function (ofm) {
         const ids = Object.getOwnPropertyNames(recordingVideoTrack);
 
         ids.forEach(function (id) {
-            html.push('\n<video id="' + id + '" controls preload="metadata" src="' + filenames[id] + '"><track default src="' + vttUrl + '"></video>');
+			if (filenames[id]) {
+				html.push('\n<video id="' + id + '" controls preload="metadata" src="' + filenames[id] + '"><track default src="' + vttUrl + '"></video>');
+			}
         });
 
         html.push('\n<script>');

@@ -57,8 +57,10 @@ If you get audio and video, then focus bot user is working ok and XMPP messages 
 
 To confirm the video-bridge is working, you need to run the last step again with 3 users. If audio and video stops with third participant, then double check on the network configuration, making sure TCP port 7443 and UDP port 10000 are opened for listening from the openfire server. Otherwise, check the log files and ask for help from ignte-realtime community.
 
-The new summary admin page shows call statistics from JVB2 as well as all active calls
-![image](https://user-images.githubusercontent.com/110731/100152444-9e438b00-2e9a-11eb-9294-6df1112446d6.png)
+The new summary admin page shows call statistics from JVB2 as well as all active calls. It also shows the status of all enabled Jitsi Components. If you see red crosses instead of green tick icons, then please check you log file for errors. If you **do not do this**, then you will be unable to video conference 3 or more people.
+
+![image](https://user-images.githubusercontent.com/110731/157767003-3bbef448-5d99-4ae2-afe5-f38e31832b5f.png)
+
 
 Special cases
 --------------

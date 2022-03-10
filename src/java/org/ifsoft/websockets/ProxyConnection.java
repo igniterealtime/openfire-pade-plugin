@@ -110,6 +110,7 @@ public class ProxyConnection
         try
         {
             if (wsClient != null) wsClient.stop();
+            if (httpClient != null) httpClient.stop();
         }
         catch (Exception e)
         {

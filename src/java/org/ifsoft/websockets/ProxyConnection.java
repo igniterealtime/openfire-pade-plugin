@@ -45,6 +45,7 @@ public class ProxyConnection
     private boolean connected = false;
 
     private WebSocketClient wsClient = null;
+	private HttpClient httpClient = null;
     private ProxySocket proxySocket = null;
     private final boolean isSecure;
 
@@ -61,7 +62,7 @@ public class ProxyConnection
         }
         else isSecure = false;
 
-        final HttpClient httpClient = new HttpClient(new HttpClientTransportOverHTTP(1),clientSslContextFactory);
+        httpClient = new HttpClient(new HttpClientTransportOverHTTP(1),clientSslContextFactory);
         final QueuedThreadPool queuedThreadPool = QueuedThreadPoolProvider.getQueuedThreadPool("ProxyConnection-HttpClient");
         httpClient.setExecutor(queuedThreadPool);
         httpClient.setConnectTimeout(connectTimeout);
@@ -110,6 +111,7 @@ public class ProxyConnection
         try
         {
             if (wsClient != null) wsClient.stop();
+            if (httpClient != null) httpClient.stop();			
         }
         catch (Exception e)
         {

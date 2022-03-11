@@ -1417,13 +1417,14 @@ var ofmeet = (function (ofm) {
         const avatarURL = presence.querySelector('avatar-url');
 
         if (raisedHand) {			
-            handsRaised = Array.from(getAllParticipants().keys()).filter(p => p.raisedHand).length;
+            const handsRaised = APP.store.getState()["features/base/participants"].raisedHandsQueue.length;
             const handsTotal = APP.conference.membersCount;
             const handsPercentage = Math.round(100 * handsRaised / handsTotal);
+            $('div#raisedHandsCountLabel > span').html(handsRaised + '/' + handsTotal + ' (' + handsPercentage + '%)');
             const label = handsRaised > 0 ? i18n('handsRaised.handsRaised', { raised: handsRaised, total: handsTotal, percentage: handsPercentage }) : "";
             if (captions.timerHandle) window.clearTimeout(captions.timerHandle);
             if (captions.ele) captions.ele.innerHTML = label;
-            captions.msgs.push({ text: label, stamp: (new Date()).getTime() });
+            captions.msgs.push({ text: label, stamp: (new Date()).getTime() });      
         }
 
         if (email) {

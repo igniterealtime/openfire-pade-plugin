@@ -800,7 +800,6 @@ var ofmeet = (function (ofm) {
 			const config =  {
 				selectable: true,				
 				initialView: 'dayGridMonth',
-				initialDate: '2022-02-07',
 				headerToolbar: {
 					left: 'prev,next today',
 					center: 'title',

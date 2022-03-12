@@ -1466,7 +1466,7 @@ var ofmeet = (function (ofm) {
     }
 
     function handleMessage(msg) {		
-        if (!msg.getAttribute("type")) // alert message
+        if (msg.getAttribute("type") == 'headline') // alert message
         {
             const body = msg.querySelector('body');
 

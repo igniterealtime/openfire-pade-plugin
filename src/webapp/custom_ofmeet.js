@@ -1074,7 +1074,7 @@ var ofmeet = (function (ofm) {
             id: 'ofmeet-cursor',
             icon: IMAGES.cursor,
             label: i18n('toolbar.shareCursorMousePointer'),
-            shortcut: '^',
+            shortcut: '!',
             callback: (evt) => {
                 if (evt) evt.stopPropagation();
 

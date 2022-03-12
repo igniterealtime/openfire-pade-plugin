@@ -311,3 +311,8 @@
 .tags-modal .tingle-modal-box {
   width: 600px;
 }
+
+/* avoid the info head line to overlay the participant widnow menu icons (#397) */
+.details-container {
+  top: 24px; /* instead of 0px */
+}

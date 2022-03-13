@@ -135,12 +135,12 @@ import org.ifsoft.oju.openfire.MUCRoomProperties;
 	
     public void onOutputLine(final String line)
     {
-        Log.info("onOutputLine " + line);
+        Log.debug("onOutputLine " + line);
     }
 
     public void onProcessQuit(int code)
     {
-        Log.info("onProcessQuit " + code);
+        Log.debug("onProcessQuit " + code);
         System.setProperty("ofmeet.ffmpeg.started", "false");
     }
 
@@ -150,6 +150,6 @@ import org.ifsoft.oju.openfire.MUCRoomProperties;
 
     public void onErrorLine(final String line)
     {
-        Log.info(line);
+        Log.debug(line);
     }	
 }

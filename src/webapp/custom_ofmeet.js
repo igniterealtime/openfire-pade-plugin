@@ -548,27 +548,34 @@ var ofmeet = (function (ofm) {
                 storage.removeItem("xmpp_username_override");
                 storage.removeItem("xmpp_password_override");
                 console.debug("credentials in local store cleared");
+				
+				const storeLocally = function() {
+					const jid = APP.connection.xmpp.connection._stropheConn.authzid;
+					const pass = APP.connection.xmpp.connection._stropheConn.pass;
+					storage.setItem("xmpp_username_override", jid);
+					storage.setItem("xmpp_password_override", pass);
+					console.debug("credentials put to local store for" + jid);					
+				}
 
                 if (interfaceConfig.OFMEET_CACHE_PASSWORD) {
                     if (!isElectron() && navigator.credentials && navigator.credentials.preventSilentAccess && typeof PasswordCredential === 'function') {
                         const id = APP.connection.xmpp.connection._stropheConn.authcid;
                         const pass = APP.connection.xmpp.connection._stropheConn.pass;
+						
                         navigator.credentials.create({ password: { id: id, password: pass } }).then(function (credential) {
                             navigator.credentials.store(credential).then(function () {
                                 console.debug("credential management api put", credential);
 
                             }).catch(function (err) {
                                 console.error("credential management api put error", err);
+								storeLocally();								
                             });
                         }).catch(function (err) {
                             console.error("credential management api put error", err);
+							storeLocally();							
                         });
                     } else {
-                        const jid = APP.connection.xmpp.connection._stropheConn.authzid;
-                        const pass = APP.connection.xmpp.connection._stropheConn.pass;
-                        storage.setItem("xmpp_username_override", jid);
-                        storage.setItem("xmpp_password_override", pass);
-                        console.debug("credentials put to local store for" + jid);
+						storeLocally();
                     }
                 }
             }

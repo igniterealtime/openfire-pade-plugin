@@ -550,20 +550,22 @@ var ofmeet = (function (ofm) {
                 console.debug("credentials in local store cleared");
 
                 if (interfaceConfig.OFMEET_CACHE_PASSWORD) {
+                    var stored = false;
                     if (!isElectron() && navigator.credentials && navigator.credentials.preventSilentAccess && typeof PasswordCredential === 'function') {
                         const id = APP.connection.xmpp.connection._stropheConn.authcid;
                         const pass = APP.connection.xmpp.connection._stropheConn.pass;
                         navigator.credentials.create({ password: { id: id, password: pass } }).then(function (credential) {
                             navigator.credentials.store(credential).then(function () {
+                                stored = true;
                                 console.debug("credential management api put", credential);
-
                             }).catch(function (err) {
                                 console.error("credential management api put error", err);
                             });
                         }).catch(function (err) {
                             console.error("credential management api put error", err);
                         });
-                    } else {
+                    } 
+                    if (! stored) {
                         const jid = APP.connection.xmpp.connection._stropheConn.authzid;
                         const pass = APP.connection.xmpp.connection._stropheConn.pass;
                         storage.setItem("xmpp_username_override", jid);

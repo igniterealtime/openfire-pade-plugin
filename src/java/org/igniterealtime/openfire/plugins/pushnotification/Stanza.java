@@ -1,4 +1,4 @@
-package nl.martijndwars.webpush;
+package org.igniterealtime.openfire.plugins.pushnotification;   // moved from  package nl.martijndwars.webpush;
 
 public class Stanza {
     public String msgType;
@@ -20,4 +20,4 @@ public class Stanza {
         this.avatar = avatar;
         this.fullname = fullname;
     }
-}
+}             

@@ -235,8 +235,11 @@ public class MeetController {
             try {
                 KeyPair keyPair = generateKeyPair();
 
-                byte[] publicKey = Utils.savePublicKey((ECPublicKey) keyPair.getPublic());
-                byte[] privateKey = Utils.savePrivateKey((ECPrivateKey) keyPair.getPrivate());
+                // taken from https://gist.github.com/halysongoncalves/e5bac1cf31b6331ba6b29b2a7c29fa5f
+                final ECPublicKey ecPublicKey = (ECPublicKey) keyPair.getPublic();
+                final ECPrivateKey ecPrivateKey = (ECPrivateKey) keyPair.getPrivate();
+                final byte[] publicKey = ecPublicKey.getQ().getEncoded(true);
+                final byte[] privateKey = ecPrivateKey.getD().toByteArray();
 
                 ofPublicKey = BaseEncoding.base64Url().encode(publicKey);
                 ofPrivateKey = BaseEncoding.base64Url().encode(privateKey);

@@ -98,6 +98,7 @@ import org.freeswitch.esl.client.transport.event.EslEvent;
 
 import org.jboss.netty.channel.ExceptionEvent;
 import org.json.JSONObject;
+import org.json.JSONArray;
 import org.jitsi.util.OSUtils;
 import de.mxro.process.*;
 import javax.xml.bind.DatatypeConverter;
@@ -1049,6 +1050,35 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
 			if (props != null)
 			{
+				// Send Meeting Polls
+
+				JSONObject pollsMsg = new JSONObject();
+				pollsMsg.put("type",  "old-polls");
+				
+				JSONArray polls = new JSONArray();				
+				
+				for (String key : props.keySet())
+				{
+					if (key.startsWith("jitsi.meet.polls.")) {
+						JSONObject poll = new JSONObject(props.get(key));
+						polls.put(poll);
+					}
+				}				
+				
+				pollsMsg.put("polls",  polls);
+				
+				Message pollMsg = new Message();
+				pollMsg.setFrom(roomJID);
+				pollMsg.setTo(user);
+				Element pollJson = pollMsg.addChildElement("json-message", "http://jitsi.org/jitmeet");
+				pollJson.setText(pollsMsg.toString());
+				XMPPServer.getInstance().getRoutingTable().routePacket(user, pollMsg, true);
+				
+				Log.debug("occupantJoined polls\n" + pollsMsg); 				
+				
+				
+				// Send all properties
+				
 				JSONObject jsonMsg = new JSONObject();
 				jsonMsg.put("action", "push-room-properties");
 				
@@ -1165,7 +1195,71 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     @Override
     public void messageReceived(JID roomJID, JID user, String nickname, Message message)
     {
+		String roomName = roomJID.getNode();
+		String serviceName = roomJID.getDomain().replace("."+ XMPPServer.getInstance().getServerInfo().getXMPPDomain(), "");		
+		String userName = user.getNode();
+		
+		Map<String, String> props =  MUCRoomProperties.get(serviceName, roomName);
+        Element childElement = message.getChildElement("json-message", "http://jitsi.org/jitmeet");
 
+        if (childElement != null && props != null) {
+			String data = childElement.getText();
+			net.sf.json.JSONObject json = new net.sf.json.JSONObject(data);
+			
+			if (json.has("type") && json.has("pollId")) {
+				Log.debug("messageReceived polls\n" + json + "\n" + props.values()); 			
+				
+				String pollType = json.getString("type");
+				String key = "jitsi.meet.polls." + json.getString("pollId");
+				
+				if ("new-poll".equals(pollType)) {
+					net.sf.json.JSONObject newPoll = new net.sf.json.JSONObject();
+					net.sf.json.JSONArray storedAnswers = new net.sf.json.JSONArray();
+					
+					net.sf.json.JSONArray answers = json.getJSONArray("answers");					
+
+					for (int i = 0; i < answers.length(); i++)
+					{
+						String name = answers.getString(i);
+						
+						net.sf.json.JSONObject answer = new net.sf.json.JSONObject();
+						answer.put("name", name);
+						answer.put("voters", new net.sf.json.JSONObject());
+						storedAnswers.put(i, answer);
+					}
+					
+					newPoll.put("id", json.getString("pollId"));	
+					newPoll.put("senderId", json.getString("senderId"));
+					newPoll.put("senderName", json.getString("senderName"));
+					newPoll.put("question", json.getString("question"));					
+					newPoll.put("answers", storedAnswers);
+					
+					props.put(key, newPoll.toString());
+				}	
+				else
+					
+				if ("answer-poll".equals(pollType)) {
+					String data2 = props.get(key);
+					
+					if (data2 != null) {
+						net.sf.json.JSONObject poll = new net.sf.json.JSONObject(data2);						
+						net.sf.json.JSONArray answers = json.getJSONArray("answers");
+
+						for (int i = 0; i < answers.length(); i++) {
+							net.sf.json.JSONObject voters = poll.getJSONArray("answers").getJSONObject(i).getJSONObject("voters");	
+							String voterId = json.getString("voterId");
+							String voterName = json.getString("voterName");
+							
+							if (answers.getBoolean(i)) {
+								voters.put(voterId, voterName);
+							}
+						}
+						
+						props.put(key, poll.toString());
+					}
+				}
+			}
+		}			
     }
 
     @Override

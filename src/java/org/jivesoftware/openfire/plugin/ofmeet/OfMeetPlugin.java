@@ -1045,7 +1045,8 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
                 Log.error( "occupantJoined error " + roomName, e );
             }
         }
-		else if (!"ofgasi".equals(roomName) && !"ofmeet".equals(roomName)) {		
+		
+		if (!"ofgasi".equals(roomName) && !"ofmeet".equals(roomName)) {		
 			Map<String, String> props =  MUCRoomProperties.get(serviceName, roomName);	
 
 			if (props != null)

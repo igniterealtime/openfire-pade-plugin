@@ -170,14 +170,16 @@ public class WebPushInterceptor implements PacketInterceptor, OfflineMessageList
         {
             user = XMPPServer.getInstance().getUserManager().getUser( packet.getTo().getNode() );
         }
-        catch ( UserNotFoundException e )
+        catch ( Exception e )
         {
-            Log.debug( "Not a recognized user.");
+            Log.debug( "Not a recognized user. " + packet.getTo());
             return;
         }
 
-        Log.debug( "If user '{}' has push services configured, pushes need to be sent for a message that just arrived.", user );
-        tryPushNotification( user, body, packet.getFrom(), ((Message) packet).getType() );
+		if (user != null) {
+			Log.debug( "If user '{}' has push services configured, pushes need to be sent for a message that just arrived.", user );
+			tryPushNotification( user, body, packet.getFrom(), ((Message) packet).getType() );
+		}
     }
 
     private void tryPushNotification( User user, String body, JID jid, Message.Type msgtype )

@@ -3720,14 +3720,27 @@ var ofmeet = (function (ofm) {
                     window.open(encodeURI(mailto));
                 }
             });
+			
+            contactsModal.addFooterBtn('Reset Selected', 'btn btn-success btn-primary', function () {
+                const container = document.querySelector(".meeting-contacts");
 
-            contactsModal.addFooterBtn('Invite to next Meeting', 'btn btn-danger', function () {
+                container.querySelectorAll(".meeting-icon > img").forEach(function (icon) {
+                    icon.outerHTML = IMAGES.contact;
+                });
+            });
+
+            contactsModal.addFooterBtn('Close', 'btn btn-success btn-secondary', function () {
+                contactsModal.close();
+            });	
+
+
+            contactsModal.addFooterBtn('Send Invite to next Meeting', 'btn btn-primary', function () {
                 const container = document.querySelector(".meeting-contacts");
 				const msgTime = document.querySelector("#meeting-time").value.trim();
 				const msgDate = document.querySelector("#meeting-date").value.trim();
 				
 				if (msgTime == "" || msgDate == "") {
-					APP.UI.messageHandler.showError({ title: "Next Meeting Error", description: "Date or Time missing", hideErrorSupportLink: true });
+					APP.UI.messageHandler.showError({ title: "Next Meeting Invite Error", description: "Date or Time missing", hideErrorSupportLink: true });
 					return;
 				}
 				
@@ -3740,19 +3753,7 @@ var ofmeet = (function (ofm) {
 				const xmpp = APP.connection.xmpp.connection._stropheConn;
 				xmpp.send($msg({ type: 'groupchat', to: getConferenceJid() }).c('json', { xmlns: 'urn:xmpp:json:0' }).t(JSON.stringify(json)));				
 
-            });	
-			
-            contactsModal.addFooterBtn('Reset Selected', 'btn btn-success btn-primary', function () {
-                const container = document.querySelector(".meeting-contacts");
-
-                container.querySelectorAll(".meeting-icon > img").forEach(function (icon) {
-                    icon.outerHTML = IMAGES.contact;
-                });
-            });
-
-            contactsModal.addFooterBtn('Close', 'btn btn-success btn-secondary', function () {
-                contactsModal.close();
-            });		
+            });				
 
             contactsModal.setContent(template);
         }

@@ -182,12 +182,12 @@ var ofmeet = (function (ofm) {
 		
 		actionChannel.addEventListener('message', event =>
 		{
-			console.debug("sw notication action", event);
+			console.debug("sw notication action", event.data);
 			
 			if (event.data.action == "accept") {
 				const start = event.data.payload.msgDate + "T" + event.data.payload.msgTime + ":00";
 				const key = "ofmeet.calendar." + start;
-				const title = "Join " + event.data.payload.name;
+				const title = "Join " + event.data.payload.roomName + ` (${event.data.payload.sender})`;
 				const url = event.data.payload.url;
 				
 				storage.setItem(key, JSON.stringify({title, url, start}));
@@ -1519,6 +1519,9 @@ var ofmeet = (function (ofm) {
 				case 'push-room-properties':
 					handleRoomProperties(json);
 					break;
+				case 'plan-new-meeting':
+					handleMeetingInvitation(json);
+					break;					
                 default:
                     console.error("unknown MUC message");
                     return true;
@@ -1535,6 +1538,25 @@ var ofmeet = (function (ofm) {
 			console.debug("handleRoomProperties", key, json[key]);
 			interfaceConfig[key] = json[key];
         })		
+	}
+	
+	function handleMeetingInvitation(json) {
+		const message = json.sender + ' invites you to join the room ' + json.roomName + " on " + json.msgDate + " at " + json.msgTime;		
+		
+		const options = {
+			body: message,
+			icon: './icon.png',
+			data: json,
+			requireInteraction: true,
+			actions: [
+			  {action: 'accept', title: 'Accept', icon: './check-solid.png'},
+			  {action: 'reject', title: 'Reject', icon: './times-solid.png'}		  
+			]
+		};
+		
+		if (swRegistration) {
+			swRegistration.showNotification(interfaceConfig.APP_NAME, options);	
+		}
 	}
 
     //-------------------------------------------------------
@@ -3662,20 +3684,21 @@ var ofmeet = (function (ofm) {
 
             contactsModal.addFooterBtn('Invite Selected', 'btn btn-danger tingle-btn tingle-btn--primary', function () {
                 const container = document.querySelector(".meeting-contacts");
-				const meetingTime = document.querySelector("#meeting-time").value.trim();
-				const meetingDate = document.querySelector("#meeting-date").value.trim();
+				const msgTime = document.querySelector("#meeting-time").value.trim();
+				const msgDate = document.querySelector("#meeting-date").value.trim();
 				
-				console.debug("addFooterBtn", meetingTime, meetingDate);
+				console.debug("addFooterBtn", msgTime, msgDate);
 				
                 container.querySelectorAll(".meeting-icon > img").forEach(function (icon) {
                     const contact = icon.getAttribute("data-contact");
-                    let message = getLocalDisplayName() + ' invites you to join the room ' + APP.conference.roomName;
+					const sender = getLocalDisplayName();
+                    let message = sender + ' invites you to join the room ' + APP.conference.roomName;
 					
-					if (meetingDate != "") {
-						message = message + " on " + meetingDate + " at " + meetingTime;
+					if (msgDate != "") {
+						message = message + " on " + msgDate + " at " + msgTime;
 					}
 
-                    sendWebPush(message, contact, meetingTime, meetingDate, function (name, error) {
+                    sendWebPush(message, sender, contact, msgTime, msgDate, function (name, error) {
                         let image = './delivered.png';
                         if (error) image = './times-solid.png';
                         icon.outerHTML = '<img data-contact="' + name + '" width="24" height="24" src="' + image + '">';
@@ -3698,6 +3721,27 @@ var ofmeet = (function (ofm) {
                 }
             });
 
+            contactsModal.addFooterBtn('Invite to next Meeting', 'btn btn-danger', function () {
+                const container = document.querySelector(".meeting-contacts");
+				const msgTime = document.querySelector("#meeting-time").value.trim();
+				const msgDate = document.querySelector("#meeting-date").value.trim();
+				
+				if (msgTime == "" || msgDate == "") {
+					APP.UI.messageHandler.showError({ title: "Next Meeting Error", description: "Date or Time missing", hideErrorSupportLink: true });
+					return;
+				}
+				
+				const action = 'plan-new-meeting';
+				const sender = getLocalDisplayName();
+				const url = location.href;
+				const roomName = APP.conference.roomName;			
+				
+				const json = {action, sender, url, roomName, msgDate, msgTime};	
+				const xmpp = APP.connection.xmpp.connection._stropheConn;
+				xmpp.send($msg({ type: 'groupchat', to: getConferenceJid() }).c('json', { xmlns: 'urn:xmpp:json:0' }).t(JSON.stringify(json)));				
+
+            });	
+			
             contactsModal.addFooterBtn('Reset Selected', 'btn btn-success btn-primary', function () {
                 const container = document.querySelector(".meeting-contacts");
 
@@ -3708,7 +3752,7 @@ var ofmeet = (function (ofm) {
 
             contactsModal.addFooterBtn('Close', 'btn btn-success btn-secondary', function () {
                 contactsModal.close();
-            });
+            });		
 
             contactsModal.setContent(template);
         }
@@ -3752,12 +3796,12 @@ var ofmeet = (function (ofm) {
         }
     }
 
-    function sendWebPush(body, name, time, date, callback) {
+    function sendWebPush(body, sender, name, time, date, callback) {
         console.debug('sendWebPush', body, name, time, date);
 
         if (storage.getItem('pade.webpush.' + name)) {
             const secret = JSON.parse(storage.getItem('pade.webpush.' + name));
-            const payload = { msgSubject: interfaceConfig.APP_NAME, msgBody: body, msgType: 'meeting', url: location.href, msgTime: time, msgDate: date, name };
+            const payload = { msgSubject: interfaceConfig.APP_NAME, msgBody: body, msgType: 'meeting', url: location.href, msgTime: time, msgDate: date, name, sender, roomName: APP.conference.roomName};
 			const data = {payload, publicKey: secret.publicKey, privateKey: secret.privateKey, subscription: secret.subscription};
 			const host = config.bosh.split("/")[2];
 			

@@ -130,11 +130,9 @@
             <scope>provided</scope>			
         </dependency>	
 		<dependency>
-			<groupId>com.sun.medialib.codec</groupId>
+			<groupId>codec</groupId>
 			<artifactId>dtmf</artifactId>
 			<version>0.0.1</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/codecLib_dtmf.jar</systemPath>
 		</dependency>	
         <dependency>
             <groupId>javax.sip</groupId>
@@ -471,7 +469,12 @@
                 <enabled>true</enabled>
             </snapshots>
             <url>https://github.com/jitsi/jitsi-maven-repository/raw/master/snapshots/</url>
-        </repository>		
+        </repository>	
+        <repository>
+            <id>localLibs</id>
+            <name>localLibs</name>
+            <url>file://${project.basedir}/lib</url>
+        </repository>  		
     </repositories>
 
     <pluginRepositories>

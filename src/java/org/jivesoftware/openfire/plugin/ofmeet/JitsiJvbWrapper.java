@@ -81,11 +81,22 @@ public class JitsiJvbWrapper implements ProcessListener
         String plain_port = JiveGlobals.getProperty( "ofmeet.websockets.plainport", "8180");
         if (rest_port.equals(plain_port)) plain_port = "8180";
 
-		String local_ip = JiveGlobals.getXMLProperty("ofmeet.local.ip", JiveGlobals.getProperty( PluginImpl.MANUAL_HARVESTER_LOCAL_PROPERTY_NAME, ipAddress));
-        String public_ip = JiveGlobals.getXMLProperty("ofmeet.local.ip", JiveGlobals.getProperty( PluginImpl.MANUAL_HARVESTER_PUBLIC_PROPERTY_NAME, ipAddress));
+		String local_ip = JiveGlobals.getProperty( PluginImpl.MANUAL_HARVESTER_LOCAL_PROPERTY_NAME, ipAddress);
+        String public_ip = JiveGlobals.getProperty( PluginImpl.MANUAL_HARVESTER_PUBLIC_PROPERTY_NAME, ipAddress);
 
-        if (local_ip == null || local_ip.isEmpty()) local_ip = ipAddress;
-        if (public_ip == null || public_ip.isEmpty()) public_ip = ipAddress;
+		if (ClusterManager.isClusteringEnabled()) {				
+			String publicBoundIp = JiveGlobals.getXMLProperty("ofmeet.public_address");
+			
+			if (publicBoundIp != null && !publicBoundIp.isEmpty()) {
+				public_ip = publicBoundIp;
+			}
+			
+			String localBoundIp = JiveGlobals.getXMLProperty("ofmeet.local_address");
+			
+			if (localBoundIp != null && !localBoundIp.isEmpty()) {
+				local_ip = localBoundIp;
+			}			
+		}
 
         List<String> lines = Arrays.asList(
             "videobridge {",
@@ -317,10 +328,9 @@ public class JitsiJvbWrapper implements ProcessListener
                 break;
 
             case PluginImpl.MANUAL_HARVESTER_LOCAL_PROPERTY_NAME:
-                if (value == null || value.isEmpty()) break;
 				
 				if (ClusterManager.isClusteringEnabled()) {		
-					String localBoundIp = JiveGlobals.getXMLProperty("network.interface");
+					String localBoundIp = JiveGlobals.getXMLProperty("ofmeet.local_address");
 					
 					if (localBoundIp != null && !localBoundIp.isEmpty()) {
 						value = localBoundIp;
@@ -331,10 +341,9 @@ public class JitsiJvbWrapper implements ProcessListener
                 break;
 
             case PluginImpl.MANUAL_HARVESTER_PUBLIC_PROPERTY_NAME:	
-                if (value == null || value.isEmpty()) break;	
 				
 				if (ClusterManager.isClusteringEnabled()) {				
-					String publicBoundIp = JiveGlobals.getXMLProperty("network.interface_public");
+					String publicBoundIp = JiveGlobals.getXMLProperty("ofmeet.public_address");
 					
 					if (publicBoundIp != null && !publicBoundIp.isEmpty()) {
 						value = publicBoundIp;

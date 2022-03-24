@@ -305,7 +305,8 @@ public class ConfigServlet extends HttpServlet
 			config.put( "enableUserRolesBasedOnToken", false);
 
             final JSONObject deploymentInfo = new JSONObject();
-            deploymentInfo.put( "region", "region1");			
+            deploymentInfo.put( "region", "region" + JiveGlobals.getXMLProperty("ofmeet.octo_id", "1"));	
+			deploymentInfo.put( "userRegion", "region" + JiveGlobals.getXMLProperty("ofmeet.octo_id", "1"));	
             config.put( "deploymentInfo", deploymentInfo );
 			
             final JSONObject testing = new JSONObject();

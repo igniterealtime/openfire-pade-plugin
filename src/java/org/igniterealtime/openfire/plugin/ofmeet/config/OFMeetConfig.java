@@ -467,7 +467,7 @@ public class OFMeetConfig
 
     public String getJvbName()
     {
-        return JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.jvb.user.name", "jvb" );
+        return JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.jvb.user.name", "jvb" ) + JiveGlobals.getXMLProperty("ofmeet.octo_id", "");
     }
 
     public void resetJvbName()

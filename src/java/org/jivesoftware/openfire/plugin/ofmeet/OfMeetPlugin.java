@@ -1046,7 +1046,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
             }
         }
 		
-		if (!"ofgasi".equals(roomName) && !"ofmeet".equals(roomName)) {		
+		if (!"ofgasi".equals(roomName) && !"ofmeet".equals(roomName) && !"focus".equals(userName) && !nickname.startsWith("focus")) {		
 			Map<String, String> props =  MUCRoomProperties.get(serviceName, roomName);	
 
 			if (props != null)
@@ -1078,15 +1078,17 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 				Log.debug("occupantJoined polls\n" + pollsMsg); 				
 				
 				
-				// Send all properties
+				// Send all other properties
 				
 				JSONObject jsonMsg = new JSONObject();
 				jsonMsg.put("action", "push-room-properties");
 				
 				for (String key : props.keySet())
 				{
-					String value = props.get(key);
-					jsonMsg.put(key, value.equals("true") ? true : (value.equals("false") ? false : value));
+					if (!key.startsWith("jitsi.meet.polls.")) {					
+						String value = props.get(key);
+						jsonMsg.put(key, value.equals("true") ? true : (value.equals("false") ? false : value));
+					}
 				}
 				
 				Message message = new Message();
@@ -1199,67 +1201,69 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 		String roomName = roomJID.getNode();
 		String serviceName = roomJID.getDomain().replace("."+ XMPPServer.getInstance().getServerInfo().getXMPPDomain(), "");		
 		String userName = user.getNode();
-		
-		Map<String, String> props =  MUCRoomProperties.get(serviceName, roomName);
-        Element childElement = message.getChildElement("json-message", "http://jitsi.org/jitmeet");
 
-        if (childElement != null && props != null) {
-			String data = childElement.getText();
-			net.sf.json.JSONObject json = new net.sf.json.JSONObject(data);
-			
-			if (json.has("type") && json.has("pollId")) {
-				Log.debug("messageReceived polls\n" + json + "\n" + props.values()); 			
+		if (!"ofgasi".equals(roomName) && !"ofmeet".equals(roomName) && !"focus".equals(userName) && !nickname.startsWith("focus")) {				
+			Map<String, String> props =  MUCRoomProperties.get(serviceName, roomName);
+			Element childElement = message.getChildElement("json-message", "http://jitsi.org/jitmeet");
+
+			if (childElement != null && props != null) {
+				String data = childElement.getText();
+				net.sf.json.JSONObject json = new net.sf.json.JSONObject(data);
 				
-				String pollType = json.getString("type");
-				String key = "jitsi.meet.polls." + json.getString("pollId");
-				
-				if ("new-poll".equals(pollType)) {
-					net.sf.json.JSONObject newPoll = new net.sf.json.JSONObject();
-					net.sf.json.JSONArray storedAnswers = new net.sf.json.JSONArray();
+				if (json.has("type") && json.has("pollId")) {
+					Log.debug("messageReceived polls\n" + json + "\n" + props.values()); 			
 					
-					net.sf.json.JSONArray answers = json.getJSONArray("answers");					
-
-					for (int i = 0; i < answers.length(); i++)
-					{
-						String name = answers.getString(i);
+					String pollType = json.getString("type");
+					String key = "jitsi.meet.polls." + json.getString("pollId");
+					
+					if ("new-poll".equals(pollType)) {
+						net.sf.json.JSONObject newPoll = new net.sf.json.JSONObject();
+						net.sf.json.JSONArray storedAnswers = new net.sf.json.JSONArray();
 						
-						net.sf.json.JSONObject answer = new net.sf.json.JSONObject();
-						answer.put("name", name);
-						answer.put("voters", new net.sf.json.JSONObject());
-						storedAnswers.put(i, answer);
-					}
-					
-					newPoll.put("id", json.getString("pollId"));	
-					newPoll.put("senderId", json.getString("senderId"));
-					newPoll.put("senderName", json.getString("senderName"));
-					newPoll.put("question", json.getString("question"));					
-					newPoll.put("answers", storedAnswers);
-					
-					props.put(key, newPoll.toString());
-				}	
-				else
-					
-				if ("answer-poll".equals(pollType)) {
-					String data2 = props.get(key);
-					
-					if (data2 != null) {
-						net.sf.json.JSONObject poll = new net.sf.json.JSONObject(data2);						
-						net.sf.json.JSONArray answers = json.getJSONArray("answers");
+						net.sf.json.JSONArray answers = json.getJSONArray("answers");					
 
-						for (int i = 0; i < answers.length(); i++) {
-							net.sf.json.JSONObject voters = poll.getJSONArray("answers").getJSONObject(i).getJSONObject("voters");	
-							String voterId = json.getString("voterId");
-							String voterName = json.getString("voterName");
+						for (int i = 0; i < answers.length(); i++)
+						{
+							String name = answers.getString(i);
 							
-							if (answers.getBoolean(i)) {
-								voters.put(voterId, voterName);
-							}
+							net.sf.json.JSONObject answer = new net.sf.json.JSONObject();
+							answer.put("name", name);
+							answer.put("voters", new net.sf.json.JSONObject());
+							storedAnswers.put(i, answer);
 						}
 						
-						props.put(key, poll.toString());
+						newPoll.put("id", json.getString("pollId"));	
+						newPoll.put("senderId", json.getString("senderId"));
+						newPoll.put("senderName", json.getString("senderName"));
+						newPoll.put("question", json.getString("question"));					
+						newPoll.put("answers", storedAnswers);
+						
+						props.put(key, newPoll.toString());
+					}	
+					else
+						
+					if ("answer-poll".equals(pollType)) {
+						String data2 = props.get(key);
+						
+						if (data2 != null) {
+							net.sf.json.JSONObject poll = new net.sf.json.JSONObject(data2);						
+							net.sf.json.JSONArray answers = json.getJSONArray("answers");
+
+							for (int i = 0; i < answers.length(); i++) {
+								net.sf.json.JSONObject voters = poll.getJSONArray("answers").getJSONObject(i).getJSONObject("voters");	
+								String voterId = json.getString("voterId");
+								String voterName = json.getString("voterName");
+								
+								if (answers.getBoolean(i)) {
+									voters.put(voterId, voterName);
+								}
+							}
+							
+							props.put(key, poll.toString());
+						}
 					}
 				}
-			}
+			}	
 		}			
     }
 

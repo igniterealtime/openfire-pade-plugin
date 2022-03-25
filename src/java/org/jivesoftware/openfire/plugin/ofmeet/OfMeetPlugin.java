@@ -986,7 +986,19 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     @Override
     public void roomDestroyed(JID roomJID)
     {
+		String roomName = roomJID.getNode();
+		String serviceName = roomJID.getDomain().replace("."+ XMPPServer.getInstance().getServerInfo().getXMPPDomain(), "");				
+		Map<String, String> props =  MUCRoomProperties.get(serviceName, roomName);
 
+		if (props != null) 	
+		{						
+			for (String key : props.keySet())
+			{
+				if (key.startsWith("jitsi.meet.polls.")) {
+					props.remove(key);
+				}
+			}
+		}				
     }
 
     @Override

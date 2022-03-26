@@ -464,8 +464,8 @@ var ofmeet = (function (ofm) {
 			}
 
 			if (APP.conference.getMyUserId() == id) {
-				if (ofm.recognition) {
-					if (track.getType() == "audio" && track.isMuted()) // speech recog synch
+				if (track.getType() == "audio" && ofm.recognition) {
+					if (track.isMuted()) // speech recog synch
 					{
 						console.debug("audio muted, stopping speech transcription");
 

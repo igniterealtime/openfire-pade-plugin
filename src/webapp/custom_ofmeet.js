@@ -417,6 +417,7 @@ var ofmeet = (function (ofm) {
 		room.on(JitsiMeetJS.events.conference.USER_JOINED, function (id) {
 			console.debug("user join", id, participants);
 			addParticipant(id);
+            publishWebPush();
 		});
 
 
@@ -3561,7 +3562,7 @@ var ofmeet = (function (ofm) {
     function handleSubscription(subscription, keys) {
         console.debug('handleSubscription', subscription, keys);
 
-        const secret = btoa(JSON.stringify({ privateKey: keys.privateKey, publicKey: keys.publicKey, subscription: subscription }));
+        const secret = btoa(JSON.stringify({ privateKey: keys.privateKey, publicKey: keys.publicKey, subscription: subscription, lastModified: Date.now() }));
         window.WebPushLib.setVapidDetails('xmpp:' + APP.connection.xmpp.connection.domain, keys.publicKey, keys.privateKey);
         window.WebPushLib.selfSecret = secret;
 
@@ -3581,14 +3582,10 @@ var ofmeet = (function (ofm) {
                 const secret = handleElement.innerHTML;
                 const id = Strophe.getResourceFromJid(message.getAttribute("from"));
                 const participant = APP.conference.getParticipantById(id);
-                const myName = getLocalDisplayName();
-
-                console.debug('webpush contact', id, participant);
 
                 if (participant && participant._displayName) {
+                    console.debug('webpush contact', id, participant, participant._displayName);
                     storage.setItem('pade.webpush.' + participant._displayName, atob(secret));
-                } else if (APP.conference.getMyUserId() == id && myName) {
-                    storage.setItem('pade.webpush.' + myName, atob(secret));
                 }
 
             }

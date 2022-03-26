@@ -464,16 +464,16 @@ var ofmeet = (function (ofm) {
 			}
 
 			if (APP.conference.getMyUserId() == id) {
-				if (ofm.recognition) {
+				if (track.getType() == "audio" && ofm.recognition) {
 					if (track.isMuted()) // speech recog synch
 					{
-						console.debug("muted, stopping speech transcription");
+						console.debug("audio muted, stopping speech transcription");
 
 						ofm.recognitionActive = false;
 						ofm.recognition.stop();
 
 					} else {
-						console.debug("unmuted, starting speech transcription");
+						console.debug("audio unmuted, starting speech transcription");
 						ofm.recognition.start();
 					}
 				}

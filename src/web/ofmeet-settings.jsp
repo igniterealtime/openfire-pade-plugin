@@ -352,7 +352,7 @@
             </tr>      
             <tr>
                 <td nowrap colspan="2">
-                    <input type="checkbox" name="forceVp9" ${admin:getBooleanProperty( "ofmeet.jicofo.force.vp9", false) ? "checked" : ""}>
+                    <input type="checkbox" name="forceVp9" ${admin:getBooleanProperty( "ofmeet.jicofo.force.vp9", true) ? "checked" : ""}>
                     <fmt:message key="config.page.configuration.ofmeet.jicofo.force.vp9" />
                 </td>
             </tr>             

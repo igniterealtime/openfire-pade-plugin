@@ -583,7 +583,11 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 	private void ensureJvbUser()
     {
         final UserManager userManager = XMPPServer.getInstance().getUserManager();
-        final String username =  config.getJvbName();
+        String username =  config.getJvbName();
+		
+		if (ClusterManager.isClusteringEnabled()) {	
+			username = username + JiveGlobals.getXMLProperty("ofmeet.octo_id", "1");
+		}		
 
         if ( !userManager.isRegisteredUser( username ) )
         {
@@ -920,7 +924,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
             if (jitsiJicofoWrapper != null) jitsiJicofoWrapper.destroy();
 			if (focusComponent != null) 	componentManager.removeComponent("focus");				
 			
-			Thread.sleep(60000);	
+			if (jitsiJvbWrapper != null) Thread.sleep(60000);	// don't wait on first time
         }
         catch ( Exception ex )
         {

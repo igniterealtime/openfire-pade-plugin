@@ -71,9 +71,10 @@ public class JitsiJvbWrapper implements ProcessListener
         final String domain = XMPPServer.getInstance().getServerInfo().getXMPPDomain();
         final String hostname = XMPPServer.getInstance().getServerInfo().getHostname();
         final String main_muc = JiveGlobals.getProperty( "ofmeet.main.muc", "conference." + domain);
-        final String username =  config.getJvbName();
         final String password = config.getJvbPassword();
         final String ipAddress = getIpAddress();
+		
+        String username =  config.getJvbName();		
 
         final String rest_port = JiveGlobals.getProperty( "ofmeet.videobridge.rest.port", "8188");
         final String public_port = JiveGlobals.getProperty( "httpbind.port.secure", "7443");
@@ -95,7 +96,9 @@ public class JitsiJvbWrapper implements ProcessListener
 			
 			if (localBoundIp != null && !localBoundIp.isEmpty()) {
 				local_ip = localBoundIp;
-			}			
+			}
+
+			username = username + JiveGlobals.getXMLProperty("ofmeet.octo_id", "1");
 		}
 
         List<String> lines = Arrays.asList(
@@ -258,7 +261,7 @@ public class JitsiJvbWrapper implements ProcessListener
             props.setProperty( "org.jitsi.videobridge.octo.BIND_PORT", JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.octo.port", "4096"));
             props.setProperty( "org.jitsi.videobridge.REGION", "region" + JiveGlobals.getXMLProperty("ofmeet.octo_id", "1"));
 
-            props.setProperty( "org.jitsi.videobridge.TRUST_BWE", Boolean.toString( !JiveGlobals.getBooleanProperty( "ofmeet.jicofo.force.vp9", false)));
+            props.setProperty( "org.jitsi.videobridge.TRUST_BWE", Boolean.toString( !JiveGlobals.getBooleanProperty( "ofmeet.jicofo.force.vp9", true)));
 
             Log.debug("sip-communicator.properties");
 

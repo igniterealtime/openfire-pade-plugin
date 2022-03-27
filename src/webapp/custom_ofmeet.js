@@ -1176,7 +1176,7 @@ var ofmeet = (function (ofm) {
                         'text:' + String.fromCodePoint(0x1F338) // :sakura:
                     ]
                 };
-            } else if ((now.getMonth() == 2 && now.getDate() >= 27) || (now.getMonth() == 3 && now.getDate() <= 5)) { // week of Easter 2021
+            } else if ((now.getMonth() == 3 && now.getDate() >= 10) || (now.getMonth() == 3 && now.getDate() <= 18)) { // Holy Week and Easter 2022
                 options = {
                     ...options,
                     shapes: [

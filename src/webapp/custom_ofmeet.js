@@ -3586,6 +3586,8 @@ var ofmeet = (function (ofm) {
                 if (participant && participant._displayName) {
                     console.debug('webpush contact', id, participant, participant._displayName);
                     storage.setItem('pade.webpush.' + participant._displayName, atob(secret));
+                } else if (APP.conference.getMyUserId() == id) {
+                    // storage.setItem('pade.webpush._self' , atob(secret)); // activate this line for debugging
                 }
 
             }

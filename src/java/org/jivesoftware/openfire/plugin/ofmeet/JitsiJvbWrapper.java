@@ -281,7 +281,17 @@ public class JitsiJvbWrapper implements ProcessListener
 
         switch ( name )
         {
-            case PluginImpl.INTERFACES_ALLOWED_PROPERTY_NAME:
+            case PluginImpl.INTERFACES_ALLOWED_PROPERTY_NAME:	
+			
+				if (ClusterManager.isClusteringEnabled()) {		
+					String interfacesAllowed = JiveGlobals.getXMLProperty("ofmeet.interfaces_allowed");
+					
+					if (interfacesAllowed != null && !interfacesAllowed.isEmpty()) {
+						props.setProperty( StackProperties.ALLOWED_INTERFACES, interfacesAllowed );
+						return;
+					}
+				}
+				
                 final Collection<String> allowedInterfaces = JiveGlobals.getListProperty( PluginImpl.INTERFACES_ALLOWED_PROPERTY_NAME, null );
                 if (allowedInterfaces != null) props.setProperty( StackProperties.ALLOWED_INTERFACES, String.join( ";", (List<String>) allowedInterfaces) );
                 break;
@@ -292,6 +302,15 @@ public class JitsiJvbWrapper implements ProcessListener
                 break;
 
             case PluginImpl.ADDRESSES_ALLOWED_PROPERTY_NAME:
+			
+				if (ClusterManager.isClusteringEnabled()) {		
+					String addressesAllowed = JiveGlobals.getXMLProperty("ofmeet.addresses_allowed");
+					
+					if (addressesAllowed != null && !addressesAllowed.isEmpty()) {
+						props.setProperty( StackProperties.ALLOWED_ADDRESSES, addressesAllowed );
+						return;
+					}
+				}			
                 final List<String> addressesAllowed = JiveGlobals.getListProperty( PluginImpl.ADDRESSES_ALLOWED_PROPERTY_NAME, null );
                 if (addressesAllowed != null) props.setProperty( StackProperties.ALLOWED_ADDRESSES, String.join( ";", (List<String>) addressesAllowed ) );
                 break;

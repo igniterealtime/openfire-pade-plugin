@@ -591,7 +591,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
         if ( !userManager.isRegisteredUser( username ) )
         {
-            Log.info( "No pre-existing 'jvb' user detected. Generating one." );
+            Log.info( "No pre-existing '" + username + "' user detected. Generating one." );
             String password = config.getJvbPassword();
 
             if ( password == null || password.isEmpty() )

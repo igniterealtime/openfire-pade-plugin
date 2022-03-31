@@ -168,7 +168,7 @@
                 <td align="left" width="50%"><%= occupants %></td>   
                 <td align="left" width="10%"><%= focus %></td>  
                 <td align="left" width="25%"><%= livestream %></td>  								
-                <td align="left" width="5%"><img src="<%= freeswitch.equals("true") ? "images/success-16x16.gif" : "images/error-16x16.gif" %>"/></th>                                  
+                <td align="left" width="5%"><img src="<%= freeswitch.equals("true") ? "images/success-16x16.gif" : "images/blank-16x16.gif" %>"/></th>                                  
             </tr>
 <%
         }

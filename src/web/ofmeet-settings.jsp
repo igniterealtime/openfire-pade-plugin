@@ -349,6 +349,11 @@
     </admin:contentBox> 
 
     <admin:contentBox title="<%= clusteringTitle%>">
+        <p>
+            <fmt:message key="config.page.configuration.clustering.description">
+                <fmt:param value="https://github.com/igniterealtime/openfire-pade-plugin/wiki/Clustering-multiple-Jitsi-Videobridges-using-Hazelcast-plugin"/>
+            </fmt:message>			
+        </p><p>&nbsp;</p>	
         <table cellpadding="3" cellspacing="0" border="0" width="100%"> 
             <tr>
                 <td nowrap>

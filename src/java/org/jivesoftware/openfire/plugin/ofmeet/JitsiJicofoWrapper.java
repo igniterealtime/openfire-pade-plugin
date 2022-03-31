@@ -132,7 +132,7 @@ public class JitsiJicofoWrapper implements ProcessListener
             "    }",
             "    octo  {",
             "        enabled = " + (ClusterManager.isClusteringEnabled() ? "true" : "false"),
-            "        id = " + (ClusterManager.isClusteringEnabled() ? JiveGlobals.getXMLProperty("ofmeet.octo_id", "0") : "0"),					
+            "        id = " + (ClusterManager.isClusteringEnabled() ? JiveGlobals.getXMLProperty("ofmeet.octo_id", "1") : "1"),					
             "    }",
             "    bridge  {",
             "        selection-strategy = RegionBasedBridgeSelectionStrategy ",

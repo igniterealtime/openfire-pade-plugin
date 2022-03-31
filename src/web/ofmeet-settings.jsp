@@ -14,6 +14,7 @@
   ~ limitations under the License.
   --%>
 <%@ page import="org.jivesoftware.openfire.XMPPServer" %>
+<%@ page import="org.jivesoftware.openfire.cluster.ClusterManager" %>
 <%@ page import="org.jivesoftware.openfire.plugin.ofmeet.OfMeetPlugin" %>
 <%@ page import="org.slf4j.Logger" %>
 <%@ page import="org.slf4j.LoggerFactory" %>
@@ -274,6 +275,12 @@
     pageContext.setAttribute( "errors", errors );
     pageContext.setAttribute( "restartNeeded", container.restartNeeded );
     pageContext.setAttribute( "serverInfo", XMPPServer.getInstance().getServerInfo() );
+
+    String enabledTitle = LocaleUtils.getLocalizedString("config.page.configuration.enabled", "pade");
+    String disabledTitle = LocaleUtils.getLocalizedString("config.page.configuration.disabled", "pade");	
+    String clusteringTitle = LocaleUtils.getLocalizedString("config.page.configuration.clustering.title", "pade");	
+	clusteringTitle = clusteringTitle + " (" + (ClusterManager.isClusteringEnabled() ? enabledTitle : disabledTitle) + ")";
+
 %>
 <html>
 <head>
@@ -338,6 +345,68 @@
                     <input type="text" size="80" maxlength="2048" name="jvmJigasi" id="jvmJigasi" value="${admin:getProperty( "org.jitsi.videobridge.ofmeet.jigasi.jvm.customOptions", "-Xmx1024m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp")}" placeholder="-Xmx1024m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp">
                 </td>
             </tr>               
+        </table>        
+    </admin:contentBox> 
+
+    <admin:contentBox title="<%= clusteringTitle%>">
+        <table cellpadding="3" cellspacing="0" border="0" width="100%"> 
+            <tr>
+                <td nowrap>
+                    <label class="jive-label" for="network_interface"><fmt:message key="config.page.configuration.network.interface"/></label>
+                </td>
+                <td>
+                    <input disabled type="text" size="40" maxlength="1024" name="network_interface" id="network_interface" value="${JiveGlobals.getXMLProperty( "network.interface", "")}">
+                </td>
+            </tr> 
+            <tr>
+                <td nowrap>
+                    <label class="jive-label" for="fqdn"><fmt:message key="config.page.configuration.fqdn"/></label>
+                </td>
+                <td>
+                    <input disabled type="text" size="40" maxlength="1024" name="fqdn" id="fqdn" value="${JiveGlobals.getXMLProperty( "fqdn", "")}">
+                </td>
+            </tr> 
+			
+            <tr>
+                <td nowrap>
+                    <label class="jive-label" for="interfaces_allowed"><fmt:message key="config.page.configuration.ofmeet.interfaces_allowed"/></label>
+                </td>
+                <td>
+                    <input disabled type="text" size="40" maxlength="1024" name="interfaces_allowed" id="interfaces_allowed" value="${JiveGlobals.getXMLProperty( "ofmeet.interfaces_allowed", "")}">
+                </td>
+            </tr>  
+            <tr>
+                <td nowrap>
+                    <label class="jive-label" for="addresses_allowed"><fmt:message key="config.page.configuration.ofmeet.addresses_allowed"/></label>
+                </td>
+                <td>
+                    <input disabled type="text" size="40" maxlength="1024" name="addresses_allowed" id="addresses_allowed" value="${JiveGlobals.getXMLProperty( "ofmeet.addresses_allowed", "")}">
+                </td>
+            </tr> 
+            <tr>
+                <td nowrap>
+                    <label class="jive-label" for="local_address"><fmt:message key="config.page.configuration.ofmeet.local_address"/></label>
+                </td>
+                <td>
+                    <input disabled type="text" size="40" maxlength="1024" name="local_address" id="local_address" value="${JiveGlobals.getXMLProperty( "ofmeet.local_address", "")}">
+                </td>
+            </tr> 
+            <tr>
+                <td nowrap>
+                    <label class="jive-label" for="public_address"><fmt:message key="config.page.configuration.ofmeet.public_address"/></label>
+                </td>
+                <td>
+                    <input disabled type="text" size="40" maxlength="1024" name="public_address" id="public_address" value="${JiveGlobals.getXMLProperty( "ofmeet.public_address", "")}">
+                </td>
+            </tr> 
+            <tr>
+                <td nowrap>
+                    <label class="jive-label" for="octo_id"><fmt:message key="config.page.configuration.ofmeet.octo_id"/></label>
+                </td>
+                <td>
+                    <input disabled type="text" size="40" maxlength="1024" name="octo_id" id="octo_id" value="${JiveGlobals.getXMLProperty( "ofmeet.octo_id", "")}">
+                </td>
+            </tr> 			
         </table>        
     </admin:contentBox> 
 

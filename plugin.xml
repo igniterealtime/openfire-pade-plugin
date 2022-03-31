@@ -5,7 +5,7 @@
     <description>${project.description}</description>
     <author>Ignite Realtime</author>
     <version>${project.version}</version>
-    <date>2021/02/28</date>
+    <date>03/31/2022</date>
     <minServerVersion>4.7.0</minServerVersion>
     <minJavaVersion>1.8</minJavaVersion>   
     <adminconsole>

@@ -352,21 +352,20 @@
         <table cellpadding="3" cellspacing="0" border="0" width="100%"> 
             <tr>
                 <td nowrap>
-                    <label class="jive-label" for="network_interface"><fmt:message key="config.page.configuration.network.interface"/></label>
-                </td>
-                <td>
-                    <input disabled type="text" size="40" maxlength="1024" name="network_interface" id="network_interface" value="${JiveGlobals.getXMLProperty( "network.interface", "")}">
-                </td>
-            </tr> 
-            <tr>
-                <td nowrap>
                     <label class="jive-label" for="fqdn"><fmt:message key="config.page.configuration.fqdn"/></label>
                 </td>
                 <td>
                     <input disabled type="text" size="40" maxlength="1024" name="fqdn" id="fqdn" value="${JiveGlobals.getXMLProperty( "fqdn", "")}">
                 </td>
-            </tr> 
-			
+            </tr> 		
+            <tr>
+                <td nowrap>
+                    <label class="jive-label" for="network_interface"><fmt:message key="config.page.configuration.network.interface"/></label>
+                </td>
+                <td>
+                    <input disabled type="text" size="40" maxlength="1024" name="network_interface" id="network_interface" value="${JiveGlobals.getXMLProperty( "network.interface", "")}">
+                </td>
+            </tr> 		
             <tr>
                 <td nowrap>
                     <label class="jive-label" for="interfaces_allowed"><fmt:message key="config.page.configuration.ofmeet.interfaces_allowed"/></label>

@@ -54,6 +54,7 @@ public class JitsiJicofoWrapper implements ProcessListener
         System.setProperty("ofmeet.jicofo.started", "false");
 
         final String jicofoSubdomain = "focus";
+        final String jicofoPort = JiveGlobals.getProperty( "ofmeet.jicofo.rest.port", "8888");			
         final ConnectionManagerImpl manager = (ConnectionManagerImpl) XMPPServer.getInstance().getConnectionManager();
         final ConnectionConfiguration plaintextConfiguration  = manager.getListener( ConnectionType.COMPONENT, false ).generateConnectionConfiguration();
         final ConnectionConfiguration clientConfiguration = manager.getListener( ConnectionType.SOCKET_C2S, false ).generateConnectionConfiguration();	
@@ -136,6 +137,9 @@ public class JitsiJicofoWrapper implements ProcessListener
             "    }",
             "    bridge  {",
             "        selection-strategy = RegionBasedBridgeSelectionStrategy ",
+            "    }",
+            "    rest   {",
+            "        port = " + jicofoPort,
             "    }",			
             "    xmpp {",
             "      client {",

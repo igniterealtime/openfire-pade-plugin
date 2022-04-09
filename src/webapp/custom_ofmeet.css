@@ -10,28 +10,31 @@
 .fc-timegrid-slot-label-cushion, .fc-timegrid-axis-cushion {
 	color: black;
 }
-/*
- * 20200427/G.Jaekel@DNB.DE   make raisehand more noticeable
- * 20200512/G.Jaekel@DNB.DE   make it even a bit more noticeable, humans seems more sensible to motion ...
- */
+
+/* <<< 20220409/G.Jaekel@DNB.DE make raisehand more noticable */
+div.jss3, /* info-box */
+div.jss33, /* participats window & filmstrip */
+div.indicators div:not(.jitsi-icon-default) { /* participant plane */
+  animation-name: raisehand;
+  animation-duration: 5s;
+  animation-direction: alternate;
+  animation-delay: 30s;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in;
+}
+
 @keyframes raisehand {
   from {
-    background-color: #165ecc;
+    background-color: #FFD600;
   }
 
   to {
-    background-color: red;
-    transform: scale(1.1);
+    background-color: #FF6000;
+    transform: scale(1.2);
   }
 }
 
-.raisehandindicator {
-  animation-name: raisehand;
-  animation-duration: 2s;
-  animation-direction: alternate;
-  animation-delay: 5s;
-  animation-iteration-count: infinite;
-}
+/* >>> */
 
 .speaker-room-button {
   border: 0;

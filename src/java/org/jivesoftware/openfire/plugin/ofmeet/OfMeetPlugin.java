@@ -1062,37 +1062,38 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
             }
         }
 		
-		if (!"ofgasi".equals(roomName) && !"ofmeet".equals(roomName) && !"focus".equals(userName) && !nickname.startsWith("focus")) {		
+		if (!"ofgasi".equals(roomName) && !"ofmeet".equals(roomName)) {		
 			Map<String, String> props =  MUCRoomProperties.get(serviceName, roomName);	
 
 			if (props != null)
 			{
 				// Send Meeting Polls
-
-				JSONObject pollsMsg = new JSONObject();
-				pollsMsg.put("type",  "old-polls");
 				
-				JSONArray polls = new JSONArray();				
-				
-				for (String key : props.keySet())
-				{
-					if (key.startsWith("jitsi.meet.polls.")) {
-						JSONObject poll = new JSONObject(props.get(key));
-						polls.put(poll);
-					}
-				}				
-				
-				pollsMsg.put("polls",  polls);
-				
-				Message pollMsg = new Message();
-				pollMsg.setFrom(roomJID);
-				pollMsg.setTo(user);
-				Element pollJson = pollMsg.addChildElement("json-message", "http://jitsi.org/jitmeet");
-				pollJson.setText(pollsMsg.toString());
-				XMPPServer.getInstance().getRoutingTable().routePacket(user, pollMsg, true);
-				
-				Log.debug("occupantJoined polls\n" + pollsMsg); 				
-				
+				if (!"focus".equals(userName) && !nickname.startsWith("focus")) {
+					JSONObject pollsMsg = new JSONObject();
+					pollsMsg.put("type",  "old-polls");
+					
+					JSONArray polls = new JSONArray();				
+					
+					for (String key : props.keySet())
+					{
+						if (key.startsWith("jitsi.meet.polls.")) {
+							JSONObject poll = new JSONObject(props.get(key));
+							polls.put(poll);
+						}
+					}				
+					
+					pollsMsg.put("polls",  polls);
+					
+					Message pollMsg = new Message();
+					pollMsg.setFrom(roomJID);
+					pollMsg.setTo(user);
+					Element pollJson = pollMsg.addChildElement("json-message", "http://jitsi.org/jitmeet");
+					pollJson.setText(pollsMsg.toString());
+					XMPPServer.getInstance().getRoutingTable().routePacket(user, pollMsg, true);
+					
+					Log.debug("occupantJoined polls\n" + pollsMsg); 
+				}									
 				
 				// Send all other properties
 				

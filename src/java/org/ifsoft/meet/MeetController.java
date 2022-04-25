@@ -297,9 +297,9 @@ public class MeetController {
             JSONObject json = new JSONObject(payload);
 
             if ("chat".equals(json.getString("msgType"))) {
-                postChatMessage(user, json);
+                ok = postChatMessage(user, json);
             } else {
-                postGroupChatMessage(user, json);
+                ok = postGroupChatMessage(user, json);
             }
 
         } catch (Exception e1) {
@@ -309,7 +309,7 @@ public class MeetController {
         return ok;
     }
 
-    private void postChatMessage(User user, JSONObject json)
+    private boolean postChatMessage(User user, JSONObject json)
     {
         Log.debug("postChatMessage "  + user + "\n" + json);
 
@@ -328,13 +328,15 @@ public class MeetController {
             XMPPServer.getInstance().getRoutingTable().routePacket(jid2, message, true);
 
             WebPushInterceptor.notifications.remove(username); // reset notification indicator
-
+			return true;
+			
         } catch (Exception e) {
             Log.error("postChatMessage", e);
+			return false;			
         }
     }
 
-    private void postGroupChatMessage(User user, JSONObject json)
+    private boolean postGroupChatMessage(User user, JSONObject json)
     {
         Log.debug("postGroupChatMessage "  + user + "\n" + json);
 
@@ -354,9 +356,11 @@ public class MeetController {
             message.setType(Message.Type.groupchat);
             message.setBody("> " + json.getString("msgNick") + " : " + json.getString("msgBody") + "\n\n" + json.getString("reply"));
             room.send(message, room.getRole());
+			return true;
 
         } catch (Exception e) {
             Log.error("postGroupChatMessage", e);
+			return false;
         }
     }
 

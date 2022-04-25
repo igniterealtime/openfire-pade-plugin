@@ -8,10 +8,11 @@ public class Stanza {
     public String token;
     public String avatar;
     public String fullname;
+	public String url;
 
     public Stanza() { }
 
-    public Stanza(String msgType, String msgFrom, String msgBody, String msgNick, String token, String avatar, String fullname) {
+    public Stanza(String msgType, String msgFrom, String msgBody, String msgNick, String token, String avatar, String fullname, String url) {
         this.msgType = msgType;
         this.msgFrom = msgFrom;
         this.msgBody = msgBody;
@@ -19,5 +20,6 @@ public class Stanza {
         this.token = token;
         this.avatar = avatar;
         this.fullname = fullname;
+		this.url = url;
     }
 }             

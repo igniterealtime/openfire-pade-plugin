@@ -274,6 +274,10 @@ public class WebPushInterceptor implements PacketInterceptor, OfflineMessageList
     public void webPush( final User user, final String body, JID jid, Message.Type msgtype, String nickname )
     {
         try {
+			String hostname = XMPPServer.getInstance().getServerInfo().getHostname();
+			String public_port = JiveGlobals.getProperty( "httpbind.port.secure", "7443");	
+			String url = "https://" + JiveGlobals.getProperty( "ofmeet.websockets.domain", hostname) + ":" + JiveGlobals.getProperty( "ofmeet.websockets.publicport", public_port);	
+			
             String publicKey = user.getProperties().get("vapid.public.key");
             String privateKey = user.getProperties().get("vapid.private.key");
 
@@ -322,7 +326,7 @@ public class WebPushInterceptor implements PacketInterceptor, OfflineMessageList
                     if (key.startsWith("webpush.subscribe."))
                     {
                         Subscription subscription = new Gson().fromJson(user.getProperties().get(key), Subscription.class);
-                        Stanza stanza = new Stanza(msgtype == Message.Type.chat ? "chat" : "groupchat", jid.asBareJID().toString(), body, nickname, token, avatar, fullname);
+                        Stanza stanza = new Stanza(msgtype == Message.Type.chat ? "chat" : "groupchat", jid.asBareJID().toString(), body, nickname, token, avatar, fullname, url);
                         Notification notification = new Notification(subscription, (new Gson().toJson(stanza)).toString());
                         HttpResponse response = pushService.send(notification);
                         int statusCode = response.getStatusLine().getStatusCode();

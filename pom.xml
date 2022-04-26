@@ -11,7 +11,7 @@
     
     <groupId>org.igniterealtime.openfire</groupId>
     <artifactId>pade</artifactId>
-    <version>1.6.4-SNAPSHOT</version>	
+    <version>1.7.0-SNAPSHOT</version>	
     
     <name>Pade</name>
     <description>Web-based chat, groupchat, telephones, audio and video conferencing solution using ConverseJS, Jitsi and FreeSWITCH</description>
@@ -51,9 +51,9 @@
                         <goal>wget</goal>
                     </goals>
                     <configuration>
-                        <url>https://igniterealtime.github.io/pade/docs-1.6.14.4.zip</url>
+                        <url>https://igniterealtime.github.io/pade/docs-2.0.7.1.zip</url>
                         <unpack>true</unpack>
-                        <outputDirectory>${project.basedir}/classes</outputDirectory>
+                        <outputDirectory>${project.basedir}/classes/docs</outputDirectory>
                     </configuration>
                     </execution>                    
                 </executions>

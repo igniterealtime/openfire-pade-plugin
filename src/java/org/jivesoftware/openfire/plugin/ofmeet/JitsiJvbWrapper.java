@@ -495,7 +495,7 @@ public class JitsiJvbWrapper implements ProcessListener
     {
         Log.debug(line);
 
-        if (line.contains("Server.doStart: Started"))
+        if (line.contains("Starting jitsi-videobridge"))
         {
             System.setProperty("ofmeet.jvb.started", "true");
             System.setProperty("ofmeet.jvb.started.timestamp", String.valueOf(System.currentTimeMillis()));

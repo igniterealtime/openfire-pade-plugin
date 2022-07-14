@@ -170,8 +170,9 @@ public class JitsiJicofoWrapper implements ProcessListener
             defaultOptions = "";
         }
 
-        final String customOptions = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.focus.jvm.customOptions", defaultOptions);
-        final String cmdLine = javaExec + " " + customOptions + " -Dconfig.file=" + configFile + " -Dnet.java.sip.communicator.SC_HOME_DIR_LOCATION=" + jicofoHomePath + " -Dnet.java.sip.communicator.SC_HOME_DIR_NAME=config -Djava.util.logging.config.file=./logging.properties -Djdk.tls.ephemeralDHKeySize=2048 -cp ./jicofo-1.1-SNAPSHOT.jar" + File.pathSeparator + "./jicofo-1.1-SNAPSHOT-jar-with-dependencies.jar org.jitsi.jicofo.Main" + parameters;
+        String customOptions = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.focus.jvm.customOptions", defaultOptions);
+        if(!customOptions.isEmpty() && !customOptions.endsWith(" ")) customOptions += " ";
+        final String cmdLine = javaExec + " " + customOptions + "-Dconfig.file=" + configFile + " -Dnet.java.sip.communicator.SC_HOME_DIR_LOCATION=" + jicofoHomePath + " -Dnet.java.sip.communicator.SC_HOME_DIR_NAME=config -Djava.util.logging.config.file=./logging.properties -Djdk.tls.ephemeralDHKeySize=2048 -cp ./jicofo-1.1-SNAPSHOT.jar" + File.pathSeparator + "./jicofo-1.1-SNAPSHOT-jar-with-dependencies.jar org.jitsi.jicofo.Main" + parameters;
         jicofoThread = Spawn.startProcess(cmdLine, new File(jicofoHomePath), this);
 
 		// create ofmeet muc room if it does not exist. needed for race condition when jicofo is a tls connection

@@ -78,7 +78,7 @@ public class Config implements MUCEventListener {
 
 			if (mucManager.getMultiUserChatService("conference") != null)
 			{
-				List<MUCRoom> rooms = mucManager.getMultiUserChatService("conference").getChatRooms();
+				List<MUCRoom> rooms = mucManager.getMultiUserChatService("conference").getActiveChatRooms();
 
 				for (MUCRoom room : rooms)
 				{

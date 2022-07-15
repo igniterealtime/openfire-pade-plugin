@@ -221,7 +221,7 @@ public class JustMarriedController {
 
 		// Is this user registered with our OF server?
 		String username = otherItem.getJid().getNode();
-		if (username != null && username.length() > 0 && userManager.isRegisteredUser(username)
+		if (username != null && username.length() > 0 && userManager.isRegisteredUser(otherItem.getJid(), false)
 				&& XMPPServer.getInstance().isLocal(XMPPServer.getInstance().createJID(currentUser, null))) {
 			try {
 				User otherUser = userManager.getUser(username);

@@ -67,7 +67,7 @@ public class InProgressListServlet extends HttpServlet
             Log.debug("ofmeet base url: {}", url);
 
             final String service = "conference"; //mainMuc.split(".")[0];
-            final List<MUCRoom> chatRooms = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(service).getChatRooms();
+            final List<MUCRoom> chatRooms = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(service).getActiveChatRooms();
             final JSONArray meetings = new JSONArray();
             final String[] excludedRoomNames = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.exclude", "").split(":");
             final String[] excludedNickNames = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.welcomepage.inprogresslist.excludeNicks", "").split(":");

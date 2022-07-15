@@ -76,7 +76,7 @@ public class MUCRoomController {
     public MUCRoomEntities getChatRooms(String serviceName, String channelType, String roomSearch, boolean expand) {
         Log.debug("getChatRooms");
         List<MUCRoom> rooms = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(serviceName)
-                .getChatRooms();
+                .getActiveChatRooms();
 
         List<MUCRoomEntity> mucRoomEntities = new ArrayList<MUCRoomEntity>();
 

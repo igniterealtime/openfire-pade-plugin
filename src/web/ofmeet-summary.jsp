@@ -21,7 +21,7 @@
 <%         
         String mainMuc = JiveGlobals.getProperty( "ofmeet.main.muc", "conference." + XMPPServer.getInstance().getServerInfo().getXMPPDomain());
         String service = "conference"; //mainMuc.split(".")[0];
-        List<MUCRoom> rooms = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(service).getChatRooms();        
+        List<MUCRoom> rooms = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(service).getActiveChatRooms();        
         int confCount = rooms.size();        
 %>
 <html>

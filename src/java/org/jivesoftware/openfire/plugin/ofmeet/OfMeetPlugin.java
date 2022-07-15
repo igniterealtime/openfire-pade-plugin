@@ -506,7 +506,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         {
             final String protocol = "https"; // No point in providing the non-SSL protocol, as webRTC won't work there.
             final String host = XMPPServer.getInstance().getServerInfo().getHostname();
-            final int port = HttpBindManager.getInstance().getHttpBindSecurePort();
+            final int port = Integer.parseInt(JiveGlobals.getProperty("httpbind.port.secure", "7443"));
             final String path;
             if ( publicWebApp != null )
             {
@@ -582,6 +582,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
 	private void ensureJvbUser()
     {
+		final String domain = XMPPServer.getInstance().getServerInfo().getXMPPDomain();		
         final UserManager userManager = XMPPServer.getInstance().getUserManager();
         String username =  config.getJvbName();
 		
@@ -589,7 +590,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 			username = username + JiveGlobals.getXMLProperty("ofmeet.octo_id", "1");
 		}		
 
-        if ( !userManager.isRegisteredUser( username ) )
+        if ( !userManager.isRegisteredUser( new JID(username + "@" + domain), false ) )
         {
             Log.info( "No pre-existing '" + username + "' user detected. Generating one." );
             String password = config.getJvbPassword();
@@ -613,9 +614,10 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 	
     private void ensureJigasiUser()
     {
+		final String domain = XMPPServer.getInstance().getServerInfo().getXMPPDomain();			
         final UserManager userManager = XMPPServer.getInstance().getUserManager();
 		
-        if ( !userManager.isRegisteredUser( config.jigasiXmppUserId.get() ) )
+        if ( !userManager.isRegisteredUser( new JID(config.jigasiXmppUserId.get() + "@" + domain), false ) )
         {
             Log.info( "No pre-existing 'jigasi' user detected. Generating one." );
 
@@ -638,9 +640,10 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     }
     private void ensureFocusUser()
     {
-        // Ensure that the 'focus' user exists.
+		final String domain = XMPPServer.getInstance().getServerInfo().getXMPPDomain();	
         final UserManager userManager = XMPPServer.getInstance().getUserManager();
-        if ( !userManager.isRegisteredUser( "focus" ) )
+		
+        if ( !userManager.isRegisteredUser( new JID("focus@" + domain), false ) )
         {
             Log.info( "No pre-existing 'focus' user detected. Generating one." );
 

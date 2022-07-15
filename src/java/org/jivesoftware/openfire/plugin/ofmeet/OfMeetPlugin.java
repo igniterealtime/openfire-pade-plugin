@@ -439,15 +439,14 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
             for (String subprotocol : req.getSubProtocols())
             {
-                Log.info("WSocketCreator found protocol " + subprotocol);
+                Log.debug("WSocketCreator found protocol " + subprotocol);
                 resp.setAcceptedSubProtocol(subprotocol);
                 protocols.add(subprotocol);
             }
 
             if (query != null) path += "?" + query;
 
-            Log.info("JvbSocketCreator " + path + " " + query);
-
+            Log.debug("JvbSocketCreator " + path + " " + query);
             String url = "ws://" + ipaddr + ":" + jvbPort + path;
 
             ProxyWebSocket socket = null;
@@ -874,7 +873,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 			
             for (String subprotocol : req.getSubProtocols())
             {
-                Log.info("WSocketCreator found protocol " + subprotocol);
+                Log.debug("WSocketCreator found protocol " + subprotocol);
                 resp.setAcceptedSubProtocol(subprotocol);
 				streamKey = subprotocol;
             }

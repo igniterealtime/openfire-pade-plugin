@@ -51,7 +51,7 @@ public class ProxyConnection
 
     public ProxyConnection(URI uri, List<String> subprotocol, int connectTimeout)
     {
-        Log.info("ProxyConnection " + uri + " " + subprotocol);
+        Log.debug("ProxyConnection " + uri + " " + subprotocol);
 
         final SslContextFactory clientSslContextFactory = SslContextFactoryProvider.getClientSslContextFactory();
         if("wss".equals(uri.getScheme()))

@@ -206,8 +206,8 @@ public class OFMeetConfig
     public List<String> getButtonsImplemented() // BAO
     {
         // These should match the implementations that are provided in the Toolbox.web.js file in jitsi-meet.
-        return JiveGlobals.getListProperty( "ofmeet.buttons.implemented", Arrays.asList( "microphone", "camera", "closedcaptions", "embedmeeting", "desktop", "fullscreen", "fodeviceselection", "hangup", "profile", "chat", "recording", "livestreaming", "etherpad", "sharedvideo", "shareaudio", "settings", "raisehand", "videoquality", "filmstrip", "invite", "feedback", "stats", "shortcuts", "tileview", "select-background", "download", "help", "mute-everyone", "mute-video-everyone", "security", "participants-pane" ) );
-    }
+        return JiveGlobals.getListProperty( "ofmeet.buttons.implemented", Arrays.asList( "camera", "chat", "closedcaptions", "desktop", "download", "embedmeeting", "etherpad", "feedback", "filmstrip", "fullscreen", "hangup", "help", "highlight", "invite", "linktosalesforce", "livestreaming", "microphone", "mute-everyone", "mute-video-everyone", "participants-pane", "profile", "raisehand", "recording", "security", "select-background", "settings", "shareaudio", "noisesuppression", "sharedvideo", "shortcuts", "stats", "tileview", "toggle-camera", "videoquality" ) );		
+     }
 
     public void resetButtonsImplemented()
     {
@@ -221,7 +221,7 @@ public class OFMeetConfig
 
     public List<String> getButtonsEnabled() // BAO
     {
-        return JiveGlobals.getListProperty( "ofmeet.buttons.enabled", Arrays.asList( "microphone", "camera", "closedcaptions", "embedmeeting", "desktop", "fullscreen", "fodeviceselection", "hangup", "profile", "chat", "recording", "livestreaming", "etherpad", "sharedvideo", "shareaudio", "settings", "raisehand", "videoquality", "filmstrip", "invite", "feedback", "stats", "shortcuts", "tileview", "select-background", "download", "help", "mute-everyone", "mute-video-everyone", "security", "participants-pane" ) );
+        return JiveGlobals.getListProperty( "ofmeet.buttons.enabled", Arrays.asList( "camera", "chat", "closedcaptions", "desktop", "download", "embedmeeting", "etherpad", "feedback", "filmstrip", "fullscreen", "hangup", "help", "highlight", "invite", "linktosalesforce", "livestreaming", "microphone", "mute-everyone", "mute-video-everyone", "participants-pane", "profile", "raisehand", "recording", "security", "select-background", "settings", "shareaudio", "noisesuppression", "sharedvideo", "shortcuts", "stats", "tileview", "toggle-camera", "videoquality" ) );
     }
 
     public void resetButtonsEnabled()

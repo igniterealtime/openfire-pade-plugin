@@ -1182,7 +1182,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
                 MUCRoom room = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(roomJID)
                         .getChatRoom(roomJID.getNode());
 
-                if (room.getOwners().stream().anyMatch(o -> o.getNode().equals("focus"))) {
+                if (room != null && room.getOwners().stream().anyMatch(o -> o.getNode().equals("focus"))) {
                     if (room.getAffiliation(user) == MUCRole.Affiliation.owner) {
                         // Remove owner authority of the user
                         List<Presence> addNonePresence = room.isMembersOnly()

@@ -97,12 +97,18 @@
         final String minHeightForQualityHigh = request.getParameter( "minHeightForQualityHigh" );           
         final boolean capScreenshareBitrate = ParamUtils.getBooleanParameter( request, "capScreenshareBitrate" );     
         final boolean enableLayerSuspension = ParamUtils.getBooleanParameter( request, "enableLayerSuspension" );        
-        
+
         final String videoConstraintsIdealAspectRatio = request.getParameter( "videoConstraintsIdealAspectRatio" );
         if(!videoConstraintsIdealAspectRatio.matches("[0-9: .,/]+"))
         {
             errors.put( "videoConstraintsIdealAspectRatio", "Cannot parse value as aspect ratio value." );
         }
+        final String resolution = request.getParameter( "resolution" );	
+        try {
+            Integer.parseInt( resolution );
+        } catch (NumberFormatException ex ) {
+            errors.put( "resolution", "Cannot parse value as integer value." );
+        }		
         final String videoConstraintsMinHeight = request.getParameter( "videoConstraintsMinHeight" );
         try {
             Integer.parseInt( videoConstraintsMinHeight );
@@ -237,6 +243,7 @@
             ofmeetConfig.setStartVideoMuted( startvideomuted == null || startvideomuted.isEmpty() ? null : Integer.parseInt( startvideomuted ));
             ofmeetConfig.setLipSync( lipSync );
 
+            ofmeetConfig.setResolution( Integer.parseInt( resolution ) );
             ofmeetConfig.setVideoConstraintsIdealAspectRatio( videoConstraintsIdealAspectRatio );
             ofmeetConfig.setVideoConstraintsMinHeight( Integer.parseInt( videoConstraintsMinHeight ) );
             ofmeetConfig.setVideoConstraintsIdealHeight( Integer.parseInt( videoConstraintsIdealHeight ) );
@@ -492,17 +499,22 @@
     <admin:contentBox title="${boxtitlemedia}">
         <p>
             <fmt:message key="config.page.configuration.ofmeet.constraints.description"/>
-        </p>
+        </p><p>&nbsp;</p>
         <table>
             <tr>
                 <td nowrap>
+                    <label class="jive-label" for="resolution"><fmt:message key="config.page.configuration.ofmeet.resolution"/></label>
+                </td>
+                <td>
+                    <input type="text" name="resolution" id="resolution" value="${ofmeetConfig.resolution}">
+                    <label for="resolution"><fmt:message key="config.page.configuration.ofmeet.resolution.unit"/></label>					
+                </td>			
+                <td nowrap style="padding-left: 10px;">
                     <label class="jive-label" for="videoConstraintsIdealAspectRatio"><fmt:message key="config.page.configuration.ofmeet.constraints.video.aspectratio.ideal"/></label>
                 </td>
                 <td>
                     <input type="text" name="videoConstraintsIdealAspectRatio" id="videoConstraintsIdealAspectRatio" value="${ofmeetConfig.videoConstraintsIdealAspectRatio}">
                 </td>
-                <td></td>
-                <td></td>
             </tr>
             <tr>
                 <td nowrap>

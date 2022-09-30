@@ -21,6 +21,27 @@
             JitsiMeetJS.app.renderEntryPoint({
                 Component: JitsiMeetJS.app.entryPoints.APP
             })
+            const inIframe = () => {
+                try {
+                    return window.self !== window.top;
+                } catch (e) {
+                    return true;
+                }
+            };
+
+            const isElectron = navigator.userAgent.includes('Electron');
+            const shouldRegisterWorker = !isElectron && !inIframe() && 'serviceWorker' in navigator;
+
+            if (shouldRegisterWorker) {
+                navigator.serviceWorker
+                    .register(window.location.origin + '/pwa-worker.js')
+                    .then(reg => {
+                        console.log('Service worker registered.', reg);
+                    })
+                    .catch(err => {
+                        console.log(err);
+                    });
+            }			
         })
     </script>
     <script>
@@ -40,10 +61,9 @@
             "config.js",
             "do_external_connect.js",
             "interface_config.js",
-            "logging_config.js",
             "lib-jitsi-meet.min.js",
             "app.bundle.min.js",
-            "all.css?v=4369"
+            "all.css"
         ];
         var loadErrHandler = function(e) {
             var target = e.target;
@@ -160,7 +180,6 @@
     <script src="config.js"></script>
     <script src="libs/do_external_connect.min.js"></script>
     <script src="interface_config.js"></script>
-    <script src="logging_config.js"></script>
     <script src="config_custom.js"></script>
     <script src="libs/lib-jitsi-meet.min.js"></script>
     <script src="libs/app.bundle.min.js"></script>

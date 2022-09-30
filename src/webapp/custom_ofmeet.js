@@ -342,7 +342,7 @@ var ofmeet = (function (ofm) {
     }
 		
     function preSetup() {
-        if (!APP.connection) {
+        if (!APP.connection || !APP.connection.xmpp.connection) {
             setTimeout(preSetup);
             return;
         }
@@ -1488,13 +1488,18 @@ var ofmeet = (function (ofm) {
         return true;
     }
 
-    function handleMucMessage(msg) {	
+    function handleMucMessage(msg) {
+       console.debug("handleMucMessage", getConferenceJid(), msg);		
         const participant = Strophe.getResourceFromJid(msg.getAttribute("from"));
 
         if (msg.getAttribute("type") == "error") {
             console.error(msg);
             return true;
         }
+		
+		if (!getConferenceJid()) {
+			setTimeout(() => {handleMucMessage(msg)}, 1000 );	// wait for jitsi-meet
+		}
 
         if (getConferenceJid() != Strophe.getBareJidFromJid(msg.getAttribute("from"))) {
             return true;

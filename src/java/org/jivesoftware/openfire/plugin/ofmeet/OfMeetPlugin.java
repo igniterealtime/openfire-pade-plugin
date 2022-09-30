@@ -267,7 +267,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
     public void initializePlugin(final PluginManager manager, final File pluginDirectory)
     {
-        self = this;
+		self = this;	
         webRoot = pluginDirectory.getPath() + "/classes";
 
         this.manager = manager;
@@ -334,7 +334,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     }
 
     public void destroyPlugin()
-    {
+    {		
         try
         {
             SessionEventDispatcher.removeListener(this);
@@ -391,6 +391,8 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         if (connectTask != null) connectTask.cancel(true);
         if (managerConnection != null) managerConnection.disconnect();	
 		if (voiceBridge != null) voiceBridge.appStop();
+		
+		self = null;		
     }
 
     protected void loadPublicWebApp() throws Exception

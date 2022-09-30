@@ -283,7 +283,7 @@ public class PadePlugin implements Plugin, MUCEventListener
      */
     @Override
     public void destroyPlugin()
-    {
+    {		
         Log.info("stop pade server");
 
         if (ofMeetPlugin != null) ofMeetPlugin.destroyPlugin();
@@ -307,6 +307,7 @@ public class PadePlugin implements Plugin, MUCEventListener
 
         OfflineMessageStrategy.removeListener( interceptor );
         InterceptorManager.getInstance().removeInterceptor( interceptor );
+		self = null;
     }
 
     public OfMeetPlugin getContainer()

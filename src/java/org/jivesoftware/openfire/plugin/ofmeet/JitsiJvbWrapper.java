@@ -60,7 +60,7 @@ public class JitsiJvbWrapper implements ProcessListener
     {
         Log.debug( "Initializing Jitsi Videobridge..." );
         System.setProperty("ofmeet.jvb.started", "false");
-        JitsiJvbWrapper self = this;
+        self = this;
 
         jitsiPlugin = new PluginImpl();
         jitsiPlugin.initializePlugin( manager, pluginDirectory );
@@ -474,6 +474,7 @@ public class JitsiJvbWrapper implements ProcessListener
         if (jvbThread != null) jvbThread.destory();
         if (jitsiPlugin != null ) jitsiPlugin.destroyPlugin();
 
+        self = null;
         Log.debug( "Successfully destroyed jvb process." );
     }
 

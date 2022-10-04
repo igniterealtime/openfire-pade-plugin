@@ -1499,6 +1499,7 @@ var ofmeet = (function (ofm) {
 		
 		if (!getConferenceJid()) {
 			setTimeout(() => {handleMucMessage(msg)}, 1000 );	// wait for jitsi-meet
+			return true;
 		}
 
         if (getConferenceJid() != Strophe.getBareJidFromJid(msg.getAttribute("from"))) {

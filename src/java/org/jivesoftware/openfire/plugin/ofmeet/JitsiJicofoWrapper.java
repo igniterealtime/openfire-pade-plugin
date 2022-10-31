@@ -108,6 +108,7 @@ public class JitsiJicofoWrapper implements ProcessListener
 
         props.setProperty( "org.jitsi.jicofo.BRIDGE_MUC", roomName + "@" + MAIN_MUC);
         props.setProperty( "org.jitsi.jicofo.ALWAYS_TRUST_MODE_ENABLED", "true" );
+		props.setProperty( "org.jitsi.jicofo.FOCUS_USER_DOMAIN", XMPPServer.getInstance().getServerInfo().getXMPPDomain());
         props.setProperty( "org.jitsi.jicofo.PING_INTERVAL", "-1" );
         props.setProperty( "org.jitsi.jicofo.SERVICE_REDISCOVERY_INTERVAL", "60000" );
         props.setProperty( "org.jitsi.jicofo.DISABLE_AUTO_OWNER", Boolean.toString( !JiveGlobals.getBooleanProperty( "ofmeet.conference.auto-moderator", true ) ) );
@@ -143,8 +144,15 @@ public class JitsiJicofoWrapper implements ProcessListener
             "    }",			
             "    xmpp {",
             "      client {",
-			"		 conference-muc-jid = " + MAIN_MUC,
-			"		 disable-certificate-verification = false",
+			"		 enabled = true",	
+			"		 username = " + jicofoSubdomain,				
+			"		 password = " + config.getFocusPassword(),				
+			"		 port = 5222",
+			"		 hostname = " +  XMPPServer.getInstance().getServerInfo().getHostname(),
+			"		 domain = " +  XMPPServer.getInstance().getServerInfo().getXMPPDomain(),			
+			"		 xmpp-domain = " +  XMPPServer.getInstance().getServerInfo().getXMPPDomain(),				
+			"		 conference-muc-jid = " + MAIN_MUC,			
+			"		 disable-certificate-verification = true",
             "        client-proxy = focus." + XMPPServer.getInstance().getServerInfo().getXMPPDomain(),
             "        use-tls = " + (clientConfiguration.getTlsPolicy() == Connection.TLSPolicy.required ? "true" : "false"),
             "       }",				

@@ -218,16 +218,16 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 	{
         try
         {	
-			jitsiJicofoWrapper = new JitsiJicofoWrapper();		
-			ensureFocusUser();
-			jitsiJicofoWrapper.initialize(pluginDirectory);
-
 			if ( JiveGlobals.getBooleanProperty( "ofmeet.use.internal.focus.component", true ) )
 			{
 				focusComponent = new FocusComponent();
 				componentManager = ComponentManagerFactory.getComponentManager();			
 				componentManager.addComponent("focus", focusComponent);		
 			}
+			
+			jitsiJicofoWrapper = new JitsiJicofoWrapper();		
+			ensureFocusUser();
+			jitsiJicofoWrapper.initialize(pluginDirectory);			
         }
         catch ( Exception ex )
         {

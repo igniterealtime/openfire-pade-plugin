@@ -11,7 +11,7 @@
     
     <groupId>org.igniterealtime.openfire</groupId>
     <artifactId>pade</artifactId>
-    <version>1.7.3-SNAPSHOT</version>	
+    <version>1.7.3</version>	
     
     <name>Pade</name>
     <description>Web-based chat, groupchat, telephones, audio and video conferencing solution using ConverseJS, Jitsi and FreeSWITCH</description>

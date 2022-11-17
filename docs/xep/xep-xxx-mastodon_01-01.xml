@@ -1,0 +1,112 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<?xml-stylesheet type='text/xsl' href='xep.xsl'?>
+<xep>
+<header> 
+  <title>Mastodon API over XMPP</title> 
+  <abstract>This specification defines a protocol extension for communicating in-band with a Mastodon API server over XMPP
+  </abstract>
+
+  <number>0000</number> 
+  <status>ProtoXEP</status> 
+  <type>Standards Track</type> 
+  <sig>Standards</sig> 
+  <dependencies>   
+      <spec>XEP-0335</spec>
+  </dependencies> 
+  <supersedes/> 
+  <supersededby/> 
+  <shortname>mastodon</shortname> 
+  <author>
+  	<firstname>Dele</firstname>
+	<surname>Olajide</surname> 
+	<email>dele@olajide.net</email>	
+  </author>
+  <revision> 
+    <version>0.1</version> 
+    <date>2022-11-17</date> 
+    <initials>do</initials> 
+    <remark>Initial version.</remark> 
+  </revision> 
+   
+</header> 
+<section1 topic='Introduction' anchor='intro'> 
+  <p>Mastodon is a free, open-source social network server based on ActivityPub where users can follow friends and discover new ones. On Mastodon, users can publish anything they want: links, pictures, text, video. All Mastodon servers are interoperable as a federated network (users on one server can seamlessly communicate with users from another one, including non-Mastodon software that implements ActivityPub)!</p>
+  <p>The purpose of this protocol extension is to provide a generic specification of how an XMPP entity can communicate in-band with a Mastodon REST API server using simple IQ stanzas and <link url="https://xmpp.org/extensions/xep-0335.html">XEP-0335: JSON Containers</link><note>XEP-0335: JSON Containers &lt;<link url="https://xmpp.org/extensions/xep-0335.html">https://xmpp.org/extensions/xep-0335.html</link>&gt;.</note> for the API payload.</p>
+</section1> 
+
+<section1 topic='Requirements' anchor='reqs'> 
+  <p>This document addresses the following requirements:</p> 
+  <ul> 
+    <li><p>Enable an XMPP client to maintain a session with a Mastodon Instance server from an existing XMPP connection without switching protocols or transport. The XMPP server will act as a proxy and maintain the required connection to a Mastodon instance. Typically, the XMPP server will maintain client HTTP connections for each XMPP client and eliminating potential CORS issues.</p> </li>
+    <li><p>Provide direct access to the Mastodon REST API protocol to enable a XMPP client send and recieve the required content/payload directly to the instance without any need to marshall that data to or from XML. Typically, this would be JSON content. The server does not need to inspect the contents or impose itself into the API flow in order to route the stanza sucessfully to the instance.</p></li>   </ul> 
+</section1> 
+
+<section1 topic='Mastodon REST API Direct Access Protocol' anchor='direct-access-protocol'> 
+<p>The namespace should be in the form "urn:xmpp:mastodon:0".</p>	
+  <section2 topic='Client to SFU' anchor='c2s'> 
+    
+    <p>A sample protocol flow of a message from the XMPP client to the Ignite Reatime Mastodon instance is shown below.</p> 
+    <example caption='Client requests for the mastodon public timeline of statuses'><![CDATA[ 
+<iq from='any-user@shakespeare.lit/globe' to="shakespeare.lit" type="set" id="q1">
+  <c2s xmlns="urn:xmpp:mastodon:0", endpoint="https://toot.igniterealtime.org/api/v1/timelines/public">
+    <json xmlns="urn:xmpp:json:0">
+	{	
+		"local": true
+	}
+    </json>	
+  </c2s>	
+</iq> 
+    ]]></example>
+  <p>The XMPP server will maintain a list of Mastodon client connections and automatically create each one on the first message recieved from a client. </p> 
+  <section2 topic='Mastodon responds to Client' anchor='c2s'>   
+    <p>The response from the Ignite Realtime Mastodon innstance to the XMPP client is shown below.</p> 
+    <example caption='Mastodon sends the public timeline statuses to the Client'><![CDATA[
+<iq from="shakespeare.lit" to='any-user@shakespeare.lit/globe' type="result" id="q1">
+  <s2c xmlns="urn:xmpp:mastodon:0">
+    <json xmlns="urn:xmpp:json:0">
+	[
+	  {
+		"id": "103206804533200177",
+		"created_at": "2019-11-26T23:27:31.000Z",
+		...
+		"visibility": "public",
+		...
+	  },
+	  {
+		"id": "103206804086086361",
+		"created_at": "2019-11-26T23:27:32.000Z",
+		...
+		"visibility": "public",
+		...
+	  }
+	]
+    </json>
+  </s2c>  
+</iq> 
+    ]]></example>  
+  </section2>      	
+</section1> 
+
+<section1 topic='Deployment Notes' anchor='deployment'> 
+
+<p>The &lt;json&gt; element MUST NOT be empty, as the empty string is not valid JSON. The data MUST be encoded as UTF-8 (though officially unspecified, this is the de facto encoding for JSON today.</p>
+
+<p>Implementations SHOULD validate JSON they receive and intend to use, and be prepared to handle invalid data appropriately (such as by responding to the sender with the applicable XMPP error reply for the stanza type.</p>
+
+<p>As the &lt;json&gt; element alone provides no context to the recipient about the kind of data it contains, only the format, it SHOULD always be encapsulated within the &lt;c2s&gt; or &lt;s2c&gt; element that provides a context and SHOULD NOT be added as a direct child of a stanza.</p>
+
+</section1> 
+
+<section1 topic='Security Considerations' anchor='security'> 
+  <p>JSON is a very common format for data interchange today, and has many popular implementations available in browsers and standalone libraries that can be assumed relatively well-tested. However an implementation receiving JSON data from an untrusted entity should take precautions and MUST NOT attempt to use invalid JSON data it receives in any way, nor must it accept data in any encoding other than UTF-8 to avoid potential encoding mismatch attacks</p>
+</section1> 
+<section1 topic='IANA Considerations' anchor='iana'> 
+  <p>This document requires no interaction with IANA.</p> 
+</section1> 
+<section1 topic='XMPP Registrar Considerations' anchor='registrar'> 
+  <p>The Registrar shall include the following information in its registries.</p> 
+  <section2 topic='Protocol Namespaces' anchor='registrar-protocol'> 
+    <p>The XMPP Registrar includes "urn:xmpp:sfu:galene:0" in its registry of protocol namespaces.</p> 
+  </section2> 
+</section1> 
+</xep> 

@@ -1,0 +1,190 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<?xml-stylesheet type='text/xsl' href='xep.xsl'?>
+<xep>
+<header> 
+  <title>In-Band SFU Sessions</title> 
+  <abstract>This specification defines a protocol extension for communicating in-band with a media selective forwarding unit (SFU) over XMPP
+  </abstract>
+
+  <number>0000</number> 
+  <status>ProtoXEP</status> 
+  <type>Standards Track</type> 
+  <sig>Standards</sig> 
+  <dependencies>   
+      <spec>XEP-0335</spec>
+      <spec>XEP-0327</spec>	  
+      <spec>XEP-0167</spec>	  
+	  <spec>XEP-0289</spec>	  
+  </dependencies> 
+  <supersedes/> 
+  <supersededby/> 
+  <shortname>sfu</shortname> 
+  <author>
+  	<firstname>Dele</firstname>
+	<surname>Olajide</surname> 
+	<email>dele@olajide.net</email>	
+  </author>
+  <revision> 
+    <version>0.1</version> 
+    <date>2022-10-10</date> 
+    <initials>do</initials> 
+    <remark>Initial version.</remark> 
+  </revision> 
+   
+</header> 
+<section1 topic='Introduction' anchor='intro'> 
+  <p>An SFU (selective forwarding unit) is capable of receiving multiple media streams and then decides which of these media streams should be sent to which participants.	In the SFU architecture, every participant sends their media stream to a centralized selective forwarding unit (SFU) and receives streams from all other participants via the same SFU.</p>
+  <p>The purpose of this protocol extension is to provide a generic specification of how an XMPP client can communicate in-band with an SFU via simple IQ stanzas</p>
+</section1> 
+
+<section1 topic='Requirements' anchor='reqs'> 
+  <p>This document addresses the following requirements:</p> 
+  <ul> 
+    <li><p>Enable an XMPP client to maintain a session with a SFU from an existing XMPP connection without switching protocols or transport. The XMPP server will act as a proxy and maintain the required connection to the SFU. Typically, the SFU will bind to localhost and accept websocket connections from the XMPP server. This removes the need to expose the SFU directly to clients.</p> </li>
+    <li><p>Provide an SFU direct access protocol to enable a XMPP client send the required content/payload directly to the SFU without any need to marshall that data to or from XML. Typically, this would be JSON content with embedded SDP for the media sessions. The server does not need to inspect the contents or impose itself into the media flow in order to route the stanza sucessfully to the SFU.</p></li> 
+    <li><p>Provide a WebRTC XMPP ingress protocol (WXIP) like WHIP <note>WebRTC-HTTP ingestion protocol&lt;<link url="https://github.com/wish-wg/webrtc-http-ingest-protocol">https://github.com/wish-wg/webrtc-http-ingest-protocol</link>&gt;.</note> that can be used to publish a WebRTC media stream to an SFU</p></li>	
+    <li><p>Provide a WebRTC XMPP access protocol (WXAP) like WHAP <note>WebRTC-HTTP access protocol&lt;<link url="https://github.com/x186k/webrtc-http-access-protocol/blob/master/draft-elliott-whap.txt">https://github.com/x186k/webrtc-http-access-protocol/blob/master/draft-elliott-whap.txt</link>&gt;.</note> that can be used to subscribe and recieve WebRTC media streams from an SFU.</p></li>	
+	<li><p>Enable a third-party remote control signalling protocol like <link url="https://xmpp.org/extensions/xep-0327.html">XEP-0327: Rayo</link><note>XEP-0327: Rayo &lt;<link url="https://xmpp.org/extensions/xep-0327.html">https://xmpp.org/extensions/xep-0327.html</link>&gt;.</note> or <link url="https://comitfs.github.io/openlink-v2.js/xep/index.html">XEP-XXXX: Openlink</link><note>XEP-XXXX: Openlink &lt;<link url="https://comitfs.github.io/openlink-v2.js/xep/index.html">https://comitfs.github.io/openlink-v2.js/xep/index.html</link>&gt;.</note> to be combined with an SFU to provide an alternative to first-party protocols such as Jingle or SIP for the  support of session management/signaling, as well as advanced media resources such as speech recognizers, speech synthesizers and audio/video recorders. Unlike <link url="https://xmpp.org/extensions/xep-0166.html">Jingle (XEP-0166)</link><note>XEP-0166: Jingle &lt;<link url="https://xmpp.org/extensions/xep-0166.html">https://xmpp.org/extensions/xep-0166.html</link>&gt;.</note> or even <link url="http://tools.ietf.org/html/rfc3261">SIP (RFC 3261)</link><note>RFC 3261: Session Initiation Protocol (SIP) &lt;<link url="http://tools.ietf.org/html/rfc3261">http://tools.ietf.org/html/rfc3261</link>&gt;.</note>, the remote client may or may not be a party to either the session negotiation or the media stream between the SFU and the call participants.</p></li>
+    <li><p>Enable chaining SFUs together using XMPP Federation in trusted environments in order to create clusters of SFUs able to support large-scale real-time multi-party communication. An example would be the use of <link url="https://xmpp.org/extensions/xep-0289.html">XEP-0289: Federated MUC for Constrained Environments</link><note>XEP-0289: Federated MUC for Constrained Environments &lt;<link url="https://xmpp.org/extensions/xep-0289.html">https://xmpp.org/extensions/xep-0289.html</link>&gt;.</note> to align MUC rooms with SFU conferences/groups/rooms and allowing these rooms to federate with remote counterparts. This enables users to connect to the federated SFU nearest to them on the network for a given FMUC room.</p></li>
+  </ul> 
+</section1> 
+
+<section1 topic='WXIP and WXAP Protocols' anchor='wxip-wxap-protocol'> 
+<p>While WebRTC specifies the usage of SDPs [RFC8866] and an Offer/Answer model [RFC3264] for creating connections, WebRTC does not define the precise signaling protocols over which SDPs should be exchanged [RFC8825]. In order to establish a WebRTC session between two WebRTC entities, a signaling protocol is usually used to exchange SDPs</p>
+<p>With HTTP/S applications, WHIP and WHAP have been proposed as simple protocols to ingress and egress media streams to and from an SFU respectfully. WXIP and WXAP are the XMPP equivalent. Like WHIP and WHAP, WXIP and WXIP are needed for both ingest/egress in traditional media platforms and ingest in WebRTC end-to-end platforms with the lowest possible latency for XMPP clients offering media real-time communication solutions.</p>
+<p>In order to support SFUs that host multiple conferences, a conference id can be specified in the requests. Typically, this may be an XMPP MUC room associated with the SFU conference.</p>
+
+  <section2 topic='WXIP Offer request to SFU' anchor='wxip-offer'>   
+    <p>A sample protocol flow to ingress a media session from the client to the SFU</p> 
+    <example caption='Client creates an SDP offer and sends to SFU'><![CDATA[  
+<iq from='any-user@shakespeare.lit/globe' id='ih28sx61' to='shakespeare.lit' type='set'>
+  <c2s xmlns="urn:xmpp:sfu:wxip:0" id="movies@muc.shakespeare.lit">
+	SDP OFFER....
+  </c2s>
+</iq>	
+    ]]></example> 
+	<p>The SFU will create an ICE/DTLS session and the media will flow unidirectionally from the encoder/media producer (XMPP client) to the ingestion endpoint (SFU). In order to reduce complexity, no SDP renegotiation is supported, so no tracks or streams can be added or removed once the initial media offer/answer is completed.</p>
+    <example caption='The SFU responds with an SDP answer for the client'><![CDATA[  
+<iq to='any-user@shakespeare.lit/globe' id='ih28sx61' from='shakespeare.lit' type='result'>
+  <s2c xmlns="urn:xmpp:sfu:wxip:0" id="movies@muc.shakespeare.lit">
+	SDP ANSWER....
+  </s2c>
+</iq>	
+    ]]></example> 	
+  </section2>
+  
+  <section2 topic='WXAP Subscribe request to SFU' anchor='wxap-subscribe'>   
+    <p>A sample protocol flow to egress remote media sessions from the SFU to the client</p> 
+    <example caption='Client subscribes to a remote media stream from SFU'><![CDATA[
+<iq from='any-user@shakespeare.lit/globe' id='ih28sx61' to='shakespeare.lit' type='set'>
+  <c2s xmlns="urn:xmpp:sfu:wxap:0" type="subscribe" id="movies@muc.shakespeare.lit" />
+</iq>	
+    ]]></example> 	
+	<p>SFU creates SDP offer for the remote media strea and sends to the client</p>
+    <example caption='Remote stream pushed from SFU to client'><![CDATA[  
+<iq to='any-user@shakespeare.lit/globe' id='6338Vbrhrl' from='shakespeare.lit' type='set'>
+  <s2c xmlns="urn:xmpp:sfu:wxap:0" id="movies@muc.shakespeare.lit">
+	SDP OFFER....
+  </s2c>
+</iq>	
+    ]]></example> 
+    <example caption='The client responds with an SDP answer for the SFU'><![CDATA[  
+<iq from='any-user@shakespeare.lit/globe' id='6338Vbrhrl' to='shakespeare.lit' type='result'>
+  <c2s xmlns="urn:xmpp:sfu:wxap:0" id="movies@muc.shakespeare.lit">
+	SDP ANSWER....
+  </c2s>
+</iq>	
+    ]]></example> 	
+  </section2>	
+</section1> 
+
+
+<section1 topic='SFU Direct Access Protocol' anchor='direct-access-protocol'> 
+<p>As this is a generic specification, the protocol will depend on the SFU implmentation. Most SFUs use a symmetric, asynchronous protocol. In client-server usage, some messages are only sent in the client to server or in the server to client direction.</p>   
+<p>The namespace should be in the form "urn:xmpp:sfu:xxxxx:0" where xxxxx is the name of the SFU implementation. This will enable the XMPP server to validate the JSON if needed and the client to discover the expected SFU implementation.</p>	
+  <section2 topic='Client to SFU' anchor='c2s'> 
+    
+    <p>A sample protocol flow of a message from the XMPP client to the Galene SFU is shown below.</p> 
+    <example caption='Client sends an ICE candidate to the SFU'><![CDATA[ 
+<iq from='any-user@shakespeare.lit/globe' to="shakespeare.lit" type="set" id="q1">
+  <c2s xmlns="urn:xmpp:sfu:galene:0">
+    <json xmlns="urn:xmpp:json:0">
+	{
+		"type":"ice",
+		"id":"c27f64006fec100b9059f98ac17ecd9d",
+		"candidate":{
+			"candidate":"candidate:4258379142 1 udp 2122194687 192.168.1.250 55730 typ host generation 0 ufrag 22gS network-id 2",
+			"sdpMid":"0",
+			"sdpMLineIndex":0
+		}
+	}
+    </json>
+  </c2s>	
+</iq> 
+    ]]></example>
+  <p>The XMPP server will maintain of SFU client connections and automatically create each one on the first message recieved from a client. </p>
+  <p>To close a connection, a client will send an empty &lt;c2s&gt; element.</p>
+    <example caption='Client closes the client connection by sending an empty &lt;c2s&gt; element to SFU'><![CDATA[
+<iq from="shakespeare.lit" to='any-user@shakespeare.lit/globe' type="set" id="q1">
+  <c2s xmlns="urn:xmpp:sfu:galene:0">
+  </c2s>
+</iq> 
+    ]]></example>  
+  </section2>  
+  <section2 topic='SFU to Client' anchor='c2s'>   
+    <p>A sample protocol flow of a message from the Galene SFU to the XMPP client is shown below.</p> 
+    <example caption='SFU sends an ICE candidate to the Client'><![CDATA[
+<iq from="shakespeare.lit" to='any-user@shakespeare.lit/globe' type="set" id="q1">
+  <s2c xmlns="urn:xmpp:sfu:galene:0">
+    <json xmlns="urn:xmpp:json:0">
+	{
+		"type":"ice",
+		"id":"c27f64006fec100b9059f98ac17ecd9d",
+		"candidate":{
+			"candidate":"candidate:161388498 1 udp 2122260223 172.24.176.1 52755 typ host generation 0 ufrag rvu2 network-id 1",
+			"sdpMid":"0",
+			"sdpMLineIndex":0
+		}
+	}
+    </json>
+  </s2c>  
+</iq> 
+    ]]></example>  
+  </section2>   
+  <section2 topic='Rayo outbound call using SFU' anchor='c2s'>   
+    <p>A sample protocol flow to initate a voice/video conversation between two users using Rayo for signalling and an SFU for media session management.</p> 
+    <example caption=' Client requests establishment of a new outbound call'><![CDATA[  
+<iq from='remote-user@capulet.lit/balcony' to='shakespeare.lit' type='set' id='h7ed2'>
+  <dial xmlns='urn:xmpp:rayo:1' 
+        to='xmpp:callee@shakespeare.lit'
+        from='xmpp:caller@shakespeare.lit'>
+  </dial>
+</iq>	
+    ]]></example> 
+	<p>All call signalling between caller and callee will be handled by Rayo protocol and all media session communication between the caller and the SFU as well as the callee and the SFU will be in-band XMPP using this protocol.</p>
+  </section2>   	
+</section1> 
+
+<section1 topic='Deployment Notes' anchor='deployment'> 
+
+<p>The &lt;json&gt; element MUST NOT be empty, as the empty string is not valid JSON. The data MUST be encoded as UTF-8 (though officially unspecified, this is the de facto encoding for JSON today.</p>
+
+<p>Implementations SHOULD validate JSON they receive and intend to use, and be prepared to handle invalid data appropriately (such as by responding to the sender with the applicable XMPP error reply for the stanza type.</p>
+
+<p>As the &lt;json&gt; element alone provides no context to the recipient about the kind of data it contains, only the format, it SHOULD always be encapsulated within the &lt;c2s&gt; or &lt;s2c&gt; element that provides a context and SHOULD NOT be added as a direct child of a stanza.</p>
+
+</section1> 
+
+<section1 topic='Security Considerations' anchor='security'> 
+  <p>JSON is a very common format for data interchange today, and has many popular implementations available in browsers and standalone libraries that can be assumed relatively well-tested. However an implementation receiving JSON data from an untrusted entity should take precautions and MUST NOT attempt to use invalid JSON data it receives in any way, nor must it accept data in any encoding other than UTF-8 to avoid potential encoding mismatch attacks</p>
+</section1> 
+<section1 topic='IANA Considerations' anchor='iana'> 
+  <p>This document requires no interaction with IANA.</p> 
+</section1> 
+<section1 topic='XMPP Registrar Considerations' anchor='registrar'> 
+  <p>The Registrar shall include the following information in its registries.</p> 
+  <section2 topic='Protocol Namespaces' anchor='registrar-protocol'> 
+    <p>The XMPP Registrar includes "urn:xmpp:sfu:galene:0" in its registry of protocol namespaces.</p> 
+  </section2> 
+</section1> 
+</xep> 

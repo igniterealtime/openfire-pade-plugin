@@ -6,7 +6,7 @@
   <abstract>This specification defines a protocol extension for communicating in-band with a media selective forwarding unit (SFU) over XMPP
   </abstract>
 
-  <number>0000</number> 
+  <number>XXXX</number> 
   <status>ProtoXEP</status> 
   <type>Standards Track</type> 
   <sig>Standards</sig> 
@@ -36,7 +36,6 @@
   <p>An SFU (selective forwarding unit) is capable of receiving multiple media streams and then decides which of these media streams should be sent to which participants.	In the SFU architecture, every participant sends their media stream to a centralized selective forwarding unit (SFU) and receives streams from all other participants via the same SFU.</p>
   <p>The purpose of this protocol extension is to provide a generic specification of how an XMPP client can communicate in-band with an SFU via simple IQ stanzas</p>
 </section1> 
-
 <section1 topic='Requirements' anchor='reqs'> 
   <p>This document addresses the following requirements:</p> 
   <ul> 
@@ -48,7 +47,6 @@
     <li><p>Enable chaining SFUs together using XMPP Federation in trusted environments in order to create clusters of SFUs able to support large-scale real-time multi-party communication. An example would be the use of <link url="https://xmpp.org/extensions/xep-0289.html">XEP-0289: Federated MUC for Constrained Environments</link><note>XEP-0289: Federated MUC for Constrained Environments &lt;<link url="https://xmpp.org/extensions/xep-0289.html">https://xmpp.org/extensions/xep-0289.html</link>&gt;.</note> to align MUC rooms with SFU conferences/groups/rooms and allowing these rooms to federate with remote counterparts. This enables users to connect to the federated SFU nearest to them on the network for a given FMUC room.</p></li>
   </ul> 
 </section1> 
-
 <section1 topic='WXIP and WXAP Protocols' anchor='wxip-wxap-protocol'> 
 <p>While WebRTC specifies the usage of SDPs [RFC8866] and an Offer/Answer model [RFC3264] for creating connections, WebRTC does not define the precise signaling protocols over which SDPs should be exchanged [RFC8825]. In order to establish a WebRTC session between two WebRTC entities, a signaling protocol is usually used to exchange SDPs</p>
 <p>With HTTP/S applications, WHIP and WHAP have been proposed as simple protocols to ingress and egress media streams to and from an SFU respectfully. WXIP and WXAP are the XMPP equivalent. Like WHIP and WHAP, WXIP and WXIP are needed for both ingest/egress in traditional media platforms and ingest in WebRTC end-to-end platforms with the lowest possible latency for XMPP clients offering media real-time communication solutions.</p>
@@ -97,8 +95,6 @@
     ]]></example> 	
   </section2>	
 </section1> 
-
-
 <section1 topic='SFU Direct Access Protocol' anchor='direct-access-protocol'> 
 <p>As this is a generic specification, the protocol will depend on the SFU implmentation. Most SFUs use a symmetric, asynchronous protocol. In client-server usage, some messages are only sent in the client to server or in the server to client direction.</p>   
 <p>The namespace should be in the form "urn:xmpp:sfu:xxxxx:0" where xxxxx is the name of the SFU implementation. This will enable the XMPP server to validate the JSON if needed and the client to discover the expected SFU implementation.</p>	
@@ -164,7 +160,6 @@
 	<p>All call signalling between caller and callee will be handled by Rayo protocol and all media session communication between the caller and the SFU as well as the callee and the SFU will be in-band XMPP using this protocol.</p>
   </section2>   	
 </section1> 
-
 <section1 topic='Deployment Notes' anchor='deployment'> 
 
 <p>The &lt;json&gt; element MUST NOT be empty, as the empty string is not valid JSON. The data MUST be encoded as UTF-8 (though officially unspecified, this is the de facto encoding for JSON today.</p>
@@ -174,7 +169,6 @@
 <p>As the &lt;json&gt; element alone provides no context to the recipient about the kind of data it contains, only the format, it SHOULD always be encapsulated within the &lt;c2s&gt; or &lt;s2c&gt; element that provides a context and SHOULD NOT be added as a direct child of a stanza.</p>
 
 </section1> 
-
 <section1 topic='Security Considerations' anchor='security'> 
   <p>JSON is a very common format for data interchange today, and has many popular implementations available in browsers and standalone libraries that can be assumed relatively well-tested. However an implementation receiving JSON data from an untrusted entity should take precautions and MUST NOT attempt to use invalid JSON data it receives in any way, nor must it accept data in any encoding other than UTF-8 to avoid potential encoding mismatch attacks</p>
 </section1> 

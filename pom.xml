@@ -431,7 +431,6 @@
             <artifactId>web-push</artifactId>
             <version>5.1.1</version>
         </dependency>
-
     </dependencies>
 	
     <repositories>
@@ -468,7 +467,8 @@
             <id>localLibs</id>
             <name>localLibs</name>
             <url>file://${project.basedir}/lib</url>
-        </repository>  		
+        </repository>  	
+		
     </repositories>
 
     <pluginRepositories>

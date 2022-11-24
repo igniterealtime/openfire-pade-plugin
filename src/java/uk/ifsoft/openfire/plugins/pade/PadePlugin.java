@@ -17,7 +17,6 @@ import org.eclipse.jetty.apache.jsp.JettyJasperInitializer;
 import org.eclipse.jetty.plus.annotation.ContainerInitializer;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.servlet.*;
-import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 import org.eclipse.jetty.util.security.*;
@@ -64,6 +63,8 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import org.ifsoft.webauthn.UserRegistrationStorage;
 import org.ifsoft.sso.Password;
 
+import java.util.concurrent.TimeUnit;
+
 public class PadePlugin implements Plugin, MUCEventListener
 {
     private static final Logger Log = LoggerFactory.getLogger( PadePlugin.class );
@@ -81,7 +82,7 @@ public class PadePlugin implements Plugin, MUCEventListener
 	private UserRegistrationStorage userRegistrationStorage;
     private String server;
 	private HashMap<String, Object> requests = new HashMap<>();
-	
+    private MastodonIQHandler mastodonIQHandler;	
 
     /**
      * Initializes the plugin.
@@ -188,7 +189,14 @@ public class PadePlugin implements Plugin, MUCEventListener
 		origins.add("https://" + server);
 		RelyingPartyIdentity rpIdentity = RelyingPartyIdentity.builder().id(hostname).name("Pade").build();
 		userRegistrationStorage = new UserRegistrationStorage();
-		relyingParty = RelyingParty.builder().identity(rpIdentity).credentialRepository(userRegistrationStorage).origins(origins).build();		
+		relyingParty = RelyingParty.builder().identity(rpIdentity).credentialRepository(userRegistrationStorage).origins(origins).build();	
+
+        if (JiveGlobals.getBooleanProperty("pade.mastodon.enabled", true))  {
+			mastodonIQHandler = new MastodonIQHandler();
+			mastodonIQHandler.startHandler();		
+			XMPPServer.getInstance().getIQRouter().addHandler(mastodonIQHandler);	
+			XMPPServer.getInstance().getIQDiscoInfoHandler().addServerFeature("urn:xmpp:sfu:mastodon:0");				
+		}			
     }
 	
 	public String startRegisterWebAuthn(String username, String name)
@@ -308,6 +316,10 @@ public class PadePlugin implements Plugin, MUCEventListener
         OfflineMessageStrategy.removeListener( interceptor );
         InterceptorManager.getInstance().removeInterceptor( interceptor );
 		self = null;
+		
+		XMPPServer.getInstance().getIQRouter().removeHandler(mastodonIQHandler);
+		mastodonIQHandler.stopHandler();
+		mastodonIQHandler = null;			
     }
 
     public OfMeetPlugin getContainer()

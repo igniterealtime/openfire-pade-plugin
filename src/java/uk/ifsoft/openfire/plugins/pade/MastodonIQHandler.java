@@ -23,6 +23,7 @@ import java.net.*;
 import javax.net.ssl.*;
 import java.util.*;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 import net.sf.json.*;
 
@@ -87,7 +88,7 @@ public class MastodonIQHandler extends IQHandler implements SessionEventListener
 				}					
 
 				int status = con.getResponseCode();
-				in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+				in = new BufferedReader(new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8));
 				String inputLine;
 				StringBuffer content = new StringBuffer();
 				

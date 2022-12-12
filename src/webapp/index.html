@@ -4,7 +4,7 @@
     <meta http-equiv="content-type" content="text/html;charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link id="favicon" rel="shortcut icon" href="icon.png" type="image/png" />
-    <link rel="manifest" href="manifest_ofmeet.json" />
+    <link rel="manifest" id="manifest-placeholder">	
     <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
     <link rel="stylesheet" href="css/all.css">
     <link rel="stylesheet" href="tingle.css">
@@ -12,7 +12,13 @@
     <link rel="stylesheet" href="cursor.css">
     <link rel="stylesheet" href="calendar.css" />
     <link rel="stylesheet" href="custom_ofmeet.css">	
+
     <script>
+        window.EXCALIDRAW_ASSET_PATH = 'libs/';
+        // Dynamically generate the manifest location URL. It must be served from the document origin, and we may have
+        // the base pointing to the CDN. This way we can generate a full URL which will bypass the base.
+        document.querySelector('#manifest-placeholder').setAttribute('href', window.location.origin + './manifest.json');
+
         document.addEventListener('DOMContentLoaded', () => {
             if (!JitsiMeetJS.app) {
                 return;
@@ -21,6 +27,7 @@
             JitsiMeetJS.app.renderEntryPoint({
                 Component: JitsiMeetJS.app.entryPoints.APP
             })
+
             const inIframe = () => {
                 try {
                     return window.self !== window.top;
@@ -34,22 +41,22 @@
 
             if (shouldRegisterWorker) {
                 navigator.serviceWorker
-                    .register(window.location.origin + '/pwa-worker.js')
+                    .register(window.location.origin + './pwa-worker.js')
                     .then(reg => {
                         console.log('Service worker registered.', reg);
                     })
                     .catch(err => {
                         console.log(err);
                     });
-            }			
-        })
+            }
+        });
     </script>
     <script>
         // IE11 and earlier can be identified via their user agent and be
         // redirected to a page that is known to have no newer js syntax.
         if (window.navigator.userAgent.match(/(MSIE|Trident)/)) {
             var roomName = encodeURIComponent(window.location.pathname);
-            window.location.href = "static/recommendedBrowsers.html" + "?room=" + roomName;
+            window.location.pathname = 'static/recommendedBrowsers.html';
         }
 
         window.indexLoadedTime = window.performance.now();
@@ -59,11 +66,12 @@
         // The intention is to prevent from displaying broken page.
         var criticalFiles = [
             "config.js",
+            "utils.js",
             "do_external_connect.js",
             "interface_config.js",
             "lib-jitsi-meet.min.js",
             "app.bundle.min.js",
-            "all.css"
+            "all.css?v=6854.3622"
         ];
         var loadErrHandler = function(e) {
             var target = e.target;
@@ -171,8 +179,7 @@
                     'error', loadErrHandler, true /* capture phase */);
             }
         };
-        window.addEventListener(
-            'error', loadErrHandler, true /* capture phase type of listener */);
+        window.addEventListener('error', loadErrHandler, true /* capture phase type of listener */);
     </script>
     <template id="welcome-page-additional-content-template"></template>
     <template id="settings-toolbar-additional-content-template"></template>

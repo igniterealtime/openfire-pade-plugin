@@ -51,7 +51,7 @@
                         <goal>wget</goal>
                     </goals>
                     <configuration>
-                        <url>https://igniterealtime.github.io/pade/docs-2.1.1.9.zip</url>
+                        <url>https://igniterealtime.github.io/pade/docs-2.1.1.10.zip</url>
                         <unpack>true</unpack>
                         <outputDirectory>${project.basedir}/classes/docs</outputDirectory>
                     </configuration>
@@ -232,7 +232,7 @@
         <dependency>
             <groupId>org.codehaus.jettison</groupId>
             <artifactId>jettison</artifactId>
-            <version>1.5.1</version>
+            <version>1.5.2</version>
         </dependency>
 
         <!-- web push dependencies -->

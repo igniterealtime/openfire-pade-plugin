@@ -336,7 +336,7 @@ public class ConfigServlet extends HttpServlet
             if (websockets)
             {
                 config.put( "websocket", new URI( "https".equals(request.getScheme()) ? "wss" : "ws", null, request.getServerName(), request.getServerPort(), "/ws/", null, null) );
-                config.put( "websocketKeepAliveUrl", new URI( request.getScheme(), null, request.getServerName(), request.getServerPort(), "/pade/keepalive", null, null) );
+                config.put( "websocketKeepAliveUrl", new URI( request.getScheme(), null, request.getServerName(), request.getServerPort(), "/pade/keepalive/index.html", null, null) );
 				
             }
             //config.put( "openBridgeChannel", wsBridgeChannel ? "websocket" : "datachannel" );

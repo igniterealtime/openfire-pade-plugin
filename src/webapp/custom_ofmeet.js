@@ -647,7 +647,7 @@ var ofmeet = (function (ofm) {
         console.debug("add drag&drop handlers to local and participants windows");
 		
 		const localVideoTileViewContainer = document.getElementById("filmstripLocalVideoThumbnail");
-        if (localVideoTileViewContainer) addParticipantDragDropHandlers(filmStrip);
+        if (localVideoTileViewContainer) addParticipantDragDropHandlers(localVideoTileViewContainer);
 		
         getOccupants();
 

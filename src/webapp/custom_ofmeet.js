@@ -360,10 +360,16 @@ var ofmeet = (function (ofm) {
             setTimeout(setup);
             return;
         }
-		
-        console.debug("custom_ofmeet.js setup");
-		
+				
 		const room = getConference();
+		
+		if (!room) {
+            setTimeout(setup);
+            return;			
+		}
+		
+        console.debug("custom_ofmeet.js setup", room);		
+		
 		listenWebPushEvents();
 
 		if (hashParams.subject) {
@@ -598,7 +604,7 @@ var ofmeet = (function (ofm) {
         });
 
         setTimeout(postLoadSetup);
-        setTimeout(postJoinSetup);
+        setTimeout(postJoinConfSetup);
 
         console.debug("custom_ofmeet.js setup", APP.connection, captions);
 
@@ -624,17 +630,25 @@ var ofmeet = (function (ofm) {
         }
     }
 
-    function postJoinSetup() {
+    function postJoinConfSetup() {
         if (!APP.conference || !APP.conference.isJoined() || !document.getElementById('new-toolbox')) {
-            setTimeout(postJoinSetup, 100);
+            setTimeout(postJoinConfSetup, 100);
             return;
         }
+		
+		if (!getConference()) {
+            setTimeout(postJoinConfSetup, 100);
+            return;			
+		}
 
-        console.debug("postJoinSetup");
+        console.debug("postJoinConfSetup");
 
         // setup drag& drop
         console.debug("add drag&drop handlers to local and participants windows");
-        addParticipantDragDropHandlers(document.getElementById("filmstripLocalVideoThumbnail"));
+		
+		const localVideoTileViewContainer = document.getElementById("filmstripLocalVideoThumbnail");
+        if (localVideoTileViewContainer) addParticipantDragDropHandlers(filmStrip);
+		
         getOccupants();
 
         // custom events for show/hide toolbox
@@ -1099,15 +1113,17 @@ var ofmeet = (function (ofm) {
 
         // Observe tile view status.
         // TODO: When the tile view change event is implemented in Jitsi Meet, it will be replaced with it.
-        const localVideoTileViewContainer = document.getElementById('filmstripLocalVideoThumbnail')
+        const localVideoTileViewContainer = document.getElementById('filmstripLocalVideoThumbnail');
+		
+		if (localVideoTileViewContainer) {
+			const observer = new MutationObserver(mutations => {
+				APP.UI.emitEvent('UI.tile_view_changed', APP.store.getState()['features/video-layout'].tileViewEnabled);
+			})
 
-        const observer = new MutationObserver(mutations => {
-            APP.UI.emitEvent('UI.tile_view_changed', APP.store.getState()['features/video-layout'].tileViewEnabled);
-        })
-
-        observer.observe(localVideoTileViewContainer, {
-            childList: true
-        })
+			observer.observe(localVideoTileViewContainer, {
+				childList: true
+			})
+		}
     }
 
     function createWhiteboardButton() {
@@ -1128,6 +1144,8 @@ var ofmeet = (function (ofm) {
     }
 
     function createConfettiButton() {
+        console.debug("createConfettiButton");
+		
         APP.conference.commands.addCommandListener("CONFETTI", e => {
             window.confetti(JSON.parse(e.value));
         });

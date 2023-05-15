@@ -146,7 +146,7 @@ public class JitsiJicofoWrapper implements ProcessListener
             "      client {",
 			"		 enabled = true",	
 			"		 username = " + jicofoSubdomain,				
-			"		 password = " + config.getFocusPassword(),				
+			"		 password = \"" + config.getFocusPassword() + "\"",				
 			"		 port = 5222",
 			"		 hostname = " +  XMPPServer.getInstance().getServerInfo().getHostname(),
 			"		 domain = " +  XMPPServer.getInstance().getServerInfo().getXMPPDomain(),			

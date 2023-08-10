@@ -49,7 +49,7 @@
                         <goal>wget</goal>
                     </goals>
                     <configuration>
-                        <url>https://igniterealtime.github.io/pade/docs-2.1.3.7.zip</url>
+                        <url>https://igniterealtime.github.io/pade/docs-2.1.4.1.zip</url>
                         <unpack>true</unpack>
                         <outputDirectory>${project.basedir}/classes/docs</outputDirectory>
                     </configuration>

@@ -544,7 +544,7 @@ public class PadePlugin implements Plugin, MUCEventListener
                     Message notification = new Message();
                     notification.setFrom(roomJID);
                     notification.setTo(subscriberJID);
-                    Element rai = notification.addChildElement("rai", "xmpp:prosody.im/protocol/rai");
+                    Element rai = notification.addChildElement("rai", "urn:xmpp:rai:0");
                     rai.addElement("activity").setText(roomJID.toString());
                     XMPPServer.getInstance().getRoutingTable().routePacket(subscriberJID, notification, true);
                 }

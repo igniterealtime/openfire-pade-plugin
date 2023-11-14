@@ -190,12 +190,12 @@ public class Password extends HttpServlet
         response.setHeader("Pragma", "no-cache");
         response.setHeader("Content-Type", "application/javascript");
         response.setHeader("Connection", "close");
-
-        HttpBindManager boshManager = HttpBindManager.getInstance();
-
-        response.setHeader("Access-Control-Allow-Origin", boshManager.getCORSAllowOrigin());
-        response.setHeader("Access-Control-Allow-Headers", HttpBindManager.HTTP_BIND_CORS_ALLOW_HEADERS_DEFAULT + ", Authorization");
+		
+		HttpBindManager boshManager = HttpBindManager.getInstance();
+		response.setHeader("Access-Control-Allow-Methods", String.join(",", HttpBindManager.HTTP_BIND_CORS_ALLOW_METHODS.getValue()));
+		response.setHeader("Access-Control-Allow-Headers", String.join(",", HttpBindManager.HTTP_BIND_CORS_ALLOW_HEADERS.getValue() + ", Authorization"));
+		response.setHeader("Access-Control-Max-Age", String.valueOf(HttpBindManager.HTTP_BIND_CORS_MAX_AGE.getValue().toSeconds()));
+		response.setHeader("Access-Control-Allow-Origin", String.valueOf(HttpBindManager.HTTP_BIND_ALLOWED_ORIGINS.getDefaultValue()));
         response.setHeader("Access-Control-Allow-Credentials", "true");
-        response.setHeader("Access-Control-Allow-Methods", HttpBindManager.HTTP_BIND_CORS_ALLOW_METHODS_DEFAULT);
     }
 }

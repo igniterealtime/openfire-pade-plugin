@@ -25,6 +25,7 @@ import org.jivesoftware.openfire.SharedGroupException;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.group.Group;
 import org.jivesoftware.openfire.group.GroupAlreadyExistsException;
+import org.jivesoftware.openfire.group.GroupNameInvalidException;
 import org.jivesoftware.openfire.group.GroupManager;
 import org.jivesoftware.openfire.group.GroupNotFoundException;
 import org.jivesoftware.openfire.lockout.LockOutManager;
@@ -103,14 +104,19 @@ public class UserServiceLegacyController {
 
 				try {
 					group = GroupManager.getInstance().getGroup(groupName);
+					groups.add(group);					
 				} catch (GroupNotFoundException e) {
 					// Create this group ;
-					group = GroupManager.getInstance().createGroup(groupName);
-					group.getProperties().put("sharedRoster.showInRoster", "onlyGroup");
-					group.getProperties().put("sharedRoster.displayName", groupName);
-					group.getProperties().put("sharedRoster.groupList", "");
+					try {
+						group = GroupManager.getInstance().createGroup(groupName);
+						group.getProperties().put("sharedRoster.showInRoster", "onlyGroup");
+						group.getProperties().put("sharedRoster.displayName", groupName);
+						group.getProperties().put("sharedRoster.groupList", "");
+						groups.add(group);							
+					} catch (GroupNameInvalidException e1) {
+						//Log.warn("Unable to get or create group " + groupName, e1);
+					}
 				}
-				groups.add(group);
 			}
 			for (Group group : groups) {
 				group.getMembers().add(server.createJID(username, null));
@@ -185,15 +191,20 @@ public class UserServiceLegacyController {
 
 				try {
 					group = GroupManager.getInstance().getGroup(groupName);
+					newGroups.add(group);					
 				} catch (GroupNotFoundException e) {
 					// Create this group ;
-					group = GroupManager.getInstance().createGroup(groupName);
-					group.getProperties().put("sharedRoster.showInRoster", "onlyGroup");
-					group.getProperties().put("sharedRoster.displayName", groupName);
-					group.getProperties().put("sharedRoster.groupList", "");
+					
+					try {
+						group = GroupManager.getInstance().createGroup(groupName);
+						group.getProperties().put("sharedRoster.showInRoster", "onlyGroup");
+						group.getProperties().put("sharedRoster.displayName", groupName);
+						group.getProperties().put("sharedRoster.groupList", "");
+						newGroups.add(group);					
+					} catch (GroupNameInvalidException e1) {
+						//Log.warn("Unable to get or create group " + groupName, e1);					
+					}
 				}
-
-				newGroups.add(group);
 			}
 
 			Collection<Group> existingGroups = GroupManager.getInstance().getGroups(user);

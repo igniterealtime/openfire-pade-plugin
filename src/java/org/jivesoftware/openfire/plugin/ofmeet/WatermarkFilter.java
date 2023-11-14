@@ -48,18 +48,26 @@ public class WatermarkFilter implements Filter
         {
             final URLConnection urlConnection = url.openConnection();
             response.setContentLength( urlConnection.getContentLength() );
-            response.setContentType( urlConnection.getContentType() );
+			String contentType = urlConnection.getContentType();
+			
+			if (contentType != null && contentType.toLowerCase().startsWith("image")) {			
+				response.setContentType( contentType );
 
-            try ( final InputStream input = urlConnection.getInputStream();
-                  final OutputStream output = response.getOutputStream() )
-            {
-                final byte[] buffer = new byte[ 1024 ];
-                int bytesRead;
-                while ( ( bytesRead = input.read( buffer ) ) != -1 )
-                {
-                    output.write( buffer, 0, bytesRead );
-                }
-            }
+				try ( final InputStream input = urlConnection.getInputStream();
+					  final OutputStream output = response.getOutputStream() )
+				{
+					final byte[] buffer = new byte[ 1024 ];
+					int bytesRead;
+					
+					while ( ( bytesRead = input.read( buffer ) ) != -1 )
+					{
+						output.write( buffer, 0, bytesRead );
+					}
+				}
+			} else {
+				Log.warn( "Unable to serve the URL '{}' as proxied content.", url);
+				response.sendError( HttpServletResponse.SC_INTERNAL_SERVER_ERROR );				
+			}
         }
         catch ( IOException e )
         {

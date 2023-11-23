@@ -171,7 +171,7 @@ public final class MtaManager {
             httpsConfig.setSendDateHeader(false);
             httpsConfig.addCustomizer(new SecureRequestCustomizer());
 
-            final SslContextFactory.Server sslContextFactory = new SslContextFactory.Server();
+            final SslContextFactory sslContextFactory = new SslContextFactory();
             sslContextFactory.addExcludeProtocols("SSLv3");
             sslContextFactory.setEndpointIdentificationAlgorithm(null);
             sslContextFactory.setTrustStorePath(c2sTrustStoreLocation);

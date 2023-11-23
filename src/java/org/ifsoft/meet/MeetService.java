@@ -578,7 +578,7 @@ public class MeetService {
                 message.setRecipient(Message.RecipientType.TO, to);
                 message.setFrom(from);
                 message.setReplyTo(new javax.mail.Address[]{from});
-                message.setSubject(StringUtils.replace(subject, "\n", "", new int[2]), encoding);
+                message.setSubject(StringUtils.replace(subject, "\n", ""), encoding);
 
                 if (textBody != null && htmlBody != null)
                 {

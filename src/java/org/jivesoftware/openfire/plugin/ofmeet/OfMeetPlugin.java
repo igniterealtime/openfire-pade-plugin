@@ -28,8 +28,7 @@ import org.eclipse.jetty.servlets.*;
 import org.eclipse.jetty.servlet.*;
 import org.eclipse.jetty.websocket.servlet.*;
 import org.eclipse.jetty.websocket.server.*;
-import org.eclipse.jetty.websocket.server.config.*;
-import org.eclipse.jetty.http.pathmap.ServletPathSpec;
+import org.eclipse.jetty.websocket.server.pathmap.ServletPathSpec;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -399,15 +398,18 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     protected void loadPublicWebApp() throws Exception
     {
         Log.info( "Initializing public web application for /colibri-ws web socket" );
-		
-		JettyWebSocketServlet websocketServlet = new JettyWebSocketServlet() {
-			@Override protected void configure(JettyWebSocketServletFactory factory) {
-				factory.addMapping("/*", (req, res) -> new JvbSocketCreator());
-			}
-		};
-		jvbWsContext = new ServletContextHandler();
-		jvbWsContext.addServlet(new ServletHolder(websocketServlet), "/colibri-ws");
-		JettyWebSocketServletContainerInitializer.configure(jvbWsContext, (JettyWebSocketServletContainerInitializer.Configurator) null);
+
+        jvbWsContext = new ServletContextHandler(null, "/colibri-ws", ServletContextHandler.SESSIONS);
+
+        try {
+            WebSocketUpgradeFilter wsfilter = WebSocketUpgradeFilter.configureContext(jvbWsContext);
+            wsfilter.getFactory().getPolicy().setIdleTimeout(60 * 60 * 1000);
+            wsfilter.getFactory().getPolicy().setMaxTextMessageSize(64000000);
+            wsfilter.addMapping(new ServletPathSpec("/*"), new JvbSocketCreator());					
+
+        } catch (Exception e) {
+            Log.error("loadPublicWebApp", e);
+        }
 
         HttpBindManager.getInstance().addJettyHandler(jvbWsContext);	
 
@@ -425,9 +427,9 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     }
 
 	
-    public static class JvbSocketCreator implements JettyWebSocketCreator
+    public static class JvbSocketCreator implements WebSocketCreator
     {
-        @Override public Object createWebSocket(JettyServerUpgradeRequest req, JettyServerUpgradeResponse resp)
+        @Override public Object createWebSocket(ServletUpgradeRequest req, ServletUpgradeResponse resp)
         {
 			String ipaddr = JiveGlobals.getProperty( "ofmeet.videobridge.rest.host", OfMeetPlugin.self.getIpAddress());	
             String jvbPort = JiveGlobals.getProperty( "ofmeet.websockets.plainport", "8180");
@@ -820,14 +822,19 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 	
 	private void startFFMPEG(String path)
 	{	
-		JettyWebSocketServlet websocketServlet = new JettyWebSocketServlet() {
-			@Override protected void configure(JettyWebSocketServletFactory factory) {
-				factory.addMapping("/*", (req, res) -> new StreamSocketCreator());
-			}
-		};
-		streamWsContext = new ServletContextHandler();
-		streamWsContext.addServlet(new ServletHolder(websocketServlet), "/livestream-ws");
-		JettyWebSocketServletContainerInitializer.configure(streamWsContext, (JettyWebSocketServletContainerInitializer.Configurator) null);				
+        streamWsContext = new ServletContextHandler(null, "/livestream-ws", ServletContextHandler.SESSIONS);		
+
+        try {			
+            WebSocketUpgradeFilter wsfilter2 = WebSocketUpgradeFilter.configureContext(streamWsContext);
+            wsfilter2.getFactory().getPolicy().setIdleTimeout(60 * 60 * 1000);
+            wsfilter2.getFactory().getPolicy().setMaxTextMessageSize(64000000);
+            wsfilter2.getFactory().getPolicy().setMaxBinaryMessageSize(64000000);			
+			
+            wsfilter2.addMapping(new ServletPathSpec("/*"), new StreamSocketCreator());						
+
+        } catch (Exception e) {
+            Log.error("loadPublicWebApp", e);
+        }			
 
         try {
 			String ffmpegName = null;
@@ -860,9 +867,9 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         bos.close();
     }	
 	
-    public static class StreamSocketCreator implements JettyWebSocketCreator
+    public static class StreamSocketCreator implements WebSocketCreator
     {
-        @Override public Object createWebSocket(JettyServerUpgradeRequest req, JettyServerUpgradeResponse resp)
+        @Override public Object createWebSocket(ServletUpgradeRequest req, ServletUpgradeResponse resp)
         {
 			String streamKey = null;
 			

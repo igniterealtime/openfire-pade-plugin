@@ -94,7 +94,7 @@ import org.ifsoft.oju.openfire.MUCRoomProperties;
 					
 			final String ffmpeg = path + File.separator + ffmpegName;	
 			final String url = liveStreamUrl + "/" + metadata.getString("key");
-			final String cmdLine = ffmpeg + " -i - -vcodec copy -f flv " + url;
+			final String cmdLine = ffmpeg + " -i - -vcodec libx264 -f flv " + url;
 			ffmpegThread = Spawn.startProcess(cmdLine, new File(path), this);
             
 			securityAuditManager.logEvent("pade", "meeting - " + metadata.getString("room") + " live stream by " + metadata.getString("user"), url);

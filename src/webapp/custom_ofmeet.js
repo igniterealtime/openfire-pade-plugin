@@ -2614,7 +2614,7 @@ var ofmeet = (function (ofm) {
                     mimeType= 'video/webm;codecs=h264'
                     if (!MediaRecorder.isTypeSupported(mimeType)) {
                         console.log(`${mimeType} is not Supported`);
-                        mimeType = "video/webm;codecs=opus,vp9"
+                        mimeType = "video/webm;codecs=vp9"
                         if (!MediaRecorder.isTypeSupported(mimeType)) {
                             console.log(`${mimeType} is not Supported`);
                             mimeType = "video/webm" 

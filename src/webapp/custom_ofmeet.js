@@ -2608,6 +2608,7 @@ var ofmeet = (function (ofm) {
                 console.debug('ofmeet.js startDesktopRecorder - live streaming', tracks, ws_url);
 
                 let websocket = connectLiveStream("wss://" + ws_url[2] + "/livestream-ws/", config.ofmeetStreamKey);
+
                 //fix firefox's unsupported codec error
                 let mimeType = ''
                 //Safari not support isTypeSupported
@@ -2625,8 +2626,9 @@ var ofmeet = (function (ofm) {
                             }
                         }
                     }
-                }                
-                videoRecorder[id] = new MediaRecorder(recorderStreams[id], { mimeType: 'video/webm;codecs=h264', bitsPerSecond: 256 * 8 * 1024 });
+                }
+                                         
+                videoRecorder[id] = new MediaRecorder(recorderStreams[id], { mimeType: mimeType, bitsPerSecond: 256 * 8 * 1024 });
 
                 videoRecorder[id].ondataavailable = function (e) {
                     websocket.send(e.data);

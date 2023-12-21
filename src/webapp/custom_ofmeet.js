@@ -2608,6 +2608,8 @@ var ofmeet = (function (ofm) {
                 console.debug('ofmeet.js startDesktopRecorder - live streaming', tracks, ws_url);
 
                 let websocket = connectLiveStream("wss://" + ws_url[2] + "/livestream-ws/", config.ofmeetStreamKey);
+
+                //fix firefox's unsupported codec error
                 let mimeType = ''
                 //Safari not support isTypeSupported
                 if (MediaRecorder.isTypeSupported){

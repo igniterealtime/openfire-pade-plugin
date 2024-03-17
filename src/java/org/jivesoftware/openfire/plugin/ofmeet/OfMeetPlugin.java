@@ -26,9 +26,14 @@ import org.eclipse.jetty.plus.annotation.ContainerInitializer;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.servlets.*;
 import org.eclipse.jetty.servlet.*;
+import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer;
 import org.eclipse.jetty.websocket.servlet.*;
 import org.eclipse.jetty.websocket.server.*;
-import org.eclipse.jetty.websocket.server.pathmap.ServletPathSpec;
+import org.eclipse.jetty.websocket.server.config.*;
+
+import org.eclipse.jetty.util.security.*;
+import org.eclipse.jetty.security.*;
+import org.eclipse.jetty.security.authentication.*;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -58,14 +63,21 @@ import org.jivesoftware.openfire.interceptor.InterceptorManager;
 import org.jivesoftware.openfire.session.ClientSession;
 import org.jivesoftware.openfire.session.Session;
 import org.jivesoftware.openfire.security.SecurityAuditManager;
+import org.jivesoftware.openfire.plugin.rest.OpenfireLoginService;
+
 import org.jivesoftware.util.JiveGlobals;
 import org.jivesoftware.util.StringUtils;
 import org.jivesoftware.util.PropertyEventDispatcher;
 import org.jivesoftware.util.PropertyEventListener;
 import org.jivesoftware.util.cache.Cache;
 import org.jivesoftware.util.cache.CacheFactory;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import org.jitsi.util.OSUtils;
+import waffle.servlet.NegotiateSecurityFilter;
+import waffle.servlet.WaffleInfoServlet;
 
 import org.xmpp.component.ComponentManager;
 import org.xmpp.component.ComponentManagerFactory;
@@ -80,6 +92,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Security;
+import javax.servlet.DispatcherType;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -99,7 +112,6 @@ import org.freeswitch.esl.client.transport.event.EslEvent;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.json.JSONObject;
 import org.json.JSONArray;
-import org.jitsi.util.OSUtils;
 import de.mxro.process.*;
 import javax.xml.bind.DatatypeConverter;
 import org.voicebridge.Application;
@@ -129,6 +141,10 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
     private OfMeetIQHandler ofmeetIQHandler;
     private WebAppContext publicWebApp;
+    private WebAppContext contextPublic;
+    private WebAppContext contextPrivate;
+    private WebAppContext contextWinSSO;
+    private WebAppContext contextWellKnown;	
     private ServletContextHandler jvbWsContext = null;
     private ServletContextHandler streamWsContext = null;	
     private BookmarkInterceptor bookmarkInterceptor;
@@ -396,40 +412,89 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     }
 
     protected void loadPublicWebApp() throws Exception
-    {
-        Log.info( "Initializing public web application for /colibri-ws web socket" );
+    {			
+        jvbWsContext = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        jvbWsContext.setContextPath("/colibri-ws");
 
-        jvbWsContext = new ServletContextHandler(null, "/colibri-ws", ServletContextHandler.SESSIONS);
+        JettyWebSocketServletContainerInitializer.configure(jvbWsContext, (servletContext, wsContainer) ->
+        {
+            wsContainer.setMaxTextMessageSize(65535);
+            wsContainer.addMapping("/*", new JvbSocketCreator());
+        });	
 
-        try {
-            WebSocketUpgradeFilter wsfilter = WebSocketUpgradeFilter.configureContext(jvbWsContext);
-            wsfilter.getFactory().getPolicy().setIdleTimeout(60 * 60 * 1000);
-            wsfilter.getFactory().getPolicy().setMaxTextMessageSize(64000000);
-            wsfilter.addMapping(new ServletPathSpec("/*"), new JvbSocketCreator());					
+		HttpBindManager.getInstance().addJettyHandler( jvbWsContext );	
+        Log.info( "Initialized public web socket for /colibri-ws web socket" );
+		
+		publicWebApp = new WebAppContext(pluginDirectory.getPath() + "/classes/jitsi-meet",  new OFMeetConfig().getWebappContextPath());
+		publicWebApp.setClassLoader(this.getClass().getClassLoader());
+		final List<ContainerInitializer> initializers4 = new ArrayList<>();
+		initializers4.add(new ContainerInitializer(new JettyJasperInitializer(), null));
+		publicWebApp.setAttribute("org.eclipse.jetty.containerInitializers", initializers4);
+		publicWebApp.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
+		HttpBindManager.getInstance().addJettyHandler( publicWebApp );	
+		
+		contextPublic = new WebAppContext(pluginDirectory.getPath() + "/classes/docs", "/pade");
+		contextPublic.setClassLoader(this.getClass().getClassLoader());
+		contextPublic.getMimeTypes().addMimeMapping("wasm", "application/wasm");
+		final List<ContainerInitializer> initializersCRM = new ArrayList<>();
+		initializersCRM.add(new ContainerInitializer(new JettyJasperInitializer(), null));
+		contextPublic.setAttribute("org.eclipse.jetty.containerInitializers", initializersCRM);
+		contextPublic.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
+		contextPublic.setWelcomeFiles(new String[]{"index.html"});
+		HttpBindManager.getInstance().addJettyHandler(contextPublic);		
+							
+		contextWellKnown = new WebAppContext(pluginDirectory.getPath() + "/classes/well-known", "/.well-known");
+		contextWellKnown.setClassLoader(this.getClass().getClassLoader());
+		final List<ContainerInitializer> initializersWellKnown = new ArrayList<>();
+		initializersWellKnown.add(new ContainerInitializer(new JettyJasperInitializer(), null));
+		contextWellKnown.setAttribute("org.eclipse.jetty.containerInitializers", initializersWellKnown);
+		contextWellKnown.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
+		contextWellKnown.setWelcomeFiles(new String[]{"index.jsp"});
+		HttpBindManager.getInstance().addJettyHandler(contextWellKnown);
+		
+		contextPrivate = new WebAppContext(pluginDirectory.getPath() + "/classes/private", "/dashboard");
+		contextPrivate.setClassLoader(this.getClass().getClassLoader());
+		contextPrivate.getMimeTypes().addMimeMapping("wasm", "application/wasm");
+		SecurityHandler securityHandler = basicAuth("ofmeet");
+		contextPrivate.setSecurityHandler(securityHandler);
+		final List<ContainerInitializer> initializersDashboard = new ArrayList<>();
+		initializersDashboard.add(new ContainerInitializer(new JettyJasperInitializer(), null));
+		contextPrivate.setAttribute("org.eclipse.jetty.containerInitializers", initializersDashboard);
+		contextPrivate.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
+		contextPrivate.setWelcomeFiles(new String[]{"index.jsp"});
+		HttpBindManager.getInstance().addJettyHandler(contextPrivate);
+		
+		contextWinSSO = new WebAppContext(pluginDirectory.getPath() + "/classes/win-sso", "/sso");
+		contextWinSSO.setClassLoader(this.getClass().getClassLoader());
+		final List<ContainerInitializer> initializers7 = new ArrayList<>();
+		initializers7.add(new ContainerInitializer(new JettyJasperInitializer(), null));
+		contextWinSSO.setAttribute("org.eclipse.jetty.containerInitializers", initializers7);
+		contextWinSSO.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
+		contextWinSSO.setWelcomeFiles(new String[]{"index.jsp"});
+		
+		if (OSUtils.IS_WINDOWS && contextWinSSO != null)
+		{
+			NegotiateSecurityFilter securityFilter = new NegotiateSecurityFilter();
+			FilterHolder filterHolder = new FilterHolder();
+			filterHolder.setFilter(securityFilter);
+			EnumSet<DispatcherType> enums = EnumSet.of(DispatcherType.REQUEST);
+			enums.add(DispatcherType.REQUEST);
 
-        } catch (Exception e) {
-            Log.error("loadPublicWebApp", e);
-        }
-
-        HttpBindManager.getInstance().addJettyHandler(jvbWsContext);	
-
-        publicWebApp = new WebAppContext(null, pluginDirectory.getPath() + "/classes/jitsi-meet",  new OFMeetConfig().getWebappContextPath());
-        publicWebApp.setClassLoader(this.getClass().getClassLoader());
-
-        final List<ContainerInitializer> initializers4 = new ArrayList<>();
-        initializers4.add(new ContainerInitializer(new JettyJasperInitializer(), null));
-        publicWebApp.setAttribute("org.eclipse.jetty.containerInitializers", initializers4);
-        publicWebApp.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
-
-        HttpBindManager.getInstance().addJettyHandler( publicWebApp );
-
-        Log.debug( "Initialized public web application", publicWebApp.toString() );
+			contextWinSSO.addFilter(filterHolder, "/*", enums);
+			contextWinSSO.addServlet(new ServletHolder(new WaffleInfoServlet()), "/waffle");
+			
+			contextWinSSO.addServlet(new ServletHolder(new org.ifsoft.sso.Password()), "/password");
+			HttpBindManager.getInstance().addJettyHandler(contextWinSSO);			
+		}	
+	
+		Log.debug( "Initialized public web application", publicWebApp.toString() );
+				
     }
 
 	
-    public static class JvbSocketCreator implements WebSocketCreator
+    public static class JvbSocketCreator implements JettyWebSocketCreator
     {
-        @Override public Object createWebSocket(ServletUpgradeRequest req, ServletUpgradeResponse resp)
+        @Override public Object createWebSocket(JettyServerUpgradeRequest req, JettyServerUpgradeResponse resp)
         {
 			String ipaddr = JiveGlobals.getProperty( "ofmeet.videobridge.rest.host", OfMeetPlugin.self.getIpAddress());	
             String jvbPort = JiveGlobals.getProperty( "ofmeet.websockets.plainport", "8180");
@@ -480,7 +545,14 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
                 {
                     HttpBindManager.getInstance().removeJettyHandler(streamWsContext);
                     streamWsContext.destroy();
-                }				
+                }	
+
+				HttpBindManager.getInstance().removeJettyHandler(contextPublic);
+				HttpBindManager.getInstance().removeJettyHandler(contextPrivate);
+
+				if (contextWellKnown != null) HttpBindManager.getInstance().removeJettyHandler(contextWellKnown);
+				if (contextWinSSO != null) HttpBindManager.getInstance().removeJettyHandler(contextWinSSO);
+				
             }
             finally
             {
@@ -736,6 +808,27 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         return contentBuilder.toString();
     }
 
+    private static final SecurityHandler basicAuth(String realm) {
+
+        OpenfireLoginService l = new OpenfireLoginService(realm);
+        Constraint constraint = new Constraint();
+        constraint.setName(Constraint.__BASIC_AUTH);
+        constraint.setRoles(new String[]{"ofmeet", "webapp-owner", "webapp-contributor", "warfile-admin"});
+        constraint.setAuthenticate(true);
+
+        ConstraintMapping cm = new ConstraintMapping();
+        cm.setConstraint(constraint);
+        cm.setPathSpec("/*");
+
+        ConstraintSecurityHandler csh = new ConstraintSecurityHandler();
+        csh.setAuthenticator(new BasicAuthenticator());
+        csh.setRealmName(realm);
+        csh.addConstraintMapping(cm);
+        csh.setLoginService(l);
+
+        return csh;
+    }
+	
     //-------------------------------------------------------
     //
     //      ffmpeg live streaming
@@ -822,19 +915,15 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 	
 	private void startFFMPEG(String path)
 	{	
-        streamWsContext = new ServletContextHandler(null, "/livestream-ws", ServletContextHandler.SESSIONS);		
+        streamWsContext = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        streamWsContext.setContextPath("/livestream-ws");
+		HttpBindManager.getInstance().addJettyHandler( streamWsContext );			
 
-        try {			
-            WebSocketUpgradeFilter wsfilter2 = WebSocketUpgradeFilter.configureContext(streamWsContext);
-            wsfilter2.getFactory().getPolicy().setIdleTimeout(60 * 60 * 1000);
-            wsfilter2.getFactory().getPolicy().setMaxTextMessageSize(64000000);
-            wsfilter2.getFactory().getPolicy().setMaxBinaryMessageSize(64000000);			
-			
-            wsfilter2.addMapping(new ServletPathSpec("/*"), new StreamSocketCreator());						
-
-        } catch (Exception e) {
-            Log.error("loadPublicWebApp", e);
-        }			
+        JettyWebSocketServletContainerInitializer.configure(streamWsContext, (servletContext, wsContainer) ->
+        {
+            wsContainer.setMaxTextMessageSize(65535);
+            wsContainer.addMapping("/*", new StreamSocketCreator());
+        });	
 
         try {
 			String ffmpegName = null;
@@ -867,9 +956,9 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         bos.close();
     }	
 	
-    public static class StreamSocketCreator implements WebSocketCreator
+    public static class StreamSocketCreator implements JettyWebSocketCreator
     {
-        @Override public Object createWebSocket(ServletUpgradeRequest req, ServletUpgradeResponse resp)
+        @Override public Object createWebSocket(JettyServerUpgradeRequest req, JettyServerUpgradeResponse resp)
         {
 			String streamKey = null;
 			

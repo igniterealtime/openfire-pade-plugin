@@ -15,11 +15,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
-import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
-import org.eclipse.jetty.websocket.servlet.WebSocketCreator;
 import org.eclipse.jetty.websocket.api.annotations.*;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.RemoteEndpoint;
@@ -94,7 +89,7 @@ import org.ifsoft.oju.openfire.MUCRoomProperties;
 					
 			final String ffmpeg = path + File.separator + ffmpegName;	
 			final String url = liveStreamUrl + "/" + metadata.getString("key");
-			final String cmdLine = ffmpeg + " -i - -vcodec libx264 -f flv " + url;
+			final String cmdLine = ffmpeg + " -i - -vcodec copy -f flv " + url;
 			ffmpegThread = Spawn.startProcess(cmdLine, new File(path), this);
             
 			securityAuditManager.logEvent("pade", "meeting - " + metadata.getString("room") + " live stream by " + metadata.getString("user"), url);

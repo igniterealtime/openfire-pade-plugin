@@ -9,7 +9,7 @@ import org.jivesoftware.openfire.container.PluginManager;
 import org.jivesoftware.openfire.net.SASLAuthentication;
 import org.jivesoftware.openfire.user.User;
 import org.jivesoftware.openfire.user.UserNotFoundException;
-
+import org.jivesoftware.openfire.plugin.rest.sasl.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,9 +30,6 @@ import org.jivesoftware.openfire.*;
 import org.jivesoftware.openfire.muc.*;
 import org.jivesoftware.openfire.session.*;
 import org.jivesoftware.openfire.group.*;
-import org.jivesoftware.openfire.plugin.rest.sasl.*;
-import org.jivesoftware.openfire.plugin.rest.service.JerseyWrapper;
-import org.jivesoftware.openfire.plugin.rest.OpenfireLoginService;
 import org.jivesoftware.util.*;
 
 import java.security.SecureRandom;
@@ -42,11 +39,7 @@ import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.nio.file.attribute.FileTime;
 import java.security.Security;
-import javax.servlet.DispatcherType;
 
-import org.jitsi.util.OSUtils;
-import waffle.servlet.NegotiateSecurityFilter;
-import waffle.servlet.WaffleInfoServlet;
 import org.xmpp.packet.*;
 import org.dom4j.Element;
 import org.igniterealtime.openfire.plugins.pushnotification.WebPushInterceptor;
@@ -70,12 +63,6 @@ public class PadePlugin implements Plugin, MUCEventListener
     private static final Logger Log = LoggerFactory.getLogger( PadePlugin.class );
     public static PadePlugin self;
     public static String webRoot;
-
-    private ServletContextHandler contextRest;
-    private WebAppContext contextPublic;
-    private WebAppContext contextPrivate;
-    private WebAppContext contextWinSSO;
-    private WebAppContext contextWellKnown;
     private WebPushInterceptor interceptor;
     private OfMeetPlugin ofMeetPlugin;
 	private RelyingParty relyingParty;
@@ -103,63 +90,6 @@ public class PadePlugin implements Plugin, MUCEventListener
         InterceptorManager.getInstance().addInterceptor( interceptor );
         OfflineMessageStrategy.addListener( interceptor );
 
-        contextRest = new ServletContextHandler(null, "/rest", ServletContextHandler.SESSIONS);
-        contextRest.setClassLoader(this.getClass().getClassLoader());
-        contextRest.addServlet(new ServletHolder(new JerseyWrapper()), "/api/*");
-        HttpBindManager.getInstance().addJettyHandler(contextRest);
-
-        contextWellKnown = new WebAppContext(null, pluginDirectory.getPath() + "/classes/well-known", "/.well-known");
-        contextWellKnown.setClassLoader(this.getClass().getClassLoader());
-        final List<ContainerInitializer> initializersWellKnown = new ArrayList<>();
-        initializersWellKnown.add(new ContainerInitializer(new JettyJasperInitializer(), null));
-        contextWellKnown.setAttribute("org.eclipse.jetty.containerInitializers", initializersWellKnown);
-        contextWellKnown.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
-        contextWellKnown.setWelcomeFiles(new String[]{"index.jsp"});
-        HttpBindManager.getInstance().addJettyHandler(contextWellKnown);
-
-        contextPrivate = new WebAppContext(null, pluginDirectory.getPath() + "/classes/private", "/dashboard");
-        contextPrivate.setClassLoader(this.getClass().getClassLoader());
-        contextPrivate.getMimeTypes().addMimeMapping("wasm", "application/wasm");
-        SecurityHandler securityHandler = basicAuth("ofmeet");
-        contextPrivate.setSecurityHandler(securityHandler);
-        final List<ContainerInitializer> initializersDashboard = new ArrayList<>();
-        initializersDashboard.add(new ContainerInitializer(new JettyJasperInitializer(), null));
-        contextPrivate.setAttribute("org.eclipse.jetty.containerInitializers", initializersDashboard);
-        contextPrivate.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
-        contextPrivate.setWelcomeFiles(new String[]{"index.jsp"});
-        HttpBindManager.getInstance().addJettyHandler(contextPrivate);
-
-        contextPublic = new WebAppContext(null, pluginDirectory.getPath() + "/classes/docs", "/pade");
-        contextPublic.setClassLoader(this.getClass().getClassLoader());
-        contextPublic.getMimeTypes().addMimeMapping("wasm", "application/wasm");
-        final List<ContainerInitializer> initializersCRM = new ArrayList<>();
-        initializersCRM.add(new ContainerInitializer(new JettyJasperInitializer(), null));
-        contextPublic.setAttribute("org.eclipse.jetty.containerInitializers", initializersCRM);
-        contextPublic.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
-        contextPublic.setWelcomeFiles(new String[]{"index.html"});
-        HttpBindManager.getInstance().addJettyHandler(contextPublic);
-
-        contextWinSSO = new WebAppContext(null, pluginDirectory.getPath() + "/classes/win-sso", "/sso");
-        contextWinSSO.setClassLoader(this.getClass().getClassLoader());
-        final List<ContainerInitializer> initializers7 = new ArrayList<>();
-        initializers7.add(new ContainerInitializer(new JettyJasperInitializer(), null));
-        contextWinSSO.setAttribute("org.eclipse.jetty.containerInitializers", initializers7);
-        contextWinSSO.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
-        contextWinSSO.setWelcomeFiles(new String[]{"index.jsp"});
-
-        if (OSUtils.IS_WINDOWS)
-        {
-            NegotiateSecurityFilter securityFilter = new NegotiateSecurityFilter();
-            FilterHolder filterHolder = new FilterHolder();
-            filterHolder.setFilter(securityFilter);
-            EnumSet<DispatcherType> enums = EnumSet.of(DispatcherType.REQUEST);
-            enums.add(DispatcherType.REQUEST);
-
-            contextWinSSO.addFilter(filterHolder, "/*", enums);
-            contextWinSSO.addServlet(new ServletHolder(new WaffleInfoServlet()), "/waffle");
-        }
-        contextWinSSO.addServlet(new ServletHolder(new org.ifsoft.sso.Password()), "/password");
-        HttpBindManager.getInstance().addJettyHandler(contextWinSSO);
 
         try
         {
@@ -196,7 +126,7 @@ public class PadePlugin implements Plugin, MUCEventListener
 			mastodonIQHandler.startHandler();		
 			XMPPServer.getInstance().getIQRouter().addHandler(mastodonIQHandler);	
 			XMPPServer.getInstance().getIQDiscoInfoHandler().addServerFeature("urn:xmpp:sfu:mastodon:0");				
-		}			
+		}	
     }
 	
 	public String startRegisterWebAuthn(String username, String name)
@@ -301,13 +231,6 @@ public class PadePlugin implements Plugin, MUCEventListener
             Security.removeProvider( OfChatSaslProvider.NAME );
         } catch (Exception e) {}
 
-        HttpBindManager.getInstance().removeJettyHandler(contextRest);
-        HttpBindManager.getInstance().removeJettyHandler(contextPublic);
-        HttpBindManager.getInstance().removeJettyHandler(contextPrivate);
-
-        if (contextWellKnown != null) HttpBindManager.getInstance().removeJettyHandler(contextWellKnown);
-        if (contextWinSSO != null) HttpBindManager.getInstance().removeJettyHandler(contextWinSSO);
-
         if ( JiveGlobals.getBooleanProperty( "pade.mucevent.dispatcher.enabled", true))
         {
             MUCEventDispatcher.removeListener(this);
@@ -325,27 +248,6 @@ public class PadePlugin implements Plugin, MUCEventListener
     public OfMeetPlugin getContainer()
     {
         return ofMeetPlugin;
-    }
-
-    private static final SecurityHandler basicAuth(String realm) {
-
-        OpenfireLoginService l = new OpenfireLoginService(realm);
-        Constraint constraint = new Constraint();
-        constraint.setName(Constraint.__BASIC_AUTH);
-        constraint.setRoles(new String[]{"ofmeet", "webapp-owner", "webapp-contributor", "warfile-admin"});
-        constraint.setAuthenticate(true);
-
-        ConstraintMapping cm = new ConstraintMapping();
-        cm.setConstraint(constraint);
-        cm.setPathSpec("/*");
-
-        ConstraintSecurityHandler csh = new ConstraintSecurityHandler();
-        csh.setAuthenticator(new BasicAuthenticator());
-        csh.setRealmName(realm);
-        csh.addConstraintMapping(cm);
-        csh.setLoginService(l);
-
-        return csh;
     }
 
     private void checkRecordingsFolder()

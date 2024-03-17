@@ -12,13 +12,12 @@ import java.security.*;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.concurrent.*;
+import java.time.Duration;
 import javax.net.*;
 import javax.net.ssl.*;
 import javax.security.auth.callback.*;
 
 import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.jetty.client.http.HttpClientTransportOverHTTP;
-import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
@@ -53,7 +52,6 @@ public class ProxyConnection
     {
         Log.debug("ProxyConnection " + uri + " " + subprotocol);
 
-        final SslContextFactory clientSslContextFactory = SslContextFactoryProvider.getClientSslContextFactory();
         if("wss".equals(uri.getScheme()))
         {
             Log.debug("ProxyConnection - SSL");
@@ -62,7 +60,7 @@ public class ProxyConnection
         }
         else isSecure = false;
 
-        httpClient = new HttpClient(new HttpClientTransportOverHTTP(1),clientSslContextFactory);
+        httpClient = new HttpClient();
         final QueuedThreadPool queuedThreadPool = QueuedThreadPoolProvider.getQueuedThreadPool("ProxyConnection-HttpClient");
         httpClient.setExecutor(queuedThreadPool);
         httpClient.setConnectTimeout(connectTimeout);
@@ -71,10 +69,10 @@ public class ProxyConnection
         {
 			httpClient.start();
 			wsClient = new WebSocketClient(httpClient);
+			wsClient.setIdleTimeout(Duration.ofMinutes(5));			
             wsClient.start();
 			
-            final ClientUpgradeRequest request = new ClientUpgradeRequest();
-			request.setRequestURI​(uri);
+            final ClientUpgradeRequest request = new ClientUpgradeRequest(uri);
             if (subprotocol != null) request.setSubProtocols(subprotocol);
 			
 			proxySocket = new ProxySocket(this);			
@@ -245,7 +243,7 @@ public class ProxyConnection
             {
                 try {
                     Log.debug("ProxySocket deliver: \n" + text);
-                    session.getRemote().sendStringByFuture(text);
+                    session.getRemote().sendString(text);
                     lastMessage = null;
                 } catch (Exception e) {
                     Log.error("ProxySocket deliver", e);

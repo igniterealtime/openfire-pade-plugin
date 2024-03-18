@@ -1,0 +1,1 @@
+<h1>User Identity is <%= request.getUserPrincipal() != null ? request.getUserPrincipal().getName() : "UNKNOWN" %></h1>

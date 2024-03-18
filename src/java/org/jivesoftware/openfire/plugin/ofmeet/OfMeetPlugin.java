@@ -41,6 +41,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.tomcat.InstanceManager;
 import org.apache.tomcat.SimpleInstanceManager;
+import org.apache.commons.io.FileUtils;
 
 import org.ice4j.ice.harvest.MappingCandidateHarvesters;
 
@@ -431,48 +432,8 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 		initializers4.add(new ContainerInitializer(new JettyJasperInitializer(), null));
 		publicWebApp.setAttribute("org.eclipse.jetty.containerInitializers", initializers4);
 		publicWebApp.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
-		HttpBindManager.getInstance().addJettyHandler( publicWebApp );	
 		
-		contextPublic = new WebAppContext(pluginDirectory.getPath() + "/classes/docs", "/pade");
-		contextPublic.setClassLoader(this.getClass().getClassLoader());
-		contextPublic.getMimeTypes().addMimeMapping("wasm", "application/wasm");
-		final List<ContainerInitializer> initializersCRM = new ArrayList<>();
-		initializersCRM.add(new ContainerInitializer(new JettyJasperInitializer(), null));
-		contextPublic.setAttribute("org.eclipse.jetty.containerInitializers", initializersCRM);
-		contextPublic.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
-		contextPublic.setWelcomeFiles(new String[]{"index.html"});
-		HttpBindManager.getInstance().addJettyHandler(contextPublic);		
-							
-		contextWellKnown = new WebAppContext(pluginDirectory.getPath() + "/classes/well-known", "/.well-known");
-		contextWellKnown.setClassLoader(this.getClass().getClassLoader());
-		final List<ContainerInitializer> initializersWellKnown = new ArrayList<>();
-		initializersWellKnown.add(new ContainerInitializer(new JettyJasperInitializer(), null));
-		contextWellKnown.setAttribute("org.eclipse.jetty.containerInitializers", initializersWellKnown);
-		contextWellKnown.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
-		contextWellKnown.setWelcomeFiles(new String[]{"index.jsp"});
-		HttpBindManager.getInstance().addJettyHandler(contextWellKnown);
-		
-		contextPrivate = new WebAppContext(pluginDirectory.getPath() + "/classes/private", "/dashboard");
-		contextPrivate.setClassLoader(this.getClass().getClassLoader());
-		contextPrivate.getMimeTypes().addMimeMapping("wasm", "application/wasm");
-		SecurityHandler securityHandler = basicAuth("ofmeet");
-		contextPrivate.setSecurityHandler(securityHandler);
-		final List<ContainerInitializer> initializersDashboard = new ArrayList<>();
-		initializersDashboard.add(new ContainerInitializer(new JettyJasperInitializer(), null));
-		contextPrivate.setAttribute("org.eclipse.jetty.containerInitializers", initializersDashboard);
-		contextPrivate.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
-		contextPrivate.setWelcomeFiles(new String[]{"index.jsp"});
-		HttpBindManager.getInstance().addJettyHandler(contextPrivate);
-		
-		contextWinSSO = new WebAppContext(pluginDirectory.getPath() + "/classes/win-sso", "/sso");
-		contextWinSSO.setClassLoader(this.getClass().getClassLoader());
-		final List<ContainerInitializer> initializers7 = new ArrayList<>();
-		initializers7.add(new ContainerInitializer(new JettyJasperInitializer(), null));
-		contextWinSSO.setAttribute("org.eclipse.jetty.containerInitializers", initializers7);
-		contextWinSSO.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
-		contextWinSSO.setWelcomeFiles(new String[]{"index.jsp"});
-		
-		if (OSUtils.IS_WINDOWS && contextWinSSO != null)
+		if (OSUtils.IS_WINDOWS)
 		{
 			NegotiateSecurityFilter securityFilter = new NegotiateSecurityFilter();
 			FilterHolder filterHolder = new FilterHolder();
@@ -480,15 +441,22 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 			EnumSet<DispatcherType> enums = EnumSet.of(DispatcherType.REQUEST);
 			enums.add(DispatcherType.REQUEST);
 
-			contextWinSSO.addFilter(filterHolder, "/*", enums);
-			contextWinSSO.addServlet(new ServletHolder(new WaffleInfoServlet()), "/waffle");
-			
-			contextWinSSO.addServlet(new ServletHolder(new org.ifsoft.sso.Password()), "/password");
-			HttpBindManager.getInstance().addJettyHandler(contextWinSSO);			
-		}	
-	
+			publicWebApp.addFilter(filterHolder, "/*", enums);
+			publicWebApp.addServlet(new ServletHolder(new WaffleInfoServlet()), "/waffle");			
+			publicWebApp.addServlet(new ServletHolder(new org.ifsoft.sso.Password()), "/password");		
+		}
+		
+		HttpBindManager.getInstance().addJettyHandler( publicWebApp );	
 		Log.debug( "Initialized public web application", publicWebApp.toString() );
-				
+
+		File source = new File(pluginDirectory.getPath() + "/classes/docs");
+		File dest = new File(JiveGlobals.getHomeDirectory() + File.separator + "resources" + File.separator + "spank" + File.separator + "pade");
+		
+		try {
+			FileUtils.copyDirectory(source, dest);
+		} catch (IOException e) {
+			Log.error("Unable to copt pade web app folder", e);
+		}
     }
 
 	

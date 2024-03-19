@@ -75,7 +75,8 @@ public class JitsiMeetRedirectFilter implements Filter
         if (uri.contains("/win-sso")) return true;
         if (uri.contains("/dashboard")) return true;
         if (uri.contains("/apps")) return true;
-
+        if (uri.contains("/pade")) return true;
+		
         return false;
     }
 

@@ -425,8 +425,10 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
 		HttpBindManager.getInstance().addJettyHandler( jvbWsContext );	
         Log.info( "Initialized public web socket for /colibri-ws web socket" );
+
+		OFMeetConfig config = new OFMeetConfig();
 		
-		publicWebApp = new WebAppContext(pluginDirectory.getPath() + "/classes/jitsi-meet",  new OFMeetConfig().getWebappContextPath());
+		publicWebApp = new WebAppContext(pluginDirectory.getPath() + "/classes/jitsi-meet",  config.getWebappContextPath());
 		publicWebApp.setClassLoader(this.getClass().getClassLoader());
 		final List<ContainerInitializer> initializers4 = new ArrayList<>();
 		initializers4.add(new ContainerInitializer(new JettyJasperInitializer(), null));
@@ -450,12 +452,16 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 		Log.debug( "Initialized public web application", publicWebApp.toString() );
 
 		File source = new File(pluginDirectory.getPath() + "/classes/docs");
-		File dest = new File(JiveGlobals.getHomeDirectory() + File.separator + "resources" + File.separator + "spank" + File.separator + "pade");
+		File destination = new File(JiveGlobals.getHomeDirectory() + "/resources/spank/pade");
+
+		if ("/".equals(config.getWebappContextPath())) {		
+			destination = new File(pluginDirectory.getPath() + "/classes/jitsi-meet/pade");
+		}
 		
 		try {
-			FileUtils.copyDirectory(source, dest);
+			FileUtils.copyDirectory(source, destination);
 		} catch (IOException e) {
-			Log.error("Unable to copt pade web app folder", e);
+			Log.error("Unable to copy pade web app folder from " + source + " to " + destination, e);
 		}
     }
 

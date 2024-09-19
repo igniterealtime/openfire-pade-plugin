@@ -63,8 +63,7 @@ public class Servlet extends HttpServlet
 
         if (name.endsWith(".webm"))
         {
-            String dir = JiveGlobals.getHomeDirectory() + File.separator + "resources" + File.separator + "spank" + File.separator + "ofmeet-cdn" + File.separator + "recordings";
-            Path path = Paths.get( dir, name);
+            Path path = JiveGlobals.getHomePath().resolve("resources").resolve("spank").resolve("ofmeet-cdn").resolve("recordings").resolve(name);
 
             try {
                 writeFile(path, request);
@@ -85,12 +84,13 @@ public class Servlet extends HttpServlet
 
                 String source = path.toString();
                 String folder = name.substring(0, name.lastIndexOf("."));
-                String destination = JiveGlobals.getHomeDirectory() + File.separator + "resources" + File.separator + "spank" + File.separator + username + File.separator + folder;
+                Path destination = JiveGlobals.getHomePath().resolve("resources").resolve("spank").resolve(username).resolve(folder);
 
                 Log.debug( "Extracting application..." + source + " " + destination);
 
-                ZipFile zipFile = new ZipFile(path.toFile());
-                zipFile.extractAll(destination);
+                try (ZipFile zipFile = new ZipFile(path.toFile())) {
+                    zipFile.extractAll(destination.toString());
+                }
 
                 Files.deleteIfExists(path);
 

@@ -15,6 +15,8 @@
  */
 package org.jivesoftware.openfire.archive;
 
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.text.*;
 import java.io.*;
@@ -91,19 +93,18 @@ public class ConversationPDFServlet extends HttpServlet {
 
         if (start != null)
         {
-            Date startDate = null;
+            Instant startDate;
 
             try {
                 if (start.contains("T"))
                 {
-                    startDate = Date.from(Instant.parse(start));
+                    startDate = Instant.parse(start);
                 }
                 else {
-                    DateFormat formatter = new SimpleDateFormat("MM/dd/yy");
-                    startDate = formatter.parse(start);
+                    startDate = DateTimeFormatter.ofPattern("MM/dd/yy").parse(start, Instant::from);
                 }
-                startDate = new Date(startDate.getTime() - JiveConstants.MINUTE * 5);
-                search.setDateRangeMin(startDate);
+                startDate = startDate.plus(5, ChronoUnit.MINUTES);
+                search.setDateRangeMin(Date.from(startDate));
             }
             catch (Exception e) {
                 Log.error("ConversationPDFServlet", e);
@@ -112,19 +113,18 @@ public class ConversationPDFServlet extends HttpServlet {
 
         if (end != null)
         {
-            Date endDate = null;
+            Instant endDate;
 
             try {
                 if (end.contains("T"))
                 {
-                    endDate = Date.from(Instant.parse(end));
+                    endDate = Instant.parse(end);
                 }
                 else {
-                    DateFormat formatter = new SimpleDateFormat("MM/dd/yy");
-                    endDate = formatter.parse(end);
+                    endDate =  DateTimeFormatter.ofPattern("MM/dd/yy").parse(end, Instant::from);
                 }
-                endDate = new Date(endDate.getTime() + JiveConstants.DAY - 1);
-                search.setDateRangeMax(endDate);
+                endDate = endDate.plus(1, ChronoUnit.DAYS).minus(1, ChronoUnit.MILLIS);
+                search.setDateRangeMax(Date.from(endDate));
             }
             catch (Exception e) {
                 Log.error("ConversationPDFServlet", e);

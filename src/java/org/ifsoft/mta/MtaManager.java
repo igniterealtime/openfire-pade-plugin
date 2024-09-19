@@ -1,6 +1,8 @@
 package org.ifsoft.mta;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -63,13 +65,13 @@ public final class MtaManager {
 
     static {
         keyStoreLocation = JiveGlobals.getProperty("xmpp.socket.ssl.keystore", "resources" + File.separator + "security" + File.separator + "keystore");
-        keyStoreLocation = JiveGlobals.getHomeDirectory() + File.separator + keyStoreLocation;
+        keyStoreLocation = JiveGlobals.getHomePath().toString() + File.separator + keyStoreLocation;
 
         keypass = JiveGlobals.getProperty("xmpp.socket.ssl.keypass", "changeit");
         keypass = keypass.trim();
 
         c2sTrustStoreLocation = JiveGlobals.getProperty("xmpp.socket.ssl.client.truststore", "resources" + File.separator + "security" + File.separator + "client.truststore");
-        c2sTrustStoreLocation = JiveGlobals.getHomeDirectory() + File.separator + c2sTrustStoreLocation;
+        c2sTrustStoreLocation = JiveGlobals.getHomePath().toString() + File.separator + c2sTrustStoreLocation;
 
         c2sTrustpass = JiveGlobals.getProperty("xmpp.socket.ssl.client.trustpass", "changeit");
         c2sTrustpass = c2sTrustpass.trim();
@@ -217,13 +219,13 @@ public final class MtaManager {
      */
     protected Handler createStaticContentHandler()
     {
-        final File mtaDirectory = new File( JiveGlobals.getHomeDirectory() + File.separator + "resources" + File.separator + "mta" );
+        final Path mtaDirectory = JiveGlobals.getHomePath().resolve("resources").resolve("mta");
 
-        if ( mtaDirectory.exists() )
+        if (Files.exists(mtaDirectory) )
         {
-            if ( mtaDirectory.canRead() )
+            if ( Files.isReadable(mtaDirectory) )
             {
-                final WebAppContext context = new WebAppContext( null, mtaDirectory.getPath(), "/" );
+                final WebAppContext context = new WebAppContext( null, mtaDirectory.normalize().toString(), "/" );
                 final List<ContainerInitializer> initializers = new ArrayList<>();
                 initializers.add(new ContainerInitializer(new JettyJasperInitializer(), null));
                 context.setAttribute("org.eclipse.jetty.containerInitializers", initializers);

@@ -17,6 +17,8 @@
 package org.jivesoftware.openfire.archive;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -98,15 +100,15 @@ public class ArchiveSearcher implements Startable {
     private Collection<Conversation> luceneSearch(ArchiveSearch search) {
         Log.debug( "Executing new Lucene search for query string {}", search.getQueryString() );
         try {
-            File searchDir = new File(JiveGlobals.getHomeDirectory() + File.separator + MonitoringConstants.NAME + File.separator + "search");
+            Path searchDir = JiveGlobals.getHomePath().resolve(MonitoringConstants.NAME).resolve("search");
 
-            if (!searchDir.exists())
+            if (!Files.exists(searchDir))
             {
                 Log.error("Search folder missing " + searchDir);
                 return Collections.emptySet();
             }
             try {
-                directory = FSDirectory.open(searchDir.toPath());
+                directory = FSDirectory.open(searchDir);
             }
             catch (IOException ioe) {
                 Log.error(ioe.getMessage(), ioe);

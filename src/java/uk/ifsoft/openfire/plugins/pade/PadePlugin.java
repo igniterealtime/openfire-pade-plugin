@@ -32,6 +32,7 @@ import org.jivesoftware.openfire.session.*;
 import org.jivesoftware.openfire.group.*;
 import org.jivesoftware.util.*;
 
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.io.File;
 import java.util.*;
@@ -252,44 +253,43 @@ public class PadePlugin implements Plugin, MUCEventListener
 
     private void checkRecordingsFolder()
     {
-        String resourcesHome = JiveGlobals.getHomeDirectory() + File.separator + "resources" + File.separator + "spank";
+        Path resourcesHome = JiveGlobals.getHomePath().resolve("resources").resolve("spank");
 
         try
         {
-            File ofmeetHome = new File(resourcesHome + File.separator + "ofmeet-cdn");
+            Path ofmeetHome = resourcesHome.resolve("ofmeet-cdn");
 
-            if(!ofmeetHome.exists())
+            if(!Files.exists(ofmeetHome))
             {
-                ofmeetHome.mkdirs();
-
-                List<String> lines = Arrays.asList("Move on, nothing here....");
-                Path file = Paths.get(ofmeetHome + File.separator + "index.html");
-                Files.write(file, lines, Charset.forName("UTF-8"));
+                Files.createDirectory(ofmeetHome);
+                List<String> lines = List.of("Move on, nothing here....");
+                Path file = ofmeetHome.resolve("index.html");
+                Files.write(file, lines, StandardCharsets.UTF_8);
             }
 
-            File recordingsHome = new File(ofmeetHome + File.separator + "recordings");
+            Path recordingsHome = ofmeetHome.resolve("recordings");
 
-            if(!recordingsHome.exists())
+            if(!Files.exists(recordingsHome))
             {
-                recordingsHome.mkdirs();
+                Files.createDirectory(recordingsHome);
 
-                List<String> lines = Arrays.asList("Move on, nothing here....");
+                List<String> lines = List.of("Move on, nothing here....");
                 Path file = Paths.get(recordingsHome + File.separator + "index.html");
-                Files.write(file, lines, Charset.forName("UTF-8"));
+                Files.write(file, lines, StandardCharsets.UTF_8);
             }
 
             // create .well-known/host-meta
 
-            File wellknownFolder = new File(resourcesHome + File.separator + ".well-known");
+            Path wellknownFolder = resourcesHome.resolve(".well-known");
 
-            if(!wellknownFolder.exists())
+            if(!Files.exists(wellknownFolder))
             {
-                wellknownFolder.mkdirs();
+                Files.createDirectory(wellknownFolder);
             }
 
             List<String> lines = Arrays.asList("<XRD xmlns=\"http://docs.oasis-open.org/ns/xri/xrd-1.0\">", "<Link rel=\"urn:xmpp:alt-connections:xbosh\" href=\"https://" + server + "/http-bind/\"/>", "<Link rel=\"urn:xmpp:alt-connections:websocket\" href=\"wss://" + server + "/ws/\"/>", "</XRD>");
-            Path file = Paths.get(wellknownFolder + File.separator + "host-meta");
-            Files.write(file, lines, Charset.forName("UTF-8"));
+            Path file = wellknownFolder.resolve("host-meta");
+            Files.write(file, lines, StandardCharsets.UTF_8);
 
         }
         catch (Exception e)
@@ -448,7 +448,7 @@ public class PadePlugin implements Plugin, MUCEventListener
                     notification.setTo(subscriberJID);
                     Element rai = notification.addChildElement("rai", "urn:xmpp:rai:0");
                     rai.addElement("activity").setText(roomJID.toString());
-                    XMPPServer.getInstance().getRoutingTable().routePacket(subscriberJID, notification, true);
+                    XMPPServer.getInstance().getRoutingTable().routePacket(subscriberJID, notification);
                 }
                 else {
                     // user is offline, send web push notification if user mentioned

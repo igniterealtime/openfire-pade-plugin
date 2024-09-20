@@ -452,7 +452,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 		Log.debug( "Initialized public web application", publicWebApp.toString() );
 
 		File source = new File(pluginDirectory.getPath() + "/classes/docs");
-		File destination = new File(JiveGlobals.getHomeDirectory() + "/resources/spank/pade");
+		File destination = JiveGlobals.getHomePath().resolve("resources").resolve("spank").resolve("pade").toFile();
 
 		if ("/".equals(config.getWebappContextPath())) {		
 			destination = new File(pluginDirectory.getPath() + "/classes/jitsi-meet/pade");
@@ -575,33 +575,29 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
     private void checkDownloadFolder(File pluginDirectory)
     {
-        String ofmeetHome = JiveGlobals.getHomeDirectory() + File.separator + "resources" + File.separator + "spank" + File.separator + "ofmeet-cdn";
+        Path ofmeetHome = JiveGlobals.getHomePath().resolve("resources").resolve("spank").resolve("ofmeet-cdn");
 
         try
         {
-            File ofmeetFolderPath = new File(ofmeetHome);
-
-            if(!ofmeetFolderPath.exists())
+            if(!Files.exists(ofmeetHome))
             {
-                ofmeetFolderPath.mkdirs();
-
+                Files.createDirectories(ofmeetHome);
             }
 
-            List<String> lines = Arrays.asList("Move on, nothing here....");
-            Path file = Paths.get(ofmeetHome + File.separator + "index.html");
-            Files.write(file, lines, Charset.forName("UTF-8"));
+            List<String> lines = List.of("Move on, nothing here....");
+            Path file = ofmeetHome.resolve("index.html");
+            Files.write(file, lines, StandardCharsets.UTF_8);
 
-            File downloadHome = new File(ofmeetHome + File.separator + "download");
+            Path downloadHome = ofmeetHome.resolve("download");
 
-            if(!downloadHome.exists())
+            if(!Files.exists(downloadHome))
             {
-                downloadHome.mkdirs();
-
+                Files.createDirectories(downloadHome);
             }
 
-            lines = Arrays.asList("Move on, nothing here....");
-            file = Paths.get(downloadHome + File.separator + "index.html");
-            Files.write(file, lines, Charset.forName("UTF-8"));
+            lines = List.of("Move on, nothing here....");
+            file = downloadHome.resolve("index.html");
+            Files.write(file, lines, StandardCharsets.UTF_8);
         }
         catch (Exception e)
         {
@@ -1157,7 +1153,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 					pollMsg.setTo(user);
 					Element pollJson = pollMsg.addChildElement("json-message", "http://jitsi.org/jitmeet");
 					pollJson.setText(pollsMsg.toString());
-					XMPPServer.getInstance().getRoutingTable().routePacket(user, pollMsg, true);
+					XMPPServer.getInstance().getRoutingTable().routePacket(user, pollMsg);
 					
 					Log.debug("occupantJoined polls\n" + pollsMsg); 
 				}									
@@ -1180,7 +1176,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 				message.setTo(user);
 				Element json = message.addChildElement("json", "urn:xmpp:json:0");
 				json.setText(jsonMsg.toString());
-				XMPPServer.getInstance().getRoutingTable().routePacket(user, message, true);	
+				XMPPServer.getInstance().getRoutingTable().routePacket(user, message);
 				
 				Log.debug("occupantJoined json\n" + jsonMsg); 					
 			}			

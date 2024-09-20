@@ -158,7 +158,7 @@ public class WebPushInterceptor implements PacketInterceptor, OfflineMessageList
 							}
 							
 							message.addChildElement("origin-id", "urn:xmpp:sid:0").addAttribute("id", msgId);							
-							XMPPServer.getInstance().getRoutingTable().routePacket(packet.getTo(), message, true);		
+							XMPPServer.getInstance().getRoutingTable().routePacket(packet.getTo(), message);
 						}							
 					}					
 				}

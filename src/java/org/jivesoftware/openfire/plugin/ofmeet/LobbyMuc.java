@@ -87,7 +87,7 @@ public class LobbyMuc implements ServerIdentitiesProvider, ServerFeaturesProvide
         message.setType(Message.Type.groupchat);
         Element json = message.addChildElement("json-message", "http://jitsi.org/jitmeet");
         json.setText(jsonMsg.toString());
-        XMPPServer.getInstance().getRoutingTable().routePacket(to, message, true);
+        XMPPServer.getInstance().getRoutingTable().routePacket(to, message);
     }
 
     private void notify_configuration_change(JID to, String from)
@@ -98,7 +98,7 @@ public class LobbyMuc implements ServerIdentitiesProvider, ServerFeaturesProvide
         message.setType(Message.Type.groupchat);
         Element x = message.addChildElement("x", "http://jabber.org/protocol/muc#user");
         x.addElement("status").addAttribute("code", "104");
-        XMPPServer.getInstance().getRoutingTable().routePacket(to, message, true);
+        XMPPServer.getInstance().getRoutingTable().routePacket(to, message);
     }
 
     private void notify_lobby_enabled(JID to, JID from, boolean value)

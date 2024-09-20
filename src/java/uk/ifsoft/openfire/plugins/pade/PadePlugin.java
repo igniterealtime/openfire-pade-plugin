@@ -71,6 +71,7 @@ public class PadePlugin implements Plugin, MUCEventListener
     private String server;
 	private HashMap<String, Object> requests = new HashMap<>();
     private MastodonIQHandler mastodonIQHandler;	
+	private boolean isCSPEnabled = true;
 
     /**
      * Initializes the plugin.
@@ -90,7 +91,9 @@ public class PadePlugin implements Plugin, MUCEventListener
         interceptor = new WebPushInterceptor();
         InterceptorManager.getInstance().addInterceptor( interceptor );
         OfflineMessageStrategy.addListener( interceptor );
-
+		
+		isCSPEnabled = HttpBindManager.HTTP_BIND_CONTENT_SECURITY_POLICY_ENABLED.getValue();
+		HttpBindManager.HTTP_BIND_CONTENT_SECURITY_POLICY_ENABLED.setValue( false );
 
         try
         {
@@ -224,6 +227,8 @@ public class PadePlugin implements Plugin, MUCEventListener
     public void destroyPlugin()
     {		
         Log.info("stop pade server");
+		
+		HttpBindManager.HTTP_BIND_CONTENT_SECURITY_POLICY_ENABLED.setValue( isCSPEnabled );		
 
         if (ofMeetPlugin != null) ofMeetPlugin.destroyPlugin();
 

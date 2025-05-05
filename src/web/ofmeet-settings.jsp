@@ -50,6 +50,7 @@
         final boolean webauthn_enabled = ParamUtils.getBooleanParameter( request, "webauthn_enabled" );
         final boolean disableRtx = !ParamUtils.getBooleanParameter( request, "enableRtx" );
         final boolean forceVp9 = ParamUtils.getBooleanParameter( request, "forceVp9" );        
+        final boolean forceAv1 = ParamUtils.getBooleanParameter( request, "forceAv1" );  		
         final String authusername = request.getParameter( "authusername" );
         final String sippassword = request.getParameter( "sippassword" );
         final String server = request.getParameter( "server" );
@@ -228,6 +229,7 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.jigasi.jvm.customOptions", jvmJigasi ); 
 
             JiveGlobals.setProperty( "ofmeet.jicofo.force.vp9", Boolean.toString( forceVp9 ) );  
+            JiveGlobals.setProperty( "ofmeet.jicofo.force.av1", Boolean.toString( forceAv1 ) ); 			
             JiveGlobals.setProperty( "ofmeet.desktop.sharing.framerate.min", desktopSharingFrameRateMin);           
             JiveGlobals.setProperty( "ofmeet.desktop.sharing.framerate.max", desktopSharingFrameRateMax);
             JiveGlobals.setProperty( "ofmeet.max.full.resolution.participants", maxFullResolutionParticipants );            
@@ -432,10 +434,16 @@
             </tr>      
             <tr>
                 <td nowrap colspan="2">
-                    <input type="checkbox" name="forceVp9" ${admin:getBooleanProperty( "ofmeet.jicofo.force.vp9", true) ? "checked" : ""}>
+                    <input type="checkbox" name="forceVp9" ${admin:getBooleanProperty( "ofmeet.jicofo.force.vp9", false) ? "checked" : ""}>
                     <fmt:message key="config.page.configuration.ofmeet.jicofo.force.vp9" />
                 </td>
-            </tr>             
+            </tr>    
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="forceAv1" ${admin:getBooleanProperty( "ofmeet.jicofo.force.av1", true) ? "checked" : ""}>
+                    <fmt:message key="config.page.configuration.ofmeet.jicofo.force.av1" />
+                </td>
+            </tr> 			
             <tr>
                 <td nowrap colspan="2">
                     <input type="checkbox" name="enableRtx" ${ofmeetConfig.disableRtx ? "" : "checked"}>

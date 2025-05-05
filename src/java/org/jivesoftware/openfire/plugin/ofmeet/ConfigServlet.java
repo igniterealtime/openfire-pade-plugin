@@ -119,6 +119,8 @@ public class ConfigServlet extends HttpServlet
             boolean enableStereo = JiveGlobals.getBooleanProperty( "ofmeet.stereo.enabled", false );
             boolean enableAudioLevels = JiveGlobals.getBooleanProperty( "ofmeet.audioLevels.enabled", false );
             boolean enableFeedback = JiveGlobals.getBooleanProperty( "ofmeet.feedback.enabled", true );
+			boolean forceVp9 = JiveGlobals.getBooleanProperty( "ofmeet.jicofo.force.vp9", false);
+			boolean forceAv1 = JiveGlobals.getBooleanProperty( "ofmeet.jicofo.force.av1", true);
             
             int video_width_ideal =  JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.constraints.video.width.ideal", ofMeetConfig.getVideoConstraintsIdealHeight() * 16/9);
             int video_width_max = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.constraints.video.width.max", ofMeetConfig.getVideoConstraintsMaxHeight() * 16/9);
@@ -165,7 +167,7 @@ public class ConfigServlet extends HttpServlet
             final Map<String, Object> p2p = new HashMap<>();
             p2p.put( "enabled", ofMeetConfig.getP2pEnabled() );
 			p2p.put( "enableUnifiedOnChrome", true);
-            p2p.put( "preferredCodec", "VP9" );
+            p2p.put( "preferredCodec", forceAv1 ? "AV1" : "VP9"  );
             p2p.put( "preferH264", ofMeetConfig.getP2pPreferH264() );			
             p2p.put( "disableH264", ofMeetConfig.getP2pDisableH264() );
             p2p.put( "useStunTurn", ofMeetConfig.getP2pUseStunTurn() );
@@ -242,14 +244,26 @@ public class ConfigServlet extends HttpServlet
             config.put( "useNewBandwidthAllocationStrategy", useNewBandwidthAllocationStrategy );			
 
             final JSONObject videoQuality = new JSONObject();
-            videoQuality.put( "preferredCodec", "VP9" );	
-			
+            videoQuality.put( "preferredCodec", forceAv1 ? "AV1" : (forceVp9 ? "VP9" : "H264") );				
             final JSONObject maxBitratesVideo = new JSONObject();
+			
             final JSONObject vp9 = new JSONObject();			
             vp9.put( "low", lowMaxBitratesVideo );
             vp9.put( "standard", standardMaxBitratesVideo );
             vp9.put( "high", highMaxBitratesVideo );
             maxBitratesVideo.put( "VP9", vp9 );	
+
+            final JSONObject h264 = new JSONObject();			
+            h264.put( "low", lowMaxBitratesVideo );
+            h264.put( "standard", standardMaxBitratesVideo );
+            h264.put( "high", highMaxBitratesVideo );
+            maxBitratesVideo.put( "H264", h264 );	
+			
+            final JSONObject av1 = new JSONObject();			
+            av1.put( "low", lowMaxBitratesVideo );
+            av1.put( "standard", standardMaxBitratesVideo );
+            av1.put( "high", highMaxBitratesVideo );
+            maxBitratesVideo.put( "AV1", av1 );				
 			
             videoQuality.put( "maxBitratesVideo", maxBitratesVideo );
 

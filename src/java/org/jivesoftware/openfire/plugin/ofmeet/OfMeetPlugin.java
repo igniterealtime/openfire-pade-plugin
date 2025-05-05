@@ -435,7 +435,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 		publicWebApp.setAttribute("org.eclipse.jetty.containerInitializers", initializers4);
 		publicWebApp.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
 		
-		if (OSUtils.IS_WINDOWS)
+		if (OSUtils.IS_WINDOWS && JiveGlobals.getBooleanProperty( "ofmeet.winsso.enabled", false))
 		{
 			NegotiateSecurityFilter securityFilter = new NegotiateSecurityFilter();
 			FilterHolder filterHolder = new FilterHolder();

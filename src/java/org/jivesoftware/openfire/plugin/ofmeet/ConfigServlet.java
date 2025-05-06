@@ -167,7 +167,7 @@ public class ConfigServlet extends HttpServlet
             final Map<String, Object> p2p = new HashMap<>();
             p2p.put( "enabled", ofMeetConfig.getP2pEnabled() );
 			p2p.put( "enableUnifiedOnChrome", true);
-            p2p.put( "preferredCodec", forceAv1 ? "AV1" : "VP9"  );
+            p2p.put( "preferredCodec", forceAv1 ? "AV1" : (forceVp9 ? "VP9" : "H264") );
             p2p.put( "preferH264", ofMeetConfig.getP2pPreferH264() );			
             p2p.put( "disableH264", ofMeetConfig.getP2pDisableH264() );
             p2p.put( "useStunTurn", ofMeetConfig.getP2pUseStunTurn() );

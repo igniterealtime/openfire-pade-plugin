@@ -101,8 +101,14 @@ public class LobbyMuc implements ServerIdentitiesProvider, ServerFeaturesProvide
         XMPPServer.getInstance().getRoutingTable().routePacket(to, message);
     }
 
+    private Boolean lastLobbyEnabledValue = null;
     private void notify_lobby_enabled(JID to, JID from, boolean value)
     {
+        if (lastLobbyEnabledValue != null && lastLobbyEnabledValue == value) {
+          return; // Avoid redundant notifications
+        }
+        lastLobbyEnabledValue = value;
+
         JSONObject jsonMsg = new JSONObject();
         jsonMsg.put("event", NOTIFY_LOBBY_ENABLED);
         jsonMsg.put("value", value);

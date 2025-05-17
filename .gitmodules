@@ -1,0 +1,6 @@
+[submodule "jitsi/jvb"]
+	path = jitsi/jvb
+	url = https://github.com/jitsi/jitsi-videobridge.git
+[submodule "jitsi/jicofo"]
+	path = jitsi/jicofo
+	url = https://github.com/jitsi/jicofo.git

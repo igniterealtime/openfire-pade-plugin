@@ -37,7 +37,7 @@
                         <goal>wget</goal>
                     </goals>
                     <configuration>
-                        <url>https://download.jitsi.org/jitsi-meet/src/jitsi-meet-1.0.6991.tar.bz2</url>
+                        <url>https://download.jitsi.org/jitsi-meet/src/jitsi-meet-1.0.8569.tar.bz2</url>
                         <unpack>true</unpack>
                         <outputDirectory>${project.basedir}/classes</outputDirectory>
                     </configuration>

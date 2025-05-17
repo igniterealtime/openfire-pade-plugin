@@ -219,7 +219,7 @@ public class JitsiJvbWrapper implements ProcessListener
 
         String customOptions = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.jvb.jvm.customOptions", defaultOptions);
         if(!customOptions.isEmpty() && !customOptions.endsWith(" ")) customOptions += " ";
-        final String cmdLine = javaExec + " " + customOptions + "-Dconfig.file=" + configFile + " -Dnet.java.sip.communicator.SC_HOME_DIR_LOCATION=" + jvbHomePath + " -Dnet.java.sip.communicator.SC_HOME_DIR_NAME=config -Djava.util.logging.config.file=./logging.properties -Djdk.tls.ephemeralDHKeySize=2048 -cp ./jitsi-videobridge-2.1-SNAPSHOT.jar" + File.pathSeparator + "./jitsi-videobridge-2.1-SNAPSHOT-jar-with-dependencies.jar org.jitsi.videobridge.MainKt  --apis=rest";
+        final String cmdLine = javaExec + " " + customOptions + "-Dconfig.file=" + configFile + " -Dnet.java.sip.communicator.SC_HOME_DIR_LOCATION=" + jvbHomePath + " -Dnet.java.sip.communicator.SC_HOME_DIR_NAME=config -Djava.util.logging.config.file=./logging.properties -Djdk.tls.ephemeralDHKeySize=2048 -cp ./jitsi-videobridge-2.3-SNAPSHOT.jar" + File.pathSeparator + "./jitsi-videobridge-2.3-SNAPSHOT-jar-with-dependencies.jar org.jitsi.videobridge.MainKt  --apis=rest";
 
         if ( JiveGlobals.getBooleanProperty("ofmeet.use.internal.jvb", true) )
         {

@@ -170,9 +170,6 @@ public class JitsiJicofoWrapper implements ProcessListener
             Log.error("createConfigFile error", e);
         }
 
-        // Jicofo tries to autonomously connect to XMPP as soon as it starts due to the brewery-jid setting. However, if Openfire is not fully ready (especially the 5222 C2S port), the connection fails. To avoid this, it's recommended to delay Jicofo startup until XMPPServer.isStarted() and ConnectionManager.isClientListenerActive() both return true.
-        Thread.sleep(3000);
-
         final String javaHome = System.getProperty("java.home");
         String defaultOptions = "-Xmx1024m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp";
         String javaExec = javaHome + File.separator + "bin" + File.separator + "java";

@@ -1241,9 +1241,10 @@ var ofmeet = (function (ofm) {
     function addToolbarItem(option) {		
 		if (mobileCheck()) {		// don't extend toolbar for mobile browsers only register shortcut
             if (option.shortcut) {
-                APP.keyboardshortcut.registerShortcut(option.shortcut, null, () => {
+				// BAO TODO				
+                /*APP.keyboardshortcut.registerShortcut(option.shortcut, null, () => {
                     option.callback();
-                }, option.label);
+                }, option.label);*/
             }	
 			return $();			
 		}
@@ -1271,9 +1272,10 @@ var ofmeet = (function (ofm) {
             $button.children('.toolbox-icon').on('click.ofmeet-toolbox-icon', option.callback);
 
             if (option.shortcut) {
-                APP.keyboardshortcut.registerShortcut(option.shortcut, null, () => {
+				// BAO TODO
+                /*APP.keyboardshortcut.registerShortcut(option.shortcut, null, () => {
                     option.callback();
-                }, option.label);
+                }, option.label);*/
             }
 
             let $toolbarItem = appendMenuToToolbarButton($button, option.menu);
@@ -1342,9 +1344,10 @@ var ofmeet = (function (ofm) {
                 $menu.append($item);
 
                 if (item.shortcut) {
-                    APP.keyboardshortcut.registerShortcut(item.shortcut, null, () => {
+					// BAO TODO
+                    /*APP.keyboardshortcut.registerShortcut(item.shortcut, null, () => {
                         $item.trigger('click.ofmeet-toolbox-menu');
-                    }, item.text);
+                    }, item.text);*/
                 }
             }
             $menu.on('click.ofmeet-toolbox-menu', 'li', (e) => { option.callback(e); return option.closeOnClick; });

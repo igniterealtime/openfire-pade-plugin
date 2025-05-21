@@ -516,7 +516,8 @@ var collab = (function (coop) {
 
             PointTransform.updateVideos();
 
-            APP.UI.addListener('UI.large_video_id_changed', id => {
+			// BAO TODO
+            /*APP.UI.addListener('UI.large_video_id_changed', id => {
                 PointTransform.updateVideos();
                 Cursor.forEach(c => c.update());
             });
@@ -533,7 +534,7 @@ var collab = (function (coop) {
                 if (this.isSharing) {
                     this.bindMouseEvent(enabled);
                 }
-            });
+            });*/
 
             APP.conference.commands.addCommandListener('CURSOR', event => {
                 this.onCommandReceived(event.value, event.attributes);

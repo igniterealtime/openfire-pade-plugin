@@ -11,7 +11,7 @@
     
     <groupId>org.igniterealtime.openfire</groupId>
     <artifactId>pade</artifactId>
-    <version>1.8.5-SNAPSHOT</version>	
+    <version>1.9.0-SNAPSHOT</version>	
     
     <name>Pade</name>
     <description>Web-based chat, groupchat, telephones, audio and video conferencing solution using ConverseJS, Jitsi and FreeSWITCH</description>
@@ -37,7 +37,7 @@
                         <goal>wget</goal>
                     </goals>
                     <configuration>
-                        <url>https://download.jitsi.org/jitsi-meet/src/jitsi-meet-1.0.8569.tar.bz2</url>
+                        <url>https://download.jitsi.org/jitsi-meet/src/jitsi-meet-1.0.8614.tar.bz2</url>
                         <unpack>true</unpack>
                         <outputDirectory>${project.basedir}/classes</outputDirectory>
                     </configuration>

@@ -1224,7 +1224,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
                         int total_conference_seconds = summary.getInt("total_conference_seconds");
                         int total_participants = summary.getInt("total_participants");
-                        // int total_failed_conferences = summary.getInt("total_failed_conferences"); // This is not possible with the latest JVM
+                        // int total_failed_conferences = summary.getInt("total_failed_conferences"); // This is not possible with the latest version of jitsi-videobridge 2.3.
                         int total_conferences_created = summary.getInt("total_conferences_created");
                         int total_conferences_completed = summary.getInt("total_conferences_completed");
                         int conferences = summary.getInt("conferences");

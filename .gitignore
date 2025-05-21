@@ -6,6 +6,8 @@ work/
 # ignore copied jitsi meet
 classes/jitsi-meet
 classes/docs
+jitsi/jicofo
+jitsi/jvb
 
 # Ignore Intellij Idea project files
 *.iml

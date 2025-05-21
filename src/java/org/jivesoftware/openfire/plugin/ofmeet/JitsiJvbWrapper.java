@@ -188,6 +188,13 @@ public class JitsiJvbWrapper implements ProcessListener
             "         }",
             "    }",
             "",
+            "}",
+            "ice4j {",
+            "   harvest {",
+            "       udp {",
+            OSUtils.IS_WINDOWS ? "          socket-pool-size = 1" : "", // Note: SocketPool size to 1 on Windows, as STUN Binding Requests fail to complete otherwise.
+            "       }",
+            "    }",
             "}"
         );
 

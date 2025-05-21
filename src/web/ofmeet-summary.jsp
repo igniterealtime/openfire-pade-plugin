@@ -34,7 +34,7 @@
 <%
     final OfMeetPlugin container = OfMeetPlugin.self;
     
-    JSONObject summary = new JSONObject("{\"current_timestamp\":\"Initialising...\", \"total_conference_seconds\":0, \"total_participants\":0, \"total_failed_conferences\":0, \"total_conferences_created\":0, \"total_conferences_completed\":0, \"conferences\":0, \"participants\":0, \"largest_conference\":0, \"p2p_conferences\":0}");        
+    JSONObject summary = new JSONObject("{\"current_timestamp\":\"Initialising...\", \"total_conference_seconds\":0, \"total_participants\":0, \"total_conferences_created\":0, \"total_conferences_completed\":0, \"conferences\":0, \"participants\":0, \"largest_conference\":0, \"p2p_conferences\":0}");        
 
     String json = container.getConferenceStats();
     
@@ -48,8 +48,7 @@
         String uptime = container.getJvbDuration();
         
         int total_conference_seconds = summary.getInt("total_conference_seconds");      
-        int total_participants = summary.getInt("total_participants");
-        int total_failed_conferences = summary.getInt("total_failed_conferences");          
+        int total_participants = summary.getInt("total_participants");         
         int total_conferences_created = summary.getInt("total_conferences_created"); 
         int total_conferences_completed = summary.getInt("total_conferences_completed");     
         int conferences = summary.getInt("conferences");      
@@ -64,8 +63,7 @@
             <tr>
                 <th nowrap><fmt:message key="ofmeet.summary.uptime" /></th>                 
                 <th nowrap><fmt:message key="ofmeet.summary.total_conference_seconds" /></th>
-                <th nowrap><fmt:message key="ofmeet.summary.total_participants" /></th>
-                <th nowrap><fmt:message key="ofmeet.summary.total_failed_conferences" /></th>           
+                <th nowrap><fmt:message key="ofmeet.summary.total_participants" /></th>         
                 <th nowrap><fmt:message key="ofmeet.summary.total_conferences_created" /></th>    
                 <th nowrap><fmt:message key="ofmeet.summary.total_conferences_completed" /></th>   
                 <th nowrap><fmt:message key="ofmeet.summary.conferences" /></th>
@@ -78,8 +76,7 @@
             <tr>
                 <td nowrap><%= uptime %></th>   
                 <td nowrap><%= total_conference_seconds %></th>
-                <td nowrap><%= total_participants %></th>
-                <td nowrap><%= total_failed_conferences %></th>           
+                <td nowrap><%= total_participants %></th>         
                 <td nowrap><%= total_conferences_created %></th>     
                 <td nowrap><%= total_conferences_completed %></th>   
                 <td nowrap><%= conferences %></th>

@@ -20,7 +20,6 @@ import java.net.*;
 import org.jitsi.util.OSUtils;
 import java.util.Properties;
 
-import de.mxro.process.*;
 import org.jivesoftware.util.JiveGlobals;
 import org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig;
 
@@ -120,6 +119,7 @@ public class JitsiJvbWrapper implements ProcessListener
             "        enabled = true",
             "        domain = \"" + JiveGlobals.getProperty( "ofmeet.websockets.domain", hostname) + ":" + JiveGlobals.getProperty( "ofmeet.websockets.publicport", public_port) + "\"",
             "        tls = true",
+			"		 relay-domains = []",			
             "    }",
             "",
             "    ice {",
@@ -135,6 +135,12 @@ public class JitsiJvbWrapper implements ProcessListener
             "        }",
             "    }",
             "",
+            "    relay {",
+            "       enabled = " + (ClusterManager.isClusteringEnabled() ? "true" : "false"),
+            "       relay-id = " + (ClusterManager.isClusteringEnabled() ? JiveGlobals.getXMLProperty("ofmeet.octo_id", "1") : "1"),								
+            "    	region = " + username,
+            "    }",
+            "",				
             "    sctp {",
             "        # Whether SCTP data channels are enabled",
             "        enabled = " + (JiveGlobals.getBooleanProperty( "ofmeet.bridge.ws.channel", OSUtils.IS_WINDOWS) ? "false" : "true"),
@@ -186,6 +192,9 @@ public class JitsiJvbWrapper implements ProcessListener
             "        version {",
             "            enabled = true",
             "         }",
+            "        prometheus  {",
+            "            enabled = false",
+            "         }",				
             "    }",
             "",
             "}",

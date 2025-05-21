@@ -139,7 +139,6 @@ public class JitsiJicofoWrapper implements ProcessListener
             "    }",
             "    bridge  {",
             "        selection-strategy = RegionBasedBridgeSelectionStrategy ",
-            "        brewery-jid: \"JvbBrewery@internal.auth." + XMPPServer.getInstance().getServerInfo().getXMPPDomain() + "\"",
             "    }",
             "    rest   {",
             "        port = " + jicofoPort,

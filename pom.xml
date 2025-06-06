@@ -467,6 +467,13 @@
             <id>localLibs</id>
             <name>localLibs</name>
             <url>file://${project.basedir}/lib</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<releases>
+				<enabled>true</enabled>
+				<checksumPolicy>warn</checksumPolicy>
+			</releases>			
         </repository>  	
 		
     </repositories>

@@ -6,7 +6,7 @@
     <author>Ignite Realtime</author>
     <version>${project.version}</version>
     <date>2025-06-30</date>
-    <minServerVersion>4.8.0</minServerVersion>
+    <minServerVersion>4.9.2</minServerVersion>
     <minJavaVersion>1.11</minJavaVersion>   
     <adminconsole>
         <tab id="tab-ofmeet" name="${plugin.title}" url="ofmeet-summary.jsp" description="${plugin.description}">

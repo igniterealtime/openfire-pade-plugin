@@ -13,12 +13,6 @@ import org.jivesoftware.openfire.plugin.rest.sasl.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.eclipse.jetty.apache.jsp.JettyJasperInitializer;
-import org.eclipse.jetty.plus.annotation.ContainerInitializer;
-import org.eclipse.jetty.server.handler.ContextHandlerCollection;
-import org.eclipse.jetty.servlet.*;
-import org.eclipse.jetty.webapp.WebAppContext;
-
 import org.eclipse.jetty.util.security.*;
 import org.eclipse.jetty.security.*;
 import org.eclipse.jetty.security.authentication.*;
@@ -141,7 +135,7 @@ public class PadePlugin implements Plugin, MUCEventListener
 		random.nextBytes(userHandle);
 
 		PublicKeyCredentialCreationOptions request = relyingParty.startRegistration(StartRegistrationOptions.builder()
-			.user(UserIdentity.builder()
+			.user(com.yubico.webauthn.data.UserIdentity.builder()
 			.name(username).displayName(name).id(new ByteArray(userHandle)).build())
 			.build());		
 
@@ -366,12 +360,12 @@ public class PadePlugin implements Plugin, MUCEventListener
                                 notifyRoomSubscribers(jid, room, roomJID, message, nickname, userJid);
                             }
 
-                            for (MUCRole role : room.getModerators())
+                            for (MUCOccupant role : room.getModerators())
                             {
                                 Log.debug("notifyRoomSubscribers moderators " + role.getUserAddress() + " " + roomJID, message);
                             }
 
-                            for (MUCRole role : room.getParticipants())
+                            for (MUCOccupant role : room.getParticipants())
                             {
                                 Log.debug("notifyRoomSubscribers participants " + role.getUserAddress() + " " + roomJID, message);
                             }
@@ -405,6 +399,19 @@ public class PadePlugin implements Plugin, MUCEventListener
 		
 	}
 	
+
+    public void roomClearChatHistory(long roomID, JID roomJID) {
+
+    }
+
+    public void roomCreated(long roomID, JID roomJID) {
+
+    }
+	
+    public void roomDestroyed(long roomID, JID roomJID) {
+
+    }	
+	
     private void notifyRoomSubscribers(JID subscriberJID, MUCRoom room, JID roomJID, Message message, String nickname, String senderJid)
     {
         try {
@@ -425,13 +432,13 @@ public class PadePlugin implements Plugin, MUCEventListener
 
     private void notifyRoomActivity(JID subscriberJID, MUCRoom room, JID roomJID, Message message, String nickname, String senderJid)
     {
-        if (room.getAffiliation(subscriberJID) != MUCRole.Affiliation.none && !senderJid.equals(subscriberJID.toBareJID()))
+        if (room.getAffiliation(subscriberJID) != Affiliation.none && !senderJid.equals(subscriberJID.toBareJID()))
         {
             Log.debug("notifyRoomActivity checking " + subscriberJID + " " + roomJID);
             boolean inRoom = false;
 
             try {
-                for (MUCRole role : room.getOccupants())
+                for (MUCOccupant role : room.getOccupants())
                 {
                     if (role.getUserAddress().asBareJID().toString().equals(subscriberJID.toString())) inRoom = true;
                 }

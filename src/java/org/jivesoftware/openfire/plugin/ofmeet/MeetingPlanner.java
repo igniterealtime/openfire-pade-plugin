@@ -68,7 +68,7 @@ public class MeetingPlanner implements Job
         {
             @Override public void run()
             {
-                if (XMPPServer.getInstance().getPluginManager().getPlugin("bookmarks") == null)
+                if (XMPPServer.getInstance().getPluginManager().getPluginByName("bookmarks") == null)
                 {
                     Log.debug( "Skipping the periodic execution, as the 'bookmarks' plugin is not loaded." );
 

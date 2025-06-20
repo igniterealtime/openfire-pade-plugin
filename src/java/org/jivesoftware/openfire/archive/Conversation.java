@@ -39,7 +39,7 @@ import org.jivesoftware.database.DbConnectionManager;
 import org.jivesoftware.database.JiveID;
 import org.jivesoftware.database.SequenceManager;
 import org.jivesoftware.openfire.XMPPServer;
-import org.jivesoftware.openfire.muc.MUCRole;
+import org.jivesoftware.openfire.muc.MUCOccupant;
 import org.jivesoftware.openfire.muc.MUCRoom;
 import org.jivesoftware.openfire.user.UserNameManager;
 import org.jivesoftware.openfire.user.UserNotFoundException;

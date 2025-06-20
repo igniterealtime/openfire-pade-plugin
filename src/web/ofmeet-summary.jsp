@@ -127,7 +127,7 @@
         String focus = null;
         String roomName = chatRoom.getJID().getNode();
 
-        for ( final MUCRole occupant : chatRoom.getOccupants() ) {
+        for ( final MUCOccupant occupant : chatRoom.getOccupants() ) {
             JID jid = occupant.getUserAddress();
             String nick = jid.getNode();
             

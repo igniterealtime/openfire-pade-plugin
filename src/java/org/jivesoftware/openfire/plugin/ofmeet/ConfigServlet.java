@@ -464,7 +464,7 @@ public class ConfigServlet extends HttpServlet
         Log.debug( "[{}] Generating BOSH URL based on {}", request.getRemoteAddr(), request.getRequestURL() );
         final String preferredMechanism = JiveGlobals.getProperty( "ofmeet.connection.mechanism.preferred" );
         final boolean webSocketInCore = !new Version(4, 2, 0, null, -1 ).isNewerThan( XMPPServer.getInstance().getServerInfo().getVersion() );
-        if ( !"http-bind".equalsIgnoreCase( preferredMechanism ) && (webSocketInCore || XMPPServer.getInstance().getPluginManager().getPlugin( "websocket" ) != null ) )
+        if ( !"http-bind".equalsIgnoreCase( preferredMechanism ) && (webSocketInCore || XMPPServer.getInstance().getPluginManager().getPluginByName( "websocket" ) != null ) )
         {
             Log.debug( "[{}] Websocket functionality is available. Returning a websocket address.", request.getRemoteAddr() );
             final String websocketScheme;

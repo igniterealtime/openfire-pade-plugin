@@ -101,14 +101,8 @@ public class LobbyMuc implements ServerIdentitiesProvider, ServerFeaturesProvide
         XMPPServer.getInstance().getRoutingTable().routePacket(to, message);
     }
 
-    private Boolean lastLobbyEnabledValue = null;
     private void notify_lobby_enabled(JID to, JID from, boolean value)
     {
-        if (lastLobbyEnabledValue != null && lastLobbyEnabledValue == value) {
-          return; // Avoid redundant notifications
-        }
-        lastLobbyEnabledValue = value;
-
         JSONObject jsonMsg = new JSONObject();
         jsonMsg.put("event", NOTIFY_LOBBY_ENABLED);
         jsonMsg.put("value", value);
@@ -191,7 +185,7 @@ public class LobbyMuc implements ServerIdentitiesProvider, ServerFeaturesProvide
                         lobbyRoom.setPersistent(false);
                         lobbyRoom.setPublicRoom(true);
                         lobbyRoom.setPassword(mucRoom.getPassword());
-                        lobbyRoom.unlock(lobbyRoom.getRole());
+                        lobbyRoom.unlock(lobbyRoom.getSelfRepresentation().getAffiliation());
 						lobbyService.syncChatRoom(lobbyRoom);							
                         notify_lobby_enabled(iq.getTo(), iq.getFrom(), true);
                     } catch (Exception e) {
@@ -251,11 +245,13 @@ public class LobbyMuc implements ServerIdentitiesProvider, ServerFeaturesProvide
 							
 							if (roomJID != null && roomJID.getNode() != null) {
 								MUCRoom room = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(roomJID).getChatRoom(roomJID.getNode());
-								List<Presence> addNonePresence = room.addNone(kicked, room.getRole());
+								List<Presence> addNonePresence = room.addNone(kicked, room.getSelfRepresentation().getAffiliation());
 
 								// Send a presence to other room members
 								for (Presence p : addNonePresence) {
-									room.send(p, room.getRole());
+									for ( final MUCOccupant  occupant : room.getOccupants() ) {
+										room.send(p, occupant);
+									}
 								}
 							}
                         }

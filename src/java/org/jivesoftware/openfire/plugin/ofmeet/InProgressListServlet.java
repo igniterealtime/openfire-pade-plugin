@@ -104,7 +104,7 @@ public class InProgressListServlet extends HttpServlet
                 final JSONArray members = new JSONArray();
                 List<String> nicks = new ArrayList<String>();
                 String focus = null;
-                for ( final MUCRole occupant : chatRoom.getOccupants() )
+                for ( final MUCOccupant occupant : chatRoom.getOccupants() )
                 {
                     JID jid = occupant.getUserAddress();
                     String nick = jid.getNode();

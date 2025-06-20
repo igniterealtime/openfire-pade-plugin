@@ -196,7 +196,7 @@ public class JitsiJicofoWrapper implements ProcessListener
 				MUCRoom mucRoom = mucService.getChatRoom(roomName, new JID("admin@" + XMPPServer.getInstance().getServerInfo().getXMPPDomain()));
 				mucRoom.setPersistent(false);
 				mucRoom.setPublicRoom(false);
-				mucRoom.unlock(mucRoom.getRole());
+				mucRoom.unlock(mucRoom.getSelfRepresentation().getAffiliation());
 			} catch (Exception e) {
 				Log.error("Cannot create MUC room", e);
 			}	

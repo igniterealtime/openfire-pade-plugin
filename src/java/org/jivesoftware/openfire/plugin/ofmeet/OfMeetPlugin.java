@@ -20,20 +20,12 @@
 package org.jivesoftware.openfire.plugin.ofmeet;
 
 import org.dom4j.Element;
-import org.eclipse.jetty.webapp.WebAppContext;
-import org.eclipse.jetty.apache.jsp.JettyJasperInitializer;
-import org.eclipse.jetty.plus.annotation.ContainerInitializer;
-import org.eclipse.jetty.server.handler.ContextHandlerCollection;
-import org.eclipse.jetty.servlets.*;
-import org.eclipse.jetty.servlet.*;
-import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer;
-import org.eclipse.jetty.websocket.servlet.*;
-import org.eclipse.jetty.websocket.server.*;
-import org.eclipse.jetty.websocket.server.config.*;
-
-import org.eclipse.jetty.util.security.*;
-import org.eclipse.jetty.security.*;
-import org.eclipse.jetty.security.authentication.*;
+import org.eclipse.jetty.ee8.webapp.WebAppContext;
+import org.eclipse.jetty.ee8.servlet.*;
+import org.eclipse.jetty.ee8.websocket.server.config.JettyWebSocketServletContainerInitializer;
+import org.eclipse.jetty.ee8.websocket.servlet.*;
+import org.eclipse.jetty.ee8.websocket.server.*;
+import org.eclipse.jetty.ee8.websocket.server.config.*;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -48,11 +40,7 @@ import org.ice4j.ice.harvest.MappingCandidateHarvesters;
 import org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.user.UserManager;
-import org.jivesoftware.openfire.muc.MultiUserChatService;
-import org.jivesoftware.openfire.muc.MUCEventListener;
-import org.jivesoftware.openfire.muc.MUCRole;
-import org.jivesoftware.openfire.muc.MUCRoom;
-import org.jivesoftware.openfire.muc.MUCEventDispatcher;
+import org.jivesoftware.openfire.muc.*;
 import org.jivesoftware.openfire.cluster.ClusterEventListener;
 import org.jivesoftware.openfire.cluster.ClusterManager;
 import org.jivesoftware.openfire.container.Plugin;
@@ -64,7 +52,6 @@ import org.jivesoftware.openfire.interceptor.InterceptorManager;
 import org.jivesoftware.openfire.session.ClientSession;
 import org.jivesoftware.openfire.session.Session;
 import org.jivesoftware.openfire.security.SecurityAuditManager;
-import org.jivesoftware.openfire.plugin.rest.OpenfireLoginService;
 
 import org.jivesoftware.util.JiveGlobals;
 import org.jivesoftware.util.StringUtils;
@@ -115,15 +102,12 @@ import org.json.JSONObject;
 import org.json.JSONArray;
 import de.mxro.process.*;
 import javax.xml.bind.DatatypeConverter;
-import org.voicebridge.Application;
-import com.sun.voip.server.*;
-import com.sun.voip.*;
 import org.ifsoft.oju.openfire.MUCRoomProperties;
 
 /**
  * Bundles various Jitsi components into one, standalone Openfire plugin.
  */
-public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventListener, PropertyEventListener, IEslEventListener, MUCEventListener, ProcessListener, CallEventListener 
+public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventListener, PropertyEventListener, IEslEventListener, MUCEventListener, ProcessListener 
 {
     private static final Logger Log = LoggerFactory.getLogger(OfMeetPlugin.class);
     private static final ScheduledExecutorService connExec = Executors.newSingleThreadScheduledExecutor();
@@ -149,7 +133,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     private ServletContextHandler jvbWsContext = null;
     private ServletContextHandler streamWsContext = null;	
     private BookmarkInterceptor bookmarkInterceptor;
-	private Application voiceBridge = null;	
     private JitsiJvbWrapper jitsiJvbWrapper;
     private JitsiJicofoWrapper jitsiJicofoWrapper;
     private JitsiJigasiWrapper jitsiJigasiWrapper;
@@ -207,7 +190,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 			MUCRoom controlRoom = mucService.getChatRoom(roomName, new JID("admin@" + domain));
 			controlRoom.setPersistent(false);
 			controlRoom.setPublicRoom(true);
-			controlRoom.unlock(controlRoom.getRole());
+			controlRoom.unlock(controlRoom.getSelfRepresentation().getAffiliation());
 			mucService.syncChatRoom(controlRoom);	
         }
         catch ( Exception ex )
@@ -337,12 +320,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 			{
 				setupFFMPEG(pluginDirectory);
 			}
-
-			if (config.getAudiobridgeEnabled())
-			{
-				voiceBridge = new Application();
-				voiceBridge.appStart(pluginDirectory);		
-			}			
+			
         }
         catch ( Exception ex )
         {
@@ -407,7 +385,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
         if (connectTask != null) connectTask.cancel(true);
         if (managerConnection != null) managerConnection.disconnect();	
-		if (voiceBridge != null) voiceBridge.appStop();
 		
 		self = null;		
     }
@@ -430,10 +407,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 		
 		publicWebApp = new WebAppContext(pluginDirectory.getPath() + "/classes/jitsi-meet",  config.getWebappContextPath());
 		publicWebApp.setClassLoader(this.getClass().getClassLoader());
-		final List<ContainerInitializer> initializers4 = new ArrayList<>();
-		initializers4.add(new ContainerInitializer(new JettyJasperInitializer(), null));
-		publicWebApp.setAttribute("org.eclipse.jetty.containerInitializers", initializers4);
-		publicWebApp.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
 		
 		if (OSUtils.IS_WINDOWS && JiveGlobals.getBooleanProperty( "ofmeet.winsso.enabled", false))
 		{
@@ -777,27 +750,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
         return contentBuilder.toString();
     }
-
-    private static final SecurityHandler basicAuth(String realm) {
-
-        OpenfireLoginService l = new OpenfireLoginService(realm);
-        Constraint constraint = new Constraint();
-        constraint.setName(Constraint.__BASIC_AUTH);
-        constraint.setRoles(new String[]{"ofmeet", "webapp-owner", "webapp-contributor", "warfile-admin"});
-        constraint.setAuthenticate(true);
-
-        ConstraintMapping cm = new ConstraintMapping();
-        cm.setConstraint(constraint);
-        cm.setPathSpec("/*");
-
-        ConstraintSecurityHandler csh = new ConstraintSecurityHandler();
-        csh.setAuthenticator(new BasicAuthenticator());
-        csh.setRealmName(realm);
-        csh.addConstraintMapping(cm);
-        csh.setLoginService(l);
-
-        return csh;
-    }
 	
     //-------------------------------------------------------
     //
@@ -1044,13 +996,11 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     //
     //-------------------------------------------------------
 
-    @Override
     public void roomCreated(JID roomJID)
     {
 
     }
 
-    @Override
     public void roomDestroyed(JID roomJID)
     {
 		String roomName = roomJID.getNode();
@@ -1068,7 +1018,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 		}				
     }
 
-    @Override
     public void occupantJoined(final JID roomJID, JID user, String nickname)
     {
 		String roomName = roomJID.getNode();
@@ -1097,27 +1046,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 						} else {
 							Log.error("focus joined room, freeswitch originate failed - " + error);
 						}						
-					}
-
-					if (config.getAudiobridgeEnabled())
-					{	
-						SipServer.setSendSipUriToProxy(true);
-						CallParticipant cp = new CallParticipant();
-						cp.setProtocol("SIP");
-						cp.setConferenceHeaderName("Jitsi-Conference-Room");
-						cp.setTransport(config.jigasiSipTransport.get());						
-						cp.setCallId(roomName);
-						cp.setDisplayName(sipUserId);						
-						cp.setVoiceDetection(false);
-						cp.setConferenceId(roomName);	
-						cp.setPhoneNumber(sipUserId);
-						cp.setSipProxy(config.jigasiProxyServer.get() + ":" + config.jigasiProxyPort.get());
-						
-						OutgoingCallHandler outgoingCallHandler = new OutgoingCallHandler(this, cp);
-						outgoingCallHandler.start();
-
-						Log.info("focus joined room, started audiobridge with " + cp);
-
 					}				
                 }
             } catch ( Exception e ) {
@@ -1183,7 +1111,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 		}
     }
 
-    @Override
     public void occupantLeft(final JID roomJID, JID user, String nickname)
     {
         Log.debug("occupantLeft " + roomJID + " " + user);
@@ -1206,13 +1133,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
                     } else {
                         Log.error("focus left room, freeswitch uuid_kill failed - " + error);
                     }
-                }
-
-				if (config.getAudiobridgeEnabled())
-				{				
-					CallHandler.hangup(roomName, "User requested call termination");	
-					Log.info("focus left room, stopping audiobridge conference " + roomName);					
-				}					
+                }					
 
                 String json = getConferenceStats();
                 String comment = "";
@@ -1244,15 +1165,18 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
                         .getChatRoom(roomJID.getNode());
 
                 if (room != null && room.getOwners().stream().anyMatch(o -> o.getNode().equals("focus"))) {
-                    if (room.getAffiliation(user) == MUCRole.Affiliation.owner) {
+                    if (room.getAffiliation(user) == Affiliation.owner) {
                         // Remove owner authority of the user
                         List<Presence> addNonePresence = room.isMembersOnly()
-                                ? room.addMember(user, null, room.getRole())
-                                : room.addNone(user, room.getRole());
+                                ? room.addMember(user, null, room.getSelfRepresentation().getAffiliation())
+                                : room.addNone(user, room.getSelfRepresentation().getAffiliation());
 
                         // Send a presence to other room members
-                        for (Presence p : addNonePresence) {
-                            room.send(p, room.getRole());
+                        for (Presence p : addNonePresence) 
+						{
+							for ( final MUCOccupant  occupant : room.getOccupants() ) {
+								room.send(p, occupant);
+							}							
                         }
                     }
                 }
@@ -1262,20 +1186,16 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         }
     }
 
-	
-	@Override
 	public void occupantNickKicked(JID roomJID, String nickname)
 	{
 		
 	}
 	
-    @Override
     public void nicknameChanged(JID roomJID, JID user, String oldNickname, String newNickname)
     {
 
     }
 
-    @Override
     public void messageReceived(JID roomJID, JID user, String nickname, Message message)
     {
 		String roomName = roomJID.getNode();
@@ -1347,18 +1267,28 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 		}			
     }
 
-    @Override
     public void roomSubjectChanged(JID roomJID, JID user, String newSubject)
     {
 
     }
 
-    @Override
     public void privateMessageRecieved(JID a, JID b, Message message)
     {
 
     }
+
+    public void roomClearChatHistory(long roomID, JID roomJID) {
+
+    }
+
+    public void roomCreated(long roomID, JID roomJID) {
+
+    }
 	
+    public void roomDestroyed(long roomID, JID roomJID) {
+
+    }		
+
     //-------------------------------------------------------
     //
     //      session management
@@ -1594,13 +1524,4 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         return response;
     }
 	
-    public boolean routeIncomingSIP(CallParticipant cp)
-    {
-		return false;
-	}
-
-    public void callEventNotification(CallEvent callEvent)
-    {
- 		Log.info( "Audiobridge callEventNotification " + callEvent.toString());
-    }	
 }

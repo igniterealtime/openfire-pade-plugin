@@ -6,7 +6,7 @@
     <parent>
         <artifactId>plugins</artifactId>
         <groupId>org.igniterealtime.openfire</groupId>
-        <version>4.9.2</version>
+        <version>5.0.0</version>
     </parent>
     
     <groupId>org.igniterealtime.openfire</groupId>
@@ -96,10 +96,10 @@
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
             </plugin>
-            <plugin>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-jspc-maven-plugin</artifactId>
-            </plugin>          
+			<plugin>
+				<groupId>org.eclipse.jetty.ee8</groupId>
+				<artifactId>jetty-ee8-jspc-maven-plugin</artifactId>
+			</plugin>          
         </plugins>
     </build>
 
@@ -153,7 +153,14 @@
             <groupId>commons-httpclient</groupId>
             <artifactId>commons-httpclient</artifactId>
             <version>3.1</version>
-        </dependency>  
+        </dependency> 
+
+		<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.19.0</version>
+		</dependency>		
         <dependency>
             <groupId>net.sf.json-lib</groupId>
             <artifactId>json-lib</artifactId>
@@ -378,8 +385,8 @@
         </dependency> 
 		
 		<dependency>
-			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>websocket-jetty-client</artifactId>
+			<groupId>org.eclipse.jetty.ee8.websocket</groupId>
+			<artifactId>jetty-ee8-websocket-jetty-client</artifactId>
 			<version>${jetty.version}</version>
 		</dependency>	
 
@@ -398,18 +405,17 @@
 		</dependency>
 
         <dependency>
-            <groupId>org.eclipse.jetty.websocket</groupId>
-            <artifactId>websocket-jetty-server</artifactId>
+            <groupId>org.eclipse.jetty.ee8.websocket</groupId>
+            <artifactId>jetty-ee8-websocket-jetty-server</artifactId>
             <version>${jetty.version}</version>
-            <scope>provided</scope>				
-        </dependency>		
+        </dependency>	
 
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-util</artifactId>
 			<version>${jetty.version}</version>
             <scope>provided</scope>			
-		</dependency>		
+		</dependency>	
 
 		<dependency>
 			<groupId>com.yubico</groupId>

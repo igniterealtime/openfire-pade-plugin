@@ -143,7 +143,10 @@ public class ConfigServlet extends HttpServlet
 			boolean useNewBandwidthAllocationStrategy = JiveGlobals.getBooleanProperty( "ofmeet.use.new.bandwidth.allocation.strategy", true); 
             
             boolean wsBridgeChannel = JiveGlobals.getBooleanProperty( "ofmeet.bridge.ws.channel", org.jitsi.util.OSUtils.IS_WINDOWS);
-
+			
+			JSONArray codecPreferenceOrder = new JSONArray(JiveGlobals.getProperty( "ofmeet.codec.preference.order", "[ \"AV1\", \"VP9\", \"VP8\", \"H264\" ]"));
+			JSONArray mobileCodecPreferenceOrder = new JSONArray(JiveGlobals.getProperty( "ofmeet.codec.preference.order", "[ \"VP8\", \"H264\", \"VP9\", \"AV1\" ]"));
+			
             if ( xirsysUrl != null )
             {
                 Log.info( "OFMeetConfig. found xirsys Url " + xirsysUrl );
@@ -166,10 +169,8 @@ public class ConfigServlet extends HttpServlet
 
             final Map<String, Object> p2p = new HashMap<>();
             p2p.put( "enabled", ofMeetConfig.getP2pEnabled() );
-			p2p.put( "enableUnifiedOnChrome", true);
-            p2p.put( "preferredCodec", forceAv1 ? "AV1" : (forceVp9 ? "VP9" : "H264") );
-            p2p.put( "preferH264", ofMeetConfig.getP2pPreferH264() );			
-            p2p.put( "disableH264", ofMeetConfig.getP2pDisableH264() );
+            p2p.put( "codecPreferenceOrder", codecPreferenceOrder);
+            p2p.put( "mobileCodecPreferenceOrder", mobileCodecPreferenceOrder);	
             p2p.put( "useStunTurn", ofMeetConfig.getP2pUseStunTurn() );
             config.put( "enableP2P", true );
             config.put( "p2p", p2p );			
@@ -244,39 +245,32 @@ public class ConfigServlet extends HttpServlet
             config.put( "useNewBandwidthAllocationStrategy", useNewBandwidthAllocationStrategy );			
 
             final JSONObject videoQuality = new JSONObject();
-            videoQuality.put( "preferredCodec", forceAv1 ? "AV1" : (forceVp9 ? "VP9" : "H264") );				
-            final JSONObject maxBitratesVideo = new JSONObject();
+            videoQuality.put( "enableAdaptiveMode", true);			
+            videoQuality.put( "codecPreferenceOrder", codecPreferenceOrder);			
+            videoQuality.put( "mobileCodecPreferenceOrder", mobileCodecPreferenceOrder);				
 			
             final JSONObject vp9 = new JSONObject();			
-            vp9.put( "low", lowMaxBitratesVideo );
-            vp9.put( "standard", standardMaxBitratesVideo );
-            vp9.put( "high", highMaxBitratesVideo );
-            maxBitratesVideo.put( "VP9", vp9 );	
-
+            vp9.put( "scalabilityModeEnabled", true );
+            vp9.put( "useSimulcast", false );
+            videoQuality.put( "vp9", vp9 );	
+			
             final JSONObject h264 = new JSONObject();			
-            h264.put( "low", lowMaxBitratesVideo );
-            h264.put( "standard", standardMaxBitratesVideo );
-            h264.put( "high", highMaxBitratesVideo );
-            maxBitratesVideo.put( "H264", h264 );	
+            videoQuality.put( "h264", h264 );	
 			
             final JSONObject av1 = new JSONObject();			
-            av1.put( "low", lowMaxBitratesVideo );
-            av1.put( "standard", standardMaxBitratesVideo );
-            av1.put( "high", highMaxBitratesVideo );
-            maxBitratesVideo.put( "AV1", av1 );				
+            av1.put( "useSimulcast", false );
+            videoQuality.put( "av1", av1 );	
 			
-            videoQuality.put( "maxBitratesVideo", maxBitratesVideo );
-
-            final JSONObject minHeightForQualityLvl = new JSONObject();
-            minHeightForQualityLvl.put( minHeightForQualityLvlLow, "low" );
-            minHeightForQualityLvl.put( minHeightForQualityLvlStd, "standard" );
-            minHeightForQualityLvl.put( minHeightForQualityLvlHigh, "high" );
-            videoQuality.put( "minHeightForQualityLvl", minHeightForQualityLvl );
             config.put( "videoQuality", videoQuality );
+			
+            final JSONObject audioQuality = new JSONObject();	
+			audioQuality.put( "enableOpusDtx", false );
+            audioQuality.put( "stereo", enableStereo);	
+			
+			config.put( "audioQuality", audioQuality);
 
             config.put( "recordingType", "colibri" );
             config.put( "disableAudioLevels", ! enableAudioLevels );
-            config.put( "stereo", false );
             config.put( "requireDisplayName", true );
             config.put( "startAudioOnly", ofMeetConfig.getStartAudioOnly() );
 
@@ -330,7 +324,7 @@ public class ConfigServlet extends HttpServlet
             testing.put( "capScreenshareBitrate", capScreenshareBitrate ? 1 : 0 );
             config.put( "testing", testing );
 
-            config.put( "maxFullResolutionParticipants", -1);
+            config.put( "maxFullResolutionParticipants", 1);
             config.put( "useRoomAsSharedDocumentName", false );
             config.put( "logStats", logStats );
             config.put( "ofmeetWinSSOEnabled", ofmeetWinSSOEnabled );
@@ -373,7 +367,6 @@ public class ConfigServlet extends HttpServlet
                 config.put( "disableAGC", true );
                 config.put( "disableHPF", true );
                 config.put( "enableLipSync", false );
-                config.put( "stereo", true );
                 config.put( "opusMaxAverageBitrate", 510000 );
             }
 

@@ -15,25 +15,6 @@
     </servlet-mapping>     
     
     <servlet>
-        <servlet-name>smartidcard</servlet-name>
-        <servlet-class>org.ifsoft.sso.SmartIdCard</servlet-class>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>smartidcard</servlet-name>
-        <url-pattern>/smartidcard</url-pattern>
-    </servlet-mapping>     
-    
-    <servlet>
-        <servlet-name>smartidcardcert</servlet-name>
-        <servlet-class>org.ifsoft.sso.SmartIdCardCert</servlet-class>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>smartidcardcert</servlet-name>
-        <url-pattern>/smartidcardcert</url-pattern>
-    </servlet-mapping> 
-    <servlet>
         <servlet-name>webhookServlet</servlet-name>
         <servlet-class>org.ifsoft.webhook.WebhookServlet</servlet-class>
     </servlet>
